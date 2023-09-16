@@ -1,0 +1,84 @@
+version: '3.8'
+
+volumes:
+  sso-postgres-data:
+    driver: local
+  booking-management-postgres-data:
+    driver: local
+    
+services:
+  nginx:
+    image: nginx
+    depends_on:
+      - booking-management-api
+      - sso
+  booking-management-postgres:
+    image: postgres
+    volumes:
+      - booking-management-postgres-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: password
+  booking-management-api:
+    image: "booking-management-api:dev"
+    build:
+      context: .
+      dockerfile: services/BookingManagement/BookingManagementService.API/Dockerfile
+      target: "build"
+    expose:
+      - "80"
+    working_dir: "/app"
+    entrypoint:
+      - "dotnet"
+      - "BookingManagementService.API.dll"
+    depends_on:
+      - cinema-booking-cache
+      - logger-seq
+  cinema-booking-cache:
+    image: redis:latest
+    restart: unless-stopped
+    command: >
+      - notify-keyspace-events Ex
+    entrypoint:
+      - "sh"
+      - "-c"
+      - |
+        redis-server &
+        sleep 5
+        redis-cli LPUSH eventsList "__keyevent@0__:expired"
+        wait %1  
+  logger-seq:
+    image: datalust/seq:latest
+    environment:
+      ACCEPT_EULA: Y
+  sso-postgres:
+    image: postgres
+    volumes:
+      - sso-postgres-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: password
+  sso:
+    image: quay.io/keycloak/keycloak:latest
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - .data/keycloak:/opt/keycloak/data/h2/
+    command:
+      - start-dev
+      - --http-port=80
+      - --proxy edge
+    environment:
+      DB: postgres
+      KC_DB_URL: 'jdbc:postgresql://sso-postgres:5432/keycloak'
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: password
+      KC_DB: postgres
+      KEYCLOAK_STATISTICS: all
+      KEYCLOAK_LOGLEVEL: DEBUG
+      PROXY_ADDRESS_FORWARDING: true
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: change_me
+    depends_on:
+      - sso-postgres    

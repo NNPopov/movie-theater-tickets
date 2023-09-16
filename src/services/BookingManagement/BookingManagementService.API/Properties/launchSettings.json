@@ -1,0 +1,31 @@
+{
+  "$schema": "http://json.schemastore.org/launchsettings.json",
+  "iisSettings": {
+    "windowsAuthentication": false,
+    "anonymousAuthentication": true
+  },
+  "profiles": {
+    "ApiApplication": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "launchUrl": "swagger/index.html",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ConnectionStrings__Redis":"localhost:6379",
+        "IdentityOptions__RedirectUrl": "https://localhost:7629/swagger/oauth2-redirect.html",
+        "IdentityOptions__IssuerWellKnown": "http://localhost:8080/realms/come-and-watch/.well-known/openid-configuration",
+        "IdentityOptions__ValidIssuer": "http://localhost:8080/realms/come-and-watch",
+        "IdentityOptions__TokenUrl": "http://localhost:8080/realms/come-and-watch/protocol/openid-connect/token",
+        "IdentityOptions__AuthorizationUrl": "http://localhost:8080/realms/come-and-watch/protocol/openid-connect/auth"
+      },
+      "applicationUrl": "https://localhost:7629;http://localhost:7628"
+    },
+    "Docker": {
+      "commandName": "Docker",
+      "launchBrowser": true,
+      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/swagger",
+      "publishAllPorts": true,
+      "useSSL": false
+    }
+  }
+}

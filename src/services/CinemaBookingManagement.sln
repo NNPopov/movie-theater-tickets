@@ -1,0 +1,78 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.7.34024.191
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BookingManagementService.API", "BookingManagement\BookingManagementService.API\BookingManagementService.API.csproj", "{B757C15A-238B-4B0D-A428-933E225A1C43}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BookingManagement", "BookingManagement", "{B7012223-3633-4FD4-8612-B624521E94FE}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{3A5F471B-BDCE-4BF4-87B7-626CACDB2DEC}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BookingManagementService.Application", "BookingManagement\BookingManagementService.Application\BookingManagementService.Application.csproj", "{5053639B-BE3A-40E5-879C-CC1A260DAAA0}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BookingManagementService.Domain", "BookingManagement\BookingManagementService.Domain\BookingManagementService.Domain.csproj", "{296FCF0E-54AB-4321-BCA9-9E67A9DB6C5A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BookingManagementService.Infrastructure", "BookingManagement\BookingManagementService.Infrastructure\BookingManagementService.Infrastructure.csproj", "{6294B7FC-C82A-4AA1-B129-3DD90F7FBFC9}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9D9DC080-6DAA-4019-9BFF-60079FAB4A9B}"
+	ProjectSection(SolutionItems) = preProject
+		..\docker-compose-minimal.yaml = ..\docker-compose-minimal.yaml
+		..\docker-compose.yaml = ..\docker-compose.yaml
+		..\docker-compose.override.yml = ..\docker-compose.override.yml
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CinemaTicketBooking.Application.UnitTests", "BookingManagement\tests\CinemaTicketBooking.Application.UnitTests\CinemaTicketBooking.Application.UnitTests.csproj", "{8F203C2A-243F-4798-AD79-E717FEA4A905}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{7C256F49-C29B-48F7-AC45-C810459AA3FC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nginx", "nginx", "{AFF88A3E-57E8-479F-BD6C-BA538DAE800C}"
+	ProjectSection(SolutionItems) = preProject
+		..\build\nginx\default.conf = ..\build\nginx\default.conf
+		..\build\nginx\localhost.crt = ..\build\nginx\localhost.crt
+		..\build\nginx\localhost.key = ..\build\nginx\localhost.key
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B757C15A-238B-4B0D-A428-933E225A1C43}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B757C15A-238B-4B0D-A428-933E225A1C43}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B757C15A-238B-4B0D-A428-933E225A1C43}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B757C15A-238B-4B0D-A428-933E225A1C43}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5053639B-BE3A-40E5-879C-CC1A260DAAA0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5053639B-BE3A-40E5-879C-CC1A260DAAA0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5053639B-BE3A-40E5-879C-CC1A260DAAA0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5053639B-BE3A-40E5-879C-CC1A260DAAA0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{296FCF0E-54AB-4321-BCA9-9E67A9DB6C5A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{296FCF0E-54AB-4321-BCA9-9E67A9DB6C5A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{296FCF0E-54AB-4321-BCA9-9E67A9DB6C5A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{296FCF0E-54AB-4321-BCA9-9E67A9DB6C5A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6294B7FC-C82A-4AA1-B129-3DD90F7FBFC9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6294B7FC-C82A-4AA1-B129-3DD90F7FBFC9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6294B7FC-C82A-4AA1-B129-3DD90F7FBFC9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6294B7FC-C82A-4AA1-B129-3DD90F7FBFC9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8F203C2A-243F-4798-AD79-E717FEA4A905}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8F203C2A-243F-4798-AD79-E717FEA4A905}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8F203C2A-243F-4798-AD79-E717FEA4A905}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8F203C2A-243F-4798-AD79-E717FEA4A905}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{B757C15A-238B-4B0D-A428-933E225A1C43} = {B7012223-3633-4FD4-8612-B624521E94FE}
+		{5053639B-BE3A-40E5-879C-CC1A260DAAA0} = {B7012223-3633-4FD4-8612-B624521E94FE}
+		{296FCF0E-54AB-4321-BCA9-9E67A9DB6C5A} = {B7012223-3633-4FD4-8612-B624521E94FE}
+		{6294B7FC-C82A-4AA1-B129-3DD90F7FBFC9} = {B7012223-3633-4FD4-8612-B624521E94FE}
+		{8F203C2A-243F-4798-AD79-E717FEA4A905} = {3A5F471B-BDCE-4BF4-87B7-626CACDB2DEC}
+		{7C256F49-C29B-48F7-AC45-C810459AA3FC} = {9D9DC080-6DAA-4019-9BFF-60079FAB4A9B}
+		{AFF88A3E-57E8-479F-BD6C-BA538DAE800C} = {7C256F49-C29B-48F7-AC45-C810459AA3FC}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {7564393F-74EB-4313-A6D5-442E81537B0A}
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,42 @@
+version: '3.4'
+
+services:
+  api0:
+    container_name: cinema-booking-api0
+    build:
+      context: .
+      dockerfile: src/CinemaTicketBooking.API/Dockerfile
+    expose:
+      - "80"
+      - "443"
+    ports:
+      - "7172:80"
+      - "7443:443"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=https://+:443;http://+:80
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=password
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
+      - ConnectionStrings__Redis=cinema-booking-cache:6379
+      - SERILOG__USING__1:Serilog.Sinks.Seq
+      - SERILOG__WRITETO__1__ARGS__SERVERURL=http://logger-seq
+      - SERILOG__WRITETO__1__NAME=Seq
+    volumes:
+      - ~/.aspnet/https:/https:ro
+    depends_on:
+      - cinema-booking-cache
+      - logger-seq
+  cinema-booking-cache:
+    image: redis:latest
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: >
+      - notify-keyspace-events Ex
+  logger-seq:
+    image: datalust/seq:latest
+    ports:
+      - '8172:80'
+      - '8443:5341'
+    environment:
+      ACCEPT_EULA: Y

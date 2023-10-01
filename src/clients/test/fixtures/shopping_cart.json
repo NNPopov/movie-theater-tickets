@@ -1,0 +1,21 @@
+{
+  "maxNumberOfSeats": 4,
+  "createdCard": "2023-09-28 19:28:53.299Z",
+  "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "movieSessionId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "status": 1,
+  "seats": [
+    {
+      "seatRow": 1,
+      "seatNumber": 1
+    },
+    {
+      "seatRow": 1,
+      "seatNumber": 2
+    },
+    {
+      "seatRow": 1,
+      "seatNumber": 3
+    }
+  ]
+}

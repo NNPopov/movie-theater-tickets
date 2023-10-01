@@ -1,9 +1,8 @@
-﻿using System.Security.Principal;
+﻿using System.Security.Claims;
 using CinemaTicketBooking.Api.Controllers;
 using CinemaTicketBooking.Api.Endpoints.Common;
-using CinemaTicketBooking.Application.Exceptions;
+using CinemaTicketBooking.Application.ShoppingCarts.Command.AssingClientCart;
 using CinemaTicketBooking.Application.ShoppingCarts.Command.CreateCart;
-using CinemaTicketBooking.Application.ShoppingCarts.Command.ExpiredSeatSelection;
 using CinemaTicketBooking.Application.ShoppingCarts.Command.PurchaseSeats;
 using CinemaTicketBooking.Application.ShoppingCarts.Command.ReserveSeats;
 using CinemaTicketBooking.Application.ShoppingCarts.Command.SelectSeats;
@@ -30,12 +29,13 @@ public class ShoppingCartEndpointApplicationBuilderExtensions : IEndpoints
             {
                 if (!Guid.TryParse(requestId, out Guid parsedRequestId))
                 {
-                    throw new DuplicateRequestException(nameof(CreateShoppingCartRequest) , requestId);
+                    throw new Exception($"Incorrect requestId:{ requestId} {nameof(CreateShoppingCartRequest)}");
                 }
                 
                 var command = new CreateShoppingCartCommand(request.MaxNumberOfSeats, parsedRequestId);
 
                 var result = await sender.Send(command, cancellationToken);
+                
                 return Results.CreatedAtRoute(
                     routeName: "GetShoppingCartById",
                     routeValues: new { shoppingCartId = result.ShoppingCartId.ToString() },
@@ -46,6 +46,35 @@ public class ShoppingCartEndpointApplicationBuilderExtensions : IEndpoints
             .Produces<CreateShoppingCartResponse>(201, "application/json")
             .Produces(204);
 
+        endpointRouteBuilder.MapPut($"{BaseRoute}/{{shoppingCartId}}/assignclient", async (
+                [FromRoute] Guid shoppingCartId,
+                ClaimsPrincipal user ,
+                [FromHeader(Name = "X-Idempotency-Key")] string requestId,
+                ISender sender,
+                CancellationToken cancellationToken) =>
+            {
+                
+                var id =  user.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier")?.Value;
+                
+                if (!Guid.TryParse(id, out Guid clientId))
+                {
+                    throw new Exception($"Incorrect requestId:{ requestId} {nameof(CreateShoppingCartRequest)}");
+                }
+                
+                if (!Guid.TryParse(requestId, out Guid parsedRequestId))
+                {
+                    throw new Exception($"Incorrect requestId:{ requestId} {nameof(CreateShoppingCartRequest)}");
+                }
+                
+                new AssignClientCartCommand(shoppingCartId, clientId, parsedRequestId);
+
+                return Results.Ok(id);
+            })
+            .WithName("AssignUser")
+            .RequireAuthorization()
+            .WithTags(Tag)
+            .Produces<CreateShoppingCartResponse>(201, "application/json")
+            .Produces(204);
 
         endpointRouteBuilder.MapPost($"{BaseRoute}/{{shoppingCartId}}/seats/select", async (
                 [FromRoute] Guid shoppingCartId,

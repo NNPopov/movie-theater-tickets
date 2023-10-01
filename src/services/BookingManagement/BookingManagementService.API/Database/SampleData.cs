@@ -54,7 +54,7 @@ public class SampleData
         var showtimeItem = MovieSession.Create(movieId: movie.Id,
             auditoriumId: redAuditorium.Id,
             new DateTime(2023, 08, 20),
-            redAuditorium.Seats.Select(t => new SeatMovieSession(t.Row, t.SeatNumber)).ToList(),
+            //redAuditorium.Seats.Select(t => new SeatMovieSession(t.Row, t.SeatNumber)).ToList(),
             redAuditorium.Seats.Count);
             
         showtimeItem = showtimeItem.SetKey( showtimeItemId);
@@ -67,13 +67,13 @@ public class SampleData
         context.MovieSessions.Add(showtimeItem);
 
         context.SaveChanges();
-        
-        
-        foreach (var seat in showtimeItem.Seats)
+
+        //redAuditorium.Seats.Select(t => new Seat(t.Row, t.SeatNumber)).ToList();
+        foreach (var seat in redAuditorium.Seats)
         {
             //var showtimeSeatKey = MovieSessionSeat.SeatKey(showtimeItem.ShoppingCartId,seat.SeatRow, seat.SeatNumber);
             
-            var showtimeSeat = new MovieSessionSeat(showtimeItem.Id,seat.SeatRow, seat.SeatNumber, 15);
+            var showtimeSeat = new MovieSessionSeat(showtimeItem.Id,seat.Row, seat.SeatNumber, 15);
 
             context.ShowtimeSeats.Add(showtimeSeat);
 

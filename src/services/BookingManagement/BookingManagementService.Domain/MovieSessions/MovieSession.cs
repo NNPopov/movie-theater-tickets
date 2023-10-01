@@ -14,7 +14,7 @@ public class MovieSession : AggregateRoot
     public int TicketsForSale { get; private set; }
 
     public int SoldTickets { get; private set; }
-    public ICollection<SeatMovieSession> Seats { get; private set; }
+ //   public ICollection<SeatMovieSession> Seats { get; private set; }
 
     public bool IsEnabled { get; private set; }
 
@@ -36,14 +36,14 @@ public class MovieSession : AggregateRoot
         Guid movieId,
         Guid auditoriumId,
         DateTime sessionDate,
-        ICollection<SeatMovieSession> seats,
+      //  ICollection<SeatMovieSession> seats,
         bool isEnabled,
         int ticketsForSale) : base(id)
     {
         MovieId = movieId;
         SessionDate = sessionDate;
         AuditoriumId = auditoriumId;
-        Seats = seats;
+       // Seats = seats;
         IsEnabled = isEnabled;
         SoldTickets = 0;
     }
@@ -52,7 +52,7 @@ public class MovieSession : AggregateRoot
         Guid movieId,
         Guid auditoriumId,
         DateTime sessionDate,
-        ICollection<SeatMovieSession> seats,
+       // ICollection<SeatMovieSession> seats,
         int ticketsForSale)
     {
         var showtime = new MovieSession(
@@ -60,7 +60,7 @@ public class MovieSession : AggregateRoot
             movieId,
             auditoriumId,
             sessionDate,
-            seats,
+        //    seats,
             false,
             ticketsForSale
         );
@@ -71,9 +71,9 @@ public class MovieSession : AggregateRoot
     }
 }
 
-[method: JsonConstructor]
-public class SeatMovieSession(short seatRow, short seatNumber) : Seat(seatRow, seatNumber);
-
+// [method: JsonConstructor]
+// public class SeatMovieSession(short seatRow, short seatNumber) : Seat(seatRow, seatNumber);
+//
 public abstract class Seat : ValueObject
 {
     protected Seat(short seatRow, short seatNumber)

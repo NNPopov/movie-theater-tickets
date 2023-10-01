@@ -1,5 +1,6 @@
 ﻿using CinemaTicketBooking.Application.Abstractions;
 using CinemaTicketBooking.Application.Exceptions;
+using CinemaTicketBooking.Application.MovieSessions.DTOs;
 using CinemaTicketBooking.Domain.MovieSessions;
 
 namespace CinemaTicketBooking.Application.MovieSessions.Queries;
@@ -29,20 +30,5 @@ public class GetMovieSessionsQueryHandler : IRequestHandler<GetMovieSessionsQuer
             throw new ContentNotFoundException(request.MovieId.ToString(), nameof(MovieSession));
 
         return movieSessions.Select(t => _mapper.Map<MovieSessionsDto>(t)).ToList();
-    }
-}
-
-public class MovieSessionsDto
-{
-    public Guid Id { get; init; }
-    public DateTime SessionDate { get; init; }
-    public Guid AuditoriumId { get; init; }
-
-    private class Mapping : Profile
-    {
-        public Mapping()
-        {
-            CreateMap<MovieSession, MovieSessionsDto>();
-        }
     }
 }

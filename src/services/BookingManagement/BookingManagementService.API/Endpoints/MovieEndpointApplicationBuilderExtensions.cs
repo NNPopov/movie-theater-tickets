@@ -35,7 +35,7 @@ public class MovieEndpointApplicationBuilderExtensions : IEndpoints
                     
                     return mapper.Map<ICollection<MovieDto>>(movie);
                 })
-            .Produces<MovieDto>(200, "application/json")
+            .Produces<ICollection<MovieDto>>(200, "application/json")
             .WithName("GetMovies")
             .WithTags(Tag)
             .Produces(404);

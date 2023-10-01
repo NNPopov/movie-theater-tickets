@@ -51,7 +51,7 @@ public class CreateMovieSessionCommandHandler : IRequestHandler<CreateMovieSessi
         var showtime = MovieSession.Create(movie.Id,
             auditorium.Id,
             request.SessionDate,
-            auditorium.Seats.Select(t => new SeatMovieSession(t.SeatNumber, t.Row)).ToList(), 
+           // auditorium.Seats.Select(t => new SeatMovieSession(t.SeatNumber, t.Row)).ToList(), 
             auditorium.Seats.Count);
 
         foreach (var seat in auditorium.Seats)
@@ -61,7 +61,7 @@ public class CreateMovieSessionCommandHandler : IRequestHandler<CreateMovieSessi
             await _movieSessionSeatRepository.AddAsync(showtimeSeat, cancellationToken);
         }
 
-        await _movieSessionsRepository.CreateShowtime(showtime, cancellationToken);
+        await _movieSessionsRepository.MovieSession(showtime, cancellationToken);
 
         return showtime.Id;
     }

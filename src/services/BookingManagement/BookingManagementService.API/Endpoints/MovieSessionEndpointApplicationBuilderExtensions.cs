@@ -2,6 +2,7 @@
 using CinemaTicketBooking.Api.Endpoints.Common;
 using CinemaTicketBooking.Application.Abstractions;
 using CinemaTicketBooking.Application.MovieSessions.Commands.CreateShowtime;
+using CinemaTicketBooking.Application.MovieSessions.DTOs;
 using CinemaTicketBooking.Application.MovieSessions.Queries;
 using CinemaTicketBooking.Application.ShoppingCarts.Command.SelectSeats;
 using CinemaTicketBooking.Domain.MovieSessions;
@@ -49,19 +50,17 @@ public class MovieSessionEndpointApplicationBuilderExtensions : IEndpoints
 
 
         endpointRouteBuilder.MapGet($"{BaseRoute}/{{movieSessionId}}", async ([FromRoute] Guid movieSessionId,
-                    [FromServices] IMovieSessionsRepository showtimesRepository,
+                    ISender sender,
                     CancellationToken cancellationToken) =>
                 {
-                    var showtimes = await showtimesRepository.GetAllAsync(
-                        t => t.Id == movieSessionId,
-                        cancellationToken);
-
-                    return showtimes;
+                    var query = new GetMovieSessionByIdQuery(movieSessionId);
+                    
+                    return await sender.Send(query, cancellationToken);
                 }
             )
             .WithName("GetMovieSessionsById")
             .WithTags(Tag)
-            .Produces<ReserveResponse>(200, "application/json")
+            .Produces<MovieSessionsDto>(200, "application/json")
             .Produces(204);
         
         
@@ -74,14 +73,14 @@ public class MovieSessionEndpointApplicationBuilderExtensions : IEndpoints
                         null,
                         cancellationToken);
 
-                   var response = mapper.Map<IList<MovieSessionDTO>>(showtimes);
+                   var response = mapper.Map<IReadOnlyCollection<MovieSessionsDto>>(showtimes);
 
                     return response;
                 }
             )
             .WithName("GetMovieSessions")
             .WithTags(Tag)
-            .Produces<ReserveResponse>(200, "application/json")
+            .Produces<IReadOnlyCollection<MovieSessionsDto>>(200, "application/json")
             .Produces(204);
         
         
@@ -97,21 +96,5 @@ public class MovieSessionEndpointApplicationBuilderExtensions : IEndpoints
             .WithTags(Tag)
             .Produces<IReadOnlyCollection<MovieSessionsDto>>(200, "application/json")
             .Produces(204);
-    }
-}
-
-public class MovieSessionDTO 
-{
-    public Guid Id { get; set; }
-    public Guid MovieId { get; set; }
-    public DateTime SessionDate { get; set; }
-    public Guid AuditoriumId { get; set; }
-    private class Mapping : Profile
-    {
-        public Mapping()
-        {
-            CreateMap<MovieSession, MovieSessionDTO>()
-                .ForMember(dst=>dst.Id, opt=>opt.MapFrom(src=>src.Id));
-        }
     }
 }

@@ -13,7 +13,8 @@ public class MovieSessionTest
    {
       // Arrange
       var movieSession = MovieSession.Create(Guid.NewGuid(), Guid.NewGuid(), DateTime.Now, 
-         new List<SeatMovieSession>(), ALLOTTED_TICKETS);
+       //  new List<SeatMovieSession>(),
+         ALLOTTED_TICKETS);
 
       // Act
       movieSession.SetSoldTickets(10);
@@ -32,7 +33,9 @@ public class MovieSessionTest
 
       // Act
       var movieSession = MovieSession.Create(movieId, auditoriumId, 
-         sessionDate, new List<SeatMovieSession>(), ALLOTTED_TICKETS);
+         sessionDate,
+         //new List<SeatMovieSession>(),
+         ALLOTTED_TICKETS);
 
       // Assert
       

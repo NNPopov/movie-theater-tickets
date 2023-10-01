@@ -15,10 +15,15 @@ namespace CinemaTicketBooking.Infrastructure.Repositories
             _context = context;
         }
 
+        public async Task<MovieSession> GetByIdAsync(Guid movieSessionId, CancellationToken cancel)
+        {
+            return await _context.MovieSessions
+                .FirstOrDefaultAsync(x => x.Id == movieSessionId, cancel);
+        }
+
         public async Task<MovieSession> GetWithMoviesByIdAsync(Guid id, CancellationToken cancel)
         {
             return await _context.MovieSessions
-                //.Include(x => x.Movie)
                 .FirstOrDefaultAsync(x => x.Id == id, cancel);
         }
 
@@ -43,7 +48,7 @@ namespace CinemaTicketBooking.Infrastructure.Repositories
                 .ToListAsync(cancel);
         }
 
-        public async Task<MovieSession> CreateShowtime(MovieSession movieSession, CancellationToken cancel)
+        public async Task<MovieSession> MovieSession(MovieSession movieSession, CancellationToken cancel)
         {
             var showtime = await _context.MovieSessions.AddAsync(movieSession, cancel);
             await _context.SaveChangesAsync(cancel);

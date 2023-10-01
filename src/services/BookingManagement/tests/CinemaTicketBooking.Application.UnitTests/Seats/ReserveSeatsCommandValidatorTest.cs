@@ -37,10 +37,8 @@ public class MovieSessionSeatTest
         var movieSessionSeat = new MovieSessionSeat(movieSessionId,
             seatNumber,seatRow, price);
 
-        var selectResult = movieSessionSeat.TrySelect(shoppingCartId);
-        selectResult.Should().Be( true);
+        movieSessionSeat.Select(shoppingCartId);
         
-    
         movieSessionSeat.Status.Should().Be( SeatStatus.Selected);
         movieSessionSeat.MovieSessionId.Should().Be(movieSessionId);
         movieSessionSeat.ShoppingCartId.Should().Be(shoppingCartId);
@@ -60,8 +58,8 @@ public class MovieSessionSeatTest
         var movieSessionSeat = PrepareSelectedMovieSessionSeat(movieSessionId, seatNumber, seatRow, price, shoppingCartId);
         
         
-        var reserveResult = movieSessionSeat.TryReturnToAvailable();
-        reserveResult.Should().Be( true);
+        movieSessionSeat.ReturnToAvailable();
+     
         movieSessionSeat.Status.Should().Be( SeatStatus.Available);
         movieSessionSeat.MovieSessionId.Should().Be(movieSessionId);
         movieSessionSeat.ShoppingCartId.Should().Be(Guid.Empty);
@@ -80,8 +78,7 @@ public class MovieSessionSeatTest
         var movieSessionSeat = PrepareSelectedMovieSessionSeat(movieSessionId, seatNumber, seatRow, price, shoppingCartId);
         
         
-        var reserveResult = movieSessionSeat.TryReserve(shoppingCartId);
-        reserveResult.Should().Be( true);
+        movieSessionSeat.Reserve(shoppingCartId);
         movieSessionSeat.Status.Should().Be( SeatStatus.Reserved);
         movieSessionSeat.MovieSessionId.Should().Be(movieSessionId);
         movieSessionSeat.ShoppingCartId.Should().Be(shoppingCartId);
@@ -101,8 +98,8 @@ public class MovieSessionSeatTest
         
         var movieSessionSeat = PrepareSelectedMovieSessionSeat(movieSessionId, seatNumber, seatRow, price, shoppingCartId);
         
-        var reserveResult = movieSessionSeat.TryReturnToAvailable();
-        reserveResult.Should().Be( true);
+        movieSessionSeat.ReturnToAvailable();
+        
         movieSessionSeat.Status.Should().Be( SeatStatus.Available);
         movieSessionSeat.MovieSessionId.Should().Be(movieSessionId);
         movieSessionSeat.ShoppingCartId.Should().Be(Guid.Empty);
@@ -121,10 +118,8 @@ public class MovieSessionSeatTest
             
         var movieSessionSeat = PrepareReservedMovieSessionSeat(movieSessionId, seatNumber, seatRow, price, shoppingCartId);
         
-        var soldResult = movieSessionSeat.TrySel(shoppingCartId);
-        
+        movieSessionSeat.Sel(shoppingCartId);
 
-        soldResult.Should().Be( true);
         movieSessionSeat.Status.Should().Be( SeatStatus.Sold);
         movieSessionSeat.MovieSessionId.Should().Be(movieSessionId);
         movieSessionSeat.ShoppingCartId.Should().Be(shoppingCartId);
@@ -141,9 +136,9 @@ public class MovieSessionSeatTest
         movieSessionSeat.Price.Should().Be(price);
         
         
-        var selectResult = movieSessionSeat.TrySelect(shoppingCartId);
+        movieSessionSeat.Select(shoppingCartId);
         movieSessionSeat.ShoppingCartId.Should().Be(shoppingCartId);
-        selectResult.Should().Be(true);
+
         return movieSessionSeat;
     }
 
@@ -152,9 +147,9 @@ public class MovieSessionSeatTest
     {
         var movieSessionSeat = PrepareSelectedMovieSessionSeat(movieSessionId, seatNumber, seatRow, price, shoppingCartId);
 
-        var reserveResult = movieSessionSeat.TryReserve(shoppingCartId);
+        movieSessionSeat.Reserve(shoppingCartId);
         movieSessionSeat.Status.Should().Be(SeatStatus.Reserved);
-        reserveResult.Should().Be(true);
+
         return movieSessionSeat;
     }
 }

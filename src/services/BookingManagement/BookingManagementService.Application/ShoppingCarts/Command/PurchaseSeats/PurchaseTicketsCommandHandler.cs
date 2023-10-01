@@ -47,10 +47,8 @@ public class PurchaseTicketsCommandHandler : IRequestHandler<PurchaseTicketsComm
                 await _movieSessionSeatRepository.GetByIdAsync(cart.MovieSessionId, seat.SeatRow, seat.SeatNumber,
                     cancellationToken);
 
-            var sellResult = reservedSeatValue1.TrySel(request.ShoppingCartId);
-
-            if (!sellResult)
-                throw new Exception($"SeatNumber has incorrect status {cart.MovieSessionId}:{seat.SeatRow}:{seat.SeatNumber}");
+            reservedSeatValue1.Sel(request.ShoppingCartId);
+            
 
             await _movieSessionSeatRepository.UpdateAsync(reservedSeatValue1, cancellationToken);
         }

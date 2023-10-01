@@ -1,0 +1,3 @@
+namespace CinemaTicketBooking.Application.ShoppingCarts.Command.AssingClientCart;
+
+public record AssignClientCartResponse(Guid ShoppingCartId);

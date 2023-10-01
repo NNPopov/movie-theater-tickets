@@ -36,12 +36,12 @@ public static class ConfigureKeyCloakAuthenticationServices
 
 
                 o.RequireHttpsMetadata = false;
-                o.TokenValidationParameters.ValidateAudience = false;
+         
                 o.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidIssuer = identityOptions.ValidIssuer,
                     ValidateAudience = false,
-                    ValidateIssuer = true,
+                    ValidateIssuer = identityOptions.ValidateIssuer,
                     ValidateLifetime = true,
                     ClockSkew = TimeSpan.Zero,
                     ValidateIssuerSigningKey = true,

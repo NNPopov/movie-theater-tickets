@@ -3,6 +3,7 @@ using System.Runtime.Serialization;
 using CinemaTicketBooking.Application.Movies.Queries;
 using AutoMapper;
 using CinemaTicketBooking.Application;
+using CinemaTicketBooking.Application.MovieSessions.DTOs;
 using CinemaTicketBooking.Application.MovieSessions.Queries;
 using CinemaTicketBooking.Domain.Movies;
 using CinemaTicketBooking.Domain.MovieSessions;

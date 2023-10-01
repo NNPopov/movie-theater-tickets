@@ -22,7 +22,6 @@ public class AuditoriumEndpointApplicationBuilderExtensions : IEndpoints
                     
                     return mapper.Map<ICollection<AuditoriumDTO>>(auditoriums);
                 })
-            .RequireAuthorization()
             .Produces<ICollection<AuditoriumDTO>>(200, "application/json")
             .WithName("GetAuditoriums")
             .WithTags(Tag)

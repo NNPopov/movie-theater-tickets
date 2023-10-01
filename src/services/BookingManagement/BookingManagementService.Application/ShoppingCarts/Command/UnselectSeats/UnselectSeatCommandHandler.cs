@@ -83,7 +83,7 @@ public class UnselectSeatCommandHandler : IRequestHandler<UnselectSeatCommand, b
         // if (movieSessionSeat is null)
         //     throw new Exception();
         //
-        // var result = movieSessionSeat.TryReturnToAvailable();
+        // var result = movieSessionSeat.ReturnToAvailable();
         //
         // if (!result)
         // {

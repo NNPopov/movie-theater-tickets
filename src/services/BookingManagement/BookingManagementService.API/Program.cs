@@ -1,4 +1,3 @@
-using System.Security.Cryptography.X509Certificates;
 using System.Text.Json.Serialization;
 using CinemaTicketBooking.Api;
 using CinemaTicketBooking.Api.Database;
@@ -6,39 +5,12 @@ using CinemaTicketBooking.Api.Endpoints.Common;
 using CinemaTicketBooking.Api.WorkerServices;
 using CinemaTicketBooking.Application;
 using CinemaTicketBooking.Infrastructure;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc.Formatters;
-using Microsoft.IdentityModel.Tokens;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using Microsoft.Extensions.Options;
 using Serilog;
 using ILogger = Serilog.ILogger;
 
-//using Newtonsoft.Json;
-
-//using ILogger = Serilog.ILogger;
-
 var builder = WebApplication.CreateBuilder(args);
-
-//var localhostHTTPUrls = builder.Configuration.GetSection("ASPNETCORE_URLS").Value.Split(";");
-
-// var localhostHTTPSports = localhostHTTPUrls.Select(t => (Int32.Parse(t!.Split(new Char[] { ':' })[2]),
-//     t!.Split(new Char[] { ':' })[0]));
-
-
-// builder.WebHost.ConfigureKestrel((context, options) =>
-// {
-//     foreach (var localhostHTTPSport in localhostHTTPSports)
-//     {
-//         options.Listen(IPAddress.Any, localhostHTTPSport.Item1, listenOptions =>
-//         {
-//             listenOptions.Protocols = HttpProtocols.Http1AndHttp2AndHttp3;
-//             if (localhostHTTPSport.Item2.Equals("https", StringComparison.CurrentCultureIgnoreCase))
-//                 listenOptions.UseHttps();
-//         });
-//     }
-// });
-//builder.WebHost.UseUrls();
 
 builder.Services.Configure<HostOptions>(options =>
 {
@@ -58,10 +30,13 @@ var logger = new LoggerConfiguration()
 builder.Logging.AddSerilog(logger);
 builder.Services.AddSingleton<ILogger>(logger);
 
-builder.Services.AddApplicationServices();
-builder.Services.AddInfrastructureServices(builder.Configuration);
+//builder.Services.AddSingleton<IValidateOptions<IdentityOptions>, IdentityOptionsValidator>();
 
-services.AddApiServices(builder.Configuration);
+services.AddApplicationServices()
+    .AddInfrastructureServices(builder.Configuration)
+    .AddApiServices(builder.Configuration);
+
+
 
 var identityOptionsSection =
     builder.Configuration.GetSection(IdentityOptions.SectionName);
@@ -74,36 +49,15 @@ services.Configure<IdentityOptions>(identityOptionsSection);
 
 services.AddKeyCloakAuthentication(builder.Configuration);
 
-
-services.AddControllers(opt => // or AddMvc()
+services.AddControllers(opt => 
     {
-        // remove formatter that turns nulls into 204 - No Content responses
-        // this formatter breaks Angular's Http response JSON parsing
         opt.OutputFormatters.RemoveType<HttpNoContentOutputFormatter>();
     })
-    // .AddNewtonsoftJson(x =>
-    //     x.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore)
     .AddJsonOptions(options => { options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve; });
 
 services.AddHostedService<RedisWorker>();
 
-
-// builder.ConfigureServices(services =>
-//     {
-//         services.Configure<HostOptions>(options =>
-//         {
-//             options.ServicesStartConcurrently = true;
-//             options.ServicesStopConcurrently = true;
-//         });
-//         services.AddHostedService<WorkerOne>();
-//         services.AddHostedService<WorkerTwo>();
-//     })
-//     .Build();
-
-//services.AddHttpClient();
-
 builder.Services.AddEndpointsApiExplorer();
-
 
 var app = builder.Build();
 
@@ -112,8 +66,6 @@ if (app.Environment.IsDevelopment())
     app.UseDeveloperExceptionPage();
     app.UseSwaggerExtensions(builder.Configuration);
 }
-
-//app.UseHttpsRedirection();
 
 //app.UseSerilogRequestLogging();
 app.UseRouting();

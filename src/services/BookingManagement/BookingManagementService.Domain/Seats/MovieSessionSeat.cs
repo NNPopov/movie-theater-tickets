@@ -30,7 +30,7 @@ public class MovieSessionSeat : ValueObject
 
     public SeatStatus Status { get; private set; }
 
-    public bool TrySelect(Guid shoppingCartId)
+    public void Select(Guid shoppingCartId)
     {
         Ensure.NotEmpty(shoppingCartId, "The shoppingCartId is required.", nameof(shoppingCartId));
 
@@ -39,21 +39,20 @@ public class MovieSessionSeat : ValueObject
             throw new ConflictException(nameof(MovieSessionSeat), this.ToString());
         }
 
+        if (shoppingCartId != ShoppingCartId && ShoppingCartId != Guid.Empty)
+        {
+            throw new InvalidOperationException("The seat is already selected by another shopping cart.");
+        }
+        
         if (ShoppingCartId == Guid.Empty)
         {
             ShoppingCartId = shoppingCartId;
         }
-        else if (shoppingCartId != ShoppingCartId)
-        {
-            return false;
-        }
 
         Status = SeatStatus.Selected;
-
-        return true;
     }
 
-    public bool TryReserve(Guid shoppingCartId)
+    public void Reserve(Guid shoppingCartId)
     {
         Ensure.NotEmpty(shoppingCartId, "The shoppingCartId is required.", nameof(shoppingCartId));
 
@@ -63,17 +62,15 @@ public class MovieSessionSeat : ValueObject
         }
 
         Status = SeatStatus.Reserved;
-
-        return true;
     }
 
-    public bool TrySel(Guid shoppingCartId)
+    public void Sel(Guid shoppingCartId)
     {
         Ensure.NotEmpty(shoppingCartId, "The shoppingCartId is required.", nameof(shoppingCartId));
 
-        if (Status != SeatStatus.Reserved || ShoppingCartId != shoppingCartId)
+        if (ShoppingCartId != shoppingCartId)
         {
-            return false;
+            throw new InvalidOperationException("The seat is already selected by another shopping cart.");
         }
         
         if (Status == SeatStatus.Sold)
@@ -82,11 +79,10 @@ public class MovieSessionSeat : ValueObject
         }
 
         Status = SeatStatus.Sold;
-
-        return true;
+        
     }
 
-    public bool TryReturnToAvailable()
+    public void ReturnToAvailable()
     {
         if (Status == SeatStatus.Sold)
         {
@@ -95,8 +91,7 @@ public class MovieSessionSeat : ValueObject
 
         Status = SeatStatus.Available;
         ShoppingCartId = Guid.Empty;
-
-        return true;
+        
     }
 
     public Guid ShoppingCartId { get; set; }

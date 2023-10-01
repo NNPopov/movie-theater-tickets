@@ -17,6 +17,8 @@ public class ShoppingCart : AggregateRoot
     public DateTime CreatedCard { get; private set; }
 
     public Guid MovieSessionId { get; private set; }
+    
+    public Guid ClientId { get; private set; }
 
     public ShoppingCartStatus Status { get; private set; }
 
@@ -28,13 +30,28 @@ public class ShoppingCart : AggregateRoot
         DateTime createdCard,
         short maxNumberOfSeats,
         SeatShoppingCart[]? seats,
-        ShoppingCartStatus status) : base(id: id)
+        ShoppingCartStatus status,
+        Guid clientId) : base(id: id)
     {
         MovieSessionId = movieSessionId ?? Guid.Empty;
         CreatedCard = createdCard;
         MaxNumberOfSeats = maxNumberOfSeats;
         Status = status;
         _seats = seats == null ? default : seats.ToList();
+        ClientId = clientId;
+    }
+
+    public void AssignClientId(Guid clientId)
+    {
+        Ensure.NotEmpty(clientId, "The clientId is required.", nameof(clientId));
+        
+        if (Status == ShoppingCartStatus.PurchaseCompleted)
+            throw new ConflictException(nameof(ShoppingCart), Id.ToString());
+        
+        if (ClientId != Guid.Empty)
+            throw new ConflictException(nameof(ShoppingCart), Id.ToString());
+        
+        ClientId = clientId;
     }
 
     private ShoppingCart(Guid id, short maxNumberOfSeats) : base(id: id)
@@ -45,6 +62,7 @@ public class ShoppingCart : AggregateRoot
         CreatedCard = TimeProvider.System.GetUtcNow().DateTime;
         MaxNumberOfSeats = maxNumberOfSeats;
         Status = ShoppingCartStatus.InWork;
+        ClientId = Guid.Empty;
     }
 
     public void SetShowTime(Guid showTimeId)
@@ -130,6 +148,8 @@ public class ShoppingCart : AggregateRoot
     {
         if (Status == ShoppingCartStatus.PurchaseCompleted)
             throw new ConflictException(nameof(ShoppingCart), Id.ToString());
+        
+        Ensure.NotEmpty(ClientId, "The ClientId is required.", nameof(ClientId));
 
         if (Status == ShoppingCartStatus.SeatsReserved)
             Status = ShoppingCartStatus.PurchaseCompleted;

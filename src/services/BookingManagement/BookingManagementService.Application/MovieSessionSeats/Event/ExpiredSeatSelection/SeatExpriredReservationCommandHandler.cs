@@ -24,7 +24,7 @@ public class MovieSessionSeatExpiredReservationEventHandler : INotificationHandl
 
         if (movieSessionSeat is not null)
         {
-            movieSessionSeat.TryReturnToAvailable();
+            movieSessionSeat.ReturnToAvailable();
             await _movieSessionSeatRepository.UpdateAsync(movieSessionSeat, cancellationToken);
         }
     }

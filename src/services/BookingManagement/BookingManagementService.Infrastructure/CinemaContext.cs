@@ -142,11 +142,11 @@ public class CinemaContext : DbContext
             build.ToTable("showtime");
             build.HasKey(entry => entry.Id);
 
-            build.Property(t => t.Seats)
-                .HasColumnName("seats")
-                .HasConversion(
-                    v => JsonConvert.SerializeObject(v),
-                    v => JsonConvert.DeserializeObject<SeatMovieSession[]>(v));
+            // build.Property(t => t.Seats)
+            //     .HasColumnName("seats")
+            //     .HasConversion(
+            //         v => JsonConvert.SerializeObject(v),
+            //         v => JsonConvert.DeserializeObject<SeatMovieSession[]>(v));
 
             build.Property(entry => entry.Id)
                 .HasColumnName("id")

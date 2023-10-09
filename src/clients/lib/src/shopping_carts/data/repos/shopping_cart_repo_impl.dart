@@ -10,11 +10,16 @@ import '../../domain/repos/shopping_cart_repo.dart';
 import '../models/create_shopping_cart_dto.dart';
 import '../models/shopping_cart_dto.dart';
 import 'package:flutter_guid/flutter_guid.dart';
+import 'package:get_it/get_it.dart';
+
+GetIt getIt = GetIt.instance;
 
 class ShoppingCartRepoImpl extends ShoppingCartRepo {
-  final Dio _client;
+  late Dio _client;
 
-  ShoppingCartRepoImpl(this._client);
+  ShoppingCartRepoImpl({Dio? client}) {
+    _client = client ?? getIt.get<Dio>();
+  }
 
   @override
   ResultFuture<String> createShoppingCart(int maxNumberOfSeats) async {

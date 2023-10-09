@@ -10,6 +10,7 @@ using Microsoft.Extensions.Options;
 using Serilog;
 using ILogger = Serilog.ILogger;
 
+var defaultCorsPolicy = "defaultCorsPolicy";
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.Configure<HostOptions>(options =>
@@ -30,12 +31,23 @@ var logger = new LoggerConfiguration()
 builder.Logging.AddSerilog(logger);
 builder.Services.AddSingleton<ILogger>(logger);
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: defaultCorsPolicy,
+        policy =>
+        {
+            policy.WithOrigins(builder.Configuration.GetSection("AllowedOrigins").Get<string[]>())
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials();
+        });
+});
+
 //builder.Services.AddSingleton<IValidateOptions<IdentityOptions>, IdentityOptionsValidator>();
 
 services.AddApplicationServices()
     .AddInfrastructureServices(builder.Configuration)
     .AddApiServices(builder.Configuration);
-
 
 
 var identityOptionsSection =
@@ -49,10 +61,7 @@ services.Configure<IdentityOptions>(identityOptionsSection);
 
 services.AddKeyCloakAuthentication(builder.Configuration);
 
-services.AddControllers(opt => 
-    {
-        opt.OutputFormatters.RemoveType<HttpNoContentOutputFormatter>();
-    })
+services.AddControllers(opt => { opt.OutputFormatters.RemoveType<HttpNoContentOutputFormatter>(); })
     .AddJsonOptions(options => { options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve; });
 
 services.AddHostedService<RedisWorker>();
@@ -69,6 +78,7 @@ if (app.Environment.IsDevelopment())
 
 //app.UseSerilogRequestLogging();
 app.UseRouting();
+app.UseCors(defaultCorsPolicy);
 app.UseHealthChecks("/Health");
 app.UseAuthentication();
 app.UseAuthorization();
@@ -79,4 +89,3 @@ app.UseEndpoints(typeof(Program));
 SampleData.Initialize(app);
 
 app.Run();
-

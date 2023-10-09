@@ -7,16 +7,21 @@ import '../../../../core/errors/exceptions.dart';
 import '../../../../core/errors/failures.dart';
 import '../../domain/repos/movie_session_repo.dart';
 import '../models/movie_session_dto.dart';
+import 'package:get_it/get_it.dart';
+
+GetIt getIt = GetIt.instance;
 
 class MovieSessionRepoImpl extends MovieSessionRepo {
-  final Dio _client;
+  late Dio _client;
 
-  MovieSessionRepoImpl(this._client);
+  MovieSessionRepoImpl({Dio? client}) {
+    _client = client ?? getIt.get<Dio>();
+  }
 
   @override
-  ResultFuture<MovieSession> getMovieSession(String movieId) async {
+  ResultFuture<MovieSession> getMovieSession(String movieSessionId) async {
     try {
-      final response = await _client.get('/api/moviesessions/$movieId');
+      final response = await _client.get('/api/moviesessions/$movieSessionId');
       var movieSession = json.decode(response.toString());
 
       var movieSessionDto = MovieSessionDto.fromJson(movieSession);

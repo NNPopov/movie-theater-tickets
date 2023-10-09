@@ -5,10 +5,10 @@ import 'package:equatable/equatable.dart';
 
 
 class Seat extends Equatable {
-  int? seatRow;
-  int? seatNumber;
+  final int? seatRow;
+  final int? seatNumber;
 
-  Seat({this.seatRow, this.seatNumber});
+  const Seat({this.seatRow, this.seatNumber});
 
   @override
   // TODO: implement props

@@ -6,5 +6,5 @@ abstract class MovieSessionRepo {
 
   ResultFuture<List<MovieSession>> getMovieSessionByMovieId(String movieId);
 
-  ResultFuture<MovieSession> getMovieSession(String shoppingCartId);
+  ResultFuture<MovieSession> getMovieSession(String movieSessionId);
 }

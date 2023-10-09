@@ -22,12 +22,14 @@ class MovieDto extends Movie {
       map['title'] as String,
       map['imdbId'] as String,
       map['stars'] as String,
-      DateTime.fromMillisecondsSinceEpoch(map['releaseDate'] as int),
+      DateTime.parse(map['releaseDate']),
     );
   }
 
   String toJson() => json.encode(toMap());
 
-  factory MovieDto.fromJson(String source) => MovieDto.fromMap(json.decode(source) as Map<String, dynamic>);
+  factory MovieDto.fromJson(dynamic source) => MovieDto.fromMap(source as Map<String, dynamic>);
+
+  //factory MovieDto.fromJson(String source) => MovieDto.fromMap(json.decode(source) as Map<String, dynamic>);
 
 }

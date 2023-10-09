@@ -5,7 +5,7 @@ import 'dart:convert';
 class Constants {
   Constants._();
 
-  static const BASE_SSO_URL = "https://localhost:9443";
+  static final BASE_SSO_URL = dotenv.env["BASE_SSO_URL"].toString();
   static final BASE_API_URL = dotenv.env["BASE_API_URL"].toString();
   //"https://api.client.fhc-dev.net";
 

@@ -52,6 +52,8 @@ dev_dependencies:
   dio: ^5.3.3
   flutter_guid: ^0.3.1
   flutter_dotenv: ^5.1.0
+  get_it: ^7.6.4
+  #collection: ^1.18.0
     # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 

@@ -7,26 +7,33 @@ import '../../../../core/errors/exceptions.dart';
 import '../../../../core/errors/failures.dart';
 import '../../domain/repos/movie_repo.dart';
 import '../models/movie_dto.dart';
+import 'package:get_it/get_it.dart';
+
+import 'package:get_it/get_it.dart';
+
+GetIt getIt = GetIt.instance;
 
 class MovieRepoImpl extends MovieRepo {
-  final Dio _client;
+  late Dio _client;
 
-  MovieRepoImpl(this._client);
+  MovieRepoImpl({Dio? client}) {
+    _client = client ?? getIt.get<Dio>();
+  }
 
   @override
-  ResultFuture<List<Movie>> getMovie() async {
+  ResultFuture<List<Movie>> getMovies() async {
     try {
+      Response response = await _client.get('/api/movies');
+      List<dynamic> movies = jsonDecode(jsonEncode(response.data));
 
-
-      final response = await _client.get('/api/movies');
-      var movies = response.data as List;
-
-      var movieDtos = List<MovieDto>.from(
-          movies.map((model) => MovieDto.fromJson(model)));
+      List<Movie> movieDtos =
+          movies.map((json) => MovieDto.fromJson(json) as Movie).toList();
 
       return Right(movieDtos);
     } on DioException catch (e) {
-      return Left(ServerFailure(message: json.decode(e.response.toString())["errorMessage"], statusCode: e.message));
+      return Left(ServerFailure(
+          message: json.decode(e.response.toString())["errorMessage"],
+          statusCode: e.message));
     }
   }
 

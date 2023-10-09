@@ -6,5 +6,5 @@ abstract class MovieRepo {
 
   ResultFuture<Movie> getMovieById(String movieId);
 
-  ResultFuture<List<Movie>> getMovie();
+  ResultFuture<List<Movie>> getMovies();
 }

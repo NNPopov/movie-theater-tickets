@@ -4,12 +4,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CinemaTicketBooking.Infrastructure.Repositories
 {
-    public class AuditoriumsRepository : IAuditoriumsRepository
+    public class CinemaHallRepository : ICinemaHallRepository
     {
         private readonly CinemaContext _context;
         private readonly ICacheService _cacheService;
 
-        public AuditoriumsRepository(CinemaContext context, ICacheService cacheService)
+        public CinemaHallRepository(CinemaContext context, ICacheService cacheService)
         {
             _context = context;
             _cacheService = cacheService;
@@ -17,7 +17,7 @@ namespace CinemaTicketBooking.Infrastructure.Repositories
 
         public async Task<CinemaHall> GetAsync(Guid auditoriumId, CancellationToken cancel)
         {
-            return await _context.Auditoriums
+            return await _context.CinemaHalls
                 .Include(x => x.Seats)
                 .FirstOrDefaultAsync(x => x.Id == auditoriumId, cancel);
         }
@@ -26,29 +26,29 @@ namespace CinemaTicketBooking.Infrastructure.Repositories
         {
             
             var auditoriumSeatsKey = $"auditoriumSeats{auditoriumId}";
-            ICollection<SeatEntity> seatsInAuditorium =
+            ICollection<SeatEntity> seatsInCinemaHall =
                 await _cacheService.TryGet<ICollection<SeatEntity>>(auditoriumSeatsKey);
 
-            if (seatsInAuditorium is null || !seatsInAuditorium.Any())
+            if (seatsInCinemaHall is null || !seatsInCinemaHall.Any())
             {
-                var auditorium = await _context.Auditoriums
+                var auditorium = await _context.CinemaHalls
                     .Include(x => x.Seats)
                     .FirstOrDefaultAsync(x => x.Id == auditoriumId, cancel);
 
                 if (auditorium is null || !auditorium.Seats.Any())
                     return default;
 
-                seatsInAuditorium = auditorium.Seats.ToList();
+                seatsInCinemaHall = auditorium.Seats.ToList();
 
-                await _cacheService.Set(auditoriumSeatsKey, seatsInAuditorium, new TimeSpan(1, 0, 0));
+                await _cacheService.Set(auditoriumSeatsKey, seatsInCinemaHall, new TimeSpan(1, 0, 0));
             }
 
-            return seatsInAuditorium;
+            return seatsInCinemaHall;
         }
 
         public async Task<ICollection<CinemaHall>> GetAllAsync(CancellationToken cancel)
         {
-            return await _context.Auditoriums
+            return await _context.CinemaHalls
                 //.Include(x => x.Seats)
                 .ToListAsync();
         }

@@ -12,7 +12,7 @@ public class CreateMovieSessionCommandHandler : IRequestHandler<CreateMovieSessi
 {
    // private readonly IMapper _mapper;
     private IMovieSessionsRepository _movieSessionsRepository;
-    private IAuditoriumsRepository _auditoriumsRepository;
+    private ICinemaHallRepository _cinemaHallRepository;
     //private ISeatStateRepository _seatStateRepository;
     private IMoviesRepository _moviesRepository;
     private readonly IMovieSessionSeatRepository _movieSessionSeatRepository;
@@ -20,14 +20,14 @@ public class CreateMovieSessionCommandHandler : IRequestHandler<CreateMovieSessi
 
     public CreateMovieSessionCommandHandler(//IMapper mapper,
         IMovieSessionsRepository movieSessionsRepository,
-        IAuditoriumsRepository auditoriumsRepository,
+        ICinemaHallRepository cinemaHallRepository,
        // ISeatStateRepository seatStateRepository,
         IMoviesRepository moviesRepository,
         IMovieSessionSeatRepository movieSessionSeatRepository)
     {
       //  _mapper = mapper;
         _movieSessionsRepository = movieSessionsRepository;
-        _auditoriumsRepository = auditoriumsRepository;
+        _cinemaHallRepository = cinemaHallRepository;
       //  _seatStateRepository = seatStateRepository;
         _moviesRepository = moviesRepository;
         _movieSessionSeatRepository = movieSessionSeatRepository;
@@ -36,7 +36,7 @@ public class CreateMovieSessionCommandHandler : IRequestHandler<CreateMovieSessi
     public async Task<Guid> Handle(CreateMovieSessionCommand request,
         CancellationToken cancellationToken)
     {
-        var auditorium = await _auditoriumsRepository
+        var auditorium = await _cinemaHallRepository
             .GetAsync(
                 request.AuditoriumId, cancellationToken);
 

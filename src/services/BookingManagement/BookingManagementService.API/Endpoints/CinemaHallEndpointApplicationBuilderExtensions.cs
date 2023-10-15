@@ -5,7 +5,7 @@ using CinemaTicketBooking.Domain.CinemaHalls;
 
 namespace CinemaTicketBooking.Api.Endpoints;
 
-public class AuditoriumEndpointApplicationBuilderExtensions : IEndpoints
+public class CinemaHallEndpointApplicationBuilderExtensions : IEndpoints
 {
     private static readonly string Tag = "CinemaHalls";
     private static readonly string BaseRoute = "api/cinema-halls";
@@ -13,7 +13,7 @@ public class AuditoriumEndpointApplicationBuilderExtensions : IEndpoints
     public static void DefineEndpoints(IEndpointRouteBuilder endpointRouteBuilder)
     {
         endpointRouteBuilder.MapGet($"{BaseRoute}",
-                async (IAuditoriumsRepository auditoriumsRepository, IMapper mapper,
+                async (ICinemaHallRepository auditoriumsRepository, IMapper mapper,
                     CancellationToken cancellationToken) =>
                 {
                     var auditoriums = await auditoriumsRepository.GetAllAsync(
@@ -23,7 +23,24 @@ public class AuditoriumEndpointApplicationBuilderExtensions : IEndpoints
                     return mapper.Map<ICollection<AuditoriumDTO>>(auditoriums);
                 })
             .Produces<ICollection<AuditoriumDTO>>(200, "application/json")
-            .WithName("GetAuditoriums")
+            .WithName("GetCinemaHalls")
+            .WithTags(Tag)
+            .Produces(404);
+        
+        endpointRouteBuilder.MapGet($"{BaseRoute}/{{cinemaHallId}}",
+                async (Guid cinemaHallId,
+                    ICinemaHallRepository auditoriumsRepository, 
+                    IMapper mapper,
+                    CancellationToken cancellationToken) =>
+                {
+                    var auditorium = await auditoriumsRepository.GetAsync(cinemaHallId,
+                        cancellationToken);
+
+                    
+                    return mapper.Map<AuditoriumDTO>(auditorium);
+                })
+            .Produces<ICollection<AuditoriumDTO>>(200, "application/json")
+            .WithName("GetCinemaHallById")
             .WithTags(Tag)
             .Produces(404);
     }

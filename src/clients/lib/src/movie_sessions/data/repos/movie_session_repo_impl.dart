@@ -36,7 +36,7 @@ class MovieSessionRepoImpl extends MovieSessionRepo {
   ResultFuture<List<MovieSession>> getMovieSessionByMovieId(
       String movieId) async {
     try {
-      final response = await _client.get('/api/movies/$movieId/moviesessions/');
+      final response = await _client.get('/api/movies/$movieId/moviesessions');
       var movieSessions = response.data as List;
 
       var movieSessionDtos = List<MovieSessionDto>.from(

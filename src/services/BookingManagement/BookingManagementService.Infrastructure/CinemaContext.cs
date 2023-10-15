@@ -25,7 +25,7 @@ public class CinemaContext : DbContext
         _mediator = mediator;
     }
 
-    public DbSet<CinemaHall> Auditoriums { get; set; }
+    public DbSet<CinemaHall> CinemaHalls { get; set; }
     public DbSet<MovieSession> MovieSessions { get; set; }
 
     public DbSet<MovieSessionSeat> ShowtimeSeats { get; set; }

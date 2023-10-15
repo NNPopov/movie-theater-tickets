@@ -25,7 +25,7 @@ public class ShoppingCart : AggregateRoot
     public IReadOnlyList<SeatShoppingCart> Seats => _seats.AsReadOnly();
 
     [JsonConstructor]
-    public ShoppingCart(Guid id,
+    private ShoppingCart(Guid id,
         Guid? movieSessionId,
         DateTime createdCard,
         short maxNumberOfSeats,

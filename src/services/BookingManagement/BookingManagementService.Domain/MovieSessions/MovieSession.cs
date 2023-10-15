@@ -45,6 +45,7 @@ public class MovieSession : AggregateRoot
         AuditoriumId = auditoriumId;
        // Seats = seats;
         IsEnabled = isEnabled;
+        TicketsForSale = ticketsForSale;
         SoldTickets = 0;
     }
 

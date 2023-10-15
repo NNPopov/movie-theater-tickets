@@ -1,16 +1,19 @@
 import '../../domain/entities/movie_session.dart';
 
 class MovieSessionDto extends MovieSession {
+  MovieSessionDto(
+      super.id, super.movieId, super.sessionDate, super.auditoriumId);
 
-
-  MovieSessionDto({super.id, super.movieId, super.sessionDate, super.auditoriumId});
-
-  MovieSessionDto.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
-    movieId = json['movieId'];
-    sessionDate = json['sessionDate'];
-    auditoriumId = json['auditoriumId'];
+  factory MovieSessionDto.fromMap(Map<String, dynamic> map) {
+    return MovieSessionDto(
+        map['id'],
+        map['movieId'],
+        DateTime.parse(map['sessionDate']),
+        map['auditoriumId']);
   }
+
+  factory MovieSessionDto.fromJson(dynamic source) =>
+      MovieSessionDto.fromMap(source as Map<String, dynamic>);
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = Map<String, dynamic>();
@@ -21,4 +24,3 @@ class MovieSessionDto extends MovieSession {
     return data;
   }
 }
-

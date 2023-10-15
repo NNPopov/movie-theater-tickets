@@ -17,7 +17,7 @@ public static class ConfigureServices
         services.AddScoped<IMovieSessionsRepository, MovieSessionsRepository>();
         services.AddScoped<ITicketsRepository, TicketsRepository>();
         services.AddScoped<IMoviesRepository, MoviesRepository>();
-        services.AddScoped<IAuditoriumsRepository, AuditoriumsRepository>();
+        services.AddScoped<ICinemaHallRepository, CinemaHallRepository>();
         services.AddScoped<ISeatStateRepository, SeatStateRepository>();
         services.AddScoped<IMovieSessionSeatRepository, MovieSessionSeatRepository>();
         services.AddScoped<IShoppingCartRepository, ShoppingCartRepository>();

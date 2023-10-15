@@ -2,7 +2,7 @@
 
 namespace CinemaTicketBooking.Application.Abstractions
 {
-    public interface IAuditoriumsRepository
+    public interface ICinemaHallRepository
     {
         Task<CinemaHall> GetAsync(Guid auditoriumId, CancellationToken cancel);
         

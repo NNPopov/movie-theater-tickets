@@ -28,6 +28,20 @@ public class SampleData
             "tt1375666",
             "Leonardo DiCaprio, Joseph Gordon-Levitt, Ellen Page, Ken Watanabe"
         );
+        
+        var movie2 = Movie.Create(
+            "Back to the Future",
+            new DateTime(1985, 07, 03),
+            "tt0088763",
+            "Michael J. Fox, Christopher Lloyd, Lea Thompson, Crispin Glover"
+        );
+        
+        var movie3 = Movie.Create(
+            "Back to the Future Part II",
+            new DateTime(1989, 10, 20),
+            "tt0096874",
+            "Michael J. Fox, Christopher Lloyd, Lea Thompson, Crispin Glover"
+        );
 
         // movie = movie.SetKey( movieId);
 
@@ -48,42 +62,84 @@ public class SampleData
         var whiteAuditorium = CinemaHall.Create(
             name:"White",
             description: "White",
-            seats: GenerateSeats(15, 21)
+            seats: GenerateSeats(15, 12)
         );
 
         var showtimeItem = MovieSession.Create(movieId: movie.Id,
             auditoriumId: redAuditorium.Id,
-            new DateTime(2023, 08, 20),
+            new DateTime(2023, 10, 20),
             //redAuditorium.Seats.Select(t => new SeatMovieSession(t.Row, t.SeatNumber)).ToList(),
             redAuditorium.Seats.Count);
+        
+        var showtimeItem2 = MovieSession.Create(movieId: movie.Id,
+            auditoriumId: redAuditorium.Id,
+            new DateTime(2023, 10, 21),
+            //redAuditorium.Seats.Select(t => new SeatMovieSession(t.Row, t.SeatNumber)).ToList(),
+            redAuditorium.Seats.Count);
+        
+        var showtimeItem3 = MovieSession.Create(movieId: movie2.Id,
+            auditoriumId: whiteAuditorium.Id,
+            new DateTime(2023, 10, 22),
+            //redAuditorium.Seats.Select(t => new SeatMovieSession(t.Row, t.SeatNumber)).ToList(),
+            whiteAuditorium.Seats.Count);
+        
+        var showtimeItem4 = MovieSession.Create(movieId: movie.Id,
+            auditoriumId: blackAuditorium.Id,
+            new DateTime(2023, 10, 22),
+            //redAuditorium.Seats.Select(t => new SeatMovieSession(t.Row, t.SeatNumber)).ToList(),
+            blackAuditorium.Seats.Count);
+        
+        var showtimeItem5 = MovieSession.Create(movieId: movie2.Id,
+            auditoriumId: whiteAuditorium.Id,
+            new DateTime(2023, 10, 23),
+            //redAuditorium.Seats.Select(t => new SeatMovieSession(t.Row, t.SeatNumber)).ToList(),
+            whiteAuditorium.Seats.Count);
+        
+        var showtimeItem6 = MovieSession.Create(movieId: movie3.Id,
+            auditoriumId: whiteAuditorium.Id,
+            new DateTime(2023, 10, 27),
+            //redAuditorium.Seats.Select(t => new SeatMovieSession(t.Row, t.SeatNumber)).ToList(),
+            whiteAuditorium.Seats.Count);
             
         showtimeItem = showtimeItem.SetKey( showtimeItemId);
             
         context.Movies.Add(movie);
-        context.Auditoriums.Add(redAuditorium);
-        context.Auditoriums.Add(blackAuditorium);
-        context.Auditoriums.Add(whiteAuditorium);
+        context.Movies.Add(movie2);
+        context.Movies.Add(movie3);
+        
+        context.CinemaHalls.Add(redAuditorium);
+        context.CinemaHalls.Add(blackAuditorium);
+        context.CinemaHalls.Add(whiteAuditorium);
 
         context.MovieSessions.Add(showtimeItem);
+        context.MovieSessions.Add(showtimeItem2);
+        context.MovieSessions.Add(showtimeItem3);
+        context.MovieSessions.Add(showtimeItem4);
+        context.MovieSessions.Add(showtimeItem5);
+        context.MovieSessions.Add(showtimeItem6);
 
         context.SaveChanges();
 
-        //redAuditorium.Seats.Select(t => new Seat(t.Row, t.SeatNumber)).ToList();
-        foreach (var seat in redAuditorium.Seats)
-        {
-            //var showtimeSeatKey = MovieSessionSeat.SeatKey(showtimeItem.ShoppingCartId,seat.SeatRow, seat.SeatNumber);
-            
-            var showtimeSeat = new MovieSessionSeat(showtimeItem.Id,seat.Row, seat.SeatNumber, 15);
-
-            context.ShowtimeSeats.Add(showtimeSeat);
-
-           //var result = seatStateRepository.SetAsync(showtimeSeatKey, showtimeSeat).Result;
-        }
+        CreateMovieSessionSeats(redAuditorium, showtimeItem, context);
+        CreateMovieSessionSeats(redAuditorium, showtimeItem2, context);
+        CreateMovieSessionSeats(whiteAuditorium, showtimeItem3, context);
+        CreateMovieSessionSeats(blackAuditorium, showtimeItem4, context);
+        CreateMovieSessionSeats(whiteAuditorium, showtimeItem5, context);
+        CreateMovieSessionSeats(whiteAuditorium, showtimeItem6, context);
         
         context.SaveChanges();
     }
 
-       
+    private static void CreateMovieSessionSeats(CinemaHall redAuditorium, MovieSession showtimeItem, CinemaContext context)
+    {
+        foreach (var seat in redAuditorium.Seats)
+        {
+            var showtimeSeat = new MovieSessionSeat(showtimeItem.Id, seat.Row, seat.SeatNumber, 15);
+
+            context.ShowtimeSeats.Add(showtimeSeat);
+        }
+    }
+
 
     private static List<(short Row, short SeatNumber)> GenerateSeats(short rows, short seatsPerRow)
     {

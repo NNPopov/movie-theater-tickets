@@ -11,6 +11,13 @@ import 'package:movie_theater_tickets/src/movies/domain/usecases/get_movies.dart
 import 'package:movie_theater_tickets/src/movies/presentation/app/movie_theater_cubit.dart';
 import 'package:movie_theater_tickets/src/seats/data/repos/seat_repo_impl.dart';
 import 'package:movie_theater_tickets/src/seats/domain/repos/seat_repo.dart';
+import 'package:movie_theater_tickets/src/seats/domain/usecases/get_seats_by_movie_session_id.dart';
+import 'package:movie_theater_tickets/src/seats/presentation/cubit/seat_cubit.dart';
+import 'package:movie_theater_tickets/src/shopping_carts/domain/usecases/create_shopping_cart.dart';
+import 'package:movie_theater_tickets/src/shopping_carts/domain/usecases/get_shopping_cart.dart';
+import 'package:movie_theater_tickets/src/shopping_carts/domain/usecases/select_seat.dart';
+import 'package:movie_theater_tickets/src/shopping_carts/domain/usecases/unselect_seat.dart';
+import 'package:movie_theater_tickets/src/shopping_carts/presentation/cubit/shopping_cart_cubit.dart';
 import 'apis/http_client.dart';
 import 'src/movies/data/repos/movie_repo_impl.dart';
 import 'src/movies/domain/repos/movie_repo.dart';
@@ -25,44 +32,52 @@ Future<void> initializeDependencies() async {
   // Dio
   getIt.registerSingleton<Dio>(Client().init());
 
-
-
-
+  _initSeats();
   _initMovie();
   _initCinemaHall();
   _initMovieSession();
-
+  _initShoppingCart();
   // Dependencies
 
-  getIt.registerLazySingleton<ShoppingCartRepo>(() => ShoppingCartRepoImpl());
-  getIt.registerLazySingleton<SeatRepo>(() => SeatRepoImpl());
 
-  // //UseCases
-  // sl.registerSingleton<GetCharacterUseCase>(
-  //     GetCharacterUseCase(sl())
-  // );
-  //
-  // //Blocs
-  // sl.registerFactory<RemoteCharactersBloc>(
-  //         ()=> RemoteCharactersBloc(sl())
-  // );
+
+  //UseCases
+
 }
+
+void _initShoppingCart() {
+  //getIt.registerFactory(() => ShoppingCartCubit(createShoppingCart:  getIt()));
+  getIt.registerLazySingleton<ShoppingCartRepo>(() => ShoppingCartRepoImpl());
+  getIt.registerLazySingleton<CreateShoppingCart>(() => CreateShoppingCart());
+  getIt.registerLazySingleton<GetShoppingCart>(() => GetShoppingCart(getIt.get()));
+  getIt.registerLazySingleton<SelectSeatUseCase>(() => SelectSeatUseCase(getIt.get()));
+  getIt.registerLazySingleton<UnselectSeatUseCase>(() => UnselectSeatUseCase(getIt.get()));
+
+
+
+}
+
+void _initSeats() {
+ // getIt.registerFactory(() => SeatCubit(getMovieSessionById:  getIt(), shoppingCartCubit:getIt()));
+  getIt.registerLazySingleton<SeatRepo>(() => SeatRepoImpl());
+  getIt.registerLazySingleton<GetSeatsByMovieSessionId>(() => GetSeatsByMovieSessionId());
+}
+
 void _initCinemaHall() {
-  getIt.registerFactory(() => CinemaHallCubit(getCinemaHall:  getIt()));
+ // getIt.registerFactory(() => CinemaHallCubit(getCinemaHall:  getIt()));
   getIt.registerLazySingleton<CinemaHallRepo>(() =>   CinemaHallRepoImpl());
   getIt.registerLazySingleton<GetCinemaHallById>(() => GetCinemaHallById());
 }
 
 void _initMovieSession() {
-  getIt.registerFactory(() => MovieSessionCubit(getMovieSessions: getIt()));
+ // getIt.registerFactory(() => MovieSessionCubit(getMovieSessions: getIt()));
   getIt.registerLazySingleton<GetMovieSessions>(() => GetMovieSessions());
   getIt.registerLazySingleton<MovieSessionRepo>(() => MovieSessionRepoImpl());
 }
 
 void _initMovie() {
-  getIt.registerFactory(
-      () => MovieTheaterCubit(getMovies: getIt(), getMovieById: getIt()));
-
+  //getIt.registerFactory(
+ //     () => MovieTheaterCubit(getMovies: getIt(), getMovieById: getIt()));
   getIt.registerLazySingleton<GetMovieById>(() => GetMovieById());
   getIt.registerLazySingleton<GetMovies>(() => GetMovies());
   getIt.registerLazySingleton<MovieRepo>(() => MovieRepoImpl());

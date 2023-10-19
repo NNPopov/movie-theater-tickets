@@ -11,9 +11,9 @@ class GetShoppingCart
   final ShoppingCartRepo _repo;
 
   @override
-  ResultFuture<ShoppingCart> call(String params) {
+  ResultFuture<ShoppingCart> call(String params) async {
 
-    var result = _repo.getShoppingCart(params);
+    var result = await _repo.getShoppingCart(params);
 
     return result;
   }

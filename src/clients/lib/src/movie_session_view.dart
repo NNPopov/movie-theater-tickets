@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:movie_theater_tickets/core/extensions/context_extensions.dart';
+import 'package:movie_theater_tickets/src/seats_view.dart';
 import '../core/common/views/loading_view.dart';
 import '../core/utils/utils.dart';
 import 'auditorium_detail.dart';
@@ -98,11 +99,11 @@ class _MovieSessionsView extends State<MovieSessionsView> {
                       children: [
                         BlocProvider(
                             key: const ValueKey('MoviesDetailView'),
-                            create: (_) => getIt<MovieTheaterCubit>(),
+                            create: (_) => MovieTheaterCubit(),
                             child: MoviesDetailView(movieSession.movieId)),
                         BlocProvider(
                             key: const ValueKey('AuditoriumDetailView'),
-                            create: (_) => getIt<CinemaHallCubit>(),
+                            create: (_) => CinemaHallCubit(),
                             child: AuditoriumDetailView(
                                 movieSession.auditoriumId)),
                         // Text('auditoriumId: ${movieSession.auditoriumId}'),
@@ -116,7 +117,7 @@ class _MovieSessionsView extends State<MovieSessionsView> {
                                   MaterialStateProperty.all<Color>(Colors.blue),
                             ),
                             onPressed: () {
-                              // movieSession(movieSession);
+                               pressMovieSession(movieSession);
                             },
                             child: const Text('Select'))
                       ],
@@ -142,5 +143,12 @@ class _MovieSessionsView extends State<MovieSessionsView> {
   @override
   void dispose() {
     super.dispose();
+  }
+
+  void pressMovieSession(MovieSession movieSession) {
+
+    Navigator.pushNamed(context, SeatsView.id, arguments: movieSession);
+
+
   }
 }

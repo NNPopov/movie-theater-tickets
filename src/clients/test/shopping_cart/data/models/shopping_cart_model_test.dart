@@ -16,9 +16,9 @@ void main() {
       maxNumberOfSeats: 4,
       status: 1,
       seats: [
-        SeatDto(seatNumber: 1, seatRow: 1),
-        SeatDto(seatNumber: 2, seatRow: 1),
-        SeatDto(seatNumber: 3, seatRow: 1)
+        ShoppingCartSeatDto(seatNumber: 1, seatRow: 1),
+        ShoppingCartSeatDto(seatNumber: 2, seatRow: 1),
+        ShoppingCartSeatDto(seatNumber: 3, seatRow: 1)
       ]);
 
   group('UserExamModel', () {

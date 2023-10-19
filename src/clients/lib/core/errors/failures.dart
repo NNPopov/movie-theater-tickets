@@ -15,6 +15,9 @@ abstract class Failure extends Equatable {
   @override
   List<dynamic> get props => [message, statusCode];
 }
+class DataFailure extends Failure {
+  const DataFailure({required super.message, required super.statusCode});
+}
 
 class CacheFailure extends Failure {
   const CacheFailure({required super.message, required super.statusCode});

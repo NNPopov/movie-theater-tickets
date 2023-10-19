@@ -1,9 +1,30 @@
 import '../../../../core/utils/typedefs.dart';
+import '../../domain/entities/seat.dart';
 import 'seat_dto.dart';
 import '../../domain/entities/shopping_cart.dart';
+import 'package:equatable/equatable.dart';
+
+class ShoppingCartResponse extends Equatable {
+
+
+  final String shoppingCartId;
+
+  const ShoppingCartResponse(this.shoppingCartId);
+
+  ShoppingCartResponse.fromJson(Map<String, dynamic> json)
+      : this(
+     json['shoppingCartId']);
+
+
+
+
+  @override
+  // TODO: implement props
+  List<Object?> get props =>  [shoppingCartId];
+}
 
 class ShoppingCartDto extends ShoppingCart {
-  const ShoppingCartDto(
+   ShoppingCartDto(
       {super.maxNumberOfSeats,
       super.createdCard,
       super.id,
@@ -20,10 +41,10 @@ class ShoppingCartDto extends ShoppingCart {
             status: json['status'],
             seats:
                 List<Map<String, dynamic>>.from(json['seats'] as List<dynamic>)
-                    .map(SeatDto.fromJson)
+                    .map( (e)=>ShoppingCartSeatDto.fromJson(e) as ShoppingCartSeat )
                     .toList());
 
-  const ShoppingCartDto.empty()
+   ShoppingCartDto.empty()
       : this(
           maxNumberOfSeats: 0,
           createdCard: null,
@@ -40,26 +61,26 @@ class ShoppingCartDto extends ShoppingCart {
     data['id'] = id;
     data['movieSessionId'] = movieSessionId;
     data['status'] = status;
-    data['seats'] = seats != null
-        ? seats!.map((v) => (v as SeatDto).toJson()).toList()
+    data['seats'] = shoppingCartSeat != null
+        ? shoppingCartSeat!.map((v) => (v as ShoppingCartSeatDto).toJson()).toList()
         : null;
     return data;
   }
 
-  ShoppingCartDto copyWith({
+  ShoppingCart copyWith({
     int? maxNumberOfSeats,
     DateTime? createdCard,
     String? id,
     String? movieSessionId,
     int? status,
-    List<SeatDto>? seats,
+    List<ShoppingCartSeatDto>? seats,
   }) {
-    return ShoppingCartDto(
+    return ShoppingCart(
         maxNumberOfSeats: maxNumberOfSeats ?? this.maxNumberOfSeats,
         createdCard: createdCard ?? this.createdCard,
         id: id ?? this.id,
         movieSessionId: movieSessionId ?? this.movieSessionId,
         status: status ?? this.status,
-        seats: seats ?? this.seats);
+        seats: seats ?? shoppingCartSeat);
   }
 }

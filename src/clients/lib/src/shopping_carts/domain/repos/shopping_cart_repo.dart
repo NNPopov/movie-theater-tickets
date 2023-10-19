@@ -9,5 +9,9 @@ abstract class ShoppingCartRepo {
 
   ResultFuture<ShoppingCart> getShoppingCart(String shoppingCartId);
 
-  ResultFuture<void> selectSeat(ShoppingCart shoppingCart, Seat seat);
+  ResultFuture<void> selectSeat(
+      ShoppingCart shoppingCart, ShoppingCartSeat seat, String movieSessionId);
+
+  ResultFuture<void> unselectSeat(
+      ShoppingCart shoppingCart, ShoppingCartSeat seat, String movieSessionId);
 }

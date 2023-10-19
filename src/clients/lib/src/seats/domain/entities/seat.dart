@@ -10,5 +10,5 @@ class Seat extends Equatable
 
   @override
 
-  List<Object?> get props => [seatNumber, row];
+  List<Object?> get props => [seatNumber, row, blocked];
 }

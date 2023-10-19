@@ -1,14 +1,10 @@
 import 'package:equatable/equatable.dart';
 
-
-
-
-
-class Seat extends Equatable {
+class ShoppingCartSeat extends Equatable {
   final int? seatRow;
   final int? seatNumber;
 
-  const Seat({this.seatRow, this.seatNumber});
+  const ShoppingCartSeat({this.seatRow, this.seatNumber});
 
   @override
   // TODO: implement props

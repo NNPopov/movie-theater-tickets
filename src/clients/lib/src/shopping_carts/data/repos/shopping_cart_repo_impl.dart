@@ -8,6 +8,7 @@ import '../../domain/entities/seat.dart';
 import '../../domain/entities/shopping_cart.dart';
 import '../../domain/repos/shopping_cart_repo.dart';
 import '../models/create_shopping_cart_dto.dart';
+import '../models/select_seat_dto.dart';
 import '../models/shopping_cart_dto.dart';
 import 'package:flutter_guid/flutter_guid.dart';
 import 'package:get_it/get_it.dart';
@@ -31,7 +32,11 @@ class ShoppingCartRepoImpl extends ShoppingCartRepo {
           options:
               Options(headers: {'X-Idempotency-Key': Guid.newGuid.toString()}));
 
-      return Right(response.toString());
+      var shoppingCart =
+          ShoppingCartResponse.fromJson(response.data as Map<String, dynamic>)
+              as ShoppingCartResponse;
+
+      return Right(shoppingCart.shoppingCartId);
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message, statusCode: e.statusCode));
     }
@@ -52,8 +57,44 @@ class ShoppingCartRepoImpl extends ShoppingCartRepo {
   }
 
   @override
-  ResultFuture<void> selectSeat(ShoppingCart shoppingCart, Seat seat) {
-    // TODO: implement selectSeat
-    throw UnimplementedError();
+  ResultFuture<void> selectSeat(
+      ShoppingCart shoppingCart, ShoppingCartSeat seat, String movieSessionId) async {
+    try {
+      var request = SelectSeatShoppingCartDto(
+          row: seat.seatRow!,
+          number: seat.seatNumber!,
+          showtimeId: movieSessionId);
+
+      final response = await _client.post(
+          '/api/shoppingcarts/${shoppingCart.id}/seats/select',
+          data: request.toJson(),
+          options:
+              Options(headers: {'X-Idempotency-Key': Guid.newGuid.toString()}));
+
+      return Right(null);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message, statusCode: e.statusCode));
+    }
+  }
+
+  @override
+  ResultFuture<void> unselectSeat(
+      ShoppingCart shoppingCart, ShoppingCartSeat seat, String movieSessionId) async {
+    try {
+      var request = SelectSeatShoppingCartDto(
+          row: seat.seatRow!,
+          number: seat.seatNumber!,
+          showtimeId: movieSessionId);
+
+      final response = await _client.delete(
+          '/api/shoppingcarts/${shoppingCart.id}/seats/unselect',
+          data: request.toJson(),
+          options:
+          Options(headers: {'X-Idempotency-Key': Guid.newGuid.toString()}));
+
+      return Right(null);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message, statusCode: e.statusCode));
+    }
   }
 }

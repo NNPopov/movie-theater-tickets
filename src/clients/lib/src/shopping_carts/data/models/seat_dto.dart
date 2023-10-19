@@ -1,10 +1,10 @@
 import '../../domain/entities/seat.dart';
 
-class SeatDto extends Seat {
+class ShoppingCartSeatDto extends ShoppingCartSeat {
 
-  SeatDto({super.seatRow, super.seatNumber});
+  const ShoppingCartSeatDto({super.seatRow, super.seatNumber});
 
-  SeatDto.fromJson(Map<String, dynamic> json):super(
+  ShoppingCartSeatDto.fromJson(Map<String, dynamic> json):super(
     seatRow : json['seatRow'],
     seatNumber : json['seatNumber'],
     );

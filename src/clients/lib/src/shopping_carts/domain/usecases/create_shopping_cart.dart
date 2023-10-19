@@ -1,17 +1,36 @@
 import 'package:equatable/equatable.dart';
 import '../../../../core/common/usecase.dart';
 import '../../../../core/utils/typedefs.dart';
+import '../../../helpers/constants.dart';
 import '../repos/shopping_cart_repo.dart';
+import 'package:get_it/get_it.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:dartz/dartz.dart';
+
+GetIt getIt = GetIt.instance;
 
 class CreateShoppingCart
     extends FutureUsecaseWithParams<String, CreateShoppingCartCommand> {
-  const CreateShoppingCart(this._repo);
+  CreateShoppingCart({ShoppingCartRepo? repo}) {
+    _repo = repo ?? getIt.get<ShoppingCartRepo>();
+  }
 
-  final ShoppingCartRepo _repo;
+  final storage = const FlutterSecureStorage();
+  late ShoppingCartRepo _repo;
 
   @override
-  ResultFuture<String> call(CreateShoppingCartCommand params) {
-    var result = _repo.createShoppingCart(params.maxNumberOfSeats);
+  ResultFuture<String> call(CreateShoppingCartCommand params) async {
+    var result =  await _repo.createShoppingCart(params.maxNumberOfSeats);
+
+    result.fold(
+            (_) =>{},
+            (value)  async {
+              storage.write(key: Constants.SHOPPING_CARD_ID, value: value);
+        });
+
+
+
+
 
     return result;
   }

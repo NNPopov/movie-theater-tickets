@@ -1,24 +1,37 @@
 using CinemaTicketBooking.Domain.Common;
 using CinemaTicketBooking.Domain.Common.Ensure;
+using CinemaTicketBooking.Domain.Common.Events;
 using CinemaTicketBooking.Domain.Exceptions;
+using CinemaTicketBooking.Domain.Seats.Events;
+using Newtonsoft.Json;
 
 namespace CinemaTicketBooking.Domain.Seats;
 
-public class MovieSessionSeat : ValueObject
+public class MovieSessionSeat : ValueObject, IAggregateRoot
 {
-    public MovieSessionSeat(Guid movieSessionId, short seatNumber, short seatRow, decimal price)
+    
+    [JsonConstructor]
+    private MovieSessionSeat(Guid movieSessionId, short seatNumber, short seatRow, decimal price, SeatStatus status, Guid shoppingCartId)
+    {
+        MovieSessionId = movieSessionId;
+        SeatNumber = seatNumber;
+        Status = status;
+        Price = price;
+        SeatRow = seatRow;
+        ShoppingCartId = shoppingCartId;
+    }
+    
+    public static MovieSessionSeat Create(Guid movieSessionId, short seatNumber, short seatRow, decimal price)
     {
         Ensure.NotEmpty(movieSessionId, "The movieSessionId is required.", nameof(movieSessionId));
         Ensure.NotEmpty(seatNumber, "The seatNumber is required.", nameof(seatNumber));
         Ensure.NotEmpty(price, "The price is required.", nameof(price));
         Ensure.NotEmpty(seatRow, "The seatRow is required.", nameof(seatRow));
-
-        MovieSessionId = movieSessionId;
-        SeatNumber = seatNumber;
-        Status = SeatStatus.Available;
-        Price = price;
-        SeatRow = seatRow;
+        
+        return new MovieSessionSeat(movieSessionId, seatNumber, seatRow, price, SeatStatus.Available, Guid.Empty);
     }
+
+
 
     public Guid MovieSessionId { get; private set; }
 
@@ -29,6 +42,8 @@ public class MovieSessionSeat : ValueObject
     public decimal Price { get; private set; }
 
     public SeatStatus Status { get; private set; }
+    
+    public Guid ShoppingCartId { get; private set; }
 
     public void Select(Guid shoppingCartId)
     {
@@ -49,7 +64,14 @@ public class MovieSessionSeat : ValueObject
             ShoppingCartId = shoppingCartId;
         }
 
+        var currentStatus = Status;
+
         Status = SeatStatus.Selected;
+        
+        var domainEvent = new MovieSessionSeatStatusUpdatedEvent(this, currentStatus);
+        
+        AddDomainEvent(domainEvent);
+        
     }
 
     public void Reserve(Guid shoppingCartId)
@@ -60,8 +82,14 @@ public class MovieSessionSeat : ValueObject
         {
             throw new ConflictException(nameof(MovieSessionSeat), this.ToString());
         }
+        
+        var currentStatus = Status;
 
         Status = SeatStatus.Reserved;
+        
+        var domainEvent = new MovieSessionSeatStatusUpdatedEvent(this, currentStatus);
+        
+        AddDomainEvent(domainEvent);
     }
 
     public void Sel(Guid shoppingCartId)
@@ -77,9 +105,14 @@ public class MovieSessionSeat : ValueObject
         {
             throw new ConflictException(nameof(MovieSessionSeat), this.ToString());
         }
+        
+        var currentStatus = Status;
 
         Status = SeatStatus.Sold;
         
+        var domainEvent = new MovieSessionSeatStatusUpdatedEvent(this, currentStatus);
+        
+        AddDomainEvent(domainEvent);
     }
 
     public void ReturnToAvailable()
@@ -88,13 +121,19 @@ public class MovieSessionSeat : ValueObject
         {
             throw new ConflictException(nameof(MovieSessionSeat), this.ToString());
         }
+        
+        var currentStatus = Status;
 
         Status = SeatStatus.Available;
         ShoppingCartId = Guid.Empty;
         
+        var domainEvent = new MovieSessionSeatStatusUpdatedEvent(this, currentStatus);
+        
+        AddDomainEvent(domainEvent);
+        
     }
 
-    public Guid ShoppingCartId { get; set; }
+
 
     public override IEnumerable<object> GetEqualityComponents()
     {
@@ -109,4 +148,24 @@ public class MovieSessionSeat : ValueObject
     {
         return $"MovieSessionId:{MovieSessionId}, SeatRow:{SeatRow}, SeatNumber:{SeatNumber}, Status:{Status.ToString()}";
     }
+
+    [JsonIgnore]
+    protected readonly List<IDomainEvent> _domainEvents = new List<IDomainEvent>();
+
+    /// <summary>
+    /// Gets the domain events. This collection is readonly.
+    /// </summary>
+    [JsonIgnore]
+    public IReadOnlyCollection<IDomainEvent> DomainEvents => _domainEvents.AsReadOnly();
+    
+    /// <summary>
+    /// Clears all the domain events from the <see cref="AggregateRoot"/>.
+    /// </summary>
+    public void ClearDomainEvents() => _domainEvents.Clear();
+    
+    /// <summary>
+    /// Adds the specified <see cref="IDomainEvent"/> to the <see cref="AggregateRoot"/>.
+    /// </summary>
+    /// <param name="domainEvent">The domain event.</param>
+    public void AddDomainEvent(IDomainEvent domainEvent) => _domainEvents.Add(domainEvent);
 }

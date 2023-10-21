@@ -28,8 +28,6 @@ class _SeatsView extends State<SeatsView> {
 
   final _maxSeatsController = TextEditingController();
 
-  final cubit = BlocProvider.of<ItemCubit>(context);
-
   void getSeats() {
     context.read<SeatCubit>().getSeats(widget.movieSession.id);
   }
@@ -48,60 +46,12 @@ class _SeatsView extends State<SeatsView> {
 
   @override
   Widget build(BuildContext context) {
-    final cubit = BlocProvider.of<SeatCubit>(context);
-
-
     return Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(title: Text("seats")),
         body: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(
-              child: BlocConsumer<SeatCubit, SeatState>(
-                listener: (context, state) {
-                  if (state is SeatsError) {
-                    Utils.showSnackBar(context, state.message);
-                  }
-                },
-                buildWhen: (context, state) {
-                  if (state is SeatsError) {
-                    return false;
-                  } else {
-                    return true;
-                  }
-                },
-                builder: (context, state) {
-                  if (state is! SeatsState && state is! SeatsError) {
-                    return const LoadingView();
-                  }
-                  if ((state is SeatsState && state.seats.isEmpty) ||
-                      state is SeatsError) {
-                    return Center(
-                      child: Text(
-                        'No courses found\nPlease contact '
-                            'admin or if you are admin, add courses',
-                        textAlign: TextAlign.center,
-                        style: context.theme.textTheme.headlineMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: Colors.grey.withOpacity(0.5),
-                        ),
-                      ),
-                    );
-                  }
-
-                  state as SeatsState;
-
-                  final seats = groupBy(state.seats, (seat) => seat.row)
-                      .values
-                      .map((seats) => seats.toList()
-                    ..sort((a, b) => a.seatNumber - b.seatNumber))
-                      .toList();
-
-                  return BuildSeatsStream(seats, context, cubit);
-                },
-              ),
-            ),
             Expanded(
               child: BlocConsumer<SeatCubit, SeatState>(
                 listener: (context, state) {
@@ -152,6 +102,9 @@ class _SeatsView extends State<SeatsView> {
                 if (state is ShoppingCartError) {
                   Utils.showSnackBar(context, state.message);
                 }
+                if (state is ShoppingCartConflictState) {
+                  Utils.showSnackBar(context, 'This place is already occupied');
+                }
               },
               buildWhen: (context, state) {
                 if (state is ShoppingCartError) {
@@ -161,6 +114,7 @@ class _SeatsView extends State<SeatsView> {
                 }
               },
               builder: (BuildContext context, ShoppingCartState state) {
+
                 if (state is CreatingShoppingCart) {
                   return SizedBox(
                     width: 150,
@@ -170,7 +124,7 @@ class _SeatsView extends State<SeatsView> {
                     ),
                   );
                 }
-                if (state is! ShoppingCartInitialState) {
+                if (state is! ShoppingCartInitialState && state is! ShoppingCartError) {
                   context.read<ShoppingCartCubit>().state;
 
                   var createdShoppingCard = state as ShoppingCartCurrentState;
@@ -198,6 +152,8 @@ class _SeatsView extends State<SeatsView> {
                     ]),
                   );
                 }
+
+
                 return SizedBox(
                   width: 150,
                   height: 200,
@@ -217,80 +173,6 @@ class _SeatsView extends State<SeatsView> {
             )
           ],
         ));
-  }
-
-  Widget BuildSeatsStream(List<List<Seat>> seats, BuildContext context, ) {
-    return Column(children: [
-      SizedBox(height: 40, width: 100, child: Text('Screen')),
-      ListView.builder(
-          shrinkWrap: true,
-          scrollDirection: Axis.vertical,
-          itemCount: seats.length,
-          itemBuilder: (context, rowIndex) {
-            var rowSeats = seats[rowIndex];
-            return SizedBox(
-                height: 22,
-                width: 600,
-                // color: Colors
-                //     .primaries[seat.row % Colors.primaries.length],
-                child: Row(children: [
-                  SizedBox(
-                      height: 19,
-                      width: 60,
-                      child: Text('Row: ${rowSeats[0].row}')),
-                  ListView.builder(
-                      shrinkWrap: true,
-                      scrollDirection: Axis.horizontal,
-                      itemCount: rowSeats.length,
-                      itemBuilder: (context, index) {
-                        var seat = rowSeats[index];
-                        if (seat.blocked) {
-                          return SizedBox(
-                              height: 19,
-                              width: 19,
-                              child: TextButton(
-                                  style: ButtonStyle(
-                                      padding: MaterialStateProperty.all(
-                                          const EdgeInsets.symmetric(
-                                              vertical: 2, horizontal: 2)),
-                                      foregroundColor:
-                                      MaterialStateProperty.all<Color>(
-                                          Colors.black),
-                                      backgroundColor:
-                                      MaterialStateProperty.all<Color>(
-                                          Colors.blue)),
-                                  onPressed: () async {
-                                    await onSeatUnselectPress(seat);
-                                  },
-                                  child: Text(
-                                    '${seat.seatNumber}',
-                                    style: TextStyle(fontSize: 12),
-                                  )));
-                        } else {
-                          return SizedBox(
-                              height: 19,
-                              width: 19,
-                              child: TextButton(
-                                  style: ButtonStyle(
-                                      padding: MaterialStateProperty.all(
-                                          const EdgeInsets.symmetric(
-                                              vertical: 2, horizontal: 2)),
-                                      foregroundColor:
-                                      MaterialStateProperty.all<Color>(
-                                          Colors.black),
-                                      backgroundColor:
-                                      MaterialStateProperty.all<Color>(
-                                          Colors.grey)),
-                                  onPressed: () async {
-                                    await onSeatPress(seat);
-                                  },
-                                  child: Text('${seat.seatNumber}',
-                                      style: TextStyle(fontSize: 12))));
-                        }
-                      })
-                ]));
-          })
-    ]);
   }
 
   Widget BuildSeats(List<List<Seat>> seats, BuildContext context) {
@@ -318,7 +200,7 @@ class _SeatsView extends State<SeatsView> {
                       itemCount: rowSeats.length,
                       itemBuilder: (context, index) {
                         var seat = rowSeats[index];
-                        if (seat.blocked) {
+                        if (seat.initBlocked) {
                           return SizedBox(
                               height: 19,
                               width: 19,
@@ -333,6 +215,28 @@ class _SeatsView extends State<SeatsView> {
                                       backgroundColor:
                                           MaterialStateProperty.all<Color>(
                                               Colors.blue)),
+                                  onPressed: () async {
+                                    await onSeatPress(seat);
+                                    },
+                                  child: Text(
+                                    '${seat.seatNumber}',
+                                    style: TextStyle(fontSize: 12),
+                                  )));
+                        } else if (seat.blocked) {
+                          return SizedBox(
+                              height: 19,
+                              width: 19,
+                              child: TextButton(
+                                  style: ButtonStyle(
+                                      padding: MaterialStateProperty.all(
+                                          const EdgeInsets.symmetric(
+                                              vertical: 2, horizontal: 2)),
+                                      foregroundColor:
+                                          MaterialStateProperty.all<Color>(
+                                              Colors.black),
+                                      backgroundColor:
+                                          MaterialStateProperty.all<Color>(
+                                              Colors.green)),
                                   onPressed: () async {
                                     await onSeatUnselectPress(seat);
                                   },

@@ -44,6 +44,13 @@ final int version;
 List<Object> get props => [shoppingCard, version];
 }
 
+class ShoppingCartConflictState extends ShoppingCartCurrentState  {
+  const ShoppingCartConflictState(super.shoppingCard, super.version);
+
+  @override
+  List<Object> get props => [shoppingCard, version];
+}
+
 
 
 class ShoppingCartValue extends ShoppingCartState  {

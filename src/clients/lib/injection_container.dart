@@ -39,14 +39,14 @@ Future<void> initializeDependencies() async {
   _initShoppingCart();
   // Dependencies
 
-
+  getIt.registerLazySingleton(() => ShoppingCartCubit(createShoppingCart:  getIt()));
 
   //UseCases
 
 }
 
 void _initShoppingCart() {
-  //getIt.registerFactory(() => ShoppingCartCubit(createShoppingCart:  getIt()));
+  //
   getIt.registerLazySingleton<ShoppingCartRepo>(() => ShoppingCartRepoImpl());
   getIt.registerLazySingleton<CreateShoppingCart>(() => CreateShoppingCart());
   getIt.registerLazySingleton<GetShoppingCart>(() => GetShoppingCart(getIt.get()));

@@ -39,14 +39,12 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       return _pageBuilder(
         (_) => MultiBlocProvider(
           providers: [
-            BlocProvider<ShoppingCartCubit>(
-              create: (_) => ShoppingCartCubit(),
-            ),
+
             BlocProvider<SeatCubit>(
               create: (context) => SeatCubit(
                   getMovieSessionById: getIt.get<GetSeatsByMovieSessionId>(),
-                  shoppingCartCubit:
-                      BlocProvider.of<ShoppingCartCubit>(context)),
+                  shoppingCartCubit:getIt.get<ShoppingCartCubit>()),
+                     // BlocProvider.of<ShoppingCartCubit>(context)),
             ),
 
           ],

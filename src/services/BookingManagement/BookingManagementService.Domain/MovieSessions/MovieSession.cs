@@ -56,7 +56,7 @@ public class MovieSession : AggregateRoot
        // ICollection<SeatMovieSession> seats,
         int ticketsForSale)
     {
-        var showtime = new MovieSession(
+        var movieSession = new MovieSession(
             Guid.NewGuid(),
             movieId,
             auditoriumId,
@@ -66,9 +66,9 @@ public class MovieSession : AggregateRoot
             ticketsForSale
         );
 
-        showtime.AddDomainEvent(new ShowtimeCreatedDomainEvent(showtime));
+        movieSession.AddDomainEvent(new ShowtimeCreatedDomainEvent(movieSession));
 
-        return showtime;
+        return movieSession;
     }
 }
 

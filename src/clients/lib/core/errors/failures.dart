@@ -23,6 +23,13 @@ class CacheFailure extends Failure {
   const CacheFailure({required super.message, required super.statusCode});
 }
 
+class ConflictFailure extends Failure {
+  const ConflictFailure({required super.message, super.statusCode=409});
+
+  ConflictFailure.fromException(ServerException exception)
+      : this(message: exception.message);
+}
+
 class ServerFailure extends Failure {
   const ServerFailure({required super.message, required super.statusCode});
 

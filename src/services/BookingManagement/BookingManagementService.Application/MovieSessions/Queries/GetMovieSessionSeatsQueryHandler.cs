@@ -53,7 +53,8 @@ public class GetMovieSessionSeatsQueryHandler : IRequestHandler<GetMovieSessionS
             {
                 SeatNumber = allSeats.SeatNumber,
                 Row = allSeats.SeatRow,
-                Blocked = purchased != null ? true : allSeats.Status == SeatStatus.Available ? false : true
+                Blocked = purchased != null ? true : allSeats.Status == SeatStatus.Available ? false : true,
+                SeatStatus = purchased != null ? SeatStatus.Blocked : allSeats.Status
             };
 
         return seats.ToList();
@@ -65,4 +66,5 @@ public class MovieSessionSeatDto
     public short SeatNumber { get; init; }
     public short Row { get; init; }
     public bool Blocked { get; init; }
+    public SeatStatus SeatStatus { get; init; }
 }

@@ -5,8 +5,14 @@ class Seat extends Equatable
   final int seatNumber;
   final int row;
   final bool blocked;
+  late bool initBlocked;
 
-  const Seat({required this.row, required this.seatNumber,  required this.blocked});
+   Seat({required this.row, required this.seatNumber,  required this.blocked})
+  {
+    initBlocked = this.blocked;
+  }
+
+  Seat.temp({required this.row, required this.seatNumber,  required this.blocked,required this.initBlocked});
 
   @override
 

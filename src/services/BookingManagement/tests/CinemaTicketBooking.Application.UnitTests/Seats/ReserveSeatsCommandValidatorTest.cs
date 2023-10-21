@@ -14,7 +14,7 @@ public class MovieSessionSeatTest
         short seatRow = 1;
         decimal price = 20;
             
-        var movieSessionSeat = new MovieSessionSeat(movieSessionId,
+        var movieSessionSeat =  MovieSessionSeat.Create(movieSessionId,
             seatNumber,seatRow, price);
         
     
@@ -34,7 +34,7 @@ public class MovieSessionSeatTest
         
         Guid shoppingCartId = Guid.NewGuid();
             
-        var movieSessionSeat = new MovieSessionSeat(movieSessionId,
+        var movieSessionSeat =  MovieSessionSeat.Create(movieSessionId,
             seatNumber,seatRow, price);
 
         movieSessionSeat.Select(shoppingCartId);
@@ -129,7 +129,7 @@ public class MovieSessionSeatTest
     private static MovieSessionSeat PrepareSelectedMovieSessionSeat(Guid movieSessionId, short seatNumber, short seatRow,
         decimal price, Guid shoppingCartId)
     {
-        var movieSessionSeat = new MovieSessionSeat(movieSessionId,
+        var movieSessionSeat =  MovieSessionSeat.Create(movieSessionId,
             seatNumber, seatRow, price);
 
         movieSessionSeat.MovieSessionId.Should().Be(movieSessionId);

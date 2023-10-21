@@ -24,7 +24,7 @@ public class ShoppingCartRepository : IShoppingCartRepository
         _mediator = mediator;
     }
 
-    private async Task PublishDomainEvents(AggregateRoot shoppingCart, CancellationToken cancellationToken = default)
+    private async Task PublishDomainEvents(IAggregateRoot shoppingCart, CancellationToken cancellationToken = default)
     {
         var domainEvents = shoppingCart.DomainEvents;
 
@@ -94,7 +94,7 @@ public class SeatStateRepository : ISeatStateRepository
     public async Task<ICollection<SeatDto>> GetReservedSeats(Guid showtimeId)
     {
         var db = _redis.GetDatabase();
-        var reservedSeatsKey = await db.ExecuteAsync("KEYS", $"{KeyPrefix}:{showtimeId}:*");
+        var reservedSeatsKey = await db.ExecuteAsync("KEYS", $"{KeyPrefix}:{showtimeId.ToString()}:*");
 
         var re = (RedisResult[])reservedSeatsKey;
         var response = re.Select(t =>
@@ -155,7 +155,7 @@ public class SeatStateRepository : ISeatStateRepository
 
     private static string GetKey(Guid movieSessionId, short seatRow, short seatNumber)
     {
-        return $"{KeyPrefix}:{movieSessionId}:{seatRow}:{seatNumber}";
+        return $"{KeyPrefix}:{movieSessionId.ToString()}:{seatRow}:{seatNumber}";
     }
 
 

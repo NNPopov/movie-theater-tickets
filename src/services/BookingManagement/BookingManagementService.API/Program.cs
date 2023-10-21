@@ -2,8 +2,10 @@ using System.Text.Json.Serialization;
 using CinemaTicketBooking.Api;
 using CinemaTicketBooking.Api.Database;
 using CinemaTicketBooking.Api.Endpoints.Common;
+using CinemaTicketBooking.Api.Sockets;
 using CinemaTicketBooking.Api.WorkerServices;
 using CinemaTicketBooking.Application;
+using CinemaTicketBooking.Application.Abstractions;
 using CinemaTicketBooking.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Extensions.Options;
@@ -50,6 +52,9 @@ services.AddApplicationServices()
     .AddApiServices(builder.Configuration);
 
 
+services.AddScoped<ICinemaHallSeatsNotifier, CinemaHallSeatsNotifier>();
+
+
 var identityOptionsSection =
     builder.Configuration.GetSection(IdentityOptions.SectionName);
 
@@ -64,7 +69,11 @@ services.AddKeyCloakAuthentication(builder.Configuration);
 services.AddControllers(opt => { opt.OutputFormatters.RemoveType<HttpNoContentOutputFormatter>(); })
     .AddJsonOptions(options => { options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve; });
 
-services.AddHostedService<RedisWorker>();
+services.AddSingleton<RedisSubscriber>();
+
+services.AddHostedService<RedisSubscriber>();
+
+builder.Services.AddSignalR();//.AddMessagePackProtocol();
 
 builder.Services.AddEndpointsApiExplorer();
 
@@ -78,6 +87,10 @@ if (app.Environment.IsDevelopment())
 
 //app.UseSerilogRequestLogging();
 app.UseRouting();
+
+app.MapHub<CinemaHallSeatsHub>("/cinema-hall-seats-hub");
+
+
 app.UseCors(defaultCorsPolicy);
 app.UseHealthChecks("/Health");
 app.UseAuthentication();
@@ -86,6 +99,10 @@ app.UseExceptionHandler(options => { });
 app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
 app.UseEndpoints(typeof(Program));
 
+
+
 SampleData.Initialize(app);
+
+
 
 app.Run();

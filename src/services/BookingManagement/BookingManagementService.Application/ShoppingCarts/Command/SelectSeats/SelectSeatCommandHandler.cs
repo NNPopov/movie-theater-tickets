@@ -38,72 +38,74 @@ public class SelectSeatCommandHandler : IRequestHandler<SelectSeatCommand, bool>
     {
         var lockKey = $"lock:{request.MovieSessionId}:{request.SeatRow}:{request.SeatNumber}";
 
-        await using var lockHandler = await _distributedLock.TryAcquireAsync(lockKey);
-        
-        if (!lockHandler.IsLocked)
-            return false;
+        await using (var lockHandler = await _distributedLock.TryAcquireAsync(lockKey,
+                         cancellationToken: cancellationToken))
+        {
 
-        var cart = await _shoppingCartRepository.TryGetCart(request.ShoppingCartId);
+            if (!lockHandler.IsLocked)
+                return false;
 
-        if (cart == null)
-            throw new ContentNotFoundException(request.ShoppingCartId.ToString(), nameof(ShoppingCart));
+            var cart = await _shoppingCartRepository.TryGetCart(request.ShoppingCartId);
+
+            if (cart == null)
+                throw new ContentNotFoundException(request.ShoppingCartId.ToString(), nameof(ShoppingCart));
+
+            var movieSession = await _movieSessionsRepository
+                .GetWithTicketsByIdAsync(
+                    request.MovieSessionId, cancellationToken);
+
+            if (movieSession == null)
+                throw new ContentNotFoundException(request.MovieSessionId.ToString(), nameof(MovieSession));
+
             
-        var movieSession = await _movieSessionsRepository
-            .GetWithTicketsByIdAsync(
-                request.MovieSessionId, cancellationToken);
+            if (cart.MovieSessionId != request.MovieSessionId)
+            {
+                cart.SetShowTime(request.MovieSessionId);
+            }
 
-        if (movieSession == null)
-            throw new ContentNotFoundException(request.MovieSessionId.ToString(), nameof(MovieSession));
+            //Step 1 Check is seat already reserved
 
+            var reservedInRedis =
+                await _seatStateRepository.GetAsync(request.MovieSessionId, request.SeatRow, request.SeatNumber);
 
+            if (!(reservedInRedis is null))
+            {
+                return false;
+            }
 
+            // Step 2 Select place
+            var movieSessionSeat =
+                await _movieSessionSeatRepository.GetByIdAsync(request.MovieSessionId, request.SeatRow,
+                    request.SeatNumber, cancellationToken);
 
-        if (cart.MovieSessionId != request.MovieSessionId)
-        {
-            cart.SetShowTime(request.MovieSessionId);
+            if (movieSessionSeat is null)
+                throw new Exception();
+
+            movieSessionSeat.Select(request.ShoppingCartId);
+
+            await _movieSessionSeatRepository.UpdateAsync(movieSessionSeat, cancellationToken);
+
+            // Step 3 Add seat to cart
+            var seatReservationInfo = new SeatSelectedInfo
+            {
+                SeatRow = request.SeatRow,
+                SeatNumber = request.SeatNumber,
+                MovieSessionId = request.MovieSessionId,
+                ShoppingCartId = request.ShoppingCartId
+            };
+
+            cart.AddSeats(new SeatShoppingCart(request.SeatRow, request.SeatNumber));
+            var result =
+                await _seatStateRepository.SetAsync(seatReservationInfo, new TimeSpan(0, 0, 120));
+
+            if (!result)
+            {
+                return false;
+            }
+
+            await _shoppingCartRepository.TrySetCart(cart);
         }
 
-        //Step 1 Check is seat already reserved
-
-        var reservedInRedis =
-            await _seatStateRepository.GetAsync(request.MovieSessionId, request.SeatRow, request.SeatNumber);
-
-        if (!(reservedInRedis is null))
-        {
-            return false;
-        }
-
-        // Step 2 Select place
-        var movieSessionSeat =
-            await _movieSessionSeatRepository.GetByIdAsync(request.MovieSessionId, request.SeatRow,
-                request.SeatNumber, cancellationToken);
-
-        if (movieSessionSeat is null)
-            throw new Exception();
-
-        movieSessionSeat.Select(request.ShoppingCartId);
-
-        await _movieSessionSeatRepository.UpdateAsync(movieSessionSeat, cancellationToken);
-
-        // Step 3 Add seat to cart
-        var seatReservationInfo = new SeatSelectedInfo
-        {
-            SeatRow = request.SeatRow,
-            SeatNumber = request.SeatNumber,
-            MovieSessionId = request.MovieSessionId,
-            ShoppingCartId = request.ShoppingCartId
-        };
-
-        cart.AddSeats(new SeatShoppingCart(request.SeatRow, request.SeatNumber));
-        var result =
-            await _seatStateRepository.SetAsync(seatReservationInfo, new TimeSpan(0, 0, 120));
-
-        if (!result)
-        {
-            return false;
-        }
-
-        await _shoppingCartRepository.TrySetCart(cart);
 
         // return result
         return true;

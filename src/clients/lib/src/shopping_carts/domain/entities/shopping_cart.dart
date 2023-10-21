@@ -24,6 +24,11 @@ class ShoppingCart extends Equatable {
 
   Either<Failure, void> addSeat(ShoppingCartSeat seat) {
     if (shoppingCartSeat.length < maxNumberOfSeats!) {
+
+      if(shoppingCartSeat.any((e) => e.seatRow == seat.seatRow && e.seatNumber == seat.seatNumber))
+        {
+          return  Left(DataFailure(message:"Seat is alredy reserved", statusCode: 500));
+        }
       shoppingCartSeat.add(seat);
       return const Right(null);
     }

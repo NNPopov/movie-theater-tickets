@@ -3,7 +3,26 @@ using Newtonsoft.Json;
 
 namespace CinemaTicketBooking.Domain.Common;
 
-public abstract class AggregateRoot : Entity<Guid>
+public interface IAggregateRoot
+{
+    /// <summary>
+    /// Gets the domain events. This collection is readonly.
+    /// </summary>
+    IReadOnlyCollection<IDomainEvent> DomainEvents { get; }
+
+    /// <summary>
+    /// Clears all the domain events from the <see cref="AggregateRoot"/>.
+    /// </summary>
+    void ClearDomainEvents();
+
+    /// <summary>
+    /// Adds the specified <see cref="IDomainEvent"/> to the <see cref="AggregateRoot"/>.
+    /// </summary>
+    /// <param name="domainEvent">The domain event.</param>
+    void AddDomainEvent(IDomainEvent domainEvent);
+}
+
+public abstract class AggregateRoot : Entity<Guid>, IAggregateRoot
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="AggregateRoot"/> class.
@@ -37,5 +56,5 @@ public abstract class AggregateRoot : Entity<Guid>
     /// Adds the specified <see cref="IDomainEvent"/> to the <see cref="AggregateRoot"/>.
     /// </summary>
     /// <param name="domainEvent">The domain event.</param>
-    protected void AddDomainEvent(IDomainEvent domainEvent) => _domainEvents.Add(domainEvent);
+    public void AddDomainEvent(IDomainEvent domainEvent) => _domainEvents.Add(domainEvent);
 }

@@ -88,9 +88,12 @@ class ShoppingCartCubit extends Cubit<ShoppingCartState> {
           shoppingCart: _shoppingCart,
           movieSessionId: movieSessionId);
 
-      await _selectSeatUseCase(command);
+      var selectResult = await _selectSeatUseCase(command);
 
-      emit(ShoppingCartCurrentState(_shoppingCart, version));
+      selectResult.fold((l) {
+        _shoppingCart.deleteSeat(shoppingCartSeat);
+        emit(ShoppingCartConflictState(_shoppingCart, version));
+      }, (r) => emit(ShoppingCartCurrentState(_shoppingCart, version)));
     });
   }
 
@@ -113,4 +116,7 @@ class ShoppingCartCubit extends Cubit<ShoppingCartState> {
 
     await _unselectSeatUseCase(command);
   }
+
+  @override
+  void dispose() {}
 }

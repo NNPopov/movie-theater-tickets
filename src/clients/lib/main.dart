@@ -10,7 +10,7 @@ import 'package:get_it/get_it.dart';
 import 'src/movies/presentation/app/movie_theater_cubit.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-final sl = GetIt.instance;
+final getIt = GetIt.instance;
 
 void main() async {
   await dotenv.load();
@@ -25,23 +25,12 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return
-      // MultiBlocProvider(
-      //   providers: [
-      //     BlocProvider<MovieTheaterCubit>(
-      //         create: (context) => MovieTheaterCubit()),
-      //     BlocProvider<MovieSessionCubit>(
-      //         create: (context) => MovieSessionCubit()),
-      //     BlocProvider<CinemaHallCubit>(create: (context) => CinemaHallCubit()),
-      //     BlocProvider<SeatCubit>(
-      //         create: (context) => SeatCubit(
-      //             shoppingCartCubit:
-      //                 BlocProvider.of<ShoppingCartCubit>(context))),
-      //     BlocProvider<ShoppingCartCubit>(
-      //         create: (context) => ShoppingCartCubit())
-      //   ],
-       // child:
-    MaterialApp(
+    return MultiBlocProvider(
+        providers: [
+          BlocProvider<ShoppingCartCubit>(
+              create: (_) => getIt.get<ShoppingCartCubit>())
+        ],
+        child: MaterialApp(
           title: 'Flutter Demo',
           theme: ThemeData(
             colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
@@ -50,7 +39,7 @@ class MyApp extends StatelessWidget {
                 bodyLarge: TextStyle(fontSize: 8.0, color: Colors.black)),
           ),
           onGenerateRoute: generateRoute,
-        //)
-    );
+          //)
+        ));
   }
 }

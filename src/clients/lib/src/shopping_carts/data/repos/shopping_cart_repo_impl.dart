@@ -51,14 +51,14 @@ class ShoppingCartRepoImpl extends ShoppingCartRepo {
       var shoppingCartDto = ShoppingCartDto.fromJson(primaryClientAccount);
 
       return Right(shoppingCartDto);
-    } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message, statusCode: e.statusCode));
+    } on Exception catch (e) {
+      return Left(ServerFailure(message: e.toString(), statusCode: 500));
     }
   }
 
   @override
-  ResultFuture<void> selectSeat(
-      ShoppingCart shoppingCart, ShoppingCartSeat seat, String movieSessionId) async {
+  ResultFuture<void> selectSeat(ShoppingCart shoppingCart,
+      ShoppingCartSeat seat, String movieSessionId) async {
     try {
       var request = SelectSeatShoppingCartDto(
           row: seat.seatRow!,
@@ -72,14 +72,19 @@ class ShoppingCartRepoImpl extends ShoppingCartRepo {
               Options(headers: {'X-Idempotency-Key': Guid.newGuid.toString()}));
 
       return Right(null);
-    } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message, statusCode: e.statusCode));
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 409) {
+        return Left(ConflictFailure(message: e.message!));
+      }
+      return Left(ServerFailure(message: e.message!, statusCode: 500));
+    } on Exception catch (e) {
+      return Left(ServerFailure(message: e.toString(), statusCode: 500));
     }
   }
 
   @override
-  ResultFuture<void> unselectSeat(
-      ShoppingCart shoppingCart, ShoppingCartSeat seat, String movieSessionId) async {
+  ResultFuture<void> unselectSeat(ShoppingCart shoppingCart,
+      ShoppingCartSeat seat, String movieSessionId) async {
     try {
       var request = SelectSeatShoppingCartDto(
           row: seat.seatRow!,
@@ -90,11 +95,11 @@ class ShoppingCartRepoImpl extends ShoppingCartRepo {
           '/api/shoppingcarts/${shoppingCart.id}/seats/unselect',
           data: request.toJson(),
           options:
-          Options(headers: {'X-Idempotency-Key': Guid.newGuid.toString()}));
+              Options(headers: {'X-Idempotency-Key': Guid.newGuid.toString()}));
 
       return Right(null);
-    } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message, statusCode: e.statusCode));
+    } on Exception catch (e) {
+      return Left(ServerFailure(message: e.toString(), statusCode: 500));
     }
   }
 }

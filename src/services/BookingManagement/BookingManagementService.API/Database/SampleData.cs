@@ -134,7 +134,7 @@ public class SampleData
     {
         foreach (var seat in redAuditorium.Seats)
         {
-            var showtimeSeat = new MovieSessionSeat(showtimeItem.Id, seat.Row, seat.SeatNumber, 15);
+            var showtimeSeat =  MovieSessionSeat.Create(showtimeItem.Id, seat.Row, seat.SeatNumber, 15);
 
             context.ShowtimeSeats.Add(showtimeSeat);
         }

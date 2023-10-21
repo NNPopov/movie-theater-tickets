@@ -56,7 +56,7 @@ public class CreateMovieSessionCommandHandler : IRequestHandler<CreateMovieSessi
 
         foreach (var seat in auditorium.Seats)
         {
-            var showtimeSeat = new MovieSessionSeat(showtime.Id, seat.Row, seat.SeatNumber, 15);
+            var showtimeSeat =  MovieSessionSeat.Create(showtime.Id, seat.Row, seat.SeatNumber, 15);
 
             await _movieSessionSeatRepository.AddAsync(showtimeSeat, cancellationToken);
         }

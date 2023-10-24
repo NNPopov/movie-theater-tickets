@@ -2,6 +2,9 @@ import 'package:equatable/equatable.dart';
 import '../../../../core/common/usecase.dart';
 import '../../../../core/utils/typedefs.dart';
 import '../../../helpers/constants.dart';
+import '../../../hub/domain/event_hub.dart';
+import '../../../hub/event_bus.dart';
+import '../entities/create_shopping_cart_response.dart';
 import '../repos/shopping_cart_repo.dart';
 import 'package:get_it/get_it.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -9,28 +12,31 @@ import 'package:dartz/dartz.dart';
 
 GetIt getIt = GetIt.instance;
 
-class CreateShoppingCart
-    extends FutureUsecaseWithParams<String, CreateShoppingCartCommand> {
-  CreateShoppingCart({ShoppingCartRepo? repo}) {
+class CreateShoppingCart extends FutureUsecaseWithParams<
+    CreateShoppingCartResponse, CreateShoppingCartCommand> {
+  CreateShoppingCart(
+      {ShoppingCartRepo? repo, EventHub? eventHub}) {
     _repo = repo ?? getIt.get<ShoppingCartRepo>();
+    _eventHub = eventHub ?? getIt.get<EventHub>();
   }
 
   final storage = const FlutterSecureStorage();
   late ShoppingCartRepo _repo;
+  late EventHub _eventHub;
 
   @override
-  ResultFuture<String> call(CreateShoppingCartCommand params) async {
-    var result =  await _repo.createShoppingCart(params.maxNumberOfSeats);
+  ResultFuture<CreateShoppingCartResponse> call(
+      CreateShoppingCartCommand params) async {
+    var result = await _repo.createShoppingCart(params.maxNumberOfSeats);
 
-    result.fold(
-            (_) =>{},
-            (value)  async {
-              storage.write(key: Constants.SHOPPING_CARD_ID, value: value);
-        });
+    result.fold((_) => {}, (value) async {
+      await storage.write(
+          key: Constants.SHOPPING_CARD_ID, value: value.shoppingCartId);
+      await storage.write(
+          key: Constants.SHOPPING_CARD_HASH_ID, value: value.hashId);
 
-
-
-
+      await _eventHub.shoppingCartUpdateSubscribe(value.shoppingCartId);
+    });
 
     return result;
   }

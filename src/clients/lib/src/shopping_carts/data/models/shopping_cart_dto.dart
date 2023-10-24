@@ -4,24 +4,6 @@ import 'seat_dto.dart';
 import '../../domain/entities/shopping_cart.dart';
 import 'package:equatable/equatable.dart';
 
-class ShoppingCartResponse extends Equatable {
-
-
-  final String shoppingCartId;
-
-  const ShoppingCartResponse(this.shoppingCartId);
-
-  ShoppingCartResponse.fromJson(Map<String, dynamic> json)
-      : this(
-     json['shoppingCartId']);
-
-
-
-
-  @override
-  // TODO: implement props
-  List<Object?> get props =>  [shoppingCartId];
-}
 
 class ShoppingCartDto extends ShoppingCart {
    ShoppingCartDto(
@@ -82,5 +64,21 @@ class ShoppingCartDto extends ShoppingCart {
         movieSessionId: movieSessionId ?? this.movieSessionId,
         status: status ?? this.status,
         seats: seats ?? shoppingCartSeat);
+  }
+
+
+}
+
+extension  ShoppingCarMap on ShoppingCart{
+
+  ShoppingCartDto map(){
+     return ShoppingCartDto( id:  this.id,
+      maxNumberOfSeats:this.maxNumberOfSeats,
+      createdCard:this.createdCard,
+
+      movieSessionId:this.movieSessionId,
+      status:this.status,
+      seats:this.shoppingCartSeat
+  );
   }
 }

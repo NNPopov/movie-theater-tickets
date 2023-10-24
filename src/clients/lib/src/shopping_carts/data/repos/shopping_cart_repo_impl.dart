@@ -4,6 +4,7 @@ import 'package:movie_theater_tickets/core/utils/typedefs.dart';
 import 'package:dio/dio.dart';
 import '../../../../core/errors/exceptions.dart';
 import '../../../../core/errors/failures.dart';
+import '../../domain/entities/create_shopping_cart_response.dart';
 import '../../domain/entities/seat.dart';
 import '../../domain/entities/shopping_cart.dart';
 import '../../domain/repos/shopping_cart_repo.dart';
@@ -23,7 +24,7 @@ class ShoppingCartRepoImpl extends ShoppingCartRepo {
   }
 
   @override
-  ResultFuture<String> createShoppingCart(int maxNumberOfSeats) async {
+  ResultFuture<CreateShoppingCartResponse> createShoppingCart(int maxNumberOfSeats) async {
     try {
       CreateShoppingCartDto request = CreateShoppingCartDto(maxNumberOfSeats);
 
@@ -33,10 +34,10 @@ class ShoppingCartRepoImpl extends ShoppingCartRepo {
               Options(headers: {'X-Idempotency-Key': Guid.newGuid.toString()}));
 
       var shoppingCart =
-          ShoppingCartResponse.fromJson(response.data as Map<String, dynamic>)
-              as ShoppingCartResponse;
+          CreateShoppingCartResponse.fromJson(response.data as Map<String, dynamic>)
+              as CreateShoppingCartResponse;
 
-      return Right(shoppingCart.shoppingCartId);
+      return Right(shoppingCart);
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message, statusCode: e.statusCode));
     }

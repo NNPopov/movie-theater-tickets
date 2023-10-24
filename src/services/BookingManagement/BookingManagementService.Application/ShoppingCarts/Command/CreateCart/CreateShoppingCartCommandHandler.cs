@@ -28,9 +28,9 @@ public class CreateShoppingCartCommandHandler : IRequestHandler<CreateShoppingCa
     public async Task<CreateShoppingCartResponse> Handle(CreateShoppingCartCommand request,
         CancellationToken cancellationToken)
     {
-        var ticketCart = ShoppingCart.Create(request.MaxNumberOfSeats);
-        await _shoppingCartRepository.TrySetCart(ticketCart);
+        var shoppingCart = ShoppingCart.Create(request.MaxNumberOfSeats);
+        await _shoppingCartRepository.TrySetCart(shoppingCart);
 
-        return new CreateShoppingCartResponse(ticketCart.Id);
+        return new CreateShoppingCartResponse(shoppingCart.Id, shoppingCart.HashId);
     }
 }

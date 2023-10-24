@@ -1,4 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Security.Cryptography;
+using System.Text;
 using CinemaTicketBooking.Domain.Common;
 using CinemaTicketBooking.Domain.Common.Ensure;
 using CinemaTicketBooking.Domain.Common.Events;
@@ -19,26 +21,51 @@ public class ShoppingCart : AggregateRoot
     public Guid MovieSessionId { get; private set; }
     
     public Guid ClientId { get; private set; }
+    
+    public string HashId { get; private set; }
 
     public ShoppingCartStatus Status { get; private set; }
 
     public IReadOnlyList<SeatShoppingCart> Seats => _seats.AsReadOnly();
 
     [JsonConstructor]
-    private ShoppingCart(Guid id,
-        Guid? movieSessionId,
+    public ShoppingCart(Guid id,
+        Guid movieSessionId,
         DateTime createdCard,
         short maxNumberOfSeats,
         SeatShoppingCart[]? seats,
         ShoppingCartStatus status,
-        Guid clientId) : base(id: id)
+        Guid clientId,
+        string hashId) : base(id: id)
     {
-        MovieSessionId = movieSessionId ?? Guid.Empty;
+        MovieSessionId = movieSessionId;
+
         CreatedCard = createdCard;
         MaxNumberOfSeats = maxNumberOfSeats;
         Status = status;
         _seats = seats == null ? default : seats.ToList();
         ClientId = clientId;
+        HashId = hashId;
+    }
+    
+    // move to injected service
+    static string ComputeMD5(string s)
+    {
+        StringBuilder sb = new StringBuilder();
+ 
+        // Initialize a MD5 hash object
+        using (MD5 md5 = MD5.Create())
+        {
+            // Compute the hash of the given string
+            byte[] hashValue = md5.ComputeHash(Encoding.UTF8.GetBytes(s));
+ 
+            // Convert the byte array to string format
+            foreach (byte b in hashValue) {
+                sb.Append($"{b:X2}");
+            }
+        }
+ 
+        return sb.ToString();
     }
 
     public void AssignClientId(Guid clientId)
@@ -59,10 +86,12 @@ public class ShoppingCart : AggregateRoot
         Ensure.NotEmpty(maxNumberOfSeats, "The maxNumberOfSeats is required.", nameof(maxNumberOfSeats));
         Ensure.NotEmpty(id, "The id is required.", nameof(id));
 
+        HashId = ComputeMD5(id.ToString());
         CreatedCard = TimeProvider.System.GetUtcNow().DateTime;
         MaxNumberOfSeats = maxNumberOfSeats;
         Status = ShoppingCartStatus.InWork;
         ClientId = Guid.Empty;
+   
     }
 
     public void SetShowTime(Guid showTimeId)

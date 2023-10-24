@@ -18,25 +18,31 @@ public class SelectSeatCommandHandler : IRequestHandler<SelectSeatCommand, bool>
     
     private readonly IMovieSessionSeatRepository _movieSessionSeatRepository;
     private IDistributedLock _distributedLock;
+    
+    private readonly IShoppingCartNotifier _shoppingCartNotifier;
 
     public SelectSeatCommandHandler(
         IMovieSessionsRepository movieSessionsRepository,
         ISeatStateRepository seatStateRepository,
         IMovieSessionSeatRepository movieSessionSeatRepository,
         IShoppingCartRepository shoppingCartRepository,
-        IDistributedLock distributedLock)
+        IDistributedLock distributedLock,
+        IShoppingCartNotifier shoppingCartNotifier)
     {
         _movieSessionsRepository = movieSessionsRepository;
         _seatStateRepository = seatStateRepository;
         _movieSessionSeatRepository = movieSessionSeatRepository;
         _shoppingCartRepository = shoppingCartRepository;
         _distributedLock = distributedLock;
+        _shoppingCartNotifier = shoppingCartNotifier;
     }
 
     public async Task<bool> Handle(SelectSeatCommand request,
         CancellationToken cancellationToken)
     {
         var lockKey = $"lock:{request.MovieSessionId}:{request.SeatRow}:{request.SeatNumber}";
+
+        ShoppingCart? cart;
 
         await using (var lockHandler = await _distributedLock.TryAcquireAsync(lockKey,
                          cancellationToken: cancellationToken))
@@ -45,7 +51,7 @@ public class SelectSeatCommandHandler : IRequestHandler<SelectSeatCommand, bool>
             if (!lockHandler.IsLocked)
                 return false;
 
-            var cart = await _shoppingCartRepository.TryGetCart(request.ShoppingCartId);
+            cart = await _shoppingCartRepository.TryGetCart(request.ShoppingCartId);
 
             if (cart == null)
                 throw new ContentNotFoundException(request.ShoppingCartId.ToString(), nameof(ShoppingCart));
@@ -81,7 +87,7 @@ public class SelectSeatCommandHandler : IRequestHandler<SelectSeatCommand, bool>
             if (movieSessionSeat is null)
                 throw new Exception();
 
-            movieSessionSeat.Select(request.ShoppingCartId);
+            movieSessionSeat.Select(request.ShoppingCartId, cart.HashId);
 
             await _movieSessionSeatRepository.UpdateAsync(movieSessionSeat, cancellationToken);
 
@@ -105,7 +111,8 @@ public class SelectSeatCommandHandler : IRequestHandler<SelectSeatCommand, bool>
 
             await _shoppingCartRepository.TrySetCart(cart);
         }
-
+        
+        await _shoppingCartNotifier.SendShoppingCartState(cart);
 
         // return result
         return true;

@@ -53,7 +53,8 @@ services.AddApplicationServices()
 
 
 services.AddScoped<ICinemaHallSeatsNotifier, CinemaHallSeatsNotifier>();
-
+services.AddScoped<IShoppingCartNotifier, ShoppingCartNotifier>();
+services.AddSingleton<IConnectionManager>( ConnectionManager.Factory());
 
 var identityOptionsSection =
     builder.Configuration.GetSection(IdentityOptions.SectionName);
@@ -89,6 +90,7 @@ if (app.Environment.IsDevelopment())
 app.UseRouting();
 
 app.MapHub<CinemaHallSeatsHub>("/cinema-hall-seats-hub");
+//app.MapHub<ShoppingCartHub>("/shopping-cart-hub");
 
 
 app.UseCors(defaultCorsPolicy);

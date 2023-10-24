@@ -74,48 +74,82 @@ class _MoviesView extends State<MoviesView> {
       appBar: AppBar(
         title: Text('Movies'),
       ),
-      body: Column(children: [
-        SizedBox(height: 40, width: 100, child: Text('Movies')),
-        SizedBox(
-            height: 100,
-            width: 1000,
-            child: CarouselSlider(
-              items: movies.map((rowSeats) {
-                return SizedBox(
-                  height: 100,
-                  width: 200,
-                  child: Column(children: [
-                    Text('Title: ${rowSeats.title}'),
-                    Text('Release Date: ${rowSeats.releaseDate}'),
-                    TextButton(
-                        style: ButtonStyle(
-                          padding: MaterialStateProperty.all(
-                              const EdgeInsets.symmetric(
-                                  vertical: 1, horizontal: 1)),
-                          foregroundColor:
-                              MaterialStateProperty.all<Color>(Colors.blue),
-                        ),
-                        onPressed: () {
-                          movieSeat(rowSeats);
-                        },
-                        child: const Text('Select'))
-                  ]),
-                );
-              }).toList(),
-              carouselController: buttonCarouselController,
-              options: CarouselOptions(
-                  height: 300.0,
-                  enableInfiniteScroll: true,
-                  viewportFraction: 0.4,
-                  enlargeCenterPage: false,
-                  aspectRatio: 3.0),
+      body: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const SizedBox(height: 40, width: 100, child: Text('Movies')),
+            Expanded(
+                child: Align(
+              alignment: Alignment.topCenter,
+              child: CarouselSlider(
+                items: movies.map((rowSeats) {
+                  return Container(width: 300,
+                    height: 650,
+                    alignment: Alignment.bottomLeft,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: Colors.blue,
+                        width: 2,
+                      ),
+                    ),
+                    margin: const EdgeInsets.all(20.0),
+                    padding: const EdgeInsets.all(20.0),
+                    child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Align(
+                              child: Text(rowSeats.title,
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                      color: Colors.grey))),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          Text('Stars: ${rowSeats.stars}'),
+                          Text(
+                              'Release Date: ${rowSeats.releaseDate.year}-${rowSeats.releaseDate.month}-${rowSeats.releaseDate.day} '),
+                          Text('imdbId: ${rowSeats.imdbId}'),
+                          const Expanded(
+                           child: SizedBox(),
+                          ),
+                          Align(
+                            alignment: Alignment.center,
+                            child: TextButton(
+                                style: ButtonStyle(
+                                  padding: MaterialStateProperty.all(
+                                      const EdgeInsets.symmetric(
+                                          vertical: 1, horizontal: 1)),
+                                  foregroundColor:
+                                      MaterialStateProperty.all<Color>(
+                                          Colors.blue),
+                                ),
+                                onPressed: () {
+                                  movieSeat(rowSeats);
+                                },
+                                child: const Text('Select')),
+                          )
+                        ]),
+                  );
+                }).toList(),
+                carouselController: buttonCarouselController,
+                options: CarouselOptions(
+                    height: 300.0,
+                    enableInfiniteScroll: true,
+                    viewportFraction: 0.4,
+                    enlargeCenterPage: false,
+                    aspectRatio: 3.0),
+              ),
             )),
-        ElevatedButton(
-          onPressed: () => buttonCarouselController.nextPage(
-              duration: Duration(milliseconds: 300), curve: Curves.linear),
-          child: Text('→'),
-        )
-      ]),
+            ElevatedButton(
+              onPressed: () => buttonCarouselController.nextPage(
+                  duration: Duration(milliseconds: 300), curve: Curves.linear),
+              child: Text('→'),
+            )
+          ]),
     );
   }
 }

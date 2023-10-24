@@ -11,7 +11,13 @@ public class MovieSessionSeat : ValueObject, IAggregateRoot
 {
     
     [JsonConstructor]
-    private MovieSessionSeat(Guid movieSessionId, short seatNumber, short seatRow, decimal price, SeatStatus status, Guid shoppingCartId)
+    private MovieSessionSeat(Guid movieSessionId,
+        short seatNumber, 
+        short seatRow,
+        decimal price,
+        SeatStatus status,
+        Guid shoppingCartId,
+        string hashId)
     {
         MovieSessionId = movieSessionId;
         SeatNumber = seatNumber;
@@ -19,16 +25,25 @@ public class MovieSessionSeat : ValueObject, IAggregateRoot
         Price = price;
         SeatRow = seatRow;
         ShoppingCartId = shoppingCartId;
+        HashId = hashId;
     }
     
-    public static MovieSessionSeat Create(Guid movieSessionId, short seatNumber, short seatRow, decimal price)
+    public static MovieSessionSeat Create(Guid movieSessionId, 
+        short seatNumber,
+        short seatRow,
+        decimal price)
     {
         Ensure.NotEmpty(movieSessionId, "The movieSessionId is required.", nameof(movieSessionId));
         Ensure.NotEmpty(seatNumber, "The seatNumber is required.", nameof(seatNumber));
         Ensure.NotEmpty(price, "The price is required.", nameof(price));
         Ensure.NotEmpty(seatRow, "The seatRow is required.", nameof(seatRow));
-        
-        return new MovieSessionSeat(movieSessionId, seatNumber, seatRow, price, SeatStatus.Available, Guid.Empty);
+
+        return new MovieSessionSeat(movieSessionId,
+            seatNumber, seatRow,
+            price,
+            SeatStatus.Available,
+            Guid.Empty,
+            string.Empty);
     }
 
 
@@ -44,8 +59,10 @@ public class MovieSessionSeat : ValueObject, IAggregateRoot
     public SeatStatus Status { get; private set; }
     
     public Guid ShoppingCartId { get; private set; }
+    
+    public string HashId { get; private set; }
 
-    public void Select(Guid shoppingCartId)
+    public void Select(Guid shoppingCartId, string hashId)
     {
         Ensure.NotEmpty(shoppingCartId, "The shoppingCartId is required.", nameof(shoppingCartId));
 
@@ -62,6 +79,7 @@ public class MovieSessionSeat : ValueObject, IAggregateRoot
         if (ShoppingCartId == Guid.Empty)
         {
             ShoppingCartId = shoppingCartId;
+            HashId = hashId;
         }
 
         var currentStatus = Status;
@@ -73,6 +91,8 @@ public class MovieSessionSeat : ValueObject, IAggregateRoot
         AddDomainEvent(domainEvent);
         
     }
+
+
 
     public void Reserve(Guid shoppingCartId)
     {
@@ -126,11 +146,11 @@ public class MovieSessionSeat : ValueObject, IAggregateRoot
 
         Status = SeatStatus.Available;
         ShoppingCartId = Guid.Empty;
+        HashId = string.Empty;
         
         var domainEvent = new MovieSessionSeatStatusUpdatedEvent(this, currentStatus);
         
         AddDomainEvent(domainEvent);
-        
     }
 
 

@@ -13,15 +13,19 @@ public class SeatExpiredReservationEventHandler : INotificationHandler<SeatExpir
     private readonly ILogger _logger;
 
     private readonly IShoppingCartRepository _shoppingCartRepository;
+    
+    private readonly IShoppingCartNotifier _shoppingCartNotifier;
 
     public SeatExpiredReservationEventHandler(
         IMovieSessionSeatRepository movieSessionSeatRepository,
         IShoppingCartRepository shoppingCartRepository,
-        ILogger logger)
+        ILogger logger,
+        IShoppingCartNotifier shoppingCartNotifier)
     {
         _movieSessionSeatRepository = movieSessionSeatRepository;
         _shoppingCartRepository = shoppingCartRepository;
         _logger = logger;
+        _shoppingCartNotifier = shoppingCartNotifier;
     }
 
     public async Task Handle(SeatExpiredSelectionEvent request,
@@ -33,7 +37,10 @@ public class SeatExpiredReservationEventHandler : INotificationHandler<SeatExpir
 
         if (movieSessionSeat is null)
         {
-            _logger.Warning("Couldnot find MovieSessionSeat, Id:", request);
+            _logger.Warning("Couldnot find MovieSessionSeat, MovieSessionId:{@MovieSessionId)}, SeatRow:{@SeatRow}, SeatNumber:{@SeatNumber} ",
+                request.MovieSessionId,
+                request.SeatRow,
+                request.SeatNumber);
             return;
         }
 
@@ -41,7 +48,7 @@ public class SeatExpiredReservationEventHandler : INotificationHandler<SeatExpir
 
         if (cart is null)
         {
-            _logger.Warning( "Couldnot find ShoppingCart, Id:", movieSessionSeat.ShoppingCartId);
+            _logger.Warning( "Couldnot find ShoppingCart, Id:{@ShoppingCartId}", movieSessionSeat.ShoppingCartId);
             return;
         }
 
@@ -52,5 +59,7 @@ public class SeatExpiredReservationEventHandler : INotificationHandler<SeatExpir
         {
             await _shoppingCartRepository.TrySetCart(cart);
         }
+        
+        await _shoppingCartNotifier.SendShoppingCartState(cart);
     }
 }

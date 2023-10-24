@@ -16,7 +16,7 @@ class GettingSeats extends SeatState {
 class SeatsState extends SeatState {
   const SeatsState(this.seats);
 
-  final List<Seat> seats;
+  final List<List<Seat>> seats;
 
   @override
   List<Object> get props => [seats];

@@ -67,37 +67,37 @@ public class SampleData
 
         var showtimeItem = MovieSession.Create(movieId: movie.Id,
             auditoriumId: redAuditorium.Id,
-            new DateTime(2023, 10, 20),
+            new DateTime(2023, 11, 20),
             //redAuditorium.Seats.Select(t => new SeatMovieSession(t.Row, t.SeatNumber)).ToList(),
             redAuditorium.Seats.Count);
         
         var showtimeItem2 = MovieSession.Create(movieId: movie.Id,
             auditoriumId: redAuditorium.Id,
-            new DateTime(2023, 10, 21),
+            new DateTime(2023, 11, 21),
             //redAuditorium.Seats.Select(t => new SeatMovieSession(t.Row, t.SeatNumber)).ToList(),
             redAuditorium.Seats.Count);
         
         var showtimeItem3 = MovieSession.Create(movieId: movie2.Id,
             auditoriumId: whiteAuditorium.Id,
-            new DateTime(2023, 10, 22),
+            new DateTime(2023, 11, 22),
             //redAuditorium.Seats.Select(t => new SeatMovieSession(t.Row, t.SeatNumber)).ToList(),
             whiteAuditorium.Seats.Count);
         
         var showtimeItem4 = MovieSession.Create(movieId: movie.Id,
             auditoriumId: blackAuditorium.Id,
-            new DateTime(2023, 10, 22),
+            new DateTime(2023, 11, 22),
             //redAuditorium.Seats.Select(t => new SeatMovieSession(t.Row, t.SeatNumber)).ToList(),
             blackAuditorium.Seats.Count);
         
         var showtimeItem5 = MovieSession.Create(movieId: movie2.Id,
             auditoriumId: whiteAuditorium.Id,
-            new DateTime(2023, 10, 23),
+            new DateTime(2023, 11, 23),
             //redAuditorium.Seats.Select(t => new SeatMovieSession(t.Row, t.SeatNumber)).ToList(),
             whiteAuditorium.Seats.Count);
         
         var showtimeItem6 = MovieSession.Create(movieId: movie3.Id,
             auditoriumId: whiteAuditorium.Id,
-            new DateTime(2023, 10, 27),
+            new DateTime(2023, 11, 27),
             //redAuditorium.Seats.Select(t => new SeatMovieSession(t.Row, t.SeatNumber)).ToList(),
             whiteAuditorium.Seats.Count);
             

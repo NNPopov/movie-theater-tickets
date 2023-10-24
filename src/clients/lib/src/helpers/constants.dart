@@ -16,6 +16,7 @@ class Constants {
   static const SSOID = 'SSOID';
 
   static const SHOPPING_CARD_ID = 'SHOPPING_CARD_ID';
+  static const SHOPPING_CARD_HASH_ID = 'SHOPPING_CARD_HASH_ID';
 
 
   static const PrimaryColor =  Color(0xFF13A9BA);

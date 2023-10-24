@@ -36,16 +36,24 @@ class SelectedSeat extends ShoppingCartState {
 }
 
 class ShoppingCartCurrentState extends ShoppingCartState  {
-const ShoppingCartCurrentState(this.shoppingCard, this.version);
+const ShoppingCartCurrentState(this.shoppingCard, this.version, this.hashId);
 
+final String hashId;
 final ShoppingCart shoppingCard;
 final int version;
 @override
-List<Object> get props => [shoppingCard, version];
+List<Object> get props => [shoppingCard, version, hashId];
 }
 
 class ShoppingCartConflictState extends ShoppingCartCurrentState  {
-  const ShoppingCartConflictState(super.shoppingCard, super.version);
+  const ShoppingCartConflictState(super.shoppingCard, super.version, super.hashId);
+
+  @override
+  List<Object> get props => [shoppingCard, version];
+}
+
+class ShoppingCartCreatedState extends ShoppingCartCurrentState  {
+  const ShoppingCartCreatedState(super.shoppingCard, super.version, super.hashId);
 
   @override
   List<Object> get props => [shoppingCard, version];

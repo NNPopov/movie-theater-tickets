@@ -6,10 +6,10 @@ import 'package:movie_theater_tickets/src/seats/presentation/cubit/seat_cubit.da
 import 'package:movie_theater_tickets/src/shopping_carts/presentation/cubit/shopping_cart_cubit.dart';
 import '../core/common/views/loading_view.dart';
 import '../core/utils/utils.dart';
+import 'hub/connectivity/connectivity_bloc.dart';
 import 'movie_sessions/domain/entities/movie_session.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
-import 'package:collection/collection.dart';
 
 GetIt getIt = GetIt.instance;
 
@@ -28,8 +28,8 @@ class _SeatsView extends State<SeatsView> {
 
   final _maxSeatsController = TextEditingController();
 
-  void getSeats() {
-    context.read<SeatCubit>().getSeats(widget.movieSession.id);
+  Future<void> getSeats() async {
+    await context.read<SeatCubit>().getSeats(widget.movieSession.id);
   }
 
   void createShoppingCard(BuildContext context) {
@@ -41,8 +41,12 @@ class _SeatsView extends State<SeatsView> {
   @override
   void initState() {
     super.initState();
-    getSeats();
+    Future.microtask(() async {
+      await getSeats();
+    });
   }
+
+  OverlayEntry? _overlayEntry;
 
   @override
   Widget build(BuildContext context) {
@@ -52,49 +56,77 @@ class _SeatsView extends State<SeatsView> {
         body: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(
-              child: BlocConsumer<SeatCubit, SeatState>(
-                listener: (context, state) {
-                  if (state is SeatsError) {
-                    Utils.showSnackBar(context, state.message);
-                  }
-                },
+            BlocConsumer<ConnectivityBloc, ConnectivityState>(
                 buildWhen: (context, state) {
-                  if (state is SeatsError) {
-                    return false;
-                  } else {
-                    return true;
-                  }
-                },
-                builder: (context, state) {
-                  if (state is! SeatsState && state is! SeatsError) {
-                    return const LoadingView();
-                  }
-                  if ((state is SeatsState && state.seats.isEmpty) ||
-                      state is SeatsError) {
-                    return Center(
-                      child: Text(
-                        'No courses found\nPlease contact '
-                        'admin or if you are admin, add courses',
-                        textAlign: TextAlign.center,
-                        style: context.theme.textTheme.headlineMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: Colors.grey.withOpacity(0.5),
-                        ),
-                      ),
+              return false;
+            }, builder: (BuildContext context, ConnectivityState state) {
+              return const Text("");
+            }, listener: (context, state) {
+              if (state is DisconnectedState) {
+                _overlayEntry = OverlayEntry(
+                  builder: (context) {
+                    return Container(
+                      color: Colors.grey.withOpacity(0.5),
+                      alignment: Alignment.center,
+                      child: const Expanded(
+                          child: SizedBox(
+                        width: 400,
+                        height: 400,
+                        child: CircularProgressIndicator(),
+                      )),
                     );
-                  }
+                  },
+                );
 
-                  state as SeatsState;
+                Overlay.of(context).insert(_overlayEntry!);
+              } else {
+                if (state is! SeatsError && _overlayEntry != null) {
+                  _overlayEntry!.remove();
+                }
+              }
+            }),
+            Expanded(
+              child: Align(
+                alignment: Alignment.topCenter,
+                child: BlocConsumer<SeatCubit, SeatState>(
+                  listener: (context, state) {
+                    if (state is SeatsError) {
+                      Utils.showSnackBar(context, state.message,
+                          backgroundColor: Colors.red);
+                    }
+                  },
+                  buildWhen: (context, state) {
+                    if (state is SeatsError) {
+                      return false;
+                    } else {
+                      return true;
+                    }
+                  },
+                  builder: (context, state) {
+                    if (state is! SeatsState && state is! SeatsError) {
+                      return const LoadingView();
+                    }
+                    if ((state is SeatsState && state.seats.isEmpty) ||
+                        state is SeatsError) {
+                      return Center(
+                        child: Text(
+                          'No courses found\nPlease contact '
+                          'admin or if you are admin, add courses',
+                          textAlign: TextAlign.center,
+                          style:
+                              context.theme.textTheme.headlineMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey.withOpacity(0.5),
+                          ),
+                        ),
+                      );
+                    }
 
-                  final seats = groupBy(state.seats, (seat) => seat.row)
-                      .values
-                      .map((seats) => seats.toList()
-                        ..sort((a, b) => a.seatNumber - b.seatNumber))
-                      .toList();
+                    state as SeatsState;
 
-                  return BuildSeats(seats, context);
-                },
+                    return BuildSeats(state.seats, context);
+                  },
+                ),
               ),
             ),
             BlocConsumer<ShoppingCartCubit, ShoppingCartState>(
@@ -114,7 +146,6 @@ class _SeatsView extends State<SeatsView> {
                 }
               },
               builder: (BuildContext context, ShoppingCartState state) {
-
                 if (state is CreatingShoppingCart) {
                   return SizedBox(
                     width: 150,
@@ -124,7 +155,8 @@ class _SeatsView extends State<SeatsView> {
                     ),
                   );
                 }
-                if (state is! ShoppingCartInitialState && state is! ShoppingCartError) {
+                if (state is! ShoppingCartInitialState &&
+                    state is! ShoppingCartError) {
                   context.read<ShoppingCartCubit>().state;
 
                   var createdShoppingCard = state as ShoppingCartCurrentState;
@@ -152,7 +184,6 @@ class _SeatsView extends State<SeatsView> {
                     ]),
                   );
                 }
-
 
                 return SizedBox(
                   width: 150,
@@ -187,8 +218,6 @@ class _SeatsView extends State<SeatsView> {
             return SizedBox(
                 height: 22,
                 width: 600,
-                // color: Colors
-                //     .primaries[seat.row % Colors.primaries.length],
                 child: Row(children: [
                   SizedBox(
                       height: 19,
@@ -200,29 +229,7 @@ class _SeatsView extends State<SeatsView> {
                       itemCount: rowSeats.length,
                       itemBuilder: (context, index) {
                         var seat = rowSeats[index];
-                        if (seat.initBlocked) {
-                          return SizedBox(
-                              height: 19,
-                              width: 19,
-                              child: TextButton(
-                                  style: ButtonStyle(
-                                      padding: MaterialStateProperty.all(
-                                          const EdgeInsets.symmetric(
-                                              vertical: 2, horizontal: 2)),
-                                      foregroundColor:
-                                          MaterialStateProperty.all<Color>(
-                                              Colors.black),
-                                      backgroundColor:
-                                          MaterialStateProperty.all<Color>(
-                                              Colors.blue)),
-                                  onPressed: () async {
-                                    await onSeatPress(seat);
-                                    },
-                                  child: Text(
-                                    '${seat.seatNumber}',
-                                    style: TextStyle(fontSize: 12),
-                                  )));
-                        } else if (seat.blocked) {
+                        if (seat.blocked && seat.isCurrentReserve) {
                           return SizedBox(
                               height: 19,
                               width: 19,
@@ -238,6 +245,29 @@ class _SeatsView extends State<SeatsView> {
                                           MaterialStateProperty.all<Color>(
                                               Colors.green)),
                                   onPressed: () async {
+                                    await onSeatUnselectPress(seat);
+                                  },
+                                  child: Text(
+                                    '${seat.seatNumber}',
+                                    style: TextStyle(fontSize: 12),
+                                  )));
+                        } else if (seat.blocked && !seat.isCurrentReserve) {
+                          return SizedBox(
+                              height: 19,
+                              width: 19,
+                              child: TextButton(
+                                  style: ButtonStyle(
+                                      padding: MaterialStateProperty.all(
+                                          const EdgeInsets.symmetric(
+                                              vertical: 2, horizontal: 2)),
+                                      foregroundColor:
+                                          MaterialStateProperty.all<Color>(
+                                              Colors.black),
+                                      backgroundColor:
+                                          MaterialStateProperty.all<Color>(
+                                              Colors.blue)),
+                                  onPressed: () async {
+                                    // test
                                     await onSeatUnselectPress(seat);
                                   },
                                   child: Text(
@@ -260,7 +290,7 @@ class _SeatsView extends State<SeatsView> {
                                           MaterialStateProperty.all<Color>(
                                               Colors.grey)),
                                   onPressed: () async {
-                                    await onSeatPress(seat);
+                                    await onSelectSeatPress(seat);
                                   },
                                   child: Text('${seat.seatNumber}',
                                       style: TextStyle(fontSize: 12))));
@@ -282,8 +312,9 @@ class _SeatsView extends State<SeatsView> {
         builder: (BuildContext context) => BlocProvider(
               create: (BuildContext context) => ShoppingCartCubit(),
               child: AlertDialog(
-                title: const Text('AlertDialog Title'),
-                content: const Text('AlertDialog description'),
+                title: const Text('Shopping cart'),
+                content: const Text(
+                    'Select the number of seats you are going to buy'),
                 actions: <Widget>[
                   TextFormField(
                     controller: _maxSeatsController,
@@ -295,14 +326,9 @@ class _SeatsView extends State<SeatsView> {
                   ),
                   TextButton(
                     onPressed: () {
-                      //
-                      Navigator.pop(context, _maxSeatsController.text
-                          //'OK'
-                          );
-
-                      // pressSeat(seat);
+                      Navigator.pop(context, _maxSeatsController.text);
                     },
-                    child: const Text('OK'),
+                    child: const Text('Create a shopping card'),
                   ),
                 ],
               ),
@@ -314,7 +340,7 @@ class _SeatsView extends State<SeatsView> {
     });
   }
 
-  Future<void> onSeatPress(Seat seat) async {
+  Future<void> onSelectSeatPress(Seat seat) async {
     if (context.read<ShoppingCartCubit>().state is! ShoppingCartInitialState) {
       await context.read<ShoppingCartCubit>().seatSelect(
           row: seat.row,

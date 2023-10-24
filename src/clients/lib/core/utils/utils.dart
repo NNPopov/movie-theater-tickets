@@ -63,7 +63,7 @@ class Utils {
     );
   }
 
-  static void showSnackBar(BuildContext context, String message) {
+  static void showSnackBar(BuildContext context, String message,{ Color? backgroundColor}) {
     ScaffoldMessenger.of(context)
       ..removeCurrentSnackBar()
       ..showSnackBar(
@@ -76,7 +76,7 @@ class Utils {
             ),
           ),
           behavior: SnackBarBehavior.floating,
-          backgroundColor: Colours.primaryColour,
+          backgroundColor: backgroundColor??Colours.primaryColour,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
           ),

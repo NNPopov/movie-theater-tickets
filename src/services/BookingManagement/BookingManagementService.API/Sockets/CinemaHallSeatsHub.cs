@@ -1,12 +1,11 @@
 ﻿using CinemaTicketBooking.Application.Abstractions;
 using CinemaTicketBooking.Application.MovieSessions.Queries;
-using CinemaTicketBooking.Domain.MovieSessions;
+using CinemaTicketBooking.Application.ShoppingCarts.Queries;
 using Microsoft.AspNetCore.SignalR;
-using Polly;
 
 namespace CinemaTicketBooking.Api.Sockets;
 
-public class CinemaHallSeatsHub : Hub<ICinemaHallSeats>
+public class CinemaHallSeatsHub(IConnectionManager connectionManager) : Hub<ICinemaHallSeats>
 {
     public async Task JoinGroup(Guid movieSession)
     {
@@ -17,7 +16,6 @@ public class CinemaHallSeatsHub : Hub<ICinemaHallSeats>
         catch (Exception e)
         {
             Console.WriteLine(e);
-            // throw;
         }
     }
 
@@ -31,7 +29,33 @@ public class CinemaHallSeatsHub : Hub<ICinemaHallSeats>
         catch (Exception e)
         {
             Console.WriteLine(e);
-            // throw;
+        }
+    }
+    
+    public async Task RegisterShoppingCart(Guid shoppingCardId)
+    {
+        try
+        {
+            connectionManager.AddConnection(shoppingCardId, Context.ConnectionId);
+            
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+    }
+    
+    public async Task SentShoppingCartState(ShoppingCartDto shoppingCart)
+    {
+        try
+        {
+            var connection = connectionManager.GetConnectionId(shoppingCart.Id);
+            
+            await Clients.Client(connection).SentShoppingCartState(shoppingCart);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
         }
     }
 }
@@ -39,6 +63,8 @@ public class CinemaHallSeatsHub : Hub<ICinemaHallSeats>
 public interface ICinemaHallSeats
 {
     Task SentState(ICollection<MovieSessionSeatDto> seats);
+    
+    Task SentShoppingCartState(ShoppingCartDto shoppingCart);
 }
 
 public class CinemaHallSeatsNotifier
@@ -54,7 +80,6 @@ public class CinemaHallSeatsNotifier
         catch (Exception e)
         {
             Console.WriteLine(e);
-            // throw;
         }
     }
 }

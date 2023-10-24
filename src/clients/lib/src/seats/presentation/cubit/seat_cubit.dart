@@ -5,9 +5,9 @@ import 'package:equatable/equatable.dart';
 import 'package:get_it/get_it.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../../helpers/constants.dart';
-import '../../../shopping_carts/domain/entities/seat.dart';
+import '../../../hub/app_events.dart';
+import '../../../hub/event_bus.dart';
 import '../../../shopping_carts/domain/entities/shopping_cart.dart';
-import '../../../shopping_carts/domain/usecases/create_shopping_cart.dart';
 import '../../../shopping_carts/presentation/cubit/shopping_cart_cubit.dart';
 import '../../data/models/seat_dto.dart';
 import '../../domain/entities/seat.dart';
@@ -22,137 +22,107 @@ GetIt getIt = GetIt.instance;
 
 class SeatCubit extends Cubit<SeatState> {
   late List<Seat> _seats;
-  late final StreamSubscription<ShoppingCartState> _shoppingCartStream;
-  late final ShoppingCartCubit _shoppingCartCubit;
+ // late final StreamSubscription<ShoppingCartState> _shoppingCartStream;
   final storage = const FlutterSecureStorage();
   late GetSeatsByMovieSessionId _getMovieSessionById;
 
-  late HubConnection _hubConnection;
+ // late HubConnection _hubConnection;
+  late String _hashId;
+  late int version = 0;
 
 
+  late EventBus _eventBus;
 
   SeatCubit(
-      {GetSeatsByMovieSessionId? getMovieSessionById,
-      required ShoppingCartCubit shoppingCartCubit})
+      {GetSeatsByMovieSessionId? getMovieSessionById, EventBus? eventBus})
       : _getMovieSessionById =
             getMovieSessionById ?? getIt.get<GetSeatsByMovieSessionId>(),
-        _shoppingCartCubit = shoppingCartCubit,
+        _eventBus =
+            eventBus ?? getIt.get<EventBus>(),
         super(const InitialState()) {
 
-    final httpConnectionOptions = HttpConnectionOptions(
-        logMessageContent: true,
-        requestTimeout: 50000,
-    );
 
-    var baseUrl = dotenv.env["BASE_API_URL"].toString();
-
-    _hubConnection = HubConnectionBuilder().withUrl('${baseUrl}/cinema-hall-seats-hub',
-     // _hubConnection = HubConnectionBuilder().withUrl('http://localhost:7628/cinema-hall-seats-hub',
-         options: httpConnectionOptions)
-         //.withHubProtocol(MessagePackHubProtocol())
-         .withAutomaticReconnect()
-        .build();
-    _hubConnection.onreconnecting(({error}) {
-      print("onreconnecting called");
-      //connectionIsOpen = false;
-    });
+    _hashId = "";
 
 
+    _eventBus.stream.listen((event) {
+      if (event is SeatsUpdateEvent ) {
 
-    // if (_hubConnection.state != HubConnectionState.Connected) {
-    //    var start = _hubConnection.start();
-    //   //connectionIsOpen = true;
-    // }
-    _hubConnection.on("SentState", _handleIncommingChatMessage);
+        var selectingSeat = event as SeatsUpdateEvent;
 
-    _shoppingCartStream = shoppingCartCubit.stream.listen((event) {
-
-
-
-      if (event is ShoppingCartCurrentState ||
-          event is ShoppingCartConflictState) {
-        var selectingSeat = event as ShoppingCartCurrentState;
-
-        updateSeatsState(selectingSeat.shoppingCard);
+        emit(SeatsState(selectingSeat.seats));
       }
     });
+
+    // _shoppingCartStream = shoppingCartCubit.stream.listen((event) {
+    //   if (event is ShoppingCartCreatedState ||
+    //       event is ShoppingCartCreatedState) {
+    //     var selectingSeat = event as ShoppingCartCreatedState;
+    //
+    //     _hashId = selectingSeat.hashId;
+    //     updateSeatsState(selectingSeat.shoppingCard);
+    //   }
+    // });
   }
 
   get movies => null;
 
-  void updateSeatsState(ShoppingCart shoppingCard) {
-    // if (shoppingCard.shoppingCartSeat != null &&
-    //     shoppingCard.shoppingCartSeat.length >= 0) {
-    //    _seats = _seats.map((e) {
-    //     var currentSeats = shoppingCard.shoppingCartSeat
-    //         .any((t) => e.row == t.seatRow && e.seatNumber == t.seatNumber);
-    //
-    //     return Seat.temp(
-    //         row: e.row,
-    //         seatNumber: e.seatNumber,
-    //         blocked: currentSeats == true && e.initBlocked == false
-    //             ? currentSeats
-    //             : e.initBlocked,
-    //         initBlocked: e.initBlocked);
-    //   }).toList();
-    // //  _seats = newSeat;
-    //   emit(SeatsState(_seats));
-    // }
+  void updateSeatsState(ShoppingCart shoppingCard) {}
+
+  // Future<void> _handleIncommingChatMessage(List<Object?>? args) async {
+  //   var senderName = args?[0];
+  //   List<dynamic> movies = jsonDecode(jsonEncode(senderName));
+  //
+  //   List<Seat> seatDtos =
+  //       movies.map((json) => SeatDto.fromJson(json) as Seat).toList();
+  //
+  //  _hashId =( await storage.read(key: Constants.SHOPPING_CARD_HASH_ID))?? '';
+  //
+  //   _seats = seatDtos.map((e) {
+  //     var s = Seat.temp(
+  //         row: e.row,
+  //         seatNumber: e.seatNumber,
+  //         blocked: e.blocked,
+  //         isCurrentReserve: checkIsCurrentReserve(e),
+  //         hashId: e.hashId);
+  //
+  //     return s;
+  //   }).toList();
+  //
+  //   emit(SeatsState(_seats));
+  // }
+
+  bool checkIsCurrentReserve(Seat e) {
+
+
+    if (_hashId.isEmpty) {
+      return false;
+    }
+    if (e.hashId == _hashId) {
+      return true;
+    }
+    return false;
   }
-
-  void _handleIncommingChatMessage(List<Object?>? args) {
-
-    var  senderName = args?[0];
-    List<dynamic> movies = jsonDecode(jsonEncode(senderName));
-
-    List<Seat> seatDtos =
-    movies.map((json) => SeatDto.fromJson(json) as Seat).toList();
-
-
-
-  emit(SeatsState(seatDtos));
-
-}
 
   Future<void> getSeats(String movieSessionId) async {
     emit(const GettingSeats());
-    if (_hubConnection.state != HubConnectionState.Connected) {
-    await  _hubConnection.start();
-      //connectionIsOpen = true;
-    }
-    _hubConnection.invoke("JoinGroup", args: <Object>[movieSessionId]);
+    // if (_hubConnection.state != HubConnectionState.Connected) {
+    //   await _hubConnection.start();
+    //   //connectionIsOpen = true;
+    // }
+  //  _hubConnection.invoke("JoinGroup", args: <Object>[movieSessionId]);
 
     final result = await _getMovieSessionById(movieSessionId);
-    result.fold((failure) => emit(SeatsError(failure.errorMessage)), (seats) {
-      var shoppingCartState = _shoppingCartCubit.state;
-      if (shoppingCartState is ShoppingCartCurrentState ||
-          shoppingCartState is ShoppingCartConflictState) {
-        var shoppingCartCurrentState =
-            shoppingCartState as ShoppingCartCurrentState;
 
-         _seats = seats.map((e) {
-          var currentSeats = shoppingCartCurrentState
-              .shoppingCard.shoppingCartSeat
-              .any((t) => e.row == t.seatRow && e.seatNumber == t.seatNumber);
-
-          return Seat.temp(
-              row: e.row,
-              seatNumber: e.seatNumber,
-              blocked: currentSeats == true ? currentSeats : e.blocked,
-              initBlocked:
-                  currentSeats == true ? !currentSeats : e.initBlocked);
-        }).toList();
-       // _seats = newSeat;
-      } else {
-        _seats = seats;
-      }
-      emit(SeatsState(_seats));
+    result.fold((failure) => emit(SeatsError(failure.errorMessage)),
+        (seats) async {
+      emit(SeatsState(seats));
     });
   }
 
   @override
   Future<void> close() {
-    _shoppingCartStream.cancel();
+  //  _shoppingCartStream.cancel();
     return super.close();
   }
 }

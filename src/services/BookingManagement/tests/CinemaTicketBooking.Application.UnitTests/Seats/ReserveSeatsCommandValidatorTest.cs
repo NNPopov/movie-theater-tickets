@@ -1,4 +1,6 @@
-﻿using CinemaTicketBooking.Domain.Seats;
+﻿using System.Security.Cryptography;
+using System.Text;
+using CinemaTicketBooking.Domain.Seats;
 using FluentAssertions;
 using Xunit;
 
@@ -33,16 +35,37 @@ public class MovieSessionSeatTest
         decimal price = 20;
         
         Guid shoppingCartId = Guid.NewGuid();
+        
+        
             
         var movieSessionSeat =  MovieSessionSeat.Create(movieSessionId,
             seatNumber,seatRow, price);
 
-        movieSessionSeat.Select(shoppingCartId);
+        movieSessionSeat.Select(shoppingCartId, ComputeMD5(shoppingCartId.ToString()));
         
         movieSessionSeat.Status.Should().Be( SeatStatus.Selected);
         movieSessionSeat.MovieSessionId.Should().Be(movieSessionId);
         movieSessionSeat.ShoppingCartId.Should().Be(shoppingCartId);
         movieSessionSeat.Price.Should().Be(20);
+    }
+    
+    static string ComputeMD5(string s)
+    {
+        StringBuilder sb = new StringBuilder();
+ 
+        // Initialize a MD5 hash object
+        using (MD5 md5 = MD5.Create())
+        {
+            // Compute the hash of the given string
+            byte[] hashValue = md5.ComputeHash(Encoding.UTF8.GetBytes(s));
+ 
+            // Convert the byte array to string format
+            foreach (byte b in hashValue) {
+                sb.Append($"{b:X2}");
+            }
+        }
+ 
+        return sb.ToString();
     }
     
     [Fact]
@@ -136,7 +159,7 @@ public class MovieSessionSeatTest
         movieSessionSeat.Price.Should().Be(price);
         
         
-        movieSessionSeat.Select(shoppingCartId);
+        movieSessionSeat.Select(shoppingCartId, ComputeMD5(shoppingCartId.ToString()));
         movieSessionSeat.ShoppingCartId.Should().Be(shoppingCartId);
 
         return movieSessionSeat;

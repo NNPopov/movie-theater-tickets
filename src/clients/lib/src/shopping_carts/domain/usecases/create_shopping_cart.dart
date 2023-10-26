@@ -3,19 +3,16 @@ import '../../../../core/common/usecase.dart';
 import '../../../../core/utils/typedefs.dart';
 import '../../../helpers/constants.dart';
 import '../../../hub/domain/event_hub.dart';
-import '../../../hub/event_bus.dart';
 import '../entities/create_shopping_cart_response.dart';
 import '../repos/shopping_cart_repo.dart';
 import 'package:get_it/get_it.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:dartz/dartz.dart';
 
 GetIt getIt = GetIt.instance;
 
 class CreateShoppingCart extends FutureUsecaseWithParams<
     CreateShoppingCartResponse, CreateShoppingCartCommand> {
-  CreateShoppingCart(
-      {ShoppingCartRepo? repo, EventHub? eventHub}) {
+  CreateShoppingCart({ShoppingCartRepo? repo, EventHub? eventHub}) {
     _repo = repo ?? getIt.get<ShoppingCartRepo>();
     _eventHub = eventHub ?? getIt.get<EventHub>();
   }
@@ -37,15 +34,12 @@ class CreateShoppingCart extends FutureUsecaseWithParams<
 
       await _eventHub.shoppingCartUpdateSubscribe(value.shoppingCartId);
     });
-
     return result;
   }
 }
 
 class CreateShoppingCartCommand extends Equatable {
   const CreateShoppingCartCommand({required this.maxNumberOfSeats});
-
-  const CreateShoppingCartCommand.empty() : maxNumberOfSeats = 0;
 
   final int maxNumberOfSeats;
 

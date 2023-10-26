@@ -2,14 +2,17 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:get_it/get_it.dart';
-import '../../../hub/event_bus.dart';
+import '../../../helpers/constants.dart';
+import '../../../../core/buses/event_bus.dart';
 import '../../../shopping_carts/domain/usecases/create_shopping_cart.dart';
 import '../../domain/entities/seat.dart';
 import '../../domain/entities/shopping_cart.dart';
 import '../../domain/usecases/get_shopping_cart.dart';
 import '../../domain/usecases/select_seat.dart';
+import '../../domain/usecases/shopping_cart_subscribe.dart';
 import '../../domain/usecases/unselect_seat.dart';
 import 'package:dartz/dartz.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 part 'shopping_cart_state.dart';
 
@@ -19,22 +22,29 @@ GetIt getIt = GetIt.instance;
 
 class ShoppingCartCubit extends Cubit<ShoppingCartState> {
   ShoppingCartCubit(
-      {CreateShoppingCart? createShoppingCart,
+      {CreateShoppingCart? createShoppingCartUseCase,
       SelectSeatUseCase? selectSeatUseCase,
       UnselectSeatUseCase? unselectSeatUseCase,
-      GetShoppingCart? getShoppingCart,
+      GetShoppingCart? getShoppingCartUseCase,
+      ShoppingCartUpdateSubscribeUseCase? shoppingCartUpdateSubscribeUseCase,
       EventBus? eventBus})
       : _createShoppingCart =
-            createShoppingCart ?? getIt.get<CreateShoppingCart>(),
+            createShoppingCartUseCase ?? getIt.get<CreateShoppingCart>(),
         _selectSeatUseCase =
             selectSeatUseCase ?? getIt.get<SelectSeatUseCase>(),
         _unselectSeatUseCase =
             unselectSeatUseCase ?? getIt.get<UnselectSeatUseCase>(),
-        _getShoppingCart = getShoppingCart ?? getIt.get<GetShoppingCart>(),
+        _getShoppingCart =
+            getShoppingCartUseCase ?? getIt.get<GetShoppingCart>(),
+        _shoppingCartUpdateSubscribeUseCase =
+            shoppingCartUpdateSubscribeUseCase ??
+                getIt.get<ShoppingCartUpdateSubscribeUseCase>(),
         _hashId = "",
         _eventBus = eventBus ?? getIt.get<EventBus>(),
         super(const ShoppingCartInitialState()) {
-    _eventBus.stream.listen((event) {
+    GetShoppingCartIfExits();
+
+    _streamSubscription = _eventBus.stream.listen((event) {
       if (event is ShoppingCartUpdateEvent) {
         version = version + 1;
         emit(ShoppingCartCurrentState(event.shoppingCart, version, _hashId));
@@ -42,12 +52,26 @@ class ShoppingCartCubit extends Cubit<ShoppingCartState> {
     });
   }
 
+  Future<void> GetShoppingCartIfExits() async {
+    var shoppingCartId = await storage.read(key: Constants.SHOPPING_CARD_ID);
+    var hashId = await storage.read(key: Constants.SHOPPING_CARD_HASH_ID);
+
+    if (shoppingCartId != null && hashId != null) {
+      getShoppingCart(shoppingCartId);
+    }
+  }
+
+  late final StreamSubscription _streamSubscription;
+  final storage = const FlutterSecureStorage();
+
   late final EventBus _eventBus;
   late final CreateShoppingCart _createShoppingCart;
   late final SelectSeatUseCase _selectSeatUseCase;
   late final UnselectSeatUseCase _unselectSeatUseCase;
   late final GetShoppingCart _getShoppingCart;
- // late final ShoppingCart _shoppingCart;
+  late final ShoppingCartUpdateSubscribeUseCase
+      _shoppingCartUpdateSubscribeUseCase;
+
   late String _hashId;
   late int version = 0;
 
@@ -71,10 +95,13 @@ class ShoppingCartCubit extends Cubit<ShoppingCartState> {
 
       final resultShoppingCart = await _getShoppingCart(value.shoppingCartId);
 
-      resultShoppingCart
-          .fold((failure) => emit(ShoppingCartError(failure.errorMessage)),
-              (shoppingCartValue) async {
-
+      resultShoppingCart.fold((failure) {
+        if (failure.statusCode == 204) {
+          emit(const ShoppingCartInitialState());
+        } else {
+          emit(ShoppingCartError(failure.errorMessage));
+        }
+      }, (shoppingCartValue) async {
         version = version + 1;
         emit(ShoppingCartCurrentState(shoppingCartValue, version, _hashId));
       });
@@ -86,9 +113,15 @@ class ShoppingCartCubit extends Cubit<ShoppingCartState> {
 
     final result = await _getShoppingCart(shoppingCartId);
 
-    result.fold((failure) => emit(ShoppingCartError(failure.errorMessage)),
-        (value) {
+    result.fold((failure) {
+      if (failure.statusCode == 204) {
+        emit(const ShoppingCartInitialState());
+      } else {
+        emit(ShoppingCartError(failure.errorMessage));
+      }
+    }, (value) {
       version = version + 1;
+      _shoppingCartUpdateSubscribeUseCase(shoppingCartId);
       emit(ShoppingCartCurrentState(value, version, _hashId));
     });
   }
@@ -122,5 +155,8 @@ class ShoppingCartCubit extends Cubit<ShoppingCartState> {
   }
 
   @override
-  void dispose() {}
+  Future<void> close() async {
+    await _streamSubscription.cancel();
+    return await super.close();
+  }
 }

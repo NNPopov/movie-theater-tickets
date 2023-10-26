@@ -16,7 +16,7 @@ public class DerivedObject : ValueObject
     }
 }
 
-public class ValueObjectTests
+public class ValueObjectSpecification
 {
     [Fact]
     public void TestGetHashCode()

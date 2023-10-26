@@ -5,7 +5,6 @@ import 'package:movie_theater_tickets/core/extensions/context_extensions.dart';
 import '../core/common/views/loading_view.dart';
 import '../core/utils/utils.dart';
 import 'movies/presentation/app/movie_theater_cubit.dart';
-import 'package:carousel_slider/carousel_slider.dart';
 
 class MoviesDetailView extends StatefulWidget {
   const MoviesDetailView(this.movieId, {super.key});

@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:js_interop';
 import 'package:dartz/dartz.dart';
 import 'package:movie_theater_tickets/core/utils/typedefs.dart';
 import 'package:dio/dio.dart';

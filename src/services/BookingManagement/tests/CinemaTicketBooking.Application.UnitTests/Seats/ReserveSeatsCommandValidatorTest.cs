@@ -6,7 +6,7 @@ using Xunit;
 
 namespace CinemaTicketBooking.Application.UnitTests.Seats;
 
-public class MovieSessionSeatTest
+public class MovieSessionSeatSpecification
 {
     [Fact]
     public async Task MovieSessionSeat_Should_Be_Correct_After_Initialisation()

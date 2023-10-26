@@ -1,7 +1,7 @@
 import '../../../../core/common/usecase.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/utils/typedefs.dart';
-import '../../../hub/event_bus.dart';
+import '../../../../core/buses/event_bus.dart';
 import '../../presentation/cubit/shopping_cart_cubit.dart';
 import '../entities/shopping_cart.dart';
 import 'package:dartz/dartz.dart';

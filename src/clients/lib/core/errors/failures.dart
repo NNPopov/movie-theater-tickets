@@ -36,3 +36,11 @@ class ServerFailure extends Failure {
   ServerFailure.fromException(ServerException exception)
       : this(message: exception.message, statusCode: exception.statusCode);
 }
+
+class NotAuthorisedException extends Failure  {
+   NotAuthorisedException({required super.message, required super.statusCode});
+
+
+  @override
+  List<dynamic> get props => [message, statusCode];
+}

@@ -4,7 +4,7 @@ using Xunit;
 
 namespace CinemaTicketBooking.Application.UnitTests.MovieSessions;
 
-public class MovieSessionTest
+public class MovieSessionSpecification
 {
    private const int ALLOTTED_TICKETS = 100;
     

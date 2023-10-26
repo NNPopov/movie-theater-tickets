@@ -1,20 +1,15 @@
 import 'dart:async';
-import 'dart:convert';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:get_it/get_it.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import '../../../helpers/constants.dart';
 import '../../../hub/app_events.dart';
-import '../../../hub/event_bus.dart';
+import '../../../../core/buses/event_bus.dart';
 import '../../../shopping_carts/domain/entities/shopping_cart.dart';
-import '../../../shopping_carts/presentation/cubit/shopping_cart_cubit.dart';
-import '../../data/models/seat_dto.dart';
 import '../../domain/entities/seat.dart';
 import '../../domain/usecases/get_seats_by_movie_session_id.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:signalr_netcore/signalr_client.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 
 part 'seat_state.dart';
 
@@ -33,6 +28,8 @@ class SeatCubit extends Cubit<SeatState> {
 
   late EventBus _eventBus;
 
+  late StreamSubscription _appEventSubscription;
+
   SeatCubit(
       {GetSeatsByMovieSessionId? getMovieSessionById, EventBus? eventBus})
       : _getMovieSessionById =
@@ -45,7 +42,7 @@ class SeatCubit extends Cubit<SeatState> {
     _hashId = "";
 
 
-    _eventBus.stream.listen((event) {
+    _appEventSubscription = _eventBus.stream.listen((event) {
       if (event is SeatsUpdateEvent ) {
 
         var selectingSeat = event as SeatsUpdateEvent;
@@ -69,28 +66,6 @@ class SeatCubit extends Cubit<SeatState> {
 
   void updateSeatsState(ShoppingCart shoppingCard) {}
 
-  // Future<void> _handleIncommingChatMessage(List<Object?>? args) async {
-  //   var senderName = args?[0];
-  //   List<dynamic> movies = jsonDecode(jsonEncode(senderName));
-  //
-  //   List<Seat> seatDtos =
-  //       movies.map((json) => SeatDto.fromJson(json) as Seat).toList();
-  //
-  //  _hashId =( await storage.read(key: Constants.SHOPPING_CARD_HASH_ID))?? '';
-  //
-  //   _seats = seatDtos.map((e) {
-  //     var s = Seat.temp(
-  //         row: e.row,
-  //         seatNumber: e.seatNumber,
-  //         blocked: e.blocked,
-  //         isCurrentReserve: checkIsCurrentReserve(e),
-  //         hashId: e.hashId);
-  //
-  //     return s;
-  //   }).toList();
-  //
-  //   emit(SeatsState(_seats));
-  // }
 
   bool checkIsCurrentReserve(Seat e) {
 
@@ -121,8 +96,8 @@ class SeatCubit extends Cubit<SeatState> {
   }
 
   @override
-  Future<void> close() {
-  //  _shoppingCartStream.cancel();
-    return super.close();
+  Future<void> close() async {
+   await _appEventSubscription.cancel();
+    return await super.close();
   }
 }

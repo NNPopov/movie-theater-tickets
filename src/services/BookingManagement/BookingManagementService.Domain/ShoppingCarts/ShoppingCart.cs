@@ -19,9 +19,9 @@ public class ShoppingCart : AggregateRoot
     public DateTime CreatedCard { get; private set; }
 
     public Guid MovieSessionId { get; private set; }
-    
+
     public Guid ClientId { get; private set; }
-    
+
     public string HashId { get; private set; }
 
     public ShoppingCartStatus Status { get; private set; }
@@ -47,37 +47,38 @@ public class ShoppingCart : AggregateRoot
         ClientId = clientId;
         HashId = hashId;
     }
-    
+
     // move to injected service
     static string ComputeMD5(string s)
     {
         StringBuilder sb = new StringBuilder();
- 
+
         // Initialize a MD5 hash object
         using (MD5 md5 = MD5.Create())
         {
             // Compute the hash of the given string
             byte[] hashValue = md5.ComputeHash(Encoding.UTF8.GetBytes(s));
- 
+
             // Convert the byte array to string format
-            foreach (byte b in hashValue) {
+            foreach (byte b in hashValue)
+            {
                 sb.Append($"{b:X2}");
             }
         }
- 
+
         return sb.ToString();
     }
 
     public void AssignClientId(Guid clientId)
     {
         Ensure.NotEmpty(clientId, "The clientId is required.", nameof(clientId));
-        
+
         if (Status == ShoppingCartStatus.PurchaseCompleted)
             throw new ConflictException(nameof(ShoppingCart), Id.ToString());
-        
+
         if (ClientId != Guid.Empty)
             throw new ConflictException(nameof(ShoppingCart), Id.ToString());
-        
+
         ClientId = clientId;
     }
 
@@ -91,7 +92,6 @@ public class ShoppingCart : AggregateRoot
         MaxNumberOfSeats = maxNumberOfSeats;
         Status = ShoppingCartStatus.InWork;
         ClientId = Guid.Empty;
-   
     }
 
     public void SetShowTime(Guid showTimeId)
@@ -115,18 +115,28 @@ public class ShoppingCart : AggregateRoot
     }
 
 
-    public void AddSeats(SeatShoppingCart seat)
+    public void AddSeats(SeatShoppingCart seat, Guid movieSessionId)
     {
         Ensure.NotEmpty(MovieSessionId, "The MovieSessionId is required.", nameof(MovieSessionId));
-
+        Ensure.NotEmpty(movieSessionId, "The movieSessionId is required.", nameof(movieSessionId));
+        
         if (Status != ShoppingCartStatus.InWork)
             throw new ConflictException(nameof(ShoppingCart), Id.ToString());
+        
+        if (MovieSessionId != movieSessionId)
+            throw new DomainValidationException($"The Seat does not belong to the cinema hall being processed.");
 
-        if ((_seats.Count() + 1) <= MaxNumberOfSeats)
+        if (_seats.Count() >= MaxNumberOfSeats)
         {
-            if (!_seats.Any(t => t.SeatRow == seat.SeatRow && t.SeatNumber == seat.SeatNumber))
-                _seats.Add(seat);
+            throw new DomainValidationException($"Number of seats cannot be greater than {MaxNumberOfSeats}.");
         }
+        
+        if (_seats.Any(t => t.SeatRow == seat.SeatRow && t.SeatNumber == seat.SeatNumber))
+        {
+            throw new DomainValidationException($"Seat has already been added to cart movieSessionId:{movieSessionId}, SeatRow:{seat.SeatRow}, SeatNumber:{seat.SeatNumber}.");
+        }
+
+        _seats.Add(seat);
     }
 
     public bool TryRemoveSeats(SeatShoppingCart seat)
@@ -177,7 +187,7 @@ public class ShoppingCart : AggregateRoot
     {
         if (Status == ShoppingCartStatus.PurchaseCompleted)
             throw new ConflictException(nameof(ShoppingCart), Id.ToString());
-        
+
         Ensure.NotEmpty(ClientId, "The ClientId is required.", nameof(ClientId));
 
         if (Status == ShoppingCartStatus.SeatsReserved)
@@ -185,11 +195,8 @@ public class ShoppingCart : AggregateRoot
     }
 }
 
-
-
 [method: JsonConstructor]
 public class SeatShoppingCart(short seatRow, short seatNumber) : Seat(seatRow, seatNumber);
-
 
 public enum ShoppingCartStatus
 {

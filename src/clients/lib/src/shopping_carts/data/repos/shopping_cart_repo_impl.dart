@@ -47,6 +47,12 @@ class ShoppingCartRepoImpl extends ShoppingCartRepo {
   ResultFuture<ShoppingCart> getShoppingCart(String shoppingCartId) async {
     try {
       final response = await _client.get('/api/shoppingcarts/$shoppingCartId');
+
+      if(response.statusCode ==204)
+        {
+          return const Left(DataFailure(message: "shoppingCartId doesnot exist", statusCode: 204));
+        }
+
       var primaryClientAccount = json.decode(response.toString());
 
       var shoppingCartDto = ShoppingCartDto.fromJson(primaryClientAccount);

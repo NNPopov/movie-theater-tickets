@@ -11,9 +11,11 @@ public class ConnectionManager : IConnectionManager
     }
     
     
-    public void AddConnection(Guid id, string connectionId)
+    public void AddConnection(Guid shoppingCartId, string connectionId)
     {
-        _signalRConnections.Add((id, connectionId));
+       
+        
+        _signalRConnections.Add((shoppingCartId, connectionId));
     }
     
     public void RemoveByConnectionId(string connectionId)
@@ -28,9 +30,9 @@ public class ConnectionManager : IConnectionManager
         _signalRConnections.Remove(item);
     }
     
-    public string GetConnectionId(Guid shoppingCartId)
+    public IEnumerable<string> GetConnectionId(Guid shoppingCartId)
     {
-        return _signalRConnections.FirstOrDefault(t => t.shoppingCartId == shoppingCartId).connectionId;
+        return _signalRConnections.Where(t => t.shoppingCartId == shoppingCartId).Select(t=>t.connectionId);
     }
     
  

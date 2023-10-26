@@ -14,11 +14,15 @@ public class ShoppingCartNotifier(IHubContext<CinemaHallSeatsHub, ICinemaHallSea
     {
         try
         {
-           var connection = connectionManager.GetConnectionId(shoppingCart.Id);
+           var connections = connectionManager.GetConnectionId(shoppingCart.Id);
 
            var shoppingCartDto = _mapper.Map<ShoppingCartDto>(shoppingCart);
+           foreach (var connection in connections)
+           {
+               await context.Clients.Client(connection).SentShoppingCartState(shoppingCartDto);
+           }
             
-            await context.Clients.Client(connection).SentShoppingCartState(shoppingCartDto);
+
         }
         catch (Exception e)
         {

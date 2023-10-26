@@ -100,7 +100,7 @@ public class SelectSeatCommandHandler : IRequestHandler<SelectSeatCommand, bool>
                 ShoppingCartId = request.ShoppingCartId
             };
 
-            cart.AddSeats(new SeatShoppingCart(request.SeatRow, request.SeatNumber));
+            cart.AddSeats(new SeatShoppingCart(request.SeatRow, request.SeatNumber), request.MovieSessionId);
             var result =
                 await _seatStateRepository.SetAsync(seatReservationInfo, new TimeSpan(0, 0, 120));
 

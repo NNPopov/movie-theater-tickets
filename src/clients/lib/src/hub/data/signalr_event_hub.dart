@@ -12,7 +12,7 @@ import 'package:signalr_netcore/signalr_client.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get_it/get_it.dart';
 
-import '../event_bus.dart';
+import '../../../core/buses/event_bus.dart';
 
 GetIt getIt = GetIt.instance;
 
@@ -61,6 +61,10 @@ class SignalREventHub extends EventHub {
     _hubConnection.on("SentShoppingCartState", _shoppingCartStateUpdate);
 
     _hubConnection.on("SentState", _seatsStateUpdate);
+
+    if (_hubConnection.state != HubConnectionState.Connected) {
+      await _hubConnection.start();
+    }
   }
 
   Future<void> _shoppingCartStateUpdate(List<Object?>? args) async {

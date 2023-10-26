@@ -1,4 +1,4 @@
-import 'dart:async';
+import 'dart:async' as domain;
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:get_it/get_it.dart';
@@ -19,7 +19,7 @@ class MovieTheaterCubit extends Cubit<MovieTheaterState> {
   late GetMovies _getMovies;
   late GetMovieById _getMovieById;
 
-  Future<void> getMovies() async {
+  domain.Future<void> getMovies() async {
     emit(const GettingMovies());
     final result = await _getMovies();
 
@@ -29,7 +29,7 @@ class MovieTheaterCubit extends Cubit<MovieTheaterState> {
     );
   }
 
-  Future<void> getMovieById(String movieId) async {
+  domain.Future<void> getMovieById(String movieId) async {
     emit(const GettingMovie());
     final result = await _getMovieById(movieId);
 

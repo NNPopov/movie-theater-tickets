@@ -27,6 +27,8 @@ public static class ConfigureServices
 
         services.AddScoped<ICacheService, RedisCacheService>();
 
+        
+        
 
         var multiplexer = ConnectionMultiplexer.Connect(
             new ConfigurationOptions
@@ -36,6 +38,13 @@ public static class ConfigureServices
             }
         );
         
+        multiplexer.ConnectionFailed += (_, e) => { Console.WriteLine("Connection to Redis failed."); };
+            
+        if (!multiplexer.IsConnected)
+        {
+            Console.WriteLine("Did not connect to Redis.");
+        }
+
         
         services.AddDbContext<CinemaContext>(options =>
         {

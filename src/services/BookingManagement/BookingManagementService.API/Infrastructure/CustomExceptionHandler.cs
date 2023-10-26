@@ -25,12 +25,37 @@ public class CustomExceptionHandler : IExceptionHandler
         exceptionHandlers.Add(typeof(ContentNotFoundException), HandleContentNotFoundException);
         exceptionHandlers.Add(typeof(UnauthorizedAccessException), HandleUnauthorizedAccessException);
         exceptionHandlers.Add(typeof(ForbiddenAccessException), HandleForbiddenAccessException);
-        exceptionHandlers.Add(typeof(ConflictException), HandleConflictExceptionException);
-        exceptionHandlers.Add(typeof(DuplicateRequestException), HandleDuplicateRequestExceptionException);
-        exceptionHandlers.Add(typeof(LockedException), HandleLockedExceptionExceptionException);
-        
-        
+        exceptionHandlers.Add(typeof(ConflictException), HandleConflictException);
+        exceptionHandlers.Add(typeof(DuplicateRequestException), HandleDuplicateRequestException);
+        exceptionHandlers.Add(typeof(LockedException), HandleLockedExceptionException);
+        exceptionHandlers.Add(typeof(DomainValidationException), HandleDomainValidationException);
+
+
         _exceptionHandlers = FrozenDictionary.ToFrozenDictionary(exceptionHandlers);
+    }
+
+    private async Task HandleDomainValidationException(HttpContext httpContext, Exception ex)
+    {
+        _logger.Error(ex, "Validation Exception");
+
+        var exception = (DomainValidationException)ex;
+
+        httpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
+
+
+        var errors = new Dictionary<string, string[]>
+        {
+            {
+                exception.Message,
+                new[] { exception.Message }
+            }
+        };
+
+
+        await httpContext.Response.WriteAsJsonAsync(new ValidationProblemDetails(errors)
+        {
+            Status = StatusCodes.Status400BadRequest, Type = "https://tools.ietf.org/html/rfc7231#section-6.5.1"
+        });
     }
 
     public async ValueTask<bool> TryHandleAsync(HttpContext httpContext,
@@ -132,8 +157,8 @@ public class CustomExceptionHandler : IExceptionHandler
             Type = "https://tools.ietf.org/html/rfc7231#section-6.5.3"
         });
     }
-    
-    private async Task HandleConflictExceptionException(HttpContext httpContext, Exception ex)
+
+    private async Task HandleConflictException(HttpContext httpContext, Exception ex)
     {
         _logger.Error(ex, "Conflict Exception");
 
@@ -146,10 +171,9 @@ public class CustomExceptionHandler : IExceptionHandler
             Type = "https://tools.ietf.org/html/rfc7231#section-6.5.8"
         });
     }
-    
 
-    
-    private async Task HandleDuplicateRequestExceptionException(HttpContext httpContext, Exception ex)
+
+    private async Task HandleDuplicateRequestException(HttpContext httpContext, Exception ex)
     {
         _logger.Error(ex, "Duplicate Request");
 
@@ -162,8 +186,8 @@ public class CustomExceptionHandler : IExceptionHandler
             Type = "https://datatracker.ietf.org/doc/html/rfc7231#section-6.3.1"
         });
     }
-    
-    private async Task HandleLockedExceptionExceptionException(HttpContext httpContext, Exception ex)
+
+    private async Task HandleLockedExceptionException(HttpContext httpContext, Exception ex)
     {
         _logger.Error(ex, "Object Locked");
 
@@ -176,5 +200,4 @@ public class CustomExceptionHandler : IExceptionHandler
             //Type = "https://datatracker.ietf.org/doc/html/rfc7231#section-6.3.1"
         });
     }
-    
 }

@@ -4,7 +4,7 @@ using Xunit;
 
 namespace CinemaTicketBooking.Application.UnitTests.Showtimes;
 
-public class ReserveSeatsCommandValidatorTest
+public class ReserveSeatsCommandValidatorSpecification
 {
     [Theory]
     [InlineData("09F67315-012D-4B17-B6F5-C49BE21BBE6B", 1,2, "08F67315-012D-4B17-B6F5-C49BE21BBE6B" )]

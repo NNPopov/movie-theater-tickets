@@ -3,7 +3,7 @@ import '../../../../core/errors/failures.dart';
 import '../../../../core/utils/typedefs.dart';
 import '../../../helpers/constants.dart';
 import '../../../hub/app_events.dart';
-import '../../../hub/event_bus.dart';
+import '../../../../core/buses/event_bus.dart';
 import '../entities/seat.dart';
 import 'package:get_it/get_it.dart';
 

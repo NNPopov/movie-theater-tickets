@@ -4,7 +4,7 @@ using Xunit;
 
 namespace CinemaTicketBooking.Application.UnitTests.Common;
 
-public class EntityTests
+public class EntitySpecification
 {   
     private class TestEntity : Entity<int>
     {

@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 
-import '../event_bus.dart';
+import '../../../core/buses/event_bus.dart';
 import 'package:get_it/get_it.dart';
 
 GetIt getIt = GetIt.instance;
@@ -11,7 +11,7 @@ class ConnectivityBloc extends Cubit<ConnectivityState> {
   ConnectivityBloc({EventBus? eventBus})
       : _eventBus = eventBus ?? getIt.get<EventBus>(),
         super(DisconnectedState()) {
-    _eventBus.stream.listen((event) {
+    _streamSubscription = _eventBus.stream.listen((event) {
       if (event is DisconnectedEvent) {
         emit(DisconnectedState());
       }
@@ -22,7 +22,14 @@ class ConnectivityBloc extends Cubit<ConnectivityState> {
     });
   }
 
+  late final StreamSubscription _streamSubscription;
   late final EventBus _eventBus;
+
+  @override
+  Future<void> close() async {
+   await _streamSubscription.cancel();
+    return await super.close();
+  }
 }
 
 class ConnectivityEvent extends Equatable {

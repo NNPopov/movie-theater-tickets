@@ -7,6 +7,7 @@ namespace CinemaTicketBooking.Api.Sockets;
 
 public class CinemaHallSeatsHub(IConnectionManager connectionManager) : Hub<ICinemaHallSeats>
 {
+   
     public async Task JoinGroup(Guid movieSession)
     {
         try
@@ -18,7 +19,18 @@ public class CinemaHallSeatsHub(IConnectionManager connectionManager) : Hub<ICin
             Console.WriteLine(e);
         }
     }
+    
+    
+    public override Task OnDisconnectedAsync(Exception exception)
+    {
+        var connectionId = Context.ConnectionId;
+        
+        connectionManager.RemoveByConnectionId(connectionId);
 
+        return base.OnDisconnectedAsync(exception);
+    }
+    
+    
     public async Task SendCinemaHallSeatsState(Guid movieSession,
         ICollection<MovieSessionSeatDto> seats)
     {
@@ -49,33 +61,12 @@ public class CinemaHallSeatsHub(IConnectionManager connectionManager) : Hub<ICin
     {
         try
         {
-            var connection = connectionManager.GetConnectionId(shoppingCart.Id);
+            var connections = connectionManager.GetConnectionId(shoppingCart.Id);
             
-            await Clients.Client(connection).SentShoppingCartState(shoppingCart);
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
-        }
-    }
-}
-
-public interface ICinemaHallSeats
-{
-    Task SentState(ICollection<MovieSessionSeatDto> seats);
-    
-    Task SentShoppingCartState(ShoppingCartDto shoppingCart);
-}
-
-public class CinemaHallSeatsNotifier
-    (IHubContext<CinemaHallSeatsHub, ICinemaHallSeats> context) : ICinemaHallSeatsNotifier
-{
-    public async Task SendCinemaHallSeatsState(Guid movieSession,
-        ICollection<MovieSessionSeatDto> seats)
-    {
-        try
-        {
-            await context.Clients.Group(movieSession.ToString()).SentState(seats);
+            foreach (var connection in connections)
+            {
+                await Clients.Client(connection).SentShoppingCartState(shoppingCart);
+            }
         }
         catch (Exception e)
         {

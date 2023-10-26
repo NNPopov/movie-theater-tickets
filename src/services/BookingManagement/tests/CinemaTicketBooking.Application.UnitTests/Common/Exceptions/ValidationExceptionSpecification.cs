@@ -5,7 +5,7 @@ using Xunit;
 
 namespace CinemaTicketBooking.Application.UnitTests.Common.Exceptions;
 
-public class ValidationExceptionTests
+public class ValidationExceptionSpecification
 {
     [Fact]
     public void DefaultConstructorCreatesAnEmptyErrorDictionary()

@@ -1,3 +1,4 @@
+using System.Net;
 using System.Text.Json.Serialization;
 using CinemaTicketBooking.Api;
 using CinemaTicketBooking.Api.Database;
@@ -10,6 +11,7 @@ using CinemaTicketBooking.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Extensions.Options;
 using Serilog;
+using StackExchange.Redis;
 using ILogger = Serilog.ILogger;
 
 var defaultCorsPolicy = "defaultCorsPolicy";
@@ -54,7 +56,7 @@ services.AddApplicationServices()
 
 services.AddScoped<ICinemaHallSeatsNotifier, CinemaHallSeatsNotifier>();
 services.AddScoped<IShoppingCartNotifier, ShoppingCartNotifier>();
-services.AddSingleton<IConnectionManager>( ConnectionManager.Factory());
+services.AddSingleton<IConnectionManager>(ConnectionManager.Factory());
 
 var identityOptionsSection =
     builder.Configuration.GetSection(IdentityOptions.SectionName);
@@ -74,7 +76,39 @@ services.AddSingleton<RedisSubscriber>();
 
 services.AddHostedService<RedisSubscriber>();
 
-builder.Services.AddSignalR();//.AddMessagePackProtocol();
+builder
+    .Services
+    .AddSignalR()
+    .AddStackExchangeRedis(builder.Configuration.GetConnectionString("Redis") ?? throw new InvalidOperationException()
+        ,
+        o =>
+        {
+            o.Configuration.ChannelPrefix = "CinemaBooking";
+            o.ConnectionFactory = async writer =>
+            {
+                var config = new ConfigurationOptions
+                {
+                    
+                    EndPoints = { builder.Configuration.GetConnectionString("Redis") },
+                    AbortOnConnectFail = false,
+                    
+                };
+                //config.EndPoints.Add(IPAddress.Loopback, 0);
+                //config.SetDefaultPorts();
+                var connection = await ConnectionMultiplexer.ConnectAsync(config, writer);
+                connection.ConnectionFailed += (_, e) => { Console.WriteLine("Connection to Redis failed."); };
+            
+                if (!connection.IsConnected)
+                {
+                    Console.WriteLine("Did not connect to Redis.");
+                }
+                
+               
+            
+                return connection;
+            };
+        }
+    ); //.AddMessagePackProtocol();
 
 builder.Services.AddEndpointsApiExplorer();
 
@@ -86,25 +120,31 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerExtensions(builder.Configuration);
 }
 
+app.UseExceptionHandler(options => { });
 //app.UseSerilogRequestLogging();
 app.UseRouting();
 
-app.MapHub<CinemaHallSeatsHub>("/cinema-hall-seats-hub");
+
 //app.MapHub<ShoppingCartHub>("/shopping-cart-hub");
 
 
 app.UseCors(defaultCorsPolicy);
+//app.MapHub<CinemaHallSeatsHub>("/cinema-hall-seats-hub");
+
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapHub<CinemaHallSeatsHub>("/cinema-hall-seats-hub");
+});
+
 app.UseHealthChecks("/Health");
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseExceptionHandler(options => { });
+
 app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
 app.UseEndpoints(typeof(Program));
 
 
-
 SampleData.Initialize(app);
-
 
 
 app.Run();

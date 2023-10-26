@@ -1,14 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:movie_theater_tickets/src/cinema_halls/presentation/cubit/cinema_hall_cubit.dart';
-import 'package:movie_theater_tickets/src/movie_sessions/presentation/cubit/movie_session_cubit.dart';
-import 'package:movie_theater_tickets/src/seats/presentation/cubit/seat_cubit.dart';
-import 'package:movie_theater_tickets/src/shopping_carts/presentation/cubit/shopping_cart_cubit.dart';
 import 'core/services/router.main.dart';
 import 'injection_container.dart';
 import 'package:get_it/get_it.dart';
-import 'src/movies/presentation/app/movie_theater_cubit.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+
 
 final getIt = GetIt.instance;
 
@@ -25,12 +20,14 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
-        providers: [
-          BlocProvider<ShoppingCartCubit>(
-              create: (_) => getIt.get<ShoppingCartCubit>())
-        ],
-        child: MaterialApp(
+    return
+      // MultiBlocProvider(
+      //   providers: [
+      //     BlocProvider<ShoppingCartCubit>(
+      //         create: (_) => getIt.get<ShoppingCartCubit>())
+      //   ],
+      //   child:
+        MaterialApp(
           title: 'Flutter Demo',
           theme: ThemeData(
             colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
@@ -40,6 +37,7 @@ class MyApp extends StatelessWidget {
           ),
           onGenerateRoute: generateRoute,
           //)
-        ));
+        );
+      //);
   }
 }

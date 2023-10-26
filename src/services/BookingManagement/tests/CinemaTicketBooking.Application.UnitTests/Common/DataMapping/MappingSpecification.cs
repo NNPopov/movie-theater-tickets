@@ -11,12 +11,12 @@ using Xunit;
 
 namespace CinemaTicketBooking.Application.UnitTests.Common.DataMapping;
 
-public class MappingTests
+public class MappingSpecification
 {
     private readonly IConfigurationProvider _configuration;
     private readonly IMapper _mapper;
 
-    public MappingTests()
+    public MappingSpecification()
     {
         _configuration = new MapperConfiguration(config =>
             config.AddMaps(Assembly.GetAssembly(typeof(ConfigureServices))));

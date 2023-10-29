@@ -16,7 +16,7 @@ import 'package:get_it/get_it.dart';
 
 GetIt getIt = GetIt.instance;
 
-class ShoppingCartRepoImpl extends ShoppingCartRepo {
+class ShoppingCartRepoImpl implements ShoppingCartRepo {
   late Dio _client;
 
   ShoppingCartRepoImpl({Dio? client}) {
@@ -24,18 +24,19 @@ class ShoppingCartRepoImpl extends ShoppingCartRepo {
   }
 
   @override
-  ResultFuture<CreateShoppingCartResponse> createShoppingCart(int maxNumberOfSeats) async {
+  ResultFuture<CreateShoppingCartResponse> createShoppingCart(
+      int maxNumberOfSeats) async {
     try {
       CreateShoppingCartDto request = CreateShoppingCartDto(maxNumberOfSeats);
 
       final response = await _client.post('/api/shoppingcarts',
           data: request.toJson(),
           options:
-              Options(headers: {'X-Idempotency-Key': Guid.newGuid.toString()}));
+          Options(headers: {'X-Idempotency-Key': Guid.newGuid.toString()}));
 
       var shoppingCart =
-          CreateShoppingCartResponse.fromJson(response.data as Map<String, dynamic>)
-              as CreateShoppingCartResponse;
+      CreateShoppingCartResponse.fromJson(response.data as Map<String, dynamic>)
+      as CreateShoppingCartResponse;
 
       return Right(shoppingCart);
     } on ServerException catch (e) {
@@ -48,10 +49,10 @@ class ShoppingCartRepoImpl extends ShoppingCartRepo {
     try {
       final response = await _client.get('/api/shoppingcarts/$shoppingCartId');
 
-      if(response.statusCode ==204)
-        {
-          return const Left(DataFailure(message: "shoppingCartId doesnot exist", statusCode: 204));
-        }
+      if (response.statusCode == 204) {
+        return const Left(DataFailure(
+            message: "shoppingCartId doesnot exist", statusCode: 204));
+      }
 
       var primaryClientAccount = json.decode(response.toString());
 
@@ -76,7 +77,7 @@ class ShoppingCartRepoImpl extends ShoppingCartRepo {
           '/api/shoppingcarts/${shoppingCart.id}/seats/select',
           data: request.toJson(),
           options:
-              Options(headers: {'X-Idempotency-Key': Guid.newGuid.toString()}));
+          Options(headers: {'X-Idempotency-Key': Guid.newGuid.toString()}));
 
       return Right(null);
     } on DioException catch (e) {
@@ -102,7 +103,35 @@ class ShoppingCartRepoImpl extends ShoppingCartRepo {
           '/api/shoppingcarts/${shoppingCart.id}/seats/unselect',
           data: request.toJson(),
           options:
-              Options(headers: {'X-Idempotency-Key': Guid.newGuid.toString()}));
+          Options(headers: {'X-Idempotency-Key': Guid.newGuid.toString()}));
+
+      return Right(null);
+    } on Exception catch (e) {
+      return Left(ServerFailure(message: e.toString(), statusCode: 500));
+    }
+  }
+
+  @override
+  ResultFuture<void> assignClientUseCase(String shoppingCartId) async {
+    try {
+      final response = await _client.put(
+          '/api/shoppingcarts/${shoppingCartId}/assignclient',
+          options:
+          Options(headers: {'X-Idempotency-Key': Guid.newGuid.toString()}));
+
+      return Right(null);
+    } on Exception catch (e) {
+      return Left(ServerFailure(message: e.toString(), statusCode: 500));
+    }
+  }
+
+  @override
+  ResultFuture<void> reserveSeatsUseCase(String shoppingCartId) async {
+    try {
+      final response = await _client.post(
+          '/api/shoppingcarts/${shoppingCartId}/reservations',
+          options:
+          Options(headers: {'X-Idempotency-Key': Guid.newGuid.toString()}));
 
       return Right(null);
     } on Exception catch (e) {

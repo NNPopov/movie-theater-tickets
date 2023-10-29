@@ -10,10 +10,11 @@ import '../../domain/services/auth_service.dart';
 import 'package:dartz/dartz.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 
 GetIt getIt = GetIt.instance;
 
-class AuthServiceImpl extends AuthService {
+class AuthServiceImpl implements AuthService {
   AuthServiceImpl({Authenticator? authenticator})
       : _authenticator = authenticator ?? getIt.get<Authenticator>();
 
@@ -26,7 +27,14 @@ class AuthServiceImpl extends AuthService {
     var token = await storage.read(key: Constants.TOKEN_KEY);
 
     if (token == null) {
-      return Left(NotAuthorisedException(message: '', statusCode: 401));
+      return const Left(NotAuthorisedException(message: '', statusCode: 401));
+    }
+
+    bool hasExpired = JwtDecoder.isExpired(token);
+
+    if(hasExpired) {
+      await storage.delete(key: Constants.TOKEN_KEY);
+      return const Left(NotAuthorisedException(message: '', statusCode: 401));
     }
 
     return Right(token);
@@ -39,6 +47,19 @@ class AuthServiceImpl extends AuthService {
 
   @override
   ResultFuture<AuthStatus> getCurrentStatus() async {
+
+    var token = await storage.read(key: Constants.TOKEN_KEY);
+
+    if (token == null) {
+      return Right(UnauthorizedAuthStatus());
+    }
+
+    bool hasExpired = JwtDecoder.isExpired(token);
+
+    if(hasExpired) {
+      return Right(ExpiredAuthStatus());
+    }
+
     return Right(AuthorizedAuthStatus());
   }
 
@@ -53,5 +74,12 @@ class AuthServiceImpl extends AuthService {
 
       return  Right(AuthorizedAuthStatus());
     });
+  }
+
+  @override
+  ResultFuture<AuthStatus> logOut() async {
+    await storage.delete(key: Constants.TOKEN_KEY);
+
+    return  Right(UnauthorizedAuthStatus());
   }
 }

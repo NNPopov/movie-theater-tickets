@@ -25,7 +25,7 @@ void main() {
 
   test('should  call the ShoppingCartRepo.createShoppingCartRepo', () async {
     //Arragne
-    createShoppingCartCommand = CreateShoppingCartCommand(maxNumberOfSeats: 5);
+    createShoppingCartCommand = const CreateShoppingCartCommand(maxNumberOfSeats: 5);
 
     //Act
 

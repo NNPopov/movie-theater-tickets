@@ -11,11 +11,11 @@ public record AssignClientCartCommand(Guid ShoppingCartId, Guid ClientId, Guid R
 public class AssignClientCartCommandHandler : IRequestHandler<AssignClientCartCommand, AssignClientCartResponse>
 {
     private readonly IShoppingCartRepository _shoppingCartRepository;
-
-    public AssignClientCartCommandHandler(IShoppingCartRepository shoppingCartRepository)
+    private readonly IShoppingCartNotifier _shoppingCartNotifier;
+    public AssignClientCartCommandHandler(IShoppingCartRepository shoppingCartRepository, IShoppingCartNotifier shoppingCartNotifier)
     {
-
         _shoppingCartRepository = shoppingCartRepository;
+        _shoppingCartNotifier = shoppingCartNotifier;
     }
 
     public async Task<AssignClientCartResponse> Handle(AssignClientCartCommand request,
@@ -29,6 +29,8 @@ public class AssignClientCartCommandHandler : IRequestHandler<AssignClientCartCo
         cart.AssignClientId(request.ShoppingCartId);
         
         await _shoppingCartRepository.TrySetCart(cart);
+        
+        await _shoppingCartNotifier.SendShoppingCartState(cart);
         
         return new AssignClientCartResponse(cart.Id);
     }

@@ -42,6 +42,7 @@ class GetSeatsByMovieSessionId
             seatNumber: e.seatNumber,
             blocked: e.blocked,
             isCurrentReserve: checkIsCurrentReserve(e, hashId),
+            seatStatus: e.seatStatus,
             hashId: e.hashId);
 
         return s;

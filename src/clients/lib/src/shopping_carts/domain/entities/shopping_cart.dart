@@ -9,30 +9,39 @@ class ShoppingCart extends Equatable {
   final DateTime? createdCard;
   final String? id;
   final String? movieSessionId;
-  final int? status;
+  final bool? isAssigned;
+  final ShoppingCartStatus? status;
   late List<ShoppingCartSeat> shoppingCartSeat;
 
-  ShoppingCart(
-      {this.maxNumberOfSeats,
-      this.createdCard,
-      this.id,
-      this.movieSessionId,
-      this.status,
-      List<ShoppingCartSeat>? seats}) {
+  ShoppingCart({
+    this.maxNumberOfSeats,
+    this.createdCard,
+    this.id,
+    this.movieSessionId,
+    this.status,
+    List<ShoppingCartSeat>? seats,
+    this.isAssigned,
+  }) {
     shoppingCartSeat = seats ?? [];
   }
 
   Either<Failure, void> addSeat(ShoppingCartSeat seat) {
-    if (shoppingCartSeat.length < maxNumberOfSeats!) {
+    if (status != ShoppingCartStatus.InWork) {
+      return Left(DataFailure(
+          message: "ShoppingCart has status $status", statusCode: 500));
+    }
 
-      if(shoppingCartSeat.any((e) => e.seatRow == seat.seatRow && e.seatNumber == seat.seatNumber))
-        {
-          return  Left(DataFailure(message:"Seat is alredy reserved", statusCode: 500));
-        }
+    if (shoppingCartSeat.length < maxNumberOfSeats!) {
+      if (shoppingCartSeat.any((e) =>
+          e.seatRow == seat.seatRow && e.seatNumber == seat.seatNumber)) {
+        return const Left(
+            DataFailure(message: "Seat is alredy reserved", statusCode: 500));
+      }
       shoppingCartSeat.add(seat);
       return const Right(null);
     }
-    return  Left(DataFailure(message:"Max number of Seats is ${maxNumberOfSeats}", statusCode: 500));
+    return Left(DataFailure(
+        message: "Max number of Seats is $maxNumberOfSeats", statusCode: 500));
   }
 
   void deleteSeat(ShoppingCartSeat seat) {
@@ -46,6 +55,9 @@ class ShoppingCart extends Equatable {
         id,
         movieSessionId,
         status,
-        shoppingCartSeat
+        shoppingCartSeat,
+        isAssigned
       ];
 }
+
+enum ShoppingCartStatus { InWork, SeatsReserved, PurchaseCompleted }

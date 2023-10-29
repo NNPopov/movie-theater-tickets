@@ -20,8 +20,10 @@ import 'package:movie_theater_tickets/src/seats/domain/usecases/get_seats_by_mov
 import 'package:movie_theater_tickets/src/seats/domain/usecases/update_seats_sate.dart';
 import 'package:movie_theater_tickets/src/shopping_carts/data/repos/shopping_cart_local_repo_impl.dart';
 import 'package:movie_theater_tickets/src/shopping_carts/domain/repos/shopping_cart_local_repo.dart';
+import 'package:movie_theater_tickets/src/shopping_carts/domain/usecases/assign_client_use_case.dart';
 import 'package:movie_theater_tickets/src/shopping_carts/domain/usecases/create_shopping_cart.dart';
 import 'package:movie_theater_tickets/src/shopping_carts/domain/usecases/get_shopping_cart.dart';
+import 'package:movie_theater_tickets/src/shopping_carts/domain/usecases/reserve_seats.dart';
 import 'package:movie_theater_tickets/src/shopping_carts/domain/usecases/select_seat.dart';
 import 'package:movie_theater_tickets/src/shopping_carts/domain/usecases/shopping_cart_subscribe.dart';
 import 'package:movie_theater_tickets/src/shopping_carts/domain/usecases/unselect_seat.dart';
@@ -41,7 +43,6 @@ final getIt = GetIt.instance;
 Future<void> initializeDependencies() async {
   // Dio
 
-
   _initSeats();
   _initMovie();
   _initCinemaHall();
@@ -49,8 +50,8 @@ Future<void> initializeDependencies() async {
   _initShoppingCart();
   // Dependencies
 
-
-  getIt.registerLazySingleton<Authenticator>(() => FlutterWebAuth2Authenticator());
+  getIt.registerLazySingleton<Authenticator>(
+      () => FlutterWebAuth2Authenticator());
 
   getIt.registerLazySingleton<AuthService>(() => AuthServiceImpl());
   getIt.registerLazySingleton<AuthEventBus>(() => AuthEventBusImpl());
@@ -64,7 +65,6 @@ Future<void> initializeDependencies() async {
 
   getIt.get<EventHub>().subscribe();
 
-
   getIt.registerLazySingleton<AuthInterceptor>(() => AuthInterceptor());
   getIt.registerSingleton<Dio>(Client(getIt.get()).init());
 }
@@ -72,6 +72,9 @@ Future<void> initializeDependencies() async {
 void _initShoppingCart() {
   getIt.registerLazySingleton<ShoppingCartLocalRepo>(
       () => ShoppingCartLocalRepoImpl());
+
+  getIt.registerLazySingleton<ReserveSeatsUseCase>(
+      () => ReserveSeatsUseCase(getIt.get(), getIt.get(), getIt.get()));
   getIt.registerLazySingleton<ShoppingCartRepo>(() => ShoppingCartRepoImpl());
   getIt.registerLazySingleton<CreateShoppingCart>(() => CreateShoppingCart());
   getIt.registerLazySingleton<GetShoppingCart>(
@@ -84,6 +87,8 @@ void _initShoppingCart() {
       () => ShoppingCartUpdateSubscribeUseCase(eventHub: getIt.get()));
   getIt.registerLazySingleton<UpdateShoppingCartState>(
       () => UpdateShoppingCartState());
+  getIt.registerLazySingleton<AssignClientUseCase>(
+      () => AssignClientUseCase(getIt.get(), getIt.get(), getIt.get()));
 }
 
 void _initSeats() {

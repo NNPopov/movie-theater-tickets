@@ -11,7 +11,7 @@ import 'package:get_it/get_it.dart';
 
 GetIt getIt = GetIt.instance;
 
-class MovieSessionRepoImpl extends MovieSessionRepo {
+class MovieSessionRepoImpl implements MovieSessionRepo {
   late Dio _client;
 
   MovieSessionRepoImpl({Dio? client}) {

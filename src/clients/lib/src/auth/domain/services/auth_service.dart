@@ -10,6 +10,8 @@ abstract class AuthService{
   ResultFuture<AuthStatus> getCurrentStatus();
 
   ResultFuture<AuthStatus> logIn();
+
+  ResultFuture<AuthStatus> logOut();
 }
 
 

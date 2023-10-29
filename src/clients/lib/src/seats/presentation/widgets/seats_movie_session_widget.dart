@@ -106,7 +106,29 @@ class _SeatsMovieSessionWidget extends State<SeatsMovieSessionWidget> {
                         itemCount: rowSeats.length,
                         itemBuilder: (context, index) {
                           var seat = rowSeats[index];
-                          if (seat.blocked && seat.isCurrentReserve) {
+                          if (seat.blocked && seat.isCurrentReserve && seat.seatStatus == SeatStatus.selected) {
+                            return SizedBox(
+                                height: 19,
+                                width: 19,
+                                child: TextButton(
+                                    style: ButtonStyle(
+                                        padding: MaterialStateProperty.all(
+                                            const EdgeInsets.symmetric(
+                                                vertical: 2, horizontal: 2)),
+                                        foregroundColor:
+                                        MaterialStateProperty.all<Color>(
+                                            Colors.black),
+                                        backgroundColor:
+                                        MaterialStateProperty.all<Color>(
+                                            Colors.greenAccent)),
+                                    onPressed: () async {
+                                      await onSeatUnselectPress(seat);
+                                    },
+                                    child: Text(
+                                      '${seat.seatNumber}',
+                                      style: TextStyle(fontSize: 12),
+                                    )));
+                          } if (seat.blocked && seat.isCurrentReserve && seat.seatStatus != SeatStatus.selected) {
                             return SizedBox(
                                 height: 19,
                                 width: 19,
@@ -122,13 +144,12 @@ class _SeatsMovieSessionWidget extends State<SeatsMovieSessionWidget> {
                                         MaterialStateProperty.all<Color>(
                                             Colors.green)),
                                     onPressed: () async {
-                                      await onSeatUnselectPress(seat);
                                     },
                                     child: Text(
                                       '${seat.seatNumber}',
                                       style: TextStyle(fontSize: 12),
                                     )));
-                          } else if (seat.blocked && !seat.isCurrentReserve) {
+                          }else if (seat.blocked && !seat.isCurrentReserve) {
                             return SizedBox(
                                 height: 19,
                                 width: 19,

@@ -38,7 +38,15 @@ class ServerFailure extends Failure {
 }
 
 class NotAuthorisedException extends Failure  {
-   NotAuthorisedException({required super.message, required super.statusCode});
+   const NotAuthorisedException({required super.message, required super.statusCode});
+
+
+  @override
+  List<dynamic> get props => [message, statusCode];
+}
+
+class ShoppingCartNotAssignedException extends Failure  {
+  const ShoppingCartNotAssignedException({required super.message, required super.statusCode});
 
 
   @override

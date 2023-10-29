@@ -4,7 +4,7 @@ import '../../src/auth/domain/abstruction/auth_event_bus.dart';
 
 
 
-class AuthEventBusImpl extends AuthEventBus {
+class AuthEventBusImpl implements AuthEventBus {
 
   final StreamController<AuthEvent> _controller = StreamController.broadcast();
 

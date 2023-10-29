@@ -7,7 +7,7 @@ import '../../../helpers/constants.dart';
 import '../../domain/abstruction/authenticator.dart';
 
 
-class FlutterWebAuth2Authenticator extends Authenticator {
+class FlutterWebAuth2Authenticator implements Authenticator {
 
   final String _clientId = dotenv.env["CLIENT_ID"].toString();
   final String _clientBaseUrl = dotenv.env["CLIENT_BASE_URL"].toString();

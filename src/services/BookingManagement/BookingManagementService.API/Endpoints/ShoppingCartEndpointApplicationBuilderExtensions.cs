@@ -66,9 +66,11 @@ public class ShoppingCartEndpointApplicationBuilderExtensions : IEndpoints
                     throw new Exception($"Incorrect requestId:{ requestId} {nameof(CreateShoppingCartRequest)}");
                 }
                 
-                new AssignClientCartCommand(shoppingCartId, clientId, parsedRequestId);
-
-                return Results.Ok(id);
+                var command = new AssignClientCartCommand(shoppingCartId, clientId, parsedRequestId);
+                
+                var result = await sender.Send(command, cancellationToken);
+                
+                return Results.Ok(result);
             })
             .WithName("AssignUser")
             .RequireAuthorization()

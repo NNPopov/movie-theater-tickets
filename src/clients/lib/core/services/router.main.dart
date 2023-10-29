@@ -20,8 +20,13 @@ GetIt getIt = GetIt.instance;
 Route<dynamic> generateRoute(RouteSettings settings) {
   if (settings.name == MoviesView.id || settings.name == '/') {
     return _pageBuilder(
-      (_) => BlocProvider(
-        create: (_) => MovieTheaterCubit(),
+      (_) => MultiBlocProvider(
+        providers: [
+          BlocProvider<AuthCubit>(create: (_) => AuthCubit()),
+          BlocProvider(
+            create: (_) => MovieTheaterCubit(),
+          ),
+        ],
         child: const MoviesView(),
       ),
       settings: settings,
@@ -31,6 +36,7 @@ Route<dynamic> generateRoute(RouteSettings settings) {
     return _pageBuilder(
       (_) => MultiBlocProvider(
         providers: [
+          BlocProvider<AuthCubit>(create: (_) => AuthCubit()),
           BlocProvider(create: (_) => MovieSessionCubit()),
           BlocProvider<ConnectivityBloc>(create: (_) => ConnectivityBloc()),
         ],
@@ -42,7 +48,7 @@ Route<dynamic> generateRoute(RouteSettings settings) {
     return _pageBuilder(
       (_) => MultiBlocProvider(
         providers: [
-          BlocProvider<AuthCubit>(create: (_)=>AuthCubit()),
+          BlocProvider<AuthCubit>(create: (_) => AuthCubit()),
           BlocProvider<ConnectivityBloc>(create: (_) => ConnectivityBloc()),
           BlocProvider<SeatCubit>(
             create: (context) => SeatCubit(

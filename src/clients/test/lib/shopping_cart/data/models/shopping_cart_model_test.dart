@@ -4,7 +4,7 @@ import 'package:movie_theater_tickets/src/shopping_carts/data/models/seat_dto.da
 import 'package:movie_theater_tickets/src/shopping_carts/data/models/shopping_cart_dto.dart';
 import 'package:movie_theater_tickets/src/shopping_carts/domain/entities/shopping_cart.dart';
 
-import '../../../fixtures/fixture_reader.dart';
+import '../../../../fixtures/fixture_reader.dart';
 
 void main() {
   final tUserExamModel = ShoppingCartDto.empty();
@@ -14,8 +14,9 @@ void main() {
       createdCard: DateTime.parse("2023-09-28 19:28:53.299Z"),
       movieSessionId: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       maxNumberOfSeats: 4,
-      status: 1,
-      seats: [
+      status: ShoppingCartStatus.SeatsReserved,
+      isAssigned: true,
+      seats: const [
         ShoppingCartSeatDto(seatNumber: 1, seatRow: 1),
         ShoppingCartSeatDto(seatNumber: 2, seatRow: 1),
         ShoppingCartSeatDto(seatNumber: 3, seatRow: 1)

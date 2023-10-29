@@ -10,6 +10,11 @@ abstract class ShoppingCartRepo {
 
   ResultFuture<ShoppingCart> getShoppingCart(String shoppingCartId);
 
+
+  ResultFuture<void>assignClientUseCase(String shoppingCartId);
+
+  ResultFuture<void>reserveSeatsUseCase(String shoppingCartId);
+
   ResultFuture<void> selectSeat(
       ShoppingCart shoppingCart, ShoppingCartSeat seat, String movieSessionId);
 

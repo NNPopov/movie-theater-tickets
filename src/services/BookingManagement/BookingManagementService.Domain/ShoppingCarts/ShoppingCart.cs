@@ -47,19 +47,15 @@ public class ShoppingCart : AggregateRoot
         ClientId = clientId;
         HashId = hashId;
     }
-
-    // move to injected service
+    
     static string ComputeMD5(string s)
     {
         StringBuilder sb = new StringBuilder();
-
-        // Initialize a MD5 hash object
+        
         using (MD5 md5 = MD5.Create())
         {
-            // Compute the hash of the given string
             byte[] hashValue = md5.ComputeHash(Encoding.UTF8.GetBytes(s));
-
-            // Convert the byte array to string format
+            
             foreach (byte b in hashValue)
             {
                 sb.Append($"{b:X2}");
@@ -197,13 +193,6 @@ public class ShoppingCart : AggregateRoot
 
 [method: JsonConstructor]
 public class SeatShoppingCart(short seatRow, short seatNumber) : Seat(seatRow, seatNumber);
-
-public enum ShoppingCartStatus
-{
-    InWork = 0,
-    SeatsReserved = 1,
-    PurchaseCompleted = 2
-}
 
 public record SeatRemovedFromShoppingCartDomainEvent(
     Guid MovieSessionId,

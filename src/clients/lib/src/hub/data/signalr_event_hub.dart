@@ -16,7 +16,7 @@ import '../../../core/buses/event_bus.dart';
 
 GetIt getIt = GetIt.instance;
 
-class SignalREventHub extends EventHub {
+class SignalREventHub implements EventHub {
   SignalREventHub(
       {UpdateShoppingCartState? updateShoppingCartState,
       EventBus? eventBus,

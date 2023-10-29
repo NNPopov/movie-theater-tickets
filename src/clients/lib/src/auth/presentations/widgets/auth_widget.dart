@@ -22,6 +22,11 @@ class _AuthWidget extends State<AuthWidget> {
     await context.read<AuthCubit>().logInt();
   }
 
+  Future<void> logOut() async {
+    await context.read<AuthCubit>().logOut();
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<AuthCubit, AuthStatus>(
@@ -47,7 +52,7 @@ class _AuthWidget extends State<AuthWidget> {
             height: 60,
             child: TextButton(
               onPressed: ()  async {
-                await logIn();
+                await logOut();
               },
               child: const Text('Log Out'),
             ),

@@ -79,10 +79,17 @@ class _ShoppingCartWidget extends State<ShoppingCartWidget> {
                         child: Text(
                             "Seat Row ${rowSeat.seatRow}, Number ${rowSeat.seatNumber}"));
                   }),
-              if (createdShoppingCard.shoppingCard.shoppingCartSeat.isNotEmpty)
+              if (createdShoppingCard.shoppingCard.shoppingCartSeat.isNotEmpty && !createdShoppingCard.shoppingCard.isAssigned!)
                 TextButton(
                   onPressed: () {
-                    onCreateShoppingCart();
+                    onAssignClient();
+                  },
+                  child: const Text('assignClient purchase'),
+                ),
+              if (createdShoppingCard.shoppingCard.shoppingCartSeat.isNotEmpty && createdShoppingCard.shoppingCard.isAssigned!)
+                TextButton(
+                  onPressed: () {
+                    onCompletePurchase();
                   },
                   child: const Text('Complete purchase'),
                 ),
@@ -146,5 +153,15 @@ class _ShoppingCartWidget extends State<ShoppingCartWidget> {
   @override
   void dispose() {
     super.dispose();
+  }
+
+  void onAssignClient() async {
+    await  context.read<ShoppingCartCubit>().assignClient();
+
+  }
+
+  void onCompletePurchase() async {
+
+  await  context.read<ShoppingCartCubit>().completePurchase();
   }
 }

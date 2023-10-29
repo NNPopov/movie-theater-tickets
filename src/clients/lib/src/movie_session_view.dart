@@ -5,6 +5,7 @@ import 'package:movie_theater_tickets/src/seats_view.dart';
 import '../core/common/views/loading_view.dart';
 import '../core/utils/utils.dart';
 import 'auditorium_detail.dart';
+import 'auth/presentations/widgets/auth_widget.dart';
 import 'cinema_halls/presentation/cubit/cinema_hall_cubit.dart';
 import 'movie_detail.dart';
 import 'movie_sessions/domain/entities/movie_session.dart';
@@ -83,7 +84,15 @@ class _MovieSessionsView extends State<MovieSessionsView> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text(movieSessions[0].movieId),
+        title: const Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Text("Movie session"),
+            ),
+            AuthWidget(),
+          ],
+        ),
       ),
       body: Column(children: [
         SizedBox(height: 40, width: 100, child: Text('Movies')),

@@ -11,7 +11,8 @@ class EventBus {
 
   @override
   void dispose() {
-    //_controller.close();
+    _controller.close();
+
   }
 }
 

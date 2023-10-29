@@ -1,25 +1,16 @@
-import 'dart:convert';
 import 'package:dartz/dartz.dart';
 import 'package:movie_theater_tickets/core/utils/typedefs.dart';
-import 'package:dio/dio.dart';
-import '../../../../core/errors/exceptions.dart';
 import '../../../../core/errors/failures.dart';
-import '../../domain/entities/create_shopping_cart_response.dart';
-import '../../domain/entities/seat.dart';
 import '../../domain/entities/shopping_cart.dart';
 import '../../domain/repos/shopping_cart_local_repo.dart';
-import '../../domain/repos/shopping_cart_repo.dart';
-import '../models/create_shopping_cart_dto.dart';
-import '../models/select_seat_dto.dart';
 import '../models/shopping_cart_dto.dart';
-import 'package:flutter_guid/flutter_guid.dart';
 import 'package:get_it/get_it.dart';
 import 'package:localstorage/localstorage.dart';
 
 
 GetIt getIt = GetIt.instance;
 
-class ShoppingCartLocalRepoImpl extends ShoppingCartLocalRepo {
+class ShoppingCartLocalRepoImpl implements ShoppingCartLocalRepo {
 
   final LocalStorage storage = LocalStorage('movie_theatre.json');
   ShoppingCartRepoLocalImpl() {

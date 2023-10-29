@@ -22,7 +22,9 @@ class SelectSeatUseCase
     var shoppingCartResult = await _localRepo.getShoppingCart();
 
     return shoppingCartResult.fold((l) => Left(l), (shoppingCart) {
-
+      if (shoppingCart.status != ShoppingCartStatus.InWork) {
+        return const Right(null);
+      }
       var resultAddSeat = shoppingCart.addSeat(params.seat);
 
       return resultAddSeat.fold(

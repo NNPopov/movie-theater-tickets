@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:movie_theater_tickets/core/extensions/context_extensions.dart';
 import '../core/common/views/loading_view.dart';
 import '../core/utils/utils.dart';
+import 'auth/presentations/widgets/auth_widget.dart';
 import 'movie_session_view.dart';
 import 'movies/domain/entities/movie.dart';
 import 'package:carousel_slider/carousel_slider.dart';
@@ -72,7 +73,15 @@ class _MoviesView extends State<MoviesView> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text('Movies'),
+        title: const Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Text("Movie"),
+          ),
+          AuthWidget(),
+        ],
+      ),
       ),
       body: Column(
           mainAxisAlignment: MainAxisAlignment.start,

@@ -13,7 +13,7 @@ import 'package:get_it/get_it.dart';
 
 GetIt getIt = GetIt.instance;
 
-class CinemaHallRepoImpl extends CinemaHallRepo {
+class CinemaHallRepoImpl implements CinemaHallRepo {
   late Dio _client;
 
   CinemaHallRepoImpl({Dio? client}) {

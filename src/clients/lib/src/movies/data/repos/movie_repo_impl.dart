@@ -13,7 +13,7 @@ import 'package:get_it/get_it.dart';
 
 GetIt getIt = GetIt.instance;
 
-class MovieRepoImpl extends MovieRepo {
+class MovieRepoImpl implements MovieRepo {
   late Dio _client;
 
   MovieRepoImpl({Dio? client}) {

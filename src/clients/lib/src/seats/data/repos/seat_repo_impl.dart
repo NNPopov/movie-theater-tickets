@@ -11,7 +11,7 @@ import '../models/seat_dto.dart';
 
 GetIt getIt = GetIt.instance;
 
-class SeatRepoImpl extends SeatRepo {
+class SeatRepoImpl implements SeatRepo {
   late Dio _client;
 
   SeatRepoImpl({Dio? client}) {

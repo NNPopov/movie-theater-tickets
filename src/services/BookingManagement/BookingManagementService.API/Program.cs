@@ -131,15 +131,14 @@ app.UseRouting();
 app.UseCors(defaultCorsPolicy);
 //app.MapHub<CinemaHallSeatsHub>("/cinema-hall-seats-hub");
 
-app.UseEndpoints(endpoints =>
-{
-    endpoints.MapHub<CinemaHallSeatsHub>("/cinema-hall-seats-hub");
-});
-
 app.UseHealthChecks("/Health");
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapHub<CinemaHallSeatsHub>("/cinema-hall-seats-hub");
+});
 app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
 app.UseEndpoints(typeof(Program));
 
@@ -148,3 +147,5 @@ SampleData.Initialize(app);
 
 
 app.Run();
+
+

@@ -7,7 +7,9 @@ import '../../../../core/buses/event_bus.dart';
 import '../../../shopping_carts/domain/usecases/create_shopping_cart.dart';
 import '../../domain/entities/seat.dart';
 import '../../domain/entities/shopping_cart.dart';
+import '../../domain/usecases/assign_client_use_case.dart';
 import '../../domain/usecases/get_shopping_cart.dart';
+import '../../domain/usecases/reserve_seats.dart';
 import '../../domain/usecases/select_seat.dart';
 import '../../domain/usecases/shopping_cart_subscribe.dart';
 import '../../domain/usecases/unselect_seat.dart';
@@ -27,6 +29,8 @@ class ShoppingCartCubit extends Cubit<ShoppingCartState> {
       UnselectSeatUseCase? unselectSeatUseCase,
       GetShoppingCart? getShoppingCartUseCase,
       ShoppingCartUpdateSubscribeUseCase? shoppingCartUpdateSubscribeUseCase,
+      AssignClientUseCase? assignClientUseCase,
+      ReserveSeatsUseCase? reserveSeatsUseCase,
       EventBus? eventBus})
       : _createShoppingCart =
             createShoppingCartUseCase ?? getIt.get<CreateShoppingCart>(),
@@ -39,6 +43,10 @@ class ShoppingCartCubit extends Cubit<ShoppingCartState> {
         _shoppingCartUpdateSubscribeUseCase =
             shoppingCartUpdateSubscribeUseCase ??
                 getIt.get<ShoppingCartUpdateSubscribeUseCase>(),
+        _assignClientUseCase =
+            assignClientUseCase ?? getIt.get<AssignClientUseCase>(),
+        _reserveSeatsUseCase =
+            reserveSeatsUseCase ?? getIt.get<ReserveSeatsUseCase>(),
         _hashId = "",
         _eventBus = eventBus ?? getIt.get<EventBus>(),
         super(const ShoppingCartInitialState()) {
@@ -71,6 +79,9 @@ class ShoppingCartCubit extends Cubit<ShoppingCartState> {
   late final GetShoppingCart _getShoppingCart;
   late final ShoppingCartUpdateSubscribeUseCase
       _shoppingCartUpdateSubscribeUseCase;
+  late final ReserveSeatsUseCase _reserveSeatsUseCase;
+
+  late final AssignClientUseCase _assignClientUseCase;
 
   late String _hashId;
   late int version = 0;
@@ -137,6 +148,18 @@ class ShoppingCartCubit extends Cubit<ShoppingCartState> {
         seat: shoppingCartSeat, movieSessionId: movieSessionId);
 
     var result = await _selectSeatUseCase(command);
+
+    result.fold((l) => emit(ShoppingCartError(l.message)), (r) async {});
+  }
+
+  Future<void> assignClient() async {
+    var result = await _assignClientUseCase();
+
+    result.fold((l) => emit(ShoppingCartError(l.message)), (r) async {});
+  }
+
+  Future<void> completePurchase() async {
+    var result = await _reserveSeatsUseCase();
 
     result.fold((l) => emit(ShoppingCartError(l.message)), (r) async {});
   }

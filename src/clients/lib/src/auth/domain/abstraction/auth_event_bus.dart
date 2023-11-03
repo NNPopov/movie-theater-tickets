@@ -1,6 +1,8 @@
 abstract class  AuthEventBus{
 
-  void send(AuthEvent event);
+  void send(AuthStatus status);
+
+  Stream<AuthStatus> get stream;
 }
 
 class AuthEvent
@@ -13,6 +15,9 @@ class UnauthorizedAuthEvent extends AuthEvent
 {}
 
 class ForbiddenAuthEvent extends AuthEvent
+{}
+
+class AuthorizedAuthEvent extends AuthEvent
 {}
 
 abstract class AuthStatus

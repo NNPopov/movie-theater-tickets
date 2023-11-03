@@ -10,9 +10,9 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 GetIt getIt = GetIt.instance;
 
-class CreateShoppingCart extends FutureUsecaseWithParams<
+class CreateShoppingCartUseCase extends FutureUsecaseWithParams<
     CreateShoppingCartResponse, CreateShoppingCartCommand> {
-  CreateShoppingCart({ShoppingCartRepo? repo, EventHub? eventHub}) {
+  CreateShoppingCartUseCase({ShoppingCartRepo? repo, EventHub? eventHub}) {
     _repo = repo ?? getIt.get<ShoppingCartRepo>();
     _eventHub = eventHub ?? getIt.get<EventHub>();
   }

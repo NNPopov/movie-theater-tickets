@@ -4,9 +4,9 @@ class MovieSession extends Equatable {
   final String id;
   final String movieId;
   final DateTime sessionDate;
-  final String auditoriumId;
+  final String cinemaHallId;
 
-  MovieSession(this.id, this.movieId, this.sessionDate, this.auditoriumId);
+  MovieSession(this.id, this.movieId, this.sessionDate, this.cinemaHallId);
 
   @override
   List<Object?> get props => [id];

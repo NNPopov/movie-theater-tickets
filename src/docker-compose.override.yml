@@ -20,10 +20,11 @@ services:
       - "5452:5432"
   booking-management-api:
     environment:
+      - IdentityOptions__ValidIssuer=http://localhost:8080/realms/come-and-watch
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:80
       - ConnectionStrings__Redis=cinema-booking-cache:6379
-      - ConnectionStrings__BookingManagementDB=booking-management-postgres:5432
+      - ConnectionStrings__BookingDbContext=Server=booking-management-postgres;Port=5432;Database=booking_db;Username=booking_user;Password=password
       - SERILOG__USING__1:Serilog.Sinks.Seq
       - SERILOG__WRITETO__1__ARGS__SERVERURL=http://logger-seq
       - SERILOG__WRITETO__1__NAME=Seq

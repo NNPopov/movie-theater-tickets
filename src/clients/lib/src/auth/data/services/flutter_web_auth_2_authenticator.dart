@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:dartz/dartz.dart';
 import '../../../../core/utils/typedefs.dart';
 import '../../../helpers/constants.dart';
-import '../../domain/abstruction/authenticator.dart';
+import '../../domain/abstraction/authenticator.dart';
 
 
 class FlutterWebAuth2Authenticator implements Authenticator {

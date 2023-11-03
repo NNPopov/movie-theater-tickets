@@ -1,6 +1,6 @@
 import 'dart:async' as domain;
 import 'package:bloc/bloc.dart';
-import '../../domain/abstruction/auth_event_bus.dart';
+import '../../domain/abstraction/auth_event_bus.dart';
 import '../../domain/services/auth_service.dart';
 import 'package:get_it/get_it.dart';
 

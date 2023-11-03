@@ -12,10 +12,6 @@ class CreateShoppingCartResponse extends Equatable {
   CreateShoppingCartResponse.fromJson(Map<String, dynamic> json)
       : this(
       json['shoppingCartId'], json['hashId']);
-
-
-
-
   @override
   // TODO: implement props
   List<Object?> get props =>  [shoppingCartId];

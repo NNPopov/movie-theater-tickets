@@ -17,8 +17,8 @@ services:
     volumes:
       - booking-management-postgres-data:/var/lib/postgresql/data
     environment:
-      POSTGRES_DB: keycloak
-      POSTGRES_USER: keycloak
+      POSTGRES_DB: booking_db
+      POSTGRES_USER: booking_user
       POSTGRES_PASSWORD: password
   booking-management-api:
     image: booking-management-api:${MY_TAG:-latest}

@@ -1,5 +1,5 @@
 import '../../../../core/utils/typedefs.dart';
-import '../abstruction/auth_event_bus.dart';
+import '../abstraction/auth_event_bus.dart';
 
 abstract class AuthService{
 

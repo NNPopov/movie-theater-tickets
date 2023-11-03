@@ -2,10 +2,12 @@
 using CinemaTicketBooking.Application.MovieSessions.Queries;
 using Microsoft.AspNetCore.SignalR;
 
+
 namespace CinemaTicketBooking.Api.Sockets;
 
 public class CinemaHallSeatsNotifier
-    (IHubContext<CinemaHallSeatsHub, ICinemaHallSeats> context) : ICinemaHallSeatsNotifier
+(IHubContext<CinemaHallSeatsHub, ICinemaHallSeats> context,
+    Serilog.ILogger logger) : ICinemaHallSeatsNotifier
 {
     public async Task SendCinemaHallSeatsState(Guid movieSession,
         ICollection<MovieSessionSeatDto> seats)
@@ -16,6 +18,7 @@ public class CinemaHallSeatsNotifier
         }
         catch (Exception e)
         {
+            logger.Error("CinemaHallSeatsNotifier {@e}", e);
             Console.WriteLine(e);
         }
     }

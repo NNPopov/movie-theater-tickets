@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.Security.Cryptography.X509Certificates;
+﻿using System.Security.Cryptography.X509Certificates;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -8,7 +7,7 @@ using Newtonsoft.Json.Linq;
 using Polly;
 using Polly.Retry;
 
-namespace CinemaTicketBooking.Api;
+namespace CinemaTicketBooking.Api.Authentication;
 
 public static class ConfigureKeyCloakAuthenticationServices
 {
@@ -23,8 +22,7 @@ public static class ConfigureKeyCloakAuthenticationServices
                     $"Attemp {retryCount}: Delay {delay}: {exception.Message}");
             });
     
-    public static IServiceCollection AddKeyCloakAuthentication(this IServiceCollection serviceCollection,
-        IConfiguration configuration)
+    public static IServiceCollection AddKeyCloakAuthentication(this IServiceCollection serviceCollection)
     {
         serviceCollection.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(async o =>
@@ -48,7 +46,6 @@ public static class ConfigureKeyCloakAuthenticationServices
                     ValidateSignatureLast = false,
                     IssuerSigningKey = rsaKey
                 };
-                //o.Authority = "https://localhost:9443";
                 o.Audience = identityOptions.IdentityClientId;
             });
 

@@ -44,8 +44,10 @@ class ShoppingCart extends Equatable {
         message: "Max number of Seats is $maxNumberOfSeats", statusCode: 500));
   }
 
-  void deleteSeat(ShoppingCartSeat seat) {
+  Either<Failure, void> deleteSeat(ShoppingCartSeat seat) {
     shoppingCartSeat.remove(seat);
+
+    return const Right(null);
   }
 
   @override

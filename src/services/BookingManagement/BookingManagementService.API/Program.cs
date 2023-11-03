@@ -1,6 +1,7 @@
 using System.Net;
 using System.Text.Json.Serialization;
 using CinemaTicketBooking.Api;
+using CinemaTicketBooking.Api.Authentication;
 using CinemaTicketBooking.Api.Database;
 using CinemaTicketBooking.Api.Endpoints.Common;
 using CinemaTicketBooking.Api.Sockets;
@@ -9,8 +10,11 @@ using CinemaTicketBooking.Application;
 using CinemaTicketBooking.Application.Abstractions;
 using CinemaTicketBooking.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Formatters;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Options;
 using Serilog;
+using Serilog.Core;
 using StackExchange.Redis;
 using ILogger = Serilog.ILogger;
 
@@ -24,6 +28,7 @@ builder.Services.Configure<HostOptions>(options =>
 });
 
 var services = builder.Services;
+
 
 Guid instanceId = Guid.NewGuid();
 
@@ -47,16 +52,6 @@ builder.Services.AddCors(options =>
         });
 });
 
-//builder.Services.AddSingleton<IValidateOptions<IdentityOptions>, IdentityOptionsValidator>();
-
-services.AddApplicationServices()
-    .AddInfrastructureServices(builder.Configuration)
-    .AddApiServices(builder.Configuration);
-
-
-services.AddScoped<ICinemaHallSeatsNotifier, CinemaHallSeatsNotifier>();
-services.AddScoped<IShoppingCartNotifier, ShoppingCartNotifier>();
-services.AddSingleton<IConnectionManager>(ConnectionManager.Factory());
 
 var identityOptionsSection =
     builder.Configuration.GetSection(IdentityOptions.SectionName);
@@ -64,53 +59,28 @@ var identityOptionsSection =
 IdentityOptions identityOptions = new IdentityOptions();
 
 identityOptionsSection.Bind(identityOptions);
-
 services.Configure<IdentityOptions>(identityOptionsSection);
 
-services.AddKeyCloakAuthentication(builder.Configuration);
+//builder.Services.AddSingleton<IValidateOptions<IdentityOptions>, IdentityOptionsValidator>();
+
+services.AddApplicationServices()
+    .AddInfrastructureServices(builder.Configuration)
+    .AddApiServices(builder.Configuration)
+    .AddWebSockets(builder.Configuration, logger)
+    .AddKeyCloakAuthentication();
 
 services.AddControllers(opt => { opt.OutputFormatters.RemoveType<HttpNoContentOutputFormatter>(); })
     .AddJsonOptions(options => { options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve; });
 
 services.AddSingleton<RedisSubscriber>();
-
 services.AddHostedService<RedisSubscriber>();
 
-builder
-    .Services
-    .AddSignalR()
-    .AddStackExchangeRedis(builder.Configuration.GetConnectionString("Redis") ?? throw new InvalidOperationException()
-        ,
-        o =>
-        {
-            o.Configuration.ChannelPrefix = "CinemaBooking";
-            o.ConnectionFactory = async writer =>
-            {
-                var config = new ConfigurationOptions
-                {
-                    
-                    EndPoints = { builder.Configuration.GetConnectionString("Redis") },
-                    AbortOnConnectFail = false,
-                    
-                };
-                //config.EndPoints.Add(IPAddress.Loopback, 0);
-                //config.SetDefaultPorts();
-                var connection = await ConnectionMultiplexer.ConnectAsync(config, writer);
-                connection.ConnectionFailed += (_, e) => { Console.WriteLine("Connection to Redis failed."); };
-            
-                if (!connection.IsConnected)
-                {
-                    Console.WriteLine("Did not connect to Redis.");
-                }
-                
-               
-            
-                return connection;
-            };
-        }
-    ); //.AddMessagePackProtocol();
-
 builder.Services.AddEndpointsApiExplorer();
+
+services.AddHealthChecks()
+    .AddNpgSql(builder.Configuration.GetConnectionString("BookingDbContext"))
+    .AddDbContextCheck<CinemaContext>("CinemaContext", HealthStatus.Unhealthy)
+    .AddRedis(builder.Configuration.GetConnectionString("Redis"), "Redis", HealthStatus.Unhealthy);
 
 var app = builder.Build();
 
@@ -121,31 +91,21 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseExceptionHandler(options => { });
-//app.UseSerilogRequestLogging();
+app.UseSerilogRequestLogging();
 app.UseRouting();
-
-
-//app.MapHub<ShoppingCartHub>("/shopping-cart-hub");
-
-
 app.UseCors(defaultCorsPolicy);
-//app.MapHub<CinemaHallSeatsHub>("/cinema-hall-seats-hub");
 
 app.UseHealthChecks("/Health");
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.UseEndpoints(endpoints =>
-{
-    endpoints.MapHub<CinemaHallSeatsHub>("/cinema-hall-seats-hub");
-});
+app.UseEndpoints(endpoints => { endpoints.MapHub<CinemaHallSeatsHub>("/cinema-hall-seats-hub"); });
 app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
 app.UseEndpoints(typeof(Program));
 
 
+//app.Migrate();
 SampleData.Initialize(app);
 
 
 app.Run();
-
-

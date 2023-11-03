@@ -7,6 +7,7 @@ import '../../../../core/buses/event_bus.dart';
 import '../../../shopping_carts/domain/usecases/create_shopping_cart.dart';
 import '../../domain/entities/seat.dart';
 import '../../domain/entities/shopping_cart.dart';
+import '../../domain/services/shopping_cart_service.dart';
 import '../../domain/usecases/assign_client_use_case.dart';
 import '../../domain/usecases/get_shopping_cart.dart';
 import '../../domain/usecases/reserve_seats.dart';
@@ -24,7 +25,9 @@ GetIt getIt = GetIt.instance;
 
 class ShoppingCartCubit extends Cubit<ShoppingCartState> {
   ShoppingCartCubit(
-      {CreateShoppingCart? createShoppingCartUseCase,
+      {ShoppingCartService? shoppingCartService,
+
+        CreateShoppingCartUseCase? createShoppingCartUseCase,
       SelectSeatUseCase? selectSeatUseCase,
       UnselectSeatUseCase? unselectSeatUseCase,
       GetShoppingCart? getShoppingCartUseCase,
@@ -32,8 +35,10 @@ class ShoppingCartCubit extends Cubit<ShoppingCartState> {
       AssignClientUseCase? assignClientUseCase,
       ReserveSeatsUseCase? reserveSeatsUseCase,
       EventBus? eventBus})
-      : _createShoppingCart =
-            createShoppingCartUseCase ?? getIt.get<CreateShoppingCart>(),
+      :
+        _shoppingCartService=shoppingCartService?? getIt<ShoppingCartService>(),
+        _createShoppingCart =
+            createShoppingCartUseCase ?? getIt.get<CreateShoppingCartUseCase>(),
         _selectSeatUseCase =
             selectSeatUseCase ?? getIt.get<SelectSeatUseCase>(),
         _unselectSeatUseCase =
@@ -72,8 +77,10 @@ class ShoppingCartCubit extends Cubit<ShoppingCartState> {
   late final StreamSubscription _streamSubscription;
   final storage = const FlutterSecureStorage();
 
+
+  late final ShoppingCartService _shoppingCartService;
   late final EventBus _eventBus;
-  late final CreateShoppingCart _createShoppingCart;
+  late final CreateShoppingCartUseCase _createShoppingCart;
   late final SelectSeatUseCase _selectSeatUseCase;
   late final UnselectSeatUseCase _unselectSeatUseCase;
   late final GetShoppingCart _getShoppingCart;
@@ -95,12 +102,10 @@ class ShoppingCartCubit extends Cubit<ShoppingCartState> {
   Future<void> createShoppingCart(int maxNumberOfSeats) async {
     emit(const CreatingShoppingCart());
 
-    var createShoppingCartCommand =
-        CreateShoppingCartCommand(maxNumberOfSeats: maxNumberOfSeats);
+    final result =  await
+    _shoppingCartService.createShoppingCart(maxNumberOfSeats);
 
-    final result = await _createShoppingCart(createShoppingCartCommand);
-
-    result.fold((failure) => emit(ShoppingCartError(failure.errorMessage)),
+     result.fold((failure) => emit(ShoppingCartError(failure.errorMessage)),
         (value) async {
       _hashId = value.hashId;
 
@@ -152,11 +157,11 @@ class ShoppingCartCubit extends Cubit<ShoppingCartState> {
     result.fold((l) => emit(ShoppingCartError(l.message)), (r) async {});
   }
 
-  Future<void> assignClient() async {
-    var result = await _assignClientUseCase();
-
-    result.fold((l) => emit(ShoppingCartError(l.message)), (r) async {});
-  }
+  // Future<void> assignClient() async {
+  //   // var result = await _assignClientUseCase();
+  //   //
+  //   // result.fold((l) => emit(ShoppingCartError(l.message)), (r) async {});
+  // }
 
   Future<void> completePurchase() async {
     var result = await _reserveSeatsUseCase();

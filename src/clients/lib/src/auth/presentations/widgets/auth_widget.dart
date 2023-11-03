@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../domain/abstruction/auth_event_bus.dart';
+import '../../domain/abstraction/auth_event_bus.dart';
 import '../cubit/auth_cubit.dart';
 
 
@@ -17,15 +17,6 @@ class _AuthWidget extends State<AuthWidget> {
   void initState() {
     super.initState();
   }
-
-  Future<void> logIn() async {
-    await context.read<AuthCubit>().logInt();
-  }
-
-  Future<void> logOut() async {
-    await context.read<AuthCubit>().logOut();
-  }
-
 
   @override
   Widget build(BuildContext context) {
@@ -48,11 +39,15 @@ class _AuthWidget extends State<AuthWidget> {
       builder: (BuildContext context, AuthStatus state) {
         if (state is AuthorizedAuthStatus) {
           return SizedBox(
-            width: 60,
-            height: 60,
-            child: TextButton(
+            width: 70,
+            height: 40,
+            child: TextButton(style: OutlinedButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(1),
+              ),
+            ),
               onPressed: ()  async {
-                await logOut();
+                await context.read<AuthCubit>().logOut();
               },
               child: const Text('Log Out'),
             ),
@@ -60,11 +55,15 @@ class _AuthWidget extends State<AuthWidget> {
         }
 
         return SizedBox(
-          width: 60,
-          height: 60,
-          child: TextButton(
+          width: 70,
+          height: 40,
+          child: TextButton(style: OutlinedButton.styleFrom(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(1),
+            ),
+          ),
             onPressed: () async {
-              await logIn();
+              await context.read<AuthCubit>().logInt();
             },
             child: const Text('Log In'),
           ),

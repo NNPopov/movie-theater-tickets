@@ -1,10 +1,9 @@
 import 'package:dio/dio.dart';
 
 
-import '../src/auth/domain/services/auth_service.dart';
-import '../src/helpers/constants.dart';
-
 import 'package:get_it/get_it.dart';
+
+import '../../src/auth/domain/services/auth_service.dart';
 
 GetIt getIt = GetIt.instance;
 

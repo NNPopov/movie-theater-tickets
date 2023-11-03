@@ -5,7 +5,7 @@ using CinemaTicketBooking.Domain.ShoppingCarts;
 
 namespace CinemaTicketBooking.Application.ShoppingCarts.Command.AssingClientCart;
 
-public record AssignClientCartCommand(Guid ShoppingCartId, Guid ClientId, Guid RequestId) : IdempotentRequest(RequestId),
+public record AssignClientCartCommand(Guid ShoppingCartId, Guid ClientId) : //IdempotentRequest(RequestId),
     IRequest<AssignClientCartResponse>;
 
 public class AssignClientCartCommandHandler : IRequestHandler<AssignClientCartCommand, AssignClientCartResponse>
@@ -24,8 +24,10 @@ public class AssignClientCartCommandHandler : IRequestHandler<AssignClientCartCo
         var cart = await _shoppingCartRepository.TryGetCart(request.ShoppingCartId);
 
         if (cart == null)
+        {
             throw new ContentNotFoundException(request.ShoppingCartId.ToString(), nameof(ShoppingCart));
-        
+        }
+
         cart.AssignClientId(request.ShoppingCartId);
         
         await _shoppingCartRepository.TrySetCart(cart);

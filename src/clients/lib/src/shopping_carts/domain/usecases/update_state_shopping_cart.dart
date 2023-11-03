@@ -14,19 +14,22 @@ GetIt getIt = GetIt.instance;
 
 class UpdateShoppingCartState
     extends FutureUsecaseWithParams<bool, ShoppingCart> {
-  UpdateShoppingCartState( {EventBus? eventBus, ShoppingCartLocalRepo? localRepo}):
-        _eventBus = eventBus ?? getIt.get<EventBus>(),
+  UpdateShoppingCartState(
+      {EventBus? eventBus, ShoppingCartLocalRepo? localRepo})
+      : _eventBus = eventBus ?? getIt.get<EventBus>(),
         _localRepo = localRepo ?? getIt.get<ShoppingCartLocalRepo>();
 
   late final EventBus _eventBus;
-  final ShoppingCartLocalRepo _localRepo;
+  late final ShoppingCartLocalRepo _localRepo;
 
   @override
   ResultFuture<bool> call(ShoppingCart params) async {
     try {
+
+      await _localRepo.setShoppingCart(params);
       _eventBus.send(ShoppingCartUpdateEvent(params));
 
-     await _localRepo.setShoppingCart(params);
+
       return const Right(true);
     } on Exception catch (e) {
       return Left(ServerFailure(message: e.toString(), statusCode: 500));

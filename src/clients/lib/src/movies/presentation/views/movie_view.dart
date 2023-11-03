@@ -2,14 +2,15 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:movie_theater_tickets/core/extensions/context_extensions.dart';
-import '../core/common/views/loading_view.dart';
-import '../core/utils/utils.dart';
-import 'auth/presentations/widgets/auth_widget.dart';
-import 'movie_session_view.dart';
-import 'movies/domain/entities/movie.dart';
+import '../../../../core/common/views/loading_view.dart';
+import '../../../../core/utils/utils.dart';
+import '../../../auth/presentations/widgets/auth_widget.dart';
+import '../../../globalisations_flutter/widgets/globalisation_widget.dart';
+import '../../../movie_sessions/movie_session_view.dart';
+import '../../domain/entities/movie.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-
-import 'movies/presentation/app/movie_theater_cubit.dart';
+import '../app/movie_theater_cubit.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class MoviesView extends StatefulWidget {
   const MoviesView({super.key});
@@ -70,7 +71,12 @@ class _MoviesView extends State<MoviesView> {
   }
 
   Widget BuildMovies(List<Movie> movies, BuildContext context) {
+
+    final Locale locale = Localizations.localeOf(context);
+
+
     return Scaffold(
+
       backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Row(
@@ -79,6 +85,7 @@ class _MoviesView extends State<MoviesView> {
           Expanded(
             child: Text("Movie"),
           ),
+          GlobalisationWidget(),
           AuthWidget(),
         ],
       ),
@@ -139,7 +146,7 @@ class _MoviesView extends State<MoviesView> {
                                 onPressed: () {
                                   movieSeat(rowSeats);
                                 },
-                                child: const Text('Select')),
+                                child: Text(AppLocalizations.of(context)!.select)),
                           )
                         ]),
                   );

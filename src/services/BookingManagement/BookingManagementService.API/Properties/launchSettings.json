@@ -12,6 +12,7 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "ConnectionStrings__Redis":"localhost:6379",
+        "ConnectionStrings__BookingDbContext":"Server=localhost;Port=5452;Database=booking_db;Username=booking_user;Password=password",
         "IdentityOptions__RedirectUrl": "https://localhost:7629/swagger/oauth2-redirect.html",
         "IdentityOptions__IssuerWellKnown": "http://localhost:8080/realms/come-and-watch/.well-known/openid-configuration",
         "IdentityOptions__ValidIssuer": "http://localhost:8080/realms/come-and-watch",

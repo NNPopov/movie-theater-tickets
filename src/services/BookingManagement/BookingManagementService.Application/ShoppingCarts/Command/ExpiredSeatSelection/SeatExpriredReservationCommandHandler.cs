@@ -48,7 +48,10 @@ public class SeatExpiredReservationEventHandler : INotificationHandler<SeatExpir
 
         if (cart is null)
         {
-            _logger.Warning( "Couldnot find ShoppingCart, Id:{@ShoppingCartId}", movieSessionSeat.ShoppingCartId);
+            _logger.Warning( "Couldnot find ShoppingCart. " +
+                             " movieSessionSeat:{@movieSessionSeat}, request:{@request}",
+                movieSessionSeat,
+                request);
             return;
         }
 
@@ -58,6 +61,15 @@ public class SeatExpiredReservationEventHandler : INotificationHandler<SeatExpir
         if (removeResult)
         {
             await _shoppingCartRepository.TrySetCart(cart);
+        }
+        else
+        {
+            _logger.Warning( "Seat could not be removed from the cart ShoppingCart, Id:{@ShoppingCartId}. " +
+                             " MovieSessionId:{@MovieSessionId}, SeatRow:{@SeatRow}, SeatNumber:{@SeatNumber}",
+                movieSessionSeat.ShoppingCartId,
+                request.MovieSessionId,
+                request.SeatRow,
+                request.SeatNumber);
         }
         
         await _shoppingCartNotifier.SendShoppingCartState(cart);

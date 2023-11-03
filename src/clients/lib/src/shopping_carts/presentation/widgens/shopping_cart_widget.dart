@@ -3,7 +3,10 @@ import 'package:flutter/material.dart';
 import '../../../../core/utils/utils.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../seats/domain/entities/seat.dart';
+import '../../domain/entities/seat.dart';
 import '../cubit/shopping_cart_cubit.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ShoppingCartWidget extends StatefulWidget {
   const ShoppingCartWidget({super.key});
@@ -60,11 +63,14 @@ class _ShoppingCartWidget extends State<ShoppingCartWidget> {
           var createdShoppingCard = state as ShoppingCartCurrentState;
           var shoppingCardId = createdShoppingCard.shoppingCard.id;
 
-          return SizedBox(
-            width: 190,
-            height: 200,
+          return Container(
+            width: 220,
+            height: 500,
+            margin: const EdgeInsets.all(6.0),
+            padding: const EdgeInsets.all(6.0),
             child: Column(children: [
               Text("Shopping Cart:  ${shoppingCardId}"),
+              Text(" ${createdShoppingCard.shoppingCard.status}"),
               ListView.builder(
                   shrinkWrap: true,
                   scrollDirection: Axis.vertical,
@@ -73,20 +79,53 @@ class _ShoppingCartWidget extends State<ShoppingCartWidget> {
                   itemBuilder: (context, rowIndex) {
                     var rowSeat = createdShoppingCard
                         .shoppingCard.shoppingCartSeat[rowIndex];
-                    return SizedBox(
-                        height: 22,
-                        width: 200,
-                        child: Text(
-                            "Seat Row ${rowSeat.seatRow}, Number ${rowSeat.seatNumber}"));
+                    return Container(
+                      width: 190,
+                      height: 65,
+                      alignment: Alignment.centerLeft,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: Colors.blue,
+                          width: 2,
+                        ),
+                      ),
+                      margin: const EdgeInsets.all(2.0),
+                      padding: const EdgeInsets.all(10.0),
+                      child: Row(
+                        children: [
+                          Container(
+                              height: 40,
+                              width: 140,
+                              padding: const EdgeInsets.all(10.0),
+                              child: Text(
+                                  "Row ${rowSeat.seatRow}, Number ${rowSeat.seatNumber}")),
+                          IconButton(
+                            icon: const Icon(Icons.delete),
+                            tooltip: AppLocalizations.of(context)!.remove,
+                            onPressed: () {
+                              onSeatUnselectPress(
+                                  rowSeat,
+                                  createdShoppingCard
+                                      .shoppingCard.movieSessionId!);
+                            },
+                          ),
+                        ],
+                      ),
+                    );
                   }),
-              if (createdShoppingCard.shoppingCard.shoppingCartSeat.isNotEmpty && !createdShoppingCard.shoppingCard.isAssigned!)
+              if (createdShoppingCard
+                      .shoppingCard.shoppingCartSeat.isNotEmpty &&
+                  !createdShoppingCard.shoppingCard.isAssigned!)
                 TextButton(
                   onPressed: () {
-                    onAssignClient();
+                    //  onAssignClient();
                   },
                   child: const Text('assignClient purchase'),
                 ),
-              if (createdShoppingCard.shoppingCard.shoppingCartSeat.isNotEmpty && createdShoppingCard.shoppingCard.isAssigned!)
+              if (createdShoppingCard
+                      .shoppingCard.shoppingCartSeat.isNotEmpty &&
+                  createdShoppingCard.shoppingCard.isAssigned!)
                 TextButton(
                   onPressed: () {
                     onCompletePurchase();
@@ -155,13 +194,17 @@ class _ShoppingCartWidget extends State<ShoppingCartWidget> {
     super.dispose();
   }
 
-  void onAssignClient() async {
-    await  context.read<ShoppingCartCubit>().assignClient();
-
+  Future<void> onSeatUnselectPress(
+      ShoppingCartSeat seat, String movieSessionId) async {
+    if (context.read<ShoppingCartCubit>().state is! ShoppingCartInitialState) {
+      await context.read<ShoppingCartCubit>().unSeatSelect(
+          row: seat.seatRow!,
+          seatNumber: seat.seatNumber!,
+          movieSessionId: movieSessionId);
+    }
   }
 
   void onCompletePurchase() async {
-
-  await  context.read<ShoppingCartCubit>().completePurchase();
+    await context.read<ShoppingCartCubit>().completePurchase();
   }
 }

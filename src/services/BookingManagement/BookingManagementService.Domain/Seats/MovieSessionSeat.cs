@@ -9,7 +9,11 @@ namespace CinemaTicketBooking.Domain.Seats;
 
 public class MovieSessionSeat : ValueObject, IAggregateRoot
 {
-    
+    private MovieSessionSeat()
+    {
+        HashId = string.Empty;
+    }
+
     [JsonConstructor]
     private MovieSessionSeat(Guid movieSessionId,
         short seatNumber, 
@@ -65,12 +69,13 @@ public class MovieSessionSeat : ValueObject, IAggregateRoot
     public void Select(Guid shoppingCartId, string hashId)
     {
         Ensure.NotEmpty(shoppingCartId, "The shoppingCartId is required.", nameof(shoppingCartId));
-
+        Ensure.NotEmpty(hashId, "The hashId is required.", nameof(hashId));
+        
         if (Status != SeatStatus.Available)
         {
             throw new ConflictException(nameof(MovieSessionSeat), this.ToString());
         }
-
+        
         if (shoppingCartId != ShoppingCartId && ShoppingCartId != Guid.Empty)
         {
             throw new InvalidOperationException("The seat is already selected by another shopping cart.");
@@ -81,6 +86,7 @@ public class MovieSessionSeat : ValueObject, IAggregateRoot
             ShoppingCartId = shoppingCartId;
             HashId = hashId;
         }
+        
 
         var currentStatus = Status;
 
@@ -172,12 +178,9 @@ public class MovieSessionSeat : ValueObject, IAggregateRoot
     [JsonIgnore]
     protected readonly List<IDomainEvent> _domainEvents = new List<IDomainEvent>();
 
-    /// <summary>
-    /// Gets the domain events. This collection is readonly.
-    /// </summary>
-    [JsonIgnore]
-    public IReadOnlyCollection<IDomainEvent> DomainEvents => _domainEvents.AsReadOnly();
-    
+
+    public IReadOnlyCollection<IDomainEvent> GetDomainEvents() => _domainEvents.AsReadOnly();
+
     /// <summary>
     /// Clears all the domain events from the <see cref="AggregateRoot"/>.
     /// </summary>

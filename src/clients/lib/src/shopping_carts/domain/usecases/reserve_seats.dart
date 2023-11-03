@@ -2,7 +2,7 @@ import 'package:movie_theater_tickets/src/shopping_carts/domain/usecases/select_
 import '../../../../core/common/usecase.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/utils/typedefs.dart';
-import '../../../auth/domain/abstruction/auth_event_bus.dart';
+import '../../../auth/domain/abstraction/auth_event_bus.dart';
 import '../../../auth/domain/services/auth_service.dart';
 import '../repos/shopping_cart_local_repo.dart';
 import '../repos/shopping_cart_repo.dart';
@@ -31,7 +31,7 @@ class ReserveSeatsUseCase extends FutureUsecaseWithoutParams<void> {
 
       return shoppingCartResult.fold((l) => Left(l), (shoppingCart) async {
         if (shoppingCart.isAssigned!) {
-          var result = await _repo.reserveSeatsUseCase(shoppingCart.id!);
+          var result = await _repo.reserveSeats(shoppingCart.id!);
           return result;
         }
 

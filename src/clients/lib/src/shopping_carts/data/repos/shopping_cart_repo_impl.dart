@@ -112,7 +112,7 @@ class ShoppingCartRepoImpl implements ShoppingCartRepo {
   }
 
   @override
-  ResultFuture<void> assignClientUseCase(String shoppingCartId) async {
+  ResultFuture<void> assignClient(String shoppingCartId) async {
     try {
       final response = await _client.put(
           '/api/shoppingcarts/${shoppingCartId}/assignclient',
@@ -126,7 +126,7 @@ class ShoppingCartRepoImpl implements ShoppingCartRepo {
   }
 
   @override
-  ResultFuture<void> reserveSeatsUseCase(String shoppingCartId) async {
+  ResultFuture<void> reserveSeats(String shoppingCartId) async {
     try {
       final response = await _client.post(
           '/api/shoppingcarts/${shoppingCartId}/reservations',

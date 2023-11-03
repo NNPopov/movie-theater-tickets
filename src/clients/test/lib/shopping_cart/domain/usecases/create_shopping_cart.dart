@@ -10,7 +10,7 @@ class MocShoppingCartRepo extends Mock implements ShoppingCartRepo {}
 class MockEventHub extends Mock implements EventHub {}
 
 void main() {
-  late CreateShoppingCart usecase;
+  late CreateShoppingCartUseCase usecase;
   late MocShoppingCartRepo repo;
   late  CreateShoppingCartCommand createShoppingCartCommand;
   late MockEventHub hub;
@@ -18,7 +18,7 @@ void main() {
   setUp(() {
     repo = MocShoppingCartRepo();
     hub = MockEventHub();
-    usecase = CreateShoppingCart(repo:repo,eventHub: hub);
+    usecase = CreateShoppingCartUseCase(repo:repo,eventHub: hub);
 
 
   });

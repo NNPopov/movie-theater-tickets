@@ -9,7 +9,7 @@ public class MovieSession : AggregateRoot
 {
     public Guid MovieId { get; private set; }
     public DateTime SessionDate { get; private set; }
-    public Guid AuditoriumId { get; private set; }
+    public Guid CinemaHallId { get; private set; }
 
     public int TicketsForSale { get; private set; }
 
@@ -34,7 +34,7 @@ public class MovieSession : AggregateRoot
 
     private MovieSession(Guid id,
         Guid movieId,
-        Guid auditoriumId,
+        Guid cinemaHallId,
         DateTime sessionDate,
       //  ICollection<SeatMovieSession> seats,
         bool isEnabled,
@@ -42,7 +42,7 @@ public class MovieSession : AggregateRoot
     {
         MovieId = movieId;
         SessionDate = sessionDate;
-        AuditoriumId = auditoriumId;
+        CinemaHallId = cinemaHallId;
        // Seats = seats;
         IsEnabled = isEnabled;
         TicketsForSale = ticketsForSale;

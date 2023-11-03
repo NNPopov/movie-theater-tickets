@@ -39,10 +39,10 @@ class SignalREventHub implements EventHub {
       requestTimeout: 50000,
     );
 
-    var baseUrl = dotenv.env["BASE_API_URL"].toString();
+    var baseUrl = dotenv.env["BASE_API_HOST"].toString();
 
     _hubConnection = HubConnectionBuilder()
-        .withUrl('${baseUrl}/cinema-hall-seats-hub',
+        .withUrl('$baseUrl/cinema-hall-seats-hub',
             options: httpConnectionOptions)
         .withAutomaticReconnect()
         .build();

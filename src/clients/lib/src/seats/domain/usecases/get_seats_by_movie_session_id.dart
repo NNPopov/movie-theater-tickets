@@ -50,10 +50,8 @@ class GetSeatsByMovieSessionId
 
       final rowSeats = groupBy(finalSeats, (seat) => seat.row)
           .values
-          .map((seats) =>
-      seats.toList()
-        ..sort((a, b) =>  a.row - b.row))
-          .toList();
+          .map((seats) => seats.toList()..sort((a, b) => a.seatNumber - b.seatNumber))
+          .toList()..sort((a, b) => a[0].row - b[0].row);
 
       //_eventBus.send(SeatsUpdateEvent(rowSeats));
 

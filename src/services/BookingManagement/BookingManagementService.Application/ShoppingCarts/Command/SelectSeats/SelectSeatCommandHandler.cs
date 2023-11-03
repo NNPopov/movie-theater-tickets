@@ -2,6 +2,7 @@
 using CinemaTicketBooking.Application.Exceptions;
 using CinemaTicketBooking.Domain.MovieSessions;
 using CinemaTicketBooking.Domain.ShoppingCarts;
+using Serilog;
 
 namespace CinemaTicketBooking.Application.ShoppingCarts.Command.SelectSeats;
 
@@ -20,14 +21,14 @@ public class SelectSeatCommandHandler : IRequestHandler<SelectSeatCommand, bool>
     private IDistributedLock _distributedLock;
     
     private readonly IShoppingCartNotifier _shoppingCartNotifier;
-
+    private ILogger _logger;
     public SelectSeatCommandHandler(
         IMovieSessionsRepository movieSessionsRepository,
         ISeatStateRepository seatStateRepository,
         IMovieSessionSeatRepository movieSessionSeatRepository,
         IShoppingCartRepository shoppingCartRepository,
         IDistributedLock distributedLock,
-        IShoppingCartNotifier shoppingCartNotifier)
+        IShoppingCartNotifier shoppingCartNotifier, ILogger logger)
     {
         _movieSessionsRepository = movieSessionsRepository;
         _seatStateRepository = seatStateRepository;
@@ -35,6 +36,7 @@ public class SelectSeatCommandHandler : IRequestHandler<SelectSeatCommand, bool>
         _shoppingCartRepository = shoppingCartRepository;
         _distributedLock = distributedLock;
         _shoppingCartNotifier = shoppingCartNotifier;
+        _logger = logger;
     }
 
     public async Task<bool> Handle(SelectSeatCommand request,
@@ -55,6 +57,7 @@ public class SelectSeatCommandHandler : IRequestHandler<SelectSeatCommand, bool>
 
             if (cart == null)
                 throw new ContentNotFoundException(request.ShoppingCartId.ToString(), nameof(ShoppingCart));
+            
 
             var movieSession = await _movieSessionsRepository
                 .GetWithTicketsByIdAsync(
@@ -86,10 +89,14 @@ public class SelectSeatCommandHandler : IRequestHandler<SelectSeatCommand, bool>
 
             if (movieSessionSeat is null)
                 throw new Exception();
+            
+            cart.AddSeats(new SeatShoppingCart(request.SeatRow, request.SeatNumber), request.MovieSessionId);
 
             movieSessionSeat.Select(request.ShoppingCartId, cart.HashId);
 
             await _movieSessionSeatRepository.UpdateAsync(movieSessionSeat, cancellationToken);
+            
+            _logger.Information("MovieSessionSeat was selected {@movieSessionSeat}", movieSessionSeat);
 
             // Step 3 Add seat to cart
             var seatReservationInfo = new SeatSelectedInfo
@@ -100,7 +107,7 @@ public class SelectSeatCommandHandler : IRequestHandler<SelectSeatCommand, bool>
                 ShoppingCartId = request.ShoppingCartId
             };
 
-            cart.AddSeats(new SeatShoppingCart(request.SeatRow, request.SeatNumber), request.MovieSessionId);
+
             var result =
                 await _seatStateRepository.SetAsync(seatReservationInfo, new TimeSpan(0, 0, 120));
 

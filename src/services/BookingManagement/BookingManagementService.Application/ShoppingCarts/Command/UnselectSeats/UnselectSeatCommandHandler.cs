@@ -2,6 +2,7 @@
 using CinemaTicketBooking.Application.Exceptions;
 using CinemaTicketBooking.Domain.MovieSessions;
 using CinemaTicketBooking.Domain.ShoppingCarts;
+using Serilog;
 
 namespace CinemaTicketBooking.Application.ShoppingCarts.Command.UnselectSeats;
 
@@ -19,19 +20,22 @@ public class UnselectSeatCommandHandler : IRequestHandler<UnselectSeatCommand, b
 
     private readonly IShoppingCartNotifier _shoppingCartNotifier;
 
+    private readonly ILogger _logger;
+
     public UnselectSeatCommandHandler(
         IMovieSessionsRepository movieSessionsRepository,
         ISeatStateRepository seatStateRepository,
-        //IMovieSessionSeatRepository movieSessionSeatRepository,
         IShoppingCartRepository shoppingCartRepository,
-        IPublisher publisher, IShoppingCartNotifier shoppingCartNotifier)
+        IPublisher publisher, 
+        IShoppingCartNotifier shoppingCartNotifier, 
+        ILogger logger)
     {
         _movieSessionsRepository = movieSessionsRepository;
         _seatStateRepository = seatStateRepository;
-        //_movieSessionSeatRepository = movieSessionSeatRepository;
         _shoppingCartRepository = shoppingCartRepository;
         _publisher = publisher;
         _shoppingCartNotifier = shoppingCartNotifier;
+        _logger = logger;
     }
 
     public async Task<bool> Handle(UnselectSeatCommand request,
@@ -77,28 +81,7 @@ public class UnselectSeatCommandHandler : IRequestHandler<UnselectSeatCommand, b
         //Step 3: return seat back to store 
 
 
-        // await _publisher.Publish(new MovieSessionSeatExpiredSelectionEvent(
-        //     MovieSessionId: request.MovieSessionId,
-        //     SeatRow:request.SeatRow,
-        //     SeatNumber: request.SeatRow,
-        //     ShoppingKartId: cart.Id), cancellationToken);
-
-
-        // var movieSessionSeat =
-        //     await _movieSessionSeatRepository.GetByIdAsync(request.MovieSessionId, request.SeatRow, request.SeatNumber, cancellationToken);
-        //
-        // if (movieSessionSeat is null)
-        //     throw new Exception();
-        //
-        // var result = movieSessionSeat.ReturnToAvailable();
-        //
-        // if (!result)
-        // {
-        //     return false;
-        // }
-        //
-        // await _movieSessionSeatRepository.UpdateAsync(movieSessionSeat, cancellationToken);
-
+        _logger.Information("Cart was updated {@Cart}", cart);
         return true;
     }
 }

@@ -5,9 +5,9 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace CinemaTicketBooking.Api.Sockets;
 
-public class CinemaHallSeatsHub(IConnectionManager connectionManager) : Hub<ICinemaHallSeats>
+public class CinemaHallSeatsHub(IConnectionManager connectionManager, 
+    Serilog.ILogger logger) : Hub<ICinemaHallSeats>
 {
-   
     public async Task JoinGroup(Guid movieSession)
     {
         try
@@ -16,21 +16,30 @@ public class CinemaHallSeatsHub(IConnectionManager connectionManager) : Hub<ICin
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            logger.Error("CinemaHallSeatsHub, JoinGroup: {@e}", e);
         }
     }
-    
-    
+
+
     public override Task OnDisconnectedAsync(Exception exception)
     {
-        var connectionId = Context.ConnectionId;
-        
-        connectionManager.RemoveByConnectionId(connectionId);
+        try
+        {
+            var connectionId = Context.ConnectionId;
+
+            connectionManager.RemoveByConnectionId(connectionId);
+            
+            logger.Warning("CinemaHallSeatsHub, OnDisconnectedAsync: {@exception}", exception);
+        }
+        catch (Exception e)
+        {
+            logger.Error("CinemaHallSeatsHub, OnDisconnectedAsync: {@e}", e);
+        }
 
         return base.OnDisconnectedAsync(exception);
     }
-    
-    
+
+
     public async Task SendCinemaHallSeatsState(Guid movieSession,
         ICollection<MovieSessionSeatDto> seats)
     {
@@ -40,29 +49,28 @@ public class CinemaHallSeatsHub(IConnectionManager connectionManager) : Hub<ICin
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            logger.Error("CinemaHallSeatsHub, SendCinemaHallSeatsState: {@e}", e);
         }
     }
-    
+
     public async Task RegisterShoppingCart(Guid shoppingCardId)
     {
         try
         {
             connectionManager.AddConnection(shoppingCardId, Context.ConnectionId);
-            
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            logger.Error("CinemaHallSeatsHub, RegisterShoppingCart: {@e}", e);
         }
     }
-    
+
     public async Task SentShoppingCartState(ShoppingCartDto shoppingCart)
     {
         try
         {
             var connections = connectionManager.GetConnectionId(shoppingCart.Id);
-            
+
             foreach (var connection in connections)
             {
                 await Clients.Client(connection).SentShoppingCartState(shoppingCart);
@@ -70,7 +78,7 @@ public class CinemaHallSeatsHub(IConnectionManager connectionManager) : Hub<ICin
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            logger.Error("CinemaHallSeatsHub, SentShoppingCartState: {@e}", e);
         }
     }
 }

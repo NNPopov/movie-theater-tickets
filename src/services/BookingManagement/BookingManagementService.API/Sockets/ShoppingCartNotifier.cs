@@ -8,7 +8,8 @@ namespace CinemaTicketBooking.Api.Sockets;
 
 public class ShoppingCartNotifier(IHubContext<CinemaHallSeatsHub, ICinemaHallSeats> context,
     IConnectionManager connectionManager, 
-    IMapper _mapper):IShoppingCartNotifier
+    IMapper mapper,
+    Serilog.ILogger logger):IShoppingCartNotifier
 {
     public async Task SendShoppingCartState(ShoppingCart shoppingCart)
     {
@@ -16,7 +17,7 @@ public class ShoppingCartNotifier(IHubContext<CinemaHallSeatsHub, ICinemaHallSea
         {
            var connections = connectionManager.GetConnectionId(shoppingCart.Id);
 
-           var shoppingCartDto = _mapper.Map<ShoppingCartDto>(shoppingCart);
+           var shoppingCartDto = mapper.Map<ShoppingCartDto>(shoppingCart);
            foreach (var connection in connections)
            {
                await context.Clients.Client(connection).SentShoppingCartState(shoppingCartDto);
@@ -26,6 +27,7 @@ public class ShoppingCartNotifier(IHubContext<CinemaHallSeatsHub, ICinemaHallSea
         }
         catch (Exception e)
         {
+            logger.Error("ShoppingCartNotifier {@e}", e);
             Console.WriteLine(e);
             // throw;
         }

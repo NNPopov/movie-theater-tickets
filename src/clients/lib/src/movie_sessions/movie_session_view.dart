@@ -2,19 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:movie_theater_tickets/core/extensions/context_extensions.dart';
 import 'package:movie_theater_tickets/src/seats_view.dart';
-import '../core/common/views/loading_view.dart';
-import '../core/utils/utils.dart';
-import 'auditorium_detail.dart';
-import 'auth/presentations/widgets/auth_widget.dart';
-import 'cinema_halls/presentation/cubit/cinema_hall_cubit.dart';
-import 'movie_detail.dart';
-import 'movie_sessions/domain/entities/movie_session.dart';
-import 'movie_sessions/presentation/cubit/movie_session_cubit.dart';
-import 'movies/domain/entities/movie.dart';
+import '../../core/common/views/loading_view.dart';
+import '../../core/utils/utils.dart';
+import '../auditorium_detail.dart';
+import '../auth/presentations/widgets/auth_widget.dart';
+import '../cinema_halls/presentation/cubit/cinema_hall_cubit.dart';
+import '../globalisations_flutter/widgets/globalisation_widget.dart';
+import '../movie_detail.dart';
+import 'domain/entities/movie_session.dart';
+import 'presentation/cubit/movie_session_cubit.dart';
+import '../movies/domain/entities/movie.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 
-import 'movies/presentation/app/movie_theater_cubit.dart';
+import '../movies/presentation/app/movie_theater_cubit.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 GetIt getIt = GetIt.instance;
 
@@ -90,6 +92,7 @@ class _MovieSessionsView extends State<MovieSessionsView> {
             Expanded(
               child: Text("Movie session"),
             ),
+            GlobalisationWidget(),
             AuthWidget(),
           ],
         ),
@@ -114,7 +117,7 @@ class _MovieSessionsView extends State<MovieSessionsView> {
                             key: const ValueKey('AuditoriumDetailView'),
                             create: (_) => CinemaHallCubit(),
                             child: AuditoriumDetailView(
-                                movieSession.auditoriumId)),
+                                movieSession.cinemaHallId)),
                         // Text('auditoriumId: ${movieSession.auditoriumId}'),
                         Text('Session Date: ${movieSession.sessionDate}'),
                         TextButton(
@@ -128,7 +131,7 @@ class _MovieSessionsView extends State<MovieSessionsView> {
                             onPressed: () {
                                pressMovieSession(movieSession);
                             },
-                            child: const Text('Select'))
+                            child: Text(AppLocalizations.of(context)!.select))
                       ],
                     ));
               }).toList(),

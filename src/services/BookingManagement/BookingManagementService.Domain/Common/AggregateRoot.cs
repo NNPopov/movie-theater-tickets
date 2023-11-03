@@ -5,10 +5,11 @@ namespace CinemaTicketBooking.Domain.Common;
 
 public interface IAggregateRoot
 {
+
     /// <summary>
     /// Gets the domain events. This collection is readonly.
     /// </summary>
-    IReadOnlyCollection<IDomainEvent> DomainEvents { get; }
+    IReadOnlyCollection<IDomainEvent> GetDomainEvents();
 
     /// <summary>
     /// Clears all the domain events from the <see cref="AggregateRoot"/>.
@@ -37,17 +38,15 @@ public abstract class AggregateRoot : Entity<Guid>, IAggregateRoot
     protected AggregateRoot(Guid id) : base(id)
     {
     }
-    
-    [JsonIgnore]
-    protected readonly List<IDomainEvent> _domainEvents = new List<IDomainEvent>();
+
+    [JsonIgnore] protected readonly List<IDomainEvent> _domainEvents = new List<IDomainEvent>();
 
     /// <summary>
     /// Gets the domain events. This collection is readonly.
     /// </summary>
-    [JsonIgnore]
-    public IReadOnlyCollection<IDomainEvent> DomainEvents => _domainEvents.AsReadOnly();
-    
-    /// <summary>
+    public IReadOnlyCollection<IDomainEvent> GetDomainEvents()=> _domainEvents.AsReadOnly();
+
+/// <summary>
     /// Clears all the domain events from the <see cref="AggregateRoot"/>.
     /// </summary>
     public void ClearDomainEvents() => _domainEvents.Clear();

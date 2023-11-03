@@ -13,10 +13,10 @@ public class SampleData
     {
         using var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope();
         var context = serviceScope.ServiceProvider.GetService<CinemaContext>();
-        var seatStateRepository = serviceScope.ServiceProvider.GetService<ISeatStateRepository>();
+       // var seatStateRepository = serviceScope.ServiceProvider.GetService<ISeatStateRepository>();
         
 
-        context.Database.EnsureCreated();
+       // context.Database.EnsureCreated();
 
         var movieId = Guid.Parse("E1FDE23C-E26D-44D2-88F8-202951255001");
         var movieId2 = Guid.Parse("E1FDE23C-E26D-44D2-88F8-202951255002");
@@ -134,10 +134,12 @@ public class SampleData
         context.Movies.Add(movie);
         context.Movies.Add(movie2);
         context.Movies.Add(movie3);
+        SafeSaveChanges(context);
         
         context.CinemaHalls.Add(redAuditorium);
         context.CinemaHalls.Add(blackAuditorium);
         context.CinemaHalls.Add(whiteAuditorium);
+        SafeSaveChanges(context);
 
         context.MovieSessions.Add(showtimeItem);
         context.MovieSessions.Add(showtimeItem2);
@@ -146,7 +148,7 @@ public class SampleData
         context.MovieSessions.Add(showtimeItem5);
         context.MovieSessions.Add(showtimeItem6);
 
-        context.SaveChanges();
+        SafeSaveChanges(context);
 
         CreateMovieSessionSeats(redAuditorium, showtimeItem, context);
         CreateMovieSessionSeats(redAuditorium, showtimeItem2, context);
@@ -154,8 +156,22 @@ public class SampleData
         CreateMovieSessionSeats(blackAuditorium, showtimeItem4, context);
         CreateMovieSessionSeats(whiteAuditorium, showtimeItem5, context);
         CreateMovieSessionSeats(whiteAuditorium, showtimeItem6, context);
+        SafeSaveChanges(context);
         
-        context.SaveChanges();
+    }
+
+    private static void SafeSaveChanges(CinemaContext context)
+    {
+        try
+        {
+            context.SaveChanges();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+
+        }
+      
     }
 
     private static void CreateMovieSessionSeats(CinemaHall redAuditorium, MovieSession showtimeItem, CinemaContext context)
@@ -164,7 +180,7 @@ public class SampleData
         {
             var showtimeSeat =  MovieSessionSeat.Create(showtimeItem.Id, seat.Row, seat.SeatNumber, 15);
 
-            context.ShowtimeSeats.Add(showtimeSeat);
+            context.MovieSessionSeats.Add(showtimeSeat);
         }
     }
 

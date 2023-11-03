@@ -1,0 +1,8 @@
+{
+  "select": "Elegir",
+   "screen":"Pantalla",
+   "remove":"Borrar",
+  "@helloWorld": {
+    "description": "Hola!"
+  }
+}

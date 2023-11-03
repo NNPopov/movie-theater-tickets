@@ -6,14 +6,12 @@ import '../entities/seat.dart';
 import '../entities/shopping_cart.dart';
 import '../repos/shopping_cart_local_repo.dart';
 import '../repos/shopping_cart_repo.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:dartz/dartz.dart';
 
 class SelectSeatUseCase
     extends FutureUsecaseWithParams<void, SelectSeatCommand> {
   const SelectSeatUseCase(this._repo, this._localRepo);
 
-  final storage = const FlutterSecureStorage();
   final ShoppingCartRepo _repo;
   final ShoppingCartLocalRepo _localRepo;
 

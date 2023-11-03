@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
+using CinemaTicketBooking.Application.Abstractions;
 using CinemaTicketBooking.Application.Common.Events;
 using CinemaTicketBooking.Domain.CinemaHalls;
 using CinemaTicketBooking.Domain.Common;
@@ -11,73 +12,111 @@ using CinemaTicketBooking.Domain.Seats;
 using CinemaTicketBooking.Infrastructure.Services;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Design;
 using Newtonsoft.Json;
+using Serilog;
 
 namespace CinemaTicketBooking.Infrastructure;
+//
+// public class BloggingContextFactory : IDesignTimeDbContextFactory<CinemaContext>
+// {
+//     public CinemaContext CreateDbContext(string[] args)
+//     {
+//         var optionsBuilder = new DbContextOptionsBuilder<CinemaContext>();
+//         optionsBuilder.UseNpgsql(
+//             "Server=localhost;Port=5452;Database=booking_db;Username=booking_user;Password=password");
+//         return new CinemaContext(optionsBuilder.Options);
+//     }
+// }
+
+public class DomainEventTracker : IDomainEventTracker
+{
+    private readonly IMediator _mediator;
+    private readonly ILogger _logger;
+
+    public DomainEventTracker(IMediator mediator, ILogger logger)
+    {
+        _mediator = mediator;
+        _logger = logger;
+    }
+
+    public async Task PublishDomainEvents( IAggregateRoot  aggregateRoot,CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var domainEvents =
+                aggregateRoot.GetDomainEvents().ToList();
+
+            aggregateRoot.ClearDomainEvents();
+
+            IEnumerable<Task> tasks = domainEvents.Select(domainEvent =>
+            {
+                var baseApplicationEventBuilder = typeof(BaseApplicationEvent<>).MakeGenericType(domainEvent.GetType());
+
+                var appEvent = Activator.CreateInstance(baseApplicationEventBuilder,
+                    domainEvent
+                );
+
+                _logger.Debug("Publish event: {AppEvent}, {@DomainEvent}", domainEvent.GetType().ToString(), domainEvent);
+                return _mediator.Publish(appEvent, cancellationToken);
+            });
+
+            await Task.WhenAll(tasks);
+        }
+        catch (Exception e)
+        {
+            _logger.Error("PublishDomainEvents {@e}", e);
+
+        }
+    }
+}
 
 public class CinemaContext : DbContext
 {
-    private readonly IMediator _mediator;
 
-    public CinemaContext(DbContextOptions<CinemaContext> options,
-        IMediator mediator) : base(options)
+    public CinemaContext(DbContextOptions<CinemaContext> options) : base(options)
     {
-        _mediator = mediator;
+        AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
     }
+
+    // public CinemaContext(DbContextOptions<CinemaContext> options) : base(options)
+    // {
+    // }
+
 
     public DbSet<CinemaHall> CinemaHalls { get; set; }
     public DbSet<MovieSession> MovieSessions { get; set; }
 
-    public DbSet<MovieSessionSeat> ShowtimeSeats { get; set; }
+    public DbSet<MovieSessionSeat> MovieSessionSeats { get; set; }
     public DbSet<Movie> Movies { get; set; }
-    public DbSet<TicketEntity> Tickets { get; set; }
-    
+    //public DbSet<TicketEntity> Tickets { get; set; }
+
     public DbSet<IdempotentRequest> IdempotentRequests { get; set; }
-    
+
+
+    public override int SaveChanges()
+    {
+        return base.SaveChanges();
+    }
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         var result = await base.SaveChangesAsync(cancellationToken);
         
-         await PublishDomainEvents(cancellationToken);
-
-         return result;
+        return result;
     }
 
-    private async Task PublishDomainEvents(CancellationToken cancellationToken)
-    {
-        var aggregateRoots = ChangeTracker
-            .Entries<AggregateRoot>()
-            .Where(entityEntry => entityEntry.Entity.DomainEvents.Any()).ToList();
-
-        var domainEvents =
-            aggregateRoots.SelectMany(entityEntry => entityEntry.Entity.DomainEvents);
-
-        aggregateRoots.ForEach(entityEntry => entityEntry.Entity.ClearDomainEvents());
-
-        IEnumerable<Task> tasks = domainEvents.Select(domainEvent =>
-        {
-            var baseApplicationEventBuilder = typeof(BaseApplicationEvent<>).MakeGenericType(domainEvent.GetType());
-
-            var appEvent = Activator.CreateInstance(baseApplicationEventBuilder,
-                domainEvent
-            );
-
-            return _mediator.Publish(appEvent, cancellationToken);
-        });
-
-        await Task.WhenAll(tasks);
-    }
+   
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Ignore<List<IDomainEvent>>();
-        
+
         modelBuilder.Entity<MovieSessionSeat>(build =>
             {
-                build.ToTable("showtime_seat");
+                build.ToTable("movie_session_seat");
                 build.HasKey(entry => new { Showtime = entry.MovieSessionId, entry.SeatRow, entry.SeatNumber })
-                    .HasName("pk_showtime_seat");
+                    .HasName("pk_movie_session_seat");
 
                 build.Property(entry => entry.SeatRow)
                     .HasColumnName("seat_row")
@@ -93,100 +132,142 @@ public class CinemaContext : DbContext
                     .HasColumnName("price");
                 build.Property(entry => entry.Status)
                     .HasColumnName("status");
+
+                build.Property(entry => entry.ShoppingCartId)
+                    .HasColumnName("shopping_cart_id");
+
+                build.Property(entry => entry.HashId)
+                    .HasColumnName("hash_id");
             }
         );
 
         modelBuilder.Entity<CinemaHall>(build =>
         {
-            build.ToTable("auditorium_entity");
-            build.HasKey(entry => entry.Id);
+            build.ToTable("cinema_hall");
+            build.HasKey(entry => entry.Id)
+                .HasName("pk_cinema_hall");
+
             build.Property(entry => entry.Id)
                 .HasColumnName("id")
                 .ValueGeneratedOnAdd();
+
+            build.Property(r => r.Name)
+                .HasColumnName("name");
+            build.Property(r => r.Description)
+                .HasColumnName("description");
+
             build.OwnsMany(d => d.Seats, o =>
             {
                 o.ToTable("seat");
                 o.WithOwner()
-                    .HasForeignKey("auditorium_id");
+                    .HasForeignKey(t => t.CinemaHallId)
+                    .HasConstraintName("fk_seat_cinema_hall_cinema_hall_id");
 
-                o.HasKey(k => new { k.AuditoriumId, k.Row, k.SeatNumber });
+                o.HasKey(k => new { AuditoriumId = k.CinemaHallId, k.Row, k.SeatNumber }).HasName("pk_seat");
 
-                o.Property(r => r.AuditoriumId)
-                    .HasColumnName("auditorium_id");
+                o.Property(r => r.CinemaHallId)
+                    .HasColumnName("cinema_hall_id");
+
                 o.Property(r => r.Row)
                     .HasColumnName("row");
+
                 o.Property(r => r.SeatNumber)
                     .HasColumnName("seat_number");
             });
-
-            // build.HasMany(entry => entry.MovieSessions)
-            //     .WithOne()
-            //     .HasForeignKey(entity => entity.AuditoriumId);
         });
 
         modelBuilder.Entity<ShowTimeSeatEntity>(build =>
         {
-            build.ToTable("show_time_seat_entity");
+            build.ToTable("show_time_seat");
             build
-                .HasKey(entry => new { entry.AuditoriumId, entry.Row, entry.SeatNumber });
-            // build
-            //     .HasOne(entry => entry.CinemaHall)
-            //     .WithMany(entry => entry.Seats)
-            //     .HasForeignKey(entry => entry.AuditoriumId);
+                .HasKey(entry => new { AuditoriumId = entry.CinemaHallId, entry.Row, entry.SeatNumber })
+                .HasName("kp_show_time_seat");
+
+            build.Property(r => r.CinemaHallId)
+                .HasColumnName("cinema_hall_id");
+            build.Property(r => r.Row)
+                .HasColumnName("row");
+            build.Property(r => r.SeatNumber)
+                .HasColumnName("seat_number");
         });
 
         modelBuilder.Entity<MovieSession>(build =>
         {
-            var opts = new JsonSerializerOptions { ReferenceHandler = ReferenceHandler.IgnoreCycles };
-
-            build.ToTable("showtime");
-            build.HasKey(entry => entry.Id);
-
-            // build.Property(t => t.Seats)
-            //     .HasColumnName("seats")
-            //     .HasConversion(
-            //         v => JsonConvert.SerializeObject(v),
-            //         v => JsonConvert.DeserializeObject<SeatMovieSession[]>(v));
+            build.ToTable("movie_session");
+            build.HasKey(entry => entry.Id)
+                .HasName("pk_movie_session_id");
 
             build.Property(entry => entry.Id)
                 .HasColumnName("id")
                 .ValueGeneratedNever();
 
-            // build.HasOne(entry => entry.Movie).WithMany(entry => entry.MovieSessions);
-            // build
-            //     .HasMany(entry => entry.Tickets)
-            //     .WithOne(entry => entry.ShoppingCartId)
-            //     .HasForeignKey(entry => entry.ShoppingCartId);
+            build.Property(r => r.CinemaHallId)
+                .HasColumnName("cinema_hall_id");
+
+            build.Property(r => r.IsEnabled)
+                .HasColumnName("is_enabled");
+
+            build.Property(r => r.MovieId)
+                .HasColumnName("movie_id");
+
+            build.Property(r => r.SoldTickets)
+                .HasColumnName("sold_tickets");
+
+            build.Property(r => r.TicketsForSale)
+                .HasColumnName("tickets_for_sale");
+
+            build.Property(r => r.SessionDate)
+                .HasColumnName("session_date");
         });
 
         modelBuilder.Entity<Movie>(build =>
         {
             build.ToTable("movie");
-            build.HasKey(entry => entry.Id);
+            build.HasKey(entry => entry.Id)
+                .HasName("pk_movie_id");
             build.Property(entry => entry.Id)
                 .HasColumnName("id")
                 .ValueGeneratedNever();
-            // build.OwnsMany(t => t.ShowtimeIds, i =>
-            // {
-            //     i.ToTable("showtime");
-            //     i.WithOwner().HasForeignKey("id");
-            // });
+
+            build.Property(r => r.Title)
+                .HasColumnName("title");
+
+            build.Property(r => r.ImdbId)
+                .HasColumnName("imdb_id");
+
+            build.Property(r => r.ReleaseDate)
+                .HasColumnName("release_date");
+
+            build.Property(r => r.Stars)
+                .HasColumnName("stars");
         });
 
-        modelBuilder.Entity<TicketEntity>(build =>
-        {
-            build.ToTable("ticket_entity");
-            build.HasKey(entry => entry.Id);
-            build.Property(entry => entry.Id)
-                .HasColumnName("id")
-                .ValueGeneratedOnAdd();
-        });
-        
+        // modelBuilder.Entity<TicketEntity>(build =>
+        // {
+        //     build.ToTable("ticket_entity");
+        //     
+        //     build.HasKey(entry => entry.Id).HasName("pk_ticket_entity");
+        //     
+        //     build.Property(entry => entry.Id)
+        //         .HasColumnName("id")
+        //         .ValueGeneratedOnAdd();
+        //     
+        //     build.Property(r => r.MovieSessionId)
+        //         .HasColumnName("movie_session_id");
+        //     
+        //     build.Property(r => r.MovieSession)
+        //         .HasColumnName("movie_session");
+        //     
+        //     build.Property(r => r.Paid)
+        //         .HasColumnName("paid");
+        // });
+
         modelBuilder.Entity<IdempotentRequest>(build =>
         {
             build.ToTable("idempotent_request");
-            
-            build.HasKey(entry => entry.Id);
+
+            build.HasKey(entry => entry.Id)
+                .HasName("pk_idempotent_request");
             build.Property(entry => entry.Id)
                 .HasColumnName("id")
                 .ValueGeneratedNever();
@@ -198,7 +279,5 @@ public class CinemaContext : DbContext
             build.Property(entry => entry.CreatedOnUtc)
                 .HasColumnName("created_on_utc");
         });
-        
-        
     }
 }

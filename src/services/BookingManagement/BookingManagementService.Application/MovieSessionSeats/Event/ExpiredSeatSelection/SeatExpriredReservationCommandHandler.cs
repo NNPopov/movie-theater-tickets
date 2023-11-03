@@ -1,18 +1,21 @@
 ﻿using CinemaTicketBooking.Application.Abstractions;
 using CinemaTicketBooking.Application.Common.Events;
 using CinemaTicketBooking.Domain.ShoppingCarts;
+using Serilog;
 
 namespace CinemaTicketBooking.Application.MovieSessionSeats.Event.ExpiredSeatSelection;
 
 public class MovieSessionSeatExpiredReservationEventHandler : INotificationHandler<BaseApplicationEvent<SeatRemovedFromShoppingCartDomainEvent>>
 {
     private readonly IMovieSessionSeatRepository _movieSessionSeatRepository;
-    
+    private readonly ILogger _logger;
 
     public MovieSessionSeatExpiredReservationEventHandler(
-        IMovieSessionSeatRepository movieSessionSeatRepository)
+        IMovieSessionSeatRepository movieSessionSeatRepository,
+        ILogger logger)
     {
         _movieSessionSeatRepository = movieSessionSeatRepository;
+        _logger = logger;
     }
 
     public async Task Handle(BaseApplicationEvent<SeatRemovedFromShoppingCartDomainEvent> request,
@@ -26,6 +29,12 @@ public class MovieSessionSeatExpiredReservationEventHandler : INotificationHandl
         {
             movieSessionSeat.ReturnToAvailable();
             await _movieSessionSeatRepository.UpdateAsync(movieSessionSeat, cancellationToken);
+            _logger.Information("MovieSessionSeat returned to Available:{@MovieSessionSeat}", movieSessionSeat);
+        }
+        else
+        {
+            _logger.Error("Couldnot find MovieSessionSeat, EventBody:{@eventBody}",
+                eventBody);
         }
     }
 }

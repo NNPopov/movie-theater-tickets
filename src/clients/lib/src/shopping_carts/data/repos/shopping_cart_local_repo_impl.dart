@@ -13,7 +13,7 @@ GetIt getIt = GetIt.instance;
 class ShoppingCartLocalRepoImpl implements ShoppingCartLocalRepo {
 
   final LocalStorage storage = LocalStorage('movie_theatre.json');
-  ShoppingCartRepoLocalImpl() {
+   ShoppingCartRepoLocalImpl() {
   }
 
   @override

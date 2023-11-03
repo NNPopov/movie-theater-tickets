@@ -1,28 +1,16 @@
 ﻿using System.Reflection;
 using CinemaTicketBooking.Api.Infrastructure;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
+using CinemaTicketBooking.Api.Sockets;
+using CinemaTicketBooking.Application.Abstractions;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
+using Serilog.Core;
+using StackExchange.Redis;
 
 namespace CinemaTicketBooking.Api;
 
-public static class ConfigureApiServices
+public static class ApiApplicationBuilderExtensions
 {
-    public static IServiceCollection AddApiServices(this IServiceCollection services, IConfiguration configuration)
-    {
-        services.AddAutoMapper(Assembly.GetExecutingAssembly());
-        services.AddDatabaseDeveloperPageExceptionFilter();
-        services.AddExceptionHandler<CustomExceptionHandler>();
-
-        services.AddSwaggerExtensions(configuration);
-
-        services
-            .AddHealthChecks()
-            .AddRedis(configuration.GetConnectionString("Redis"), "Redis", HealthStatus.Unhealthy);
-
-        return services;
-    }
-
     public static WebApplication UseSwaggerExtensions(this WebApplication webApplication,
         IConfiguration configuration)
     {
@@ -41,6 +29,22 @@ public static class ConfigureApiServices
 
         return webApplication;
     }
+}
+
+public static class ConfigureApiServices
+{
+    public static IServiceCollection AddApiServices(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddAutoMapper(Assembly.GetExecutingAssembly());
+        services.AddDatabaseDeveloperPageExceptionFilter();
+        services.AddExceptionHandler<CustomExceptionHandler>();
+
+        services.AddSwaggerExtensions(configuration);
+
+
+        return services;
+    }
+
 
     public static IServiceCollection AddSwaggerExtensions(this IServiceCollection serviceCollection,
         IConfiguration configuration)
@@ -48,9 +52,9 @@ public static class ConfigureApiServices
         serviceCollection.AddSwaggerGen(options =>
         {
             using var sp = serviceCollection.BuildServiceProvider();
-            var cofigs = sp.GetService<IOptions<IdentityOptions>>().Value;
+            var configs = sp.GetService<IOptions<IdentityOptions>>().Value;
 
-            if (cofigs is null)
+            if (configs is null)
                 throw new Exception("identityOptions is null");
 
             var scheme = new OpenApiSecurityScheme
@@ -61,10 +65,10 @@ public static class ConfigureApiServices
                 {
                     AuthorizationCode = new OpenApiOAuthFlow
                     {
-                        AuthorizationUrl = new Uri(cofigs.AuthorizationUrl),
-                        TokenUrl = new Uri(cofigs.TokenUrl),
+                        AuthorizationUrl = new Uri(configs.AuthorizationUrl),
+                        TokenUrl = new Uri(configs.TokenUrl),
 
-                        Scopes = cofigs.AuthScopes.Select(d => new KeyValuePair<string, string>(d, d))
+                        Scopes = configs.AuthScopes.Select(d => new KeyValuePair<string, string>(d, d))
                             .ToDictionary(d => d.Key, f => f.Value),
                     }
                 },
@@ -85,5 +89,52 @@ public static class ConfigureApiServices
             });
         });
         return serviceCollection;
+    }
+
+
+    public static IServiceCollection AddWebSockets(this IServiceCollection services,
+        IConfiguration configuration,
+        Logger logger)
+    {
+        services
+            .AddSignalR()
+            .AddStackExchangeRedis(
+                o =>
+                {
+                    o.Configuration.ChannelPrefix = "CinemaBooking";
+                    o.ConnectionFactory = async writer =>
+                    {
+                        var config = new ConfigurationOptions
+                        {
+                            EndPoints =
+                            {
+                                configuration.GetConnectionString("Redis") ??
+                                throw new InvalidOperationException()
+                            },
+                            AbortOnConnectFail = false,
+                        };
+
+                        var connection = await ConnectionMultiplexer.ConnectAsync(config, writer);
+                        connection.ConnectionFailed += (_, e) =>
+                        {
+                            logger.Error("Connection to Redis failed. {@E}", e);
+                        };
+
+                        if (!connection.IsConnected)
+                        {
+                            logger.Error("Did not connect to Redis");
+                        }
+
+                        return connection;
+                    };
+                }
+            );
+
+
+        services.AddScoped<ICinemaHallSeatsNotifier, CinemaHallSeatsNotifier>()
+            .AddScoped<IShoppingCartNotifier, ShoppingCartNotifier>()
+            .AddSingleton<IConnectionManager>(t => ConnectionManager.Factory(t.GetRequiredService<ICacheService>()));
+
+        return services;
     }
 }

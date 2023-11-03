@@ -7,8 +7,8 @@ import '../repos/shopping_cart_repo.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:dartz/dartz.dart';
 
-
-class UnselectSeatUseCase extends FutureUsecaseWithParams<void, SelectSeatCommand> {
+class UnselectSeatUseCase
+    extends FutureUsecaseWithParams<void, SelectSeatCommand> {
   const UnselectSeatUseCase(this._repo, this._localRepo);
 
   final storage = const FlutterSecureStorage();
@@ -17,24 +17,18 @@ class UnselectSeatUseCase extends FutureUsecaseWithParams<void, SelectSeatComman
 
   @override
   ResultFuture<void> call(SelectSeatCommand params) async {
-
     var shoppingCartResult = await _localRepo.getShoppingCart();
     return shoppingCartResult.fold((l) => Left(l), (shoppingCart) {
-
       if (shoppingCart.status != ShoppingCartStatus.InWork) {
         return const Right(null);
       }
 
       var resultAddSeat = shoppingCart.deleteSeat(params.seat);
 
-      // return resultAddSeat.fold(
-      //         (l) => Left(l),
-      //         (r) => _repo.unselectSeat(
-      //         shoppingCart, params.seat, params.movieSessionId));
-
-    return  _repo.unselectSeat(
-          shoppingCart, params.seat, params.movieSessionId);
+      return resultAddSeat.fold(
+          (l) => Left(l),
+          (r) => _repo.unselectSeat(
+              shoppingCart, params.seat, params.movieSessionId));
     });
   }
 }
-

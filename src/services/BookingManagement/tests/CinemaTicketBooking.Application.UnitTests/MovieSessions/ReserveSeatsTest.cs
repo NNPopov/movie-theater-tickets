@@ -41,7 +41,7 @@ public class MovieSessionSpecification
       
       movieSession.Should().NotBeNull();
       movieSession.MovieId.Should().Be(movieId);
-      movieSession.AuditoriumId.Should().Be(auditoriumId);
+      movieSession.CinemaHallId.Should().Be(auditoriumId);
       movieSession.SessionDate.Should().Be(sessionDate);
       
    }

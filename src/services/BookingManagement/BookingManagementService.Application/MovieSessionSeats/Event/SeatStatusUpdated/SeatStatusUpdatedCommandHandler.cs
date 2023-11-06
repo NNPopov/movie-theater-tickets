@@ -39,7 +39,7 @@ public class
             var movieSessionSeat = await _sender.Send(query, cancellationToken);
             
             
-            await _cinemaHallSeatsNotifier.SendCinemaHallSeatsState(eventBody.MovieSessionId,movieSessionSeat);
+            await _cinemaHallSeatsNotifier.SentCinemaHallSeatsState(eventBody.MovieSessionId,movieSessionSeat);
         }
         
     }

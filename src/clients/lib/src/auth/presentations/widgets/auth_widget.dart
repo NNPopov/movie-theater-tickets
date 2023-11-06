@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../domain/abstraction/auth_event_bus.dart';
 import '../cubit/auth_cubit.dart';
-
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class AuthWidget extends StatefulWidget {
   const AuthWidget({super.key});
@@ -49,7 +49,7 @@ class _AuthWidget extends State<AuthWidget> {
               onPressed: ()  async {
                 await context.read<AuthCubit>().logOut();
               },
-              child: const Text('Log Out'),
+              child:  Text(AppLocalizations.of(context)!.sing_out),
             ),
           );
         }
@@ -65,7 +65,7 @@ class _AuthWidget extends State<AuthWidget> {
             onPressed: () async {
               await context.read<AuthCubit>().logInt();
             },
-            child: const Text('Log In'),
+            child:  Text(AppLocalizations.of(context)!.sing_in),
           ),
         );
       });

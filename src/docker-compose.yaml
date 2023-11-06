@@ -9,9 +9,13 @@ volumes:
 services:
   nginx:
     image: nginx
-    depends_on:
-      - booking-management-api
-      - sso
+  booking-management-ui:
+    image: booking-management-ui:${MY_TAG:-latest}
+    build:
+      context: clients
+      dockerfile: Dockerfile
+    expose:
+      - "80"
   booking-management-postgres:
     image: postgres
     volumes:

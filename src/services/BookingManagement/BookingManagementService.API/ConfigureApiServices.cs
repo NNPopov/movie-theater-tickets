@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using CinemaTicketBooking.Api.Infrastructure;
 using CinemaTicketBooking.Api.Sockets;
+using CinemaTicketBooking.Api.Sockets.Abstractions;
 using CinemaTicketBooking.Application.Abstractions;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
@@ -97,7 +98,20 @@ public static class ConfigureApiServices
         Logger logger)
     {
         services
-            .AddSignalR()
+            .AddSignalR(
+                hubOptions => {
+                     hubOptions.KeepAliveInterval = TimeSpan.FromSeconds(20);
+                     hubOptions.MaximumReceiveMessageSize = 65_536;
+                     hubOptions.HandshakeTimeout = TimeSpan.FromSeconds(15);
+                     hubOptions.MaximumParallelInvocationsPerClient = 2;
+                     hubOptions.EnableDetailedErrors = true; 
+                    hubOptions.StreamBufferCapacity = 15;
+                    if (hubOptions?.SupportedProtocols is not null)
+                         {
+                         foreach (var protocol in hubOptions.SupportedProtocols)
+                             logger.Error($"SignalR supports {protocol} protocol.");
+                         }
+                     })
             .AddStackExchangeRedis(
                 o =>
                 {

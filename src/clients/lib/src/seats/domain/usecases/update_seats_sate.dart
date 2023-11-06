@@ -18,7 +18,7 @@ class UpdateSeatsState extends FutureUsecaseWithParams<bool, List<Seat>> {
   UpdateSeatsState({EventBus? eventBus})
       : _eventBus = eventBus ?? getIt.get<EventBus>();
 
-  late EventBus _eventBus;
+  late final EventBus _eventBus;
   final storage = const FlutterSecureStorage();
 
   @override

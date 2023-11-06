@@ -32,7 +32,7 @@ public class AssignClientCartCommandHandler : IRequestHandler<AssignClientCartCo
         
         await _shoppingCartRepository.TrySetCart(cart);
         
-        await _shoppingCartNotifier.SendShoppingCartState(cart);
+        await _shoppingCartNotifier.SentShoppingCartState(cart);
         
         return new AssignClientCartResponse(cart.Id);
     }

@@ -1,4 +1,5 @@
-﻿using CinemaTicketBooking.Application.Abstractions;
+﻿using CinemaTicketBooking.Api.Sockets.Abstractions;
+using CinemaTicketBooking.Application.Abstractions;
 using CinemaTicketBooking.Application.MovieSessions.Queries;
 using CinemaTicketBooking.Application.ShoppingCarts.Queries;
 using Microsoft.AspNetCore.SignalR;
@@ -6,17 +7,19 @@ using Microsoft.AspNetCore.SignalR;
 namespace CinemaTicketBooking.Api.Sockets;
 
 public class CinemaHallSeatsHub(IConnectionManager connectionManager, 
-    Serilog.ILogger logger) : Hub<ICinemaHallSeats>
+    Serilog.ILogger logger) : Hub<IBookingManagementStateUpdater>
 {
-    public async Task JoinGroup(Guid movieSession)
+    public async Task SubscribeToUpdateSeatsGroup(Guid movieSessionId)
     {
         try
         {
-            await Groups.AddToGroupAsync(Context.ConnectionId, movieSession.ToString());
+            await Groups.AddToGroupAsync(Context.ConnectionId, movieSessionId.ToString());
+            logger.Debug( "Client {@ConnectionId} was subscribed to MovieSessionSeats update {@MovieSessionId}",
+                Context.ConnectionId, movieSessionId);
         }
         catch (Exception e)
         {
-            logger.Error("CinemaHallSeatsHub, JoinGroup: {@e}", e);
+            logger.Error(e, "Failed to add to distribution group");
         }
     }
 
@@ -29,28 +32,14 @@ public class CinemaHallSeatsHub(IConnectionManager connectionManager,
 
             connectionManager.RemoveByConnectionId(connectionId);
             
-            logger.Warning("CinemaHallSeatsHub, OnDisconnectedAsync: {@exception}", exception);
+            logger.Warning(exception,"Client connectionId:{@ConnectionId} was disconnected", connectionId );
         }
         catch (Exception e)
         {
-            logger.Error("CinemaHallSeatsHub, OnDisconnectedAsync: {@e}", e);
+            logger.Error(e, "Failed to remove from distribution group");
         }
 
         return base.OnDisconnectedAsync(exception);
-    }
-
-
-    public async Task SendCinemaHallSeatsState(Guid movieSession,
-        ICollection<MovieSessionSeatDto> seats)
-    {
-        try
-        {
-            await Clients.Group(movieSession.ToString()).SentState(seats);
-        }
-        catch (Exception e)
-        {
-            logger.Error("CinemaHallSeatsHub, SendCinemaHallSeatsState: {@e}", e);
-        }
     }
 
     public async Task RegisterShoppingCart(Guid shoppingCardId)
@@ -58,27 +47,13 @@ public class CinemaHallSeatsHub(IConnectionManager connectionManager,
         try
         {
             connectionManager.AddConnection(shoppingCardId, Context.ConnectionId);
+            
+            logger.Debug("The customer has subscribed to shopping cart updates shoppingCartId:{@ShoppingCartId}",
+                shoppingCardId );
         }
         catch (Exception e)
         {
-            logger.Error("CinemaHallSeatsHub, RegisterShoppingCart: {@e}", e);
-        }
-    }
-
-    public async Task SentShoppingCartState(ShoppingCartDto shoppingCart)
-    {
-        try
-        {
-            var connections = connectionManager.GetConnectionId(shoppingCart.Id);
-
-            foreach (var connection in connections)
-            {
-                await Clients.Client(connection).SentShoppingCartState(shoppingCart);
-            }
-        }
-        catch (Exception e)
-        {
-            logger.Error("CinemaHallSeatsHub, SentShoppingCartState: {@e}", e);
+            logger.Error(e, "Failed to add AddConnection");
         }
     }
 }

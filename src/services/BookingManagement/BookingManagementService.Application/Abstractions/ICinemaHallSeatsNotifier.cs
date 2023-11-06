@@ -4,6 +4,6 @@ namespace CinemaTicketBooking.Application.Abstractions;
 
 public interface ICinemaHallSeatsNotifier
 {
-    Task SendCinemaHallSeatsState(Guid movieSession,
+    Task SentCinemaHallSeatsState(Guid movieSessionId,
         ICollection<MovieSessionSeatDto> seats);
 }

@@ -1,17 +1,15 @@
-﻿using CinemaTicketBooking.Application.Abstractions;
+﻿using CinemaTicketBooking.Api.Sockets.Abstractions;
+using CinemaTicketBooking.Application.Abstractions;
 
 namespace CinemaTicketBooking.Api.Sockets;
 
 public class ConnectionManager : IConnectionManager
 {
-    private ICacheService _cacheService;
-
-    private ICollection<(Guid shoppingCartId, string connectionId)> _signalRConnections;
+    private readonly ICacheService _cacheService;
 
     private ConnectionManager(ICacheService cacheService)
     {
         _cacheService = cacheService;
-        _signalRConnections = new List<(Guid shoppingCartId, string connectionId)>();
     }
     
     
@@ -27,7 +25,6 @@ public class ConnectionManager : IConnectionManager
         }
         
         _cacheService.Set($"hub:{shoppingCartId}", connectionIds, new TimeSpan(2, 0, 0));
-        //_signalRConnections.Add((shoppingCartId, connectionId));
     }
     
     public void RemoveByConnectionId(string connectionId)
@@ -41,8 +38,8 @@ public class ConnectionManager : IConnectionManager
     {
        _cacheService.Remove($"hub:{shoppingCartId}");
         
-       var item = _signalRConnections.FirstOrDefault(t => t.shoppingCartId == shoppingCartId);
-        _signalRConnections.Remove(item);
+       // var item = _signalRConnections.FirstOrDefault(t => t.shoppingCartId == shoppingCartId);
+       //  _signalRConnections.Remove(item);
     }
     
     public IEnumerable<string> GetConnectionId(Guid shoppingCartId)
@@ -51,7 +48,6 @@ public class ConnectionManager : IConnectionManager
 
         if (connectionIds != null) return connectionIds;
         return new List<string>();
-        // return _signalRConnections.Where(t => t.shoppingCartId == shoppingCartId).Select(t=>t.connectionId);
     }
 
 

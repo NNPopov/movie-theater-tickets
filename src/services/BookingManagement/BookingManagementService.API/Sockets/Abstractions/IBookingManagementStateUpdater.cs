@@ -1,11 +1,11 @@
 ﻿using CinemaTicketBooking.Application.MovieSessions.Queries;
 using CinemaTicketBooking.Application.ShoppingCarts.Queries;
 
-namespace CinemaTicketBooking.Api.Sockets;
+namespace CinemaTicketBooking.Api.Sockets.Abstractions;
 
-public interface ICinemaHallSeats
+public interface IBookingManagementStateUpdater
 {
-    Task SentState(ICollection<MovieSessionSeatDto> seats);
+    Task SentCinemaHallSeatsState(ICollection<MovieSessionSeatDto> seats);
     
     Task SentShoppingCartState(ShoppingCartDto shoppingCart);
 }

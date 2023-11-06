@@ -26,7 +26,10 @@ class CreateShoppingCartUseCase extends FutureUsecaseWithParams<
       CreateShoppingCartCommand params) async {
     var result = await _repo.createShoppingCart(params.maxNumberOfSeats);
 
-    result.fold((_) => {}, (value) async {
+    result.fold((_) => {
+
+
+    }, (value) async {
       await storage.write(
           key: Constants.SHOPPING_CARD_ID, value: value.shoppingCartId);
       await storage.write(

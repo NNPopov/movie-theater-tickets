@@ -76,7 +76,7 @@ public class UnselectSeatCommandHandler : IRequestHandler<UnselectSeatCommand, b
         }
 
 
-        await _shoppingCartNotifier.SendShoppingCartState(cart);
+        await _shoppingCartNotifier.SentShoppingCartState(cart);
 
         //Step 3: return seat back to store 
 

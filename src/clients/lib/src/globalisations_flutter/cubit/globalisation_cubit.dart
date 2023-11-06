@@ -1,4 +1,5 @@
 import 'dart:async' as domain;
+import 'dart:ui';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:get_it/get_it.dart';
@@ -6,22 +7,22 @@ import 'package:get_it/get_it.dart';
 GetIt getIt = GetIt.instance;
 
 class GlobalisationCubit extends Cubit<LanguagenStatus> {
-  GlobalisationCubit() : super(CurrentLanguagenStatus('en')) {}
+  GlobalisationCubit() : super(const CurrentLanguagenStatus(Locale('en'))) {}
 
-  domain.Future<void> setLanguage(String lang) async {
+  domain.Future<void> setLanguage(Locale lang) async {
     emit(CurrentLanguagenStatus(lang));
   }
 }
 
 abstract class LanguagenStatus extends Equatable {
-  const LanguagenStatus(this.language);
+  const LanguagenStatus(this.locate);
 
-  final String language;
+  final Locale locate;
 
   @override
-  List<Object> get props => [language];
+  List<Object> get props => [locate];
 }
 
 class CurrentLanguagenStatus extends LanguagenStatus {
-  const CurrentLanguagenStatus(super.language);
+  const CurrentLanguagenStatus(super.locate);
 }

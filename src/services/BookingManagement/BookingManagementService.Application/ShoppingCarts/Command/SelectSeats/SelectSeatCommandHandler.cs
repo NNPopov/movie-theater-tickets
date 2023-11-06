@@ -119,7 +119,7 @@ public class SelectSeatCommandHandler : IRequestHandler<SelectSeatCommand, bool>
             await _shoppingCartRepository.TrySetCart(cart);
         }
         
-        await _shoppingCartNotifier.SendShoppingCartState(cart);
+        await _shoppingCartNotifier.SentShoppingCartState(cart);
 
         // return result
         return true;

@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-import '../../../main.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../cubit/globalisation_cubit.dart';
@@ -19,24 +16,20 @@ class _GlobalisationWidget extends State<GlobalisationWidget> {
   void initState() {
     super.initState();
   }
-   List<Locale> list = AppLocalizations.supportedLocales;
 
+  List<Locale> list = AppLocalizations.supportedLocales;
 
   @override
   Widget build(BuildContext context) {
     Locale dropdownValue = list.first;
-
+  return  BlocBuilder<GlobalisationCubit, LanguagenStatus>(
+        builder: (context, lang) {
     return DropdownButton<Locale>(
-      value: dropdownValue,
-      //icon: const Icon(Icons.arrow_downward),
+      value: lang.locate,
       elevation: 16,
-      style:  TextStyle(color: Colors.black),
-      // underline: Container(
-      //   height: 2,
-      //   color: Colors.deepPurpleAccent,
-      // ),
+      style: TextStyle(color: Colors.black),
       onChanged: (Locale? value) {
-        context.read<GlobalisationCubit>().setLanguage(value!.languageCode);
+        context.read<GlobalisationCubit>().setLanguage(value!);
       },
       items: list.map<DropdownMenuItem<Locale>>((Locale value) {
         return DropdownMenuItem<Locale>(
@@ -45,7 +38,9 @@ class _GlobalisationWidget extends State<GlobalisationWidget> {
         );
       }).toList(),
     );
+    });
   }
+
   @override
   void dispose() {
     super.dispose();

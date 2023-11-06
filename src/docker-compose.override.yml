@@ -15,12 +15,24 @@ services:
     ports:
       - "9443:443"
       - "9442:80"
+    depends_on:
+      - booking-management-api
+      - booking-management-ui
+      - sso
   booking-management-postgres:
     ports:
       - "5452:5432"
+  booking-management-ui:
+    environment:
+      TARGET_ENV: development
+    ports:
+      - "8084:80"
+    depends_on:
+      - booking-management-api
+      - sso
   booking-management-api:
     environment:
-      - IdentityOptions__ValidIssuer=http://localhost:8080/realms/come-and-watch
+      - IdentityOptions__ValidIssuer=https://localhost:9443/realms/come-and-watch
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:80
       - ConnectionStrings__Redis=cinema-booking-cache:6379

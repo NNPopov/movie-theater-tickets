@@ -1,4 +1,4 @@
-﻿namespace CinemaTicketBooking.Api.Sockets;
+﻿namespace CinemaTicketBooking.Api.Sockets.Abstractions;
 
 public interface IConnectionManager
 {

@@ -156,35 +156,57 @@ class _ShoppingCartWidget extends State<ShoppingCartWidget> {
   }
 
   void onCreateShoppingCart() {
+  if(  context.read<ShoppingCartCubit>().state.shoppingCard.status != null)
+    {return;}
+
     showDialog<String>(
         context: context,
-        builder: (BuildContext context) => BlocProvider(
+        builder:
+            (BuildContext context) => BlocProvider(
               create: (BuildContext context) => ShoppingCartCubit(),
-              child: AlertDialog(
-                title: const Text('Shopping cart'),
-                content: const Text(
-                    'Select the number of seats you are going to buy'),
-                actions: <Widget>[
-                  TextFormField(
-                    controller: _maxSeatsController,
-                    keyboardType: TextInputType.phone,
-                  ),
-                  TextButton(
-                    onPressed: () => Navigator.pop(context, 'Cancel'),
-                    child: const Text('Cancel'),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pop(context, _maxSeatsController.text);
-                    },
-                    child: const Text('Create a shopping card'),
-                  ),
-                ],
+              child:
+
+
+        BlocConsumer<ShoppingCartCubit, ShoppingCartState>(
+                builder:  (BuildContext context, ShoppingCartState state)  {
+                  return AlertDialog(
+                    title: const Text('Shopping cart'),
+                    content: const Text(
+                        'Select the number of seats you are going to buy'),
+                    actions: <Widget>[
+                      TextFormField(
+                        controller: _maxSeatsController,
+                        keyboardType: TextInputType.phone,
+                      ),
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, 'Cancel'),
+                        child: const Text('Cancel'),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          var maxNumberOfSeats = int.parse(_maxSeatsController.text!);
+                          context.read<ShoppingCartCubit>().createShoppingCart(maxNumberOfSeats);
+
+
+                        },
+                        child: const Text('Create a shopping card'),
+                      ),
+                    ],
+                  );
+                }, listener: (BuildContext context, ShoppingCartState state) {
+
+            if (state is ShoppingCartCurrentState) {
+              Navigator.pop(context, _maxSeatsController.text);
+            }
+        },
               ),
-            )).then((valueFromDialog) {
+            )
+
+    ).then((valueFromDialog) {
       if (valueFromDialog != "Cancel") {
-        var maxNumberOfSeats = int.parse(valueFromDialog!);
-        context.read<ShoppingCartCubit>().createShoppingCart(maxNumberOfSeats);
+       context.read<ShoppingCartCubit>().GetShoppingCartIfExits();
+        // var maxNumberOfSeats = int.parse(valueFromDialog!);
+        // context.read<ShoppingCartCubit>().createShoppingCart(maxNumberOfSeats);
       }
     });
   }

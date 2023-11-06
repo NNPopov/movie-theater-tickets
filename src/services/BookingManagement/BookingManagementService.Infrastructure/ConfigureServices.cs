@@ -1,4 +1,6 @@
 ﻿using CinemaTicketBooking.Application.Abstractions;
+using CinemaTicketBooking.Application.Abstractions.Services;
+using CinemaTicketBooking.Infrastructure.Data;
 using CinemaTicketBooking.Infrastructure.Repositories;
 using CinemaTicketBooking.Infrastructure.Services;
 using Microsoft.AspNetCore.Builder;
@@ -28,11 +30,11 @@ public static class ConfigureServices
         services.AddScoped<IDomainEventTracker, DomainEventTracker>();
         services.AddSingleton<ICacheService, RedisCacheService>();
 
-        
+        var redisConnectionString = configuration.GetConnectionString("Redis");
         var multiplexer = ConnectionMultiplexer.Connect(
             new ConfigurationOptions
             {
-                EndPoints = { configuration.GetConnectionString("Redis") },
+                EndPoints = { redisConnectionString },
                 AbortOnConnectFail = false
             }
         );
@@ -43,14 +45,19 @@ public static class ConfigureServices
         {
             Console.WriteLine("Did not connect to Redis.");
         }
-        services.AddSingleton<IConnectionMultiplexer>(multiplexer);        
+        services.AddSingleton<IConnectionMultiplexer>(multiplexer);
+
+
+        var cinemaContextConnectionString = configuration.GetConnectionString("BookingDbContext");
         
         services.AddDbContextPool<CinemaContext>(options =>
         {
-            options.UseNpgsql(configuration.GetConnectionString("BookingDbContext"))
+            options.UseNpgsql(cinemaContextConnectionString)
                 .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking)
                 .EnableSensitiveDataLogging();
         });
+        services.AddScoped<ICinemaContext>(provider => provider.GetRequiredService<CinemaContext>());
+        services.AddScoped<SampleDataInitializer>();
         
 
         return services;

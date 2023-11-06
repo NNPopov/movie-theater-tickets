@@ -13,16 +13,19 @@ public class CreateShoppingCartCommandHandler : IRequestHandler<CreateShoppingCa
 
     private readonly IMovieSessionSeatRepository _movieSessionSeatRepository;
     private readonly IShoppingCartRepository _shoppingCartRepository;
+    private readonly IShoppingCartNotifier _shoppingCartNotifier;
 
     public CreateShoppingCartCommandHandler(
         ISeatStateRepository seatStateRepository,
         IMovieSessionSeatRepository movieSessionSeatRepository,
-        IShoppingCartRepository shoppingCartRepository)
+        IShoppingCartRepository shoppingCartRepository, 
+        IShoppingCartNotifier shoppingCartNotifier)
     {
         _seatStateRepository = seatStateRepository;
 
         _movieSessionSeatRepository = movieSessionSeatRepository;
         _shoppingCartRepository = shoppingCartRepository;
+        _shoppingCartNotifier = shoppingCartNotifier;
     }
 
     public async Task<CreateShoppingCartResponse> Handle(CreateShoppingCartCommand request,
@@ -30,6 +33,8 @@ public class CreateShoppingCartCommandHandler : IRequestHandler<CreateShoppingCa
     {
         var shoppingCart = ShoppingCart.Create(request.MaxNumberOfSeats);
         await _shoppingCartRepository.TrySetCart(shoppingCart);
+        
+        await _shoppingCartNotifier.SentShoppingCartState(shoppingCart);
 
         return new CreateShoppingCartResponse(shoppingCart.Id, shoppingCart.HashId);
     }

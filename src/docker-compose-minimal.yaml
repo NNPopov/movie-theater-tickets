@@ -1,42 +1,50 @@
-version: '3.4'
+version: '3.8'
 
 services:
-  api0:
-    container_name: cinema-booking-api0
-    build:
-      context: .
-      dockerfile: src/CinemaTicketBooking.API/Dockerfile
-    expose:
-      - "80"
-      - "443"
+  nginx:
+    volumes:
+      - ./build/nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./build/nginx/localhost.crt:/etc/ssl/certs/localhost.crt
+      - ./build/nginx/localhost.key:/etc/ssl/private/localhost.key
     ports:
-      - "7172:80"
-      - "7443:443"
+      - "9442:80"
+    depends_on:
+      - booking-management-api
+      - sso
+  booking-management-postgres:
+    ports:
+      - "5452:5432"
+  booking-management-api:
     environment:
+      - IdentityOptions__ValidIssuer=http://localhost:8080/realms/come-and-watch
       - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_URLS=https://+:443;http://+:80
-      - ASPNETCORE_Kestrel__Certificates__Default__Password=password
-      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
+      - ASPNETCORE_URLS=http://+:80
       - ConnectionStrings__Redis=cinema-booking-cache:6379
+      - ConnectionStrings__BookingDbContext=Server=booking-management-postgres;Port=5432;Database=booking_db;Username=booking_user;Password=password
       - SERILOG__USING__1:Serilog.Sinks.Seq
       - SERILOG__WRITETO__1__ARGS__SERVERURL=http://logger-seq
       - SERILOG__WRITETO__1__NAME=Seq
-    volumes:
-      - ~/.aspnet/https:/https:ro
-    depends_on:
-      - cinema-booking-cache
-      - logger-seq
+    ports:
+        - "9453:80"
   cinema-booking-cache:
-    image: redis:latest
-    restart: unless-stopped
     ports:
       - "6379:6379"
-    command: >
-      - notify-keyspace-events Ex
   logger-seq:
-    image: datalust/seq:latest
     ports:
-      - '8172:80'
-      - '8443:5341'
-    environment:
-      ACCEPT_EULA: Y
+      - "8172:80"
+      - "8443:5341"
+  sso-postgres:
+    ports:
+      - "5442:5432"
+  sso:
+    volumes:
+      - ./build/keycloak:/opt/keycloak/data/import:ro
+    command:
+      - start-dev
+      - --http-port=80
+      - --proxy edge
+      - --import-realm
+    ports:
+      - "8080:80"
+      - "18443:443"
+      - "19990:9990"

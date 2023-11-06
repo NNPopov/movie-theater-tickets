@@ -1,5 +1,6 @@
 ﻿using CinemaTicketBooking.Application.Abstractions;
 using CinemaTicketBooking.Domain.CinemaHalls;
+using CinemaTicketBooking.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace CinemaTicketBooking.Infrastructure.Repositories

@@ -13,8 +13,11 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get_it/get_it.dart';
 
 import '../../../core/buses/event_bus.dart';
+import 'package:logging/logging.dart';
 
 GetIt getIt = GetIt.instance;
+
+
 
 class SignalREventHub implements EventHub {
   SignalREventHub(
@@ -36,15 +39,28 @@ class SignalREventHub implements EventHub {
   Future subscribe() async {
     final httpConnectionOptions = HttpConnectionOptions(
       logMessageContent: true,
-      requestTimeout: 50000,
+      requestTimeout: 60000,
     );
+
+    Logger.root.level = Level.ALL;
+// Writes the log messages to the console
+    Logger.root.onRecord.listen((LogRecord rec) {
+      print('${rec.level.name}: ${rec.time}: ${rec.message}');
+    });
+
+// If you want only to log out the message for the higer level hub protocol:
+    final hubProtLogger = Logger("SignalR - hub");
+// If youn want to also to log out transport messages:
+    final transportProtLogger = Logger("SignalR - transport");
 
     var baseUrl = dotenv.env["BASE_API_HOST"].toString();
 
     _hubConnection = HubConnectionBuilder()
-        .withUrl('$baseUrl/cinema-hall-seats-hub',
+        .withUrl('$baseUrl/ws/cinema-hall-seats-hub',
             options: httpConnectionOptions)
-        .withAutomaticReconnect()
+        .withAutomaticReconnect(retryDelays: [2000, 5000, 10000, 20000, 40000])
+        .configureLogging(transportProtLogger)
+       // .withAutomaticReconnect()
         .build();
 
     _hubConnection.onreconnected(({connectionId}) {
@@ -58,9 +74,9 @@ class SignalREventHub implements EventHub {
       print("onclose called");
     });
 
-    _hubConnection.on("SentShoppingCartState", _shoppingCartStateUpdate);
+    _hubConnection.on('SentShoppingCartState', _shoppingCartStateUpdate);
 
-    _hubConnection.on("SentState", _seatsStateUpdate);
+    _hubConnection.on('SentCinemaHallSeatsState', _seatsStateUpdate);
 
     if (_hubConnection.state != HubConnectionState.Connected) {
       await _hubConnection.start();
@@ -97,7 +113,7 @@ class SignalREventHub implements EventHub {
     if (_hubConnection.state != HubConnectionState.Connected) {
       await _hubConnection.start();
     }
-    await _hubConnection.invoke('JoinGroup', args: <Object>[movieSessionId]);
+    await _hubConnection.invoke('SubscribeToUpdateSeatsGroup', args: <Object>[movieSessionId]);
   }
 
   @override

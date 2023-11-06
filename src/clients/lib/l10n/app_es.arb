@@ -2,6 +2,8 @@
   "select": "Elegir",
    "screen":"Pantalla",
    "remove":"Borrar",
+   "sing_in":"Iniciar sesión",
+   "sing_out":"Cerrar sesión",
   "@helloWorld": {
     "description": "Hola!"
   }

@@ -8,6 +8,15 @@ import 'package:get_it/get_it.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:logger/logger.dart';
+
+var logger = Logger(
+  printer: PrettyPrinter(),
+);
+
+var loggerNoStack = Logger(
+  printer: PrettyPrinter(methodCount: 0),
+);
 
 final getIt = GetIt.instance;
 
@@ -31,13 +40,13 @@ class MyApp extends StatelessWidget {
             builder: (context, lang) {
           return MaterialApp(
             title: 'Flutter Demo',
-            localizationsDelegates: [
+            localizationsDelegates: const [
               AppLocalizations.delegate,
               GlobalMaterialLocalizations.delegate,
               GlobalWidgetsLocalizations.delegate,
               GlobalCupertinoLocalizations.delegate,
             ],
-            locale: Locale(lang.language),
+            locale: lang.locate,
             supportedLocales: AppLocalizations.supportedLocales,
             theme: ThemeData(
               colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
@@ -46,9 +55,7 @@ class MyApp extends StatelessWidget {
                   bodyLarge: TextStyle(fontSize: 8.0, color: Colors.black)),
             ),
             onGenerateRoute: generateRoute,
-            //)
           );
-          //);
         }));
   }
 }

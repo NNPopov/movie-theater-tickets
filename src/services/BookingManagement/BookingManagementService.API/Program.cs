@@ -2,13 +2,14 @@ using System.Net;
 using System.Text.Json.Serialization;
 using CinemaTicketBooking.Api;
 using CinemaTicketBooking.Api.Authentication;
-using CinemaTicketBooking.Api.Database;
 using CinemaTicketBooking.Api.Endpoints.Common;
 using CinemaTicketBooking.Api.Sockets;
 using CinemaTicketBooking.Api.WorkerServices;
 using CinemaTicketBooking.Application;
 using CinemaTicketBooking.Application.Abstractions;
 using CinemaTicketBooking.Infrastructure;
+using CinemaTicketBooking.Infrastructure.Data;
+using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
@@ -91,7 +92,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseExceptionHandler(options => { });
-app.UseSerilogRequestLogging();
+//app.UseSerilogRequestLogging();
 app.UseRouting();
 app.UseCors(defaultCorsPolicy);
 
@@ -99,13 +100,31 @@ app.UseHealthChecks("/Health");
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.UseEndpoints(endpoints => { endpoints.MapHub<CinemaHallSeatsHub>("/cinema-hall-seats-hub"); });
+//app.UseEndpoints(endpoints => { endpoints.MapHub<CinemaHallSeatsHub>("/ws/cinema-hall-seats-hub"); });
+
+app.MapHub<CinemaHallSeatsHub>("/ws/cinema-hall-seats-hub",
+options =>
+     {
+     options.Transports =
+         HttpTransportType.WebSockets |
+         HttpTransportType.LongPolling |
+         HttpTransportType.ServerSentEvents;
+     options.CloseOnAuthenticationExpiration = false;
+     options.ApplicationMaxBufferSize = 65_536;
+     options.TransportMaxBufferSize = 65_536;
+     options.MinimumProtocolVersion = 0;
+      // Advanced SignalR configuration 89
+     options.TransportSendTimeout = TimeSpan.FromSeconds(20);
+     options.WebSockets.CloseTimeout = TimeSpan.FromSeconds(30);
+     options.LongPolling.PollTimeout = TimeSpan.FromSeconds(20);
+     }
+);
 app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
 app.UseEndpoints(typeof(Program));
 
 
 //app.Migrate();
-SampleData.Initialize(app);
+await app.InitialiseDatabaseAsync();
 
 
 app.Run();

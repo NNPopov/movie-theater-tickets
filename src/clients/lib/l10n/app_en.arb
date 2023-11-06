@@ -2,6 +2,8 @@
   "select": "Select",
   "screen":"Screen",
   "remove":"Remove",
+  "sing_in":"Sing in",
+  "sing_out":"Sing out",
   "@helloWorld": {
     "description": "The conventional newborn programmer greeting"
   }

@@ -39,8 +39,8 @@ class ShoppingCartRepoImpl implements ShoppingCartRepo {
       as CreateShoppingCartResponse;
 
       return Right(shoppingCart);
-    } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message, statusCode: e.statusCode));
+    } on Exception catch (e) {
+      return Left(ServerFailure(message: e.toString(), statusCode: e.toString()));
     }
   }
 
@@ -51,7 +51,7 @@ class ShoppingCartRepoImpl implements ShoppingCartRepo {
 
       if (response.statusCode == 204) {
         return const Left(DataFailure(
-            message: "shoppingCartId doesnot exist", statusCode: 204));
+            message: "shoppingCartId doesn't exist", statusCode: 204));
       }
 
       var primaryClientAccount = json.decode(response.toString());

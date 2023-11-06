@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using CinemaTicketBooking.Api.Sockets.Abstractions;
 using CinemaTicketBooking.Application.Abstractions;
 using CinemaTicketBooking.Application.ShoppingCarts.Queries;
 using CinemaTicketBooking.Domain.ShoppingCarts;
@@ -6,12 +7,12 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace CinemaTicketBooking.Api.Sockets;
 
-public class ShoppingCartNotifier(IHubContext<CinemaHallSeatsHub, ICinemaHallSeats> context,
+public class ShoppingCartNotifier(IHubContext<CinemaHallSeatsHub, IBookingManagementStateUpdater> context,
     IConnectionManager connectionManager, 
     IMapper mapper,
     Serilog.ILogger logger):IShoppingCartNotifier
 {
-    public async Task SendShoppingCartState(ShoppingCart shoppingCart)
+    public async Task SentShoppingCartState(ShoppingCart shoppingCart)
     {
         try
         {
@@ -23,13 +24,12 @@ public class ShoppingCartNotifier(IHubContext<CinemaHallSeatsHub, ICinemaHallSea
                await context.Clients.Client(connection).SentShoppingCartState(shoppingCartDto);
            }
             
-
+           logger.Debug("Updates have been sent to subscribers of shoppingCartId:{@ShoppingCartId}",
+               shoppingCart.Id );
         }
         catch (Exception e)
         {
-            logger.Error("ShoppingCartNotifier {@e}", e);
-            Console.WriteLine(e);
-            // throw;
+            logger.Error(e, "Failed to sent ShoppingCartState");
         }
     }
 }

@@ -72,6 +72,6 @@ public class SeatExpiredReservationEventHandler : INotificationHandler<SeatExpir
                 request.SeatNumber);
         }
         
-        await _shoppingCartNotifier.SendShoppingCartState(cart);
+        await _shoppingCartNotifier.SentShoppingCartState(cart);
     }
 }

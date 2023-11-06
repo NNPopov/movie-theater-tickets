@@ -1,8 +1,6 @@
 ﻿using CinemaTicketBooking.Application.Abstractions;
-using CinemaTicketBooking.Application.Common.Events;
-using CinemaTicketBooking.Domain.Common;
 using CinemaTicketBooking.Domain.Seats;
-using MediatR;
+using CinemaTicketBooking.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Serilog;
@@ -41,7 +39,7 @@ public class MovieSessionSeatRepository : IMovieSessionSeatRepository
         }
         catch (Exception e)
         {
-            _logger.Error("Update MovieSessionSeatRepository {@e}", e);
+            _logger.Error(e, "Failed to update MovieSessionSeats");
         }
 
 

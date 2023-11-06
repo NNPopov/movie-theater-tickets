@@ -1,44 +1,26 @@
-using System.Security.Cryptography.X509Certificates;
+using System.Net;
 using System.Text.Json.Serialization;
 using CinemaTicketBooking.Api;
-using CinemaTicketBooking.Api.Database;
+using CinemaTicketBooking.Api.Authentication;
 using CinemaTicketBooking.Api.Endpoints.Common;
+using CinemaTicketBooking.Api.Sockets;
 using CinemaTicketBooking.Api.WorkerServices;
 using CinemaTicketBooking.Application;
+using CinemaTicketBooking.Application.Abstractions;
 using CinemaTicketBooking.Infrastructure;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+using CinemaTicketBooking.Infrastructure.Data;
+using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.Mvc.Formatters;
-using Microsoft.IdentityModel.Tokens;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Options;
 using Serilog;
+using Serilog.Core;
+using StackExchange.Redis;
 using ILogger = Serilog.ILogger;
 
-//using Newtonsoft.Json;
-
-//using ILogger = Serilog.ILogger;
-
+var defaultCorsPolicy = "defaultCorsPolicy";
 var builder = WebApplication.CreateBuilder(args);
-
-//var localhostHTTPUrls = builder.Configuration.GetSection("ASPNETCORE_URLS").Value.Split(";");
-
-// var localhostHTTPSports = localhostHTTPUrls.Select(t => (Int32.Parse(t!.Split(new Char[] { ':' })[2]),
-//     t!.Split(new Char[] { ':' })[0]));
-
-
-// builder.WebHost.ConfigureKestrel((context, options) =>
-// {
-//     foreach (var localhostHTTPSport in localhostHTTPSports)
-//     {
-//         options.Listen(IPAddress.Any, localhostHTTPSport.Item1, listenOptions =>
-//         {
-//             listenOptions.Protocols = HttpProtocols.Http1AndHttp2AndHttp3;
-//             if (localhostHTTPSport.Item2.Equals("https", StringComparison.CurrentCultureIgnoreCase))
-//                 listenOptions.UseHttps();
-//         });
-//     }
-// });
-//builder.WebHost.UseUrls();
 
 builder.Services.Configure<HostOptions>(options =>
 {
@@ -47,6 +29,7 @@ builder.Services.Configure<HostOptions>(options =>
 });
 
 var services = builder.Services;
+
 
 Guid instanceId = Guid.NewGuid();
 
@@ -58,10 +41,18 @@ var logger = new LoggerConfiguration()
 builder.Logging.AddSerilog(logger);
 builder.Services.AddSingleton<ILogger>(logger);
 
-builder.Services.AddApplicationServices();
-builder.Services.AddInfrastructureServices(builder.Configuration);
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: defaultCorsPolicy,
+        policy =>
+        {
+            policy.WithOrigins(builder.Configuration.GetSection("AllowedOrigins").Get<string[]>())
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials();
+        });
+});
 
-services.AddApiServices(builder.Configuration);
 
 var identityOptionsSection =
     builder.Configuration.GetSection(IdentityOptions.SectionName);
@@ -69,41 +60,28 @@ var identityOptionsSection =
 IdentityOptions identityOptions = new IdentityOptions();
 
 identityOptionsSection.Bind(identityOptions);
-
 services.Configure<IdentityOptions>(identityOptionsSection);
 
-services.AddKeyCloakAuthentication(builder.Configuration);
+//builder.Services.AddSingleton<IValidateOptions<IdentityOptions>, IdentityOptionsValidator>();
 
+services.AddApplicationServices()
+    .AddInfrastructureServices(builder.Configuration)
+    .AddApiServices(builder.Configuration)
+    .AddWebSockets(builder.Configuration, logger)
+    .AddKeyCloakAuthentication();
 
-services.AddControllers(opt => // or AddMvc()
-    {
-        // remove formatter that turns nulls into 204 - No Content responses
-        // this formatter breaks Angular's Http response JSON parsing
-        opt.OutputFormatters.RemoveType<HttpNoContentOutputFormatter>();
-    })
-    // .AddNewtonsoftJson(x =>
-    //     x.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore)
+services.AddControllers(opt => { opt.OutputFormatters.RemoveType<HttpNoContentOutputFormatter>(); })
     .AddJsonOptions(options => { options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve; });
 
-services.AddHostedService<RedisWorker>();
-
-
-// builder.ConfigureServices(services =>
-//     {
-//         services.Configure<HostOptions>(options =>
-//         {
-//             options.ServicesStartConcurrently = true;
-//             options.ServicesStopConcurrently = true;
-//         });
-//         services.AddHostedService<WorkerOne>();
-//         services.AddHostedService<WorkerTwo>();
-//     })
-//     .Build();
-
-//services.AddHttpClient();
+services.AddSingleton<RedisSubscriber>();
+services.AddHostedService<RedisSubscriber>();
 
 builder.Services.AddEndpointsApiExplorer();
 
+services.AddHealthChecks()
+    .AddNpgSql(builder.Configuration.GetConnectionString("BookingDbContext"))
+    .AddDbContextCheck<CinemaContext>("CinemaContext", HealthStatus.Unhealthy)
+    .AddRedis(builder.Configuration.GetConnectionString("Redis"), "Redis", HealthStatus.Unhealthy);
 
 var app = builder.Build();
 
@@ -113,18 +91,40 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerExtensions(builder.Configuration);
 }
 
-//app.UseHttpsRedirection();
-
+app.UseExceptionHandler(options => { });
 //app.UseSerilogRequestLogging();
 app.UseRouting();
+app.UseCors(defaultCorsPolicy);
+
 app.UseHealthChecks("/Health");
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseExceptionHandler(options => { });
+
+//app.UseEndpoints(endpoints => { endpoints.MapHub<CinemaHallSeatsHub>("/ws/cinema-hall-seats-hub"); });
+
+app.MapHub<CinemaHallSeatsHub>("/ws/cinema-hall-seats-hub",
+options =>
+     {
+     options.Transports =
+         HttpTransportType.WebSockets |
+         HttpTransportType.LongPolling |
+         HttpTransportType.ServerSentEvents;
+     options.CloseOnAuthenticationExpiration = false;
+     options.ApplicationMaxBufferSize = 65_536;
+     options.TransportMaxBufferSize = 65_536;
+     options.MinimumProtocolVersion = 0;
+      // Advanced SignalR configuration 89
+     options.TransportSendTimeout = TimeSpan.FromSeconds(20);
+     options.WebSockets.CloseTimeout = TimeSpan.FromSeconds(30);
+     options.LongPolling.PollTimeout = TimeSpan.FromSeconds(20);
+     }
+);
 app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
 app.UseEndpoints(typeof(Program));
 
-SampleData.Initialize(app);
+
+//app.Migrate();
+await app.InitialiseDatabaseAsync();
+
 
 app.Run();
-

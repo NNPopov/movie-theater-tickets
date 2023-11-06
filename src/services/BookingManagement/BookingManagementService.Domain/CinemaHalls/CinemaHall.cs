@@ -24,7 +24,7 @@ public class CinemaHall : AggregateRoot
 
         var auditoriumSeats = seats.Select(t => new SeatEntity
         {
-            AuditoriumId = id,
+            CinemaHallId = id,
             Row = t.Row,
             SeatNumber = t.SeatNumber
         }).ToList();

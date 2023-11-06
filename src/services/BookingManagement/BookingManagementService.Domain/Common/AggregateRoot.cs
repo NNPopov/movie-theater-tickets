@@ -3,7 +3,27 @@ using Newtonsoft.Json;
 
 namespace CinemaTicketBooking.Domain.Common;
 
-public abstract class AggregateRoot : Entity<Guid>
+public interface IAggregateRoot
+{
+
+    /// <summary>
+    /// Gets the domain events. This collection is readonly.
+    /// </summary>
+    IReadOnlyCollection<IDomainEvent> GetDomainEvents();
+
+    /// <summary>
+    /// Clears all the domain events from the <see cref="AggregateRoot"/>.
+    /// </summary>
+    void ClearDomainEvents();
+
+    /// <summary>
+    /// Adds the specified <see cref="IDomainEvent"/> to the <see cref="AggregateRoot"/>.
+    /// </summary>
+    /// <param name="domainEvent">The domain event.</param>
+    void AddDomainEvent(IDomainEvent domainEvent);
+}
+
+public abstract class AggregateRoot : Entity<Guid>, IAggregateRoot
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="AggregateRoot"/> class.
@@ -18,17 +38,15 @@ public abstract class AggregateRoot : Entity<Guid>
     protected AggregateRoot(Guid id) : base(id)
     {
     }
-    
-    [JsonIgnore]
-    protected readonly List<IDomainEvent> _domainEvents = new List<IDomainEvent>();
+
+    [JsonIgnore] protected readonly List<IDomainEvent> _domainEvents = new List<IDomainEvent>();
 
     /// <summary>
     /// Gets the domain events. This collection is readonly.
     /// </summary>
-    [JsonIgnore]
-    public IReadOnlyCollection<IDomainEvent> DomainEvents => _domainEvents.AsReadOnly();
-    
-    /// <summary>
+    public IReadOnlyCollection<IDomainEvent> GetDomainEvents()=> _domainEvents.AsReadOnly();
+
+/// <summary>
     /// Clears all the domain events from the <see cref="AggregateRoot"/>.
     /// </summary>
     public void ClearDomainEvents() => _domainEvents.Clear();
@@ -37,5 +55,5 @@ public abstract class AggregateRoot : Entity<Guid>
     /// Adds the specified <see cref="IDomainEvent"/> to the <see cref="AggregateRoot"/>.
     /// </summary>
     /// <param name="domainEvent">The domain event.</param>
-    protected void AddDomainEvent(IDomainEvent domainEvent) => _domainEvents.Add(domainEvent);
+    public void AddDomainEvent(IDomainEvent domainEvent) => _domainEvents.Add(domainEvent);
 }

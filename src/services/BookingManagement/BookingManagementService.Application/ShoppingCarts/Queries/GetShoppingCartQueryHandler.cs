@@ -45,11 +45,14 @@ public class ShoppingCartDto
     
     public IReadOnlyList<SeatShoppingCart> Seats { get; set; }
     
+    public bool IsAssigned { get; set; }
+    
     private class Mapping : Profile
     {
         public Mapping()
         {
-            CreateMap<ShoppingCart, ShoppingCartDto>();
+            CreateMap<ShoppingCart, ShoppingCartDto>()
+                .ForMember(dst => dst.IsAssigned, opt => opt.MapFrom(src => src.ClientId != Guid.Empty));
         }
     }
 }

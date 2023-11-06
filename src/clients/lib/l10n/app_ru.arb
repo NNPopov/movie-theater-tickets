@@ -1,0 +1,10 @@
+{
+  "select": "Выбрать",
+  "screen":"Экран",
+  "remove":"Удалить",
+  "sing_in":"Войти",
+  "sing_out":"Выйти",
+  "@helloWorld": {
+    "description": "Привет"
+  }
+}

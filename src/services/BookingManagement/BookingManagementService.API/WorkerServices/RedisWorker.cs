@@ -6,44 +6,35 @@ using ILogger = Serilog.ILogger;
 
 namespace CinemaTicketBooking.Api.WorkerServices;
 
-public sealed class RedisWorker : IHostedLifecycleService 
+public sealed class RedisSubscriber : BackgroundService
 {
     private readonly ILogger _logger;
     private readonly IConnectionMultiplexer _redis;
     private readonly IServiceScopeFactory _serviceScopeFactory;
+    private readonly ISubscriber _subscriber;
+    private readonly IMediator _mediator;
 
-    public RedisWorker(ILogger logger, IConnectionMultiplexer redis, IServiceScopeFactory serviceScopeFactory)
+    public RedisSubscriber(ILogger logger, IConnectionMultiplexer redis, IServiceScopeFactory serviceScopeFactory)
     {
         _redis = redis;
         _serviceScopeFactory = serviceScopeFactory;
         _logger = logger;
+
+        _subscriber = _redis.GetSubscriber();
+
+        _mediator = _serviceScopeFactory
+            .CreateScope()
+            .ServiceProvider
+            .GetRequiredService<IMediator>();
     }
-
-    protected  async Task ExecuteAsync(CancellationToken stoppingToken)
-    {
-        Subscriber();
-
-        while (!stoppingToken.IsCancellationRequested)
-        {
-            //_logger.Information("Worker running at: {time}", DateTimeOffset.Now);
-            await Task.Delay(1_000, stoppingToken);
-        }
-    }
-
-    private void Subscriber()
+    
+    protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
         string EXPIRED_KEYS_CHANNEL = "__keyevent@0__:expired";
 
         try
         {
-            ISubscriber subscriber = _redis.GetSubscriber();
-
-            var mediator = _serviceScopeFactory
-                .CreateScope()
-                .ServiceProvider
-                .GetRequiredService<IMediator>();
-
-            subscriber.Subscribe(EXPIRED_KEYS_CHANNEL, async (channel, key) =>
+            await _subscriber.SubscribeAsync(EXPIRED_KEYS_CHANNEL, async (channel, key) =>
             {
                 var keys = key.ToString().Split(':');
 
@@ -55,60 +46,34 @@ public sealed class RedisWorker : IHostedLifecycleService
                         var showtimeId = Guid.Parse(keys[1]);
                         var row = short.Parse(keys[2]);
                         var seat = short.Parse(keys[3]);
-                        // var shopingKartId = Guid.Parse(keys[4]);
 
                         var seatExpiredReservationEvent = new SeatExpiredSelectionEvent(
                             MovieSessionId: showtimeId,
                             SeatRow: row,
                             SeatNumber: seat,
-                            ShoppingKartId: Guid.Empty); // shopingKartId);
+                            ShoppingKartId: Guid.Empty); 
 
-                        await mediator.Publish(seatExpiredReservationEvent);
-                        //Console.WriteLine($"EXPIRED: {key}");
+                        await _mediator.Publish(seatExpiredReservationEvent, cancellationToken);
+
                         _logger.Warning($"EXPIRED: {key}");
                         break;
                     default:
+
+                        _logger.Error($"EXPIRED: {key}");
                         break;
                 }
-
             });
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
-            //throw;
+            _logger.Error(e, "Error processing message");
         }
-    }
 
-    public Task StartAsync(CancellationToken cancellationToken)
-    {
-        return Task.CompletedTask;
-    }
 
-    public Task StopAsync(CancellationToken cancellationToken)
-    {
-        return Task.CompletedTask;
-    }
-
-    public Task StartedAsync(CancellationToken cancellationToken)
-    {
-        Subscriber();
-        
-        return Task.CompletedTask;
-    }
-
-    public Task StartingAsync(CancellationToken cancellationToken)
-    {
-        return Task.CompletedTask;
-    }
-
-    public Task StoppedAsync(CancellationToken cancellationToken)
-    {
-        return Task.CompletedTask;
-    }
-
-    public Task StoppingAsync(CancellationToken cancellationToken)
-    {
-        return Task.CompletedTask;
+        while (!cancellationToken.IsCancellationRequested)
+        {
+            //    _logger.Error("Redis IsConnected: {@IsConnected}, status {@GetStatus}", _subscriber.IsConnected(), _redis.GetStatus());
+            await Task.Delay(1000, cancellationToken);
+        }
     }
 }

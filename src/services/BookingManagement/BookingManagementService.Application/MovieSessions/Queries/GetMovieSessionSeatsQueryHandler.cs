@@ -43,18 +43,30 @@ public class GetMovieSessionSeatsQueryHandler : IRequestHandler<GetMovieSessionS
         
         var soldSeats = seatsInAuditorium.Count(t => t.Status == SeatStatus.Reserved);
 
+        // var seats =
+        //     from allSeats in seatsInAuditorium.ToList()
+        //     join purchasedS in reservedSeats.ToList()
+        //         on new { seat = allSeats.SeatNumber, row = allSeats.SeatRow } equals
+        //         new { seat = purchasedS.Number, row = purchasedS.Row } into gj
+        //     from purchased in gj.DefaultIfEmpty()
+        //     select new MovieSessionSeatDto
+        //     {
+        //         SeatNumber = allSeats.SeatNumber,
+        //         Row = allSeats.SeatRow,
+        //         Blocked = purchased != null ? true : allSeats.Status == SeatStatus.Available ? false : true,
+        //         SeatStatus = purchased != null ? SeatStatus.Blocked : allSeats.Status
+            // };
+        
         var seats =
-            from allSeats in seatsInAuditorium.ToList()
-            join purchasedS in reservedSeats.ToList()
-                on new { seat = allSeats.SeatNumber, row = allSeats.SeatRow } equals
-                new { seat = purchasedS.Number, row = purchasedS.Row } into gj
-            from purchased in gj.DefaultIfEmpty()
-            select new MovieSessionSeatDto
+            seatsInAuditorium.Select( allSeats=>
+             new MovieSessionSeatDto
             {
                 SeatNumber = allSeats.SeatNumber,
                 Row = allSeats.SeatRow,
-                Blocked = purchased != null ? true : allSeats.Status == SeatStatus.Available ? false : true
-            };
+                Blocked = allSeats.Status == SeatStatus.Available ? false : true,
+                SeatStatus =  allSeats.Status,
+                HashId = allSeats.HashId
+            });
 
         return seats.ToList();
     }
@@ -65,4 +77,6 @@ public class MovieSessionSeatDto
     public short SeatNumber { get; init; }
     public short Row { get; init; }
     public bool Blocked { get; init; }
+    public SeatStatus SeatStatus { get; init; }
+    public string HashId { get; init; }
 }

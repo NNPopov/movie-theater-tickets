@@ -14,18 +14,34 @@ services:
       - ./build/nginx/localhost.key:/etc/ssl/private/localhost.key
     ports:
       - "9443:443"
+      - "9442:80"
+    depends_on:
+      - booking-management-api
+      - booking-management-ui
+      - sso
   booking-management-postgres:
     ports:
       - "5452:5432"
+  booking-management-ui:
+    environment:
+      TARGET_ENV: development
+    ports:
+      - "8084:80"
+    depends_on:
+      - booking-management-api
+      - sso
   booking-management-api:
     environment:
+      - IdentityOptions__ValidIssuer=https://localhost:9443/realms/come-and-watch
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:80
       - ConnectionStrings__Redis=cinema-booking-cache:6379
-      - ConnectionStrings__BookingManagementDB=booking-management-postgres:5432
+      - ConnectionStrings__BookingDbContext=Server=booking-management-postgres;Port=5432;Database=booking_db;Username=booking_user;Password=password
       - SERILOG__USING__1:Serilog.Sinks.Seq
       - SERILOG__WRITETO__1__ARGS__SERVERURL=http://logger-seq
       - SERILOG__WRITETO__1__NAME=Seq
+#    ports:
+#      - "9453:80"
   cinema-booking-cache:
     ports:
       - "6379:6379"

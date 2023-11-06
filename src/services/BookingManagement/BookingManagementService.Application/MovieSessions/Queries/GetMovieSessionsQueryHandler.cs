@@ -1,12 +1,14 @@
 ﻿using CinemaTicketBooking.Application.Abstractions;
 using CinemaTicketBooking.Application.Exceptions;
+using CinemaTicketBooking.Application.MovieSessions.DTOs;
 using CinemaTicketBooking.Domain.MovieSessions;
 
 namespace CinemaTicketBooking.Application.MovieSessions.Queries;
 
 public record GetMovieSessionsQuery(Guid MovieId) : IRequest<IReadOnlyCollection<MovieSessionsDto>>;
 
-public class GetMovieSessionsQueryHandler : IRequestHandler<GetMovieSessionsQuery, IReadOnlyCollection<MovieSessionsDto>>
+public class
+    GetMovieSessionsQueryHandler : IRequestHandler<GetMovieSessionsQuery, IReadOnlyCollection<MovieSessionsDto>>
 {
     private readonly IMapper _mapper;
     private IMovieSessionsRepository _movieSessionsRepository;
@@ -22,27 +24,15 @@ public class GetMovieSessionsQueryHandler : IRequestHandler<GetMovieSessionsQuer
         CancellationToken cancellationToken)
     {
         var movieSessions = await _movieSessionsRepository
-            .GetAllAsync(t => t.MovieId == request.MovieId && !t.SalesTerminated,
+            .GetAllAsync(
+                t => t.MovieId == request.MovieId &&
+                     t.SessionDate >= TimeProvider.System.GetUtcNow().DateTime &&
+                     t.TicketsForSale > t.SoldTickets,
                 cancellationToken);
 
         if (movieSessions == null || !movieSessions.Any())
             throw new ContentNotFoundException(request.MovieId.ToString(), nameof(MovieSession));
 
         return movieSessions.Select(t => _mapper.Map<MovieSessionsDto>(t)).ToList();
-    }
-}
-
-public class MovieSessionsDto
-{
-    public Guid Id { get; init; }
-    public DateTime SessionDate { get; init; }
-    public Guid AuditoriumId { get; init; }
-
-    private class Mapping : Profile
-    {
-        public Mapping()
-        {
-            CreateMap<MovieSession, MovieSessionsDto>();
-        }
     }
 }

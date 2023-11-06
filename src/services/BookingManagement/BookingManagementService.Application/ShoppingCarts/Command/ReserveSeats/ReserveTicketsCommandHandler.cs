@@ -13,16 +13,18 @@ public class ReserveTicketsCommandHandler : IRequestHandler<ReserveTicketsComman
 
     private readonly IMovieSessionSeatRepository _movieSessionSeatRepository;
     private readonly IShoppingCartRepository _shoppingCartRepository;
-
+    private readonly IShoppingCartNotifier _shoppingCartNotifier;
     public ReserveTicketsCommandHandler(
         ISeatStateRepository seatStateRepository,
         IMovieSessionSeatRepository movieSessionSeatRepository,
-        IShoppingCartRepository shoppingCartRepository)
+        IShoppingCartRepository shoppingCartRepository, 
+        IShoppingCartNotifier shoppingCartNotifier)
     {
         _seatStateRepository = seatStateRepository;
 
         _movieSessionSeatRepository = movieSessionSeatRepository;
         _shoppingCartRepository = shoppingCartRepository;
+        _shoppingCartNotifier = shoppingCartNotifier;
     }
 
     public async Task<bool> Handle(ReserveTicketsCommand request,
@@ -47,10 +49,8 @@ public class ReserveTicketsCommandHandler : IRequestHandler<ReserveTicketsComman
                 await _movieSessionSeatRepository.GetByIdAsync(cart.MovieSessionId, seat.SeatRow, seat.SeatNumber,
                     cancellationToken);
 
-            var sellResult = reservedSeatValue1.TryReserve(request.ShoppingCartId);
-
-            if (!sellResult)
-                throw new Exception($"SeatNumber has incorrect status {cart.MovieSessionId}:{seat.SeatRow}:{seat.SeatNumber}");
+            reservedSeatValue1.Reserve(request.ShoppingCartId);
+            
 
             await _movieSessionSeatRepository.UpdateAsync(reservedSeatValue1, cancellationToken);
         }
@@ -62,6 +62,8 @@ public class ReserveTicketsCommandHandler : IRequestHandler<ReserveTicketsComman
         {
             await _seatStateRepository.DeleteAsync(cart.MovieSessionId,seat.SeatRow,seat.SeatNumber);
         }
+        
+        await _shoppingCartNotifier.SentShoppingCartState(cart);
 
         return true;
     }

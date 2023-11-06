@@ -9,19 +9,23 @@ volumes:
 services:
   nginx:
     image: nginx
-    depends_on:
-      - booking-management-api
-      - sso
+  booking-management-ui:
+    image: booking-management-ui:${MY_TAG:-latest}
+    build:
+      context: clients
+      dockerfile: Dockerfile
+    expose:
+      - "80"
   booking-management-postgres:
     image: postgres
     volumes:
       - booking-management-postgres-data:/var/lib/postgresql/data
     environment:
-      POSTGRES_DB: keycloak
-      POSTGRES_USER: keycloak
+      POSTGRES_DB: booking_db
+      POSTGRES_USER: booking_user
       POSTGRES_PASSWORD: password
   booking-management-api:
-    image: "booking-management-api:dev"
+    image: booking-management-api:${MY_TAG:-latest}
     build:
       context: .
       dockerfile: services/BookingManagement/BookingManagementService.API/Dockerfile
@@ -38,16 +42,19 @@ services:
   cinema-booking-cache:
     image: redis:latest
     restart: unless-stopped
+    volumes:
+          - ./path/to/local/redis.conf:/usr/local/etc/redis/redis.conf
+    # command: redis-server /usr/local/etc/redis/redis.conf
     command: >
       - notify-keyspace-events Ex
-    entrypoint:
-      - "sh"
-      - "-c"
-      - |
-        redis-server &
-        sleep 5
-        redis-cli LPUSH eventsList "__keyevent@0__:expired"
-        wait %1  
+    # entrypoint:
+    #   - "sh"
+    #   - "-c"
+    #   - |
+    #     redis-server &
+    #     sleep 5
+    #     redis-cli LPUSH eventsList "__keyevent@0__:expired"
+    #     wait %1  
   logger-seq:
     image: datalust/seq:latest
     environment:

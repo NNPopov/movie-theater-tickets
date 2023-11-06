@@ -1,30 +1,17 @@
 ﻿using System.Reflection;
-using System.Text.Json.Serialization;
 using CinemaTicketBooking.Api.Infrastructure;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
+using CinemaTicketBooking.Api.Sockets;
+using CinemaTicketBooking.Api.Sockets.Abstractions;
+using CinemaTicketBooking.Application.Abstractions;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
-using Newtonsoft.Json;
+using Serilog.Core;
+using StackExchange.Redis;
 
 namespace CinemaTicketBooking.Api;
 
-public static class ConfigureApiServices
+public static class ApiApplicationBuilderExtensions
 {
-    public static IServiceCollection AddApiServices(this IServiceCollection services, IConfiguration configuration)
-    {
-        services.AddAutoMapper(Assembly.GetExecutingAssembly());
-        services.AddDatabaseDeveloperPageExceptionFilter();
-        services.AddExceptionHandler<CustomExceptionHandler>();
-
-        services.AddSwaggerExtensions(configuration);
-
-        services
-            .AddHealthChecks()
-            .AddRedis(configuration.GetConnectionString("Redis"), "Redis", HealthStatus.Unhealthy);
-
-        return services;
-    }
-
     public static WebApplication UseSwaggerExtensions(this WebApplication webApplication,
         IConfiguration configuration)
     {
@@ -43,6 +30,22 @@ public static class ConfigureApiServices
 
         return webApplication;
     }
+}
+
+public static class ConfigureApiServices
+{
+    public static IServiceCollection AddApiServices(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddAutoMapper(Assembly.GetExecutingAssembly());
+        services.AddDatabaseDeveloperPageExceptionFilter();
+        services.AddExceptionHandler<CustomExceptionHandler>();
+
+        services.AddSwaggerExtensions(configuration);
+
+
+        return services;
+    }
+
 
     public static IServiceCollection AddSwaggerExtensions(this IServiceCollection serviceCollection,
         IConfiguration configuration)
@@ -50,9 +53,9 @@ public static class ConfigureApiServices
         serviceCollection.AddSwaggerGen(options =>
         {
             using var sp = serviceCollection.BuildServiceProvider();
-            var cofigs = sp.GetService<IOptions<IdentityOptions>>().Value;
+            var configs = sp.GetService<IOptions<IdentityOptions>>().Value;
 
-            if (cofigs is null)
+            if (configs is null)
                 throw new Exception("identityOptions is null");
 
             var scheme = new OpenApiSecurityScheme
@@ -63,10 +66,10 @@ public static class ConfigureApiServices
                 {
                     AuthorizationCode = new OpenApiOAuthFlow
                     {
-                        AuthorizationUrl = new Uri(cofigs.AuthorizationUrl),
-                        TokenUrl = new Uri(cofigs.TokenUrl),
+                        AuthorizationUrl = new Uri(configs.AuthorizationUrl),
+                        TokenUrl = new Uri(configs.TokenUrl),
 
-                        Scopes = cofigs.AuthScopes.Select(d => new KeyValuePair<string, string>(d, d))
+                        Scopes = configs.AuthScopes.Select(d => new KeyValuePair<string, string>(d, d))
                             .ToDictionary(d => d.Key, f => f.Value),
                     }
                 },
@@ -88,77 +91,64 @@ public static class ConfigureApiServices
         });
         return serviceCollection;
     }
-}
-
-public class IdentityOptions
-{
-    public const string SectionName = "IdentityOptions";
-
-    [JsonProperty("IssuerWellKnown")]
-    [JsonPropertyName("IssuerWellKnown")]
-    public string IssuerWellKnown { get; set; }
 
 
-    [JsonProperty("ValidIssuer")]
-    [JsonPropertyName("ValidIssuer")]
-    public string ValidIssuer { get; set; }
+    public static IServiceCollection AddWebSockets(this IServiceCollection services,
+        IConfiguration configuration,
+        Logger logger)
+    {
+        services
+            .AddSignalR(
+                hubOptions => {
+                     hubOptions.KeepAliveInterval = TimeSpan.FromSeconds(20);
+                     hubOptions.MaximumReceiveMessageSize = 65_536;
+                     hubOptions.HandshakeTimeout = TimeSpan.FromSeconds(15);
+                     hubOptions.MaximumParallelInvocationsPerClient = 2;
+                     hubOptions.EnableDetailedErrors = true; 
+                    hubOptions.StreamBufferCapacity = 15;
+                    if (hubOptions?.SupportedProtocols is not null)
+                         {
+                         foreach (var protocol in hubOptions.SupportedProtocols)
+                             logger.Error($"SignalR supports {protocol} protocol.");
+                         }
+                     })
+            .AddStackExchangeRedis(
+                o =>
+                {
+                    o.Configuration.ChannelPrefix = "CinemaBooking";
+                    o.ConnectionFactory = async writer =>
+                    {
+                        var config = new ConfigurationOptions
+                        {
+                            EndPoints =
+                            {
+                                configuration.GetConnectionString("Redis") ??
+                                throw new InvalidOperationException()
+                            },
+                            AbortOnConnectFail = false,
+                        };
+
+                        var connection = await ConnectionMultiplexer.ConnectAsync(config, writer);
+                        connection.ConnectionFailed += (_, e) =>
+                        {
+                            logger.Error("Connection to Redis failed. {@E}", e);
+                        };
+
+                        if (!connection.IsConnected)
+                        {
+                            logger.Error("Did not connect to Redis");
+                        }
+
+                        return connection;
+                    };
+                }
+            );
 
 
-    [JsonProperty("ValidateIssuerSigningKey")]
-    [JsonPropertyName("ValidateIssuerSigningKey")]
-    public bool ValidateIssuerSigningKey { get; set; }
+        services.AddScoped<ICinemaHallSeatsNotifier, CinemaHallSeatsNotifier>()
+            .AddScoped<IShoppingCartNotifier, ShoppingCartNotifier>()
+            .AddSingleton<IConnectionManager>(t => ConnectionManager.Factory(t.GetRequiredService<ICacheService>()));
 
-
-    [JsonProperty("ValidateIssuer")]
-    [JsonPropertyName("ValidateIssuer")]
-    public bool ValidateIssuer { get; set; }
-
-
-    [JsonProperty("ValidateLifetime")]
-    [JsonPropertyName("ValidateLifetime")]
-    public bool ValidateLifetime { get; set; }
-
-
-    [JsonProperty("ValidAudience")]
-    [JsonPropertyName("ValidAudience")]
-    public string ValidAudience { get; set; }
-
-
-    [JsonProperty("ValidateAudience")]
-    [JsonPropertyName("ValidateAudience")]
-    public bool ValidateAudience { get; set; }
-
-
-    [JsonProperty("RoleClaimType")]
-    [JsonPropertyName("RoleClaimType")]
-    public string RoleClaimType { get; set; }
-
-
-    [JsonProperty("ClientSecret")]
-    [JsonPropertyName("ClientSecret")]
-    public string ClientSecret { get; set; }
-
-
-    [JsonProperty("RedirectUrl")]
-    [JsonPropertyName("RedirectUrl")]
-    public string RedirectUrl { get; set; }
-
-    [JsonProperty("IdentityClientId")]
-    [JsonPropertyName("IdentityClientId")]
-    public string IdentityClientId { get; set; }
-
-
-    [JsonProperty("AuthScopes")]
-    [JsonPropertyName("AuthScopes")]
-    public string[] AuthScopes { get; set; }
-
-
-    [JsonProperty("AuthorizationUrl")]
-    [JsonPropertyName("AuthorizationUrl")]
-    public string AuthorizationUrl { get; set; }
-
-
-    [JsonProperty("TokenUrl")]
-    [JsonPropertyName("TokenUrl")]
-    public string TokenUrl { get; set; }
+        return services;
+    }
 }

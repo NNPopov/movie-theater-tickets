@@ -12,10 +12,10 @@ namespace CinemaTicketBooking.Domain.Entities
         }
 
         public Guid Id { get; set; }
-        public Guid ShowtimeId { get; set; }
+        public Guid MovieSessionId { get; set; }
         public ICollection<ShowTimeSeatEntity> Seats { get; set; }
         public DateTime CreatedTime { get; set; }
         public bool Paid { get; set; }
-        public MovieSession Showtime { get; set; }
+        public MovieSession MovieSession { get; set; }
     }
 }

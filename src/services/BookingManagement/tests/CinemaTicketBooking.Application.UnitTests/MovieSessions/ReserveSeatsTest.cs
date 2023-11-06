@@ -4,7 +4,7 @@ using Xunit;
 
 namespace CinemaTicketBooking.Application.UnitTests.MovieSessions;
 
-public class MovieSessionTest
+public class MovieSessionSpecification
 {
    private const int ALLOTTED_TICKETS = 100;
     
@@ -13,7 +13,8 @@ public class MovieSessionTest
    {
       // Arrange
       var movieSession = MovieSession.Create(Guid.NewGuid(), Guid.NewGuid(), DateTime.Now, 
-         new List<SeatMovieSession>(), ALLOTTED_TICKETS);
+       //  new List<SeatMovieSession>(),
+         ALLOTTED_TICKETS);
 
       // Act
       movieSession.SetSoldTickets(10);
@@ -32,13 +33,15 @@ public class MovieSessionTest
 
       // Act
       var movieSession = MovieSession.Create(movieId, auditoriumId, 
-         sessionDate, new List<SeatMovieSession>(), ALLOTTED_TICKETS);
+         sessionDate,
+         //new List<SeatMovieSession>(),
+         ALLOTTED_TICKETS);
 
       // Assert
       
       movieSession.Should().NotBeNull();
       movieSession.MovieId.Should().Be(movieId);
-      movieSession.AuditoriumId.Should().Be(auditoriumId);
+      movieSession.CinemaHallId.Should().Be(auditoriumId);
       movieSession.SessionDate.Should().Be(sessionDate);
       
    }

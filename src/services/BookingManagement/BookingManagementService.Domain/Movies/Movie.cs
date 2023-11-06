@@ -1,12 +1,13 @@
 ﻿using CinemaTicketBooking.Domain.Common;
 using CinemaTicketBooking.Domain.Common.Ensure;
 using CinemaTicketBooking.Domain.Movies.Events;
+using Newtonsoft.Json;
 
 namespace CinemaTicketBooking.Domain.Movies;
 
 public class Movie : AggregateRoot
 {
-    
+    [JsonConstructor]
     private Movie(Guid id,
         string title,
         DateTime releaseDate,
@@ -26,6 +27,7 @@ public class Movie : AggregateRoot
     public string ImdbId { get; private set;  }
     public string Stars { get; private set;  }
     public DateTime ReleaseDate { get; private set;  }
+
 
     public static Movie Create(string title,
         DateTime releaseDate,

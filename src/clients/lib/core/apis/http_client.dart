@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import '../../src/helpers/constants.dart';
 import 'auth-interceptor.dart';
 import 'package:get_it/get_it.dart';
 
@@ -16,7 +17,7 @@ class Client {
     Dio dio =  Dio();
 
     dio.options.headers.addAll( {'accept': 'application/json'});
-    dio.options.baseUrl = dotenv.env["BASE_API_URL"].toString();
+    dio.options.baseUrl = Constants.BASE_API_URL;
     dio.interceptors.add(_authInterceptor);
 
     return dio;

@@ -1,5 +1,6 @@
 ﻿using CinemaTicketBooking.Application.Abstractions;
 using CinemaTicketBooking.Application.Common;
+using CinemaTicketBooking.Domain.Seats.Abstractions;
 using CinemaTicketBooking.Domain.ShoppingCarts;
 
 namespace CinemaTicketBooking.Application.ShoppingCarts.Command.CreateCart;

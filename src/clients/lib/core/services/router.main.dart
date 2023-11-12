@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:movie_theater_tickets/src/movie_sessions/domain/entities/movie_session.dart';
 import 'package:movie_theater_tickets/src/shopping_carts/presentation/cubit/shopping_cart_cubit.dart';
 import '../../src/auth/presentations/cubit/auth_cubit.dart';
-import '../../src/hub/connectivity/connectivity_bloc.dart';
+import '../../src/hub/presentation/cubit/connectivity_bloc.dart';
 import '../buses/event_bus.dart';
 import '../../src/movie_sessions/movie_session_view.dart';
 import '../../src/movie_sessions/presentation/cubit/movie_session_cubit.dart';
@@ -14,10 +14,19 @@ import '../../src/seats/domain/usecases/get_seats_by_movie_session_id.dart';
 import '../../src/seats/presentation/cubit/seat_cubit.dart';
 import '../../src/seats_view.dart';
 import 'package:get_it/get_it.dart';
+import 'package:logging/logging.dart';
 
+final log = Logger('ExampleLogger');
+
+//
+// var logger = Logger(
+//   printer: PrettyPrinter(),
+// );
 GetIt getIt = GetIt.instance;
 
 Route<dynamic> generateRoute(RouteSettings settings) {
+  log.info(settings.name);
+
   if (settings.name == MoviesView.id || settings.name == '/') {
     return _pageBuilder(
       (_) => MultiBlocProvider(
@@ -25,6 +34,9 @@ Route<dynamic> generateRoute(RouteSettings settings) {
           BlocProvider<AuthCubit>(create: (_) => AuthCubit()),
           BlocProvider(
             create: (_) => MovieTheaterCubit(),
+          ),
+          BlocProvider<ShoppingCartCubit>(
+            create: (context) => ShoppingCartCubit(),
           ),
         ],
         child: const MoviesView(),
@@ -39,6 +51,9 @@ Route<dynamic> generateRoute(RouteSettings settings) {
           BlocProvider<AuthCubit>(create: (_) => AuthCubit()),
           BlocProvider(create: (_) => MovieSessionCubit()),
           BlocProvider<ConnectivityBloc>(create: (_) => ConnectivityBloc()),
+          BlocProvider<ShoppingCartCubit>(
+            create: (context) => ShoppingCartCubit(),
+          ),
         ],
         child: MovieSessionsView(settings.arguments! as Movie),
       ),
@@ -65,10 +80,8 @@ Route<dynamic> generateRoute(RouteSettings settings) {
     );
   }
 
-
-
   return _pageBuilder(
-        (_) => MultiBlocProvider(
+    (_) => MultiBlocProvider(
       providers: [
         BlocProvider<AuthCubit>(create: (_) => AuthCubit()),
         BlocProvider(

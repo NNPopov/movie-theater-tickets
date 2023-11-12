@@ -16,6 +16,7 @@ services:
       dockerfile: Dockerfile
     expose:
       - "80"
+      
   booking-management-postgres:
     image: postgres
     volumes:
@@ -24,11 +25,12 @@ services:
       POSTGRES_DB: booking_db
       POSTGRES_USER: booking_user
       POSTGRES_PASSWORD: password
+      
   booking-management-api:
     image: booking-management-api:${MY_TAG:-latest}
     build:
-      context: .
-      dockerfile: services/BookingManagement/BookingManagementService.API/Dockerfile
+      context: services
+      dockerfile: BookingManagement/BookingManagementService.API/Dockerfile
       target: "build"
     expose:
       - "80"
@@ -39,26 +41,20 @@ services:
     depends_on:
       - cinema-booking-cache
       - logger-seq
+  
   cinema-booking-cache:
     image: redis:latest
     restart: unless-stopped
     volumes:
           - ./path/to/local/redis.conf:/usr/local/etc/redis/redis.conf
-    # command: redis-server /usr/local/etc/redis/redis.conf
     command: >
       - notify-keyspace-events Ex
-    # entrypoint:
-    #   - "sh"
-    #   - "-c"
-    #   - |
-    #     redis-server &
-    #     sleep 5
-    #     redis-cli LPUSH eventsList "__keyevent@0__:expired"
-    #     wait %1  
+      
   logger-seq:
     image: datalust/seq:latest
     environment:
       ACCEPT_EULA: Y
+  
   sso-postgres:
     image: postgres
     volumes:
@@ -67,6 +63,7 @@ services:
       POSTGRES_DB: keycloak
       POSTGRES_USER: keycloak
       POSTGRES_PASSWORD: password
+  
   sso:
     image: quay.io/keycloak/keycloak:latest
     volumes:

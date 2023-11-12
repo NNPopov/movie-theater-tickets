@@ -60,7 +60,9 @@ Future<void> initializeDependencies() async {
 
 
   getIt.registerLazySingleton<EventBus>(() => EventBus());
-  getIt.registerLazySingleton<EventHub>(() => SignalREventHub());
+  getIt.registerLazySingleton<EventHub>(() => SignalREventHub(updateShoppingCartState:  getIt.get(),
+      eventBus: getIt.get(),
+      updateSeatsState: getIt.get()));
 
   //UseCases
 

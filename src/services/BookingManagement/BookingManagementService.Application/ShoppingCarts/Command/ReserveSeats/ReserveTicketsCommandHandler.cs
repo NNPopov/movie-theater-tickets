@@ -1,5 +1,7 @@
 ﻿using CinemaTicketBooking.Application.Abstractions;
 using CinemaTicketBooking.Application.Exceptions;
+using CinemaTicketBooking.Domain.Seats.Abstractions;
+using CinemaTicketBooking.Domain.Services;
 using CinemaTicketBooking.Domain.ShoppingCarts;
 
 namespace CinemaTicketBooking.Application.ShoppingCarts.Command.ReserveSeats;
@@ -11,6 +13,7 @@ public class ReserveTicketsCommandHandler : IRequestHandler<ReserveTicketsComman
 {
     private ISeatStateRepository _seatStateRepository;
 
+    private readonly MovieSessionSeatService _movieSessionSeatService;
     private readonly IMovieSessionSeatRepository _movieSessionSeatRepository;
     private readonly IShoppingCartRepository _shoppingCartRepository;
     private readonly IShoppingCartNotifier _shoppingCartNotifier;
@@ -18,13 +21,14 @@ public class ReserveTicketsCommandHandler : IRequestHandler<ReserveTicketsComman
         ISeatStateRepository seatStateRepository,
         IMovieSessionSeatRepository movieSessionSeatRepository,
         IShoppingCartRepository shoppingCartRepository, 
-        IShoppingCartNotifier shoppingCartNotifier)
+        IShoppingCartNotifier shoppingCartNotifier, MovieSessionSeatService movieSessionSeatService)
     {
         _seatStateRepository = seatStateRepository;
 
         _movieSessionSeatRepository = movieSessionSeatRepository;
         _shoppingCartRepository = shoppingCartRepository;
         _shoppingCartNotifier = shoppingCartNotifier;
+        _movieSessionSeatService = movieSessionSeatService;
     }
 
     public async Task<bool> Handle(ReserveTicketsCommand request,
@@ -45,14 +49,18 @@ public class ReserveTicketsCommandHandler : IRequestHandler<ReserveTicketsComman
 
         foreach (var seat in cart.Seats)
         {
-            var reservedSeatValue1 =
-                await _movieSessionSeatRepository.GetByIdAsync(cart.MovieSessionId, seat.SeatRow, seat.SeatNumber,
-                    cancellationToken);
+            // var reservedSeatValue1 =
+            //     await _movieSessionSeatRepository.GetByIdAsync(cart.MovieSessionId, seat.SeatRow, seat.SeatNumber,
+            //         cancellationToken);
 
-            reservedSeatValue1.Reserve(request.ShoppingCartId);
+         await   _movieSessionSeatService.ReserveSeat(cart.MovieSessionId, 
+                seat.SeatRow,
+                seat.SeatNumber,
+                request.ShoppingCartId,
+                cancellationToken);
             
 
-            await _movieSessionSeatRepository.UpdateAsync(reservedSeatValue1, cancellationToken);
+         //   await _movieSessionSeatRepository.UpdateAsync(reservedSeatValue1, cancellationToken);
         }
         
         cart.SeatsReserve();

@@ -2,9 +2,9 @@
 
 namespace CinemaTicketBooking.Domain.Seats.Events;
 
-public class MovieSessionSeatStatusUpdatedEvent : IDomainEvent
+public sealed class MovieSessionSeatStatusUpdatedDomainEvent : IDomainEvent
 {
-    internal MovieSessionSeatStatusUpdatedEvent(MovieSessionSeat movieSessionSeat,
+    internal MovieSessionSeatStatusUpdatedDomainEvent(MovieSessionSeat movieSessionSeat,
         SeatStatus previousStatus
     )
     {

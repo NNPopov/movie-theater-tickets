@@ -1,6 +1,4 @@
-﻿using CinemaTicketBooking.Domain.Seats;
-
-namespace CinemaTicketBooking.Application.Abstractions;
+﻿namespace CinemaTicketBooking.Domain.Seats.Abstractions;
 
 public interface IMovieSessionSeatRepository
 {

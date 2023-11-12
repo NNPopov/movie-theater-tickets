@@ -6,23 +6,8 @@
         <Nullable>enable</Nullable>
         <LangVersion>preview</LangVersion>
         <RootNamespace>CinemaTicketBooking.Domain</RootNamespace>
-
-
-
-
-
-
     </PropertyGroup>
-
-
     <ItemGroup>
-      <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+      <PackageReference Include="Newtonsoft.Json"/>
     </ItemGroup>
-
-
-
-
-
-
-
 </Project>

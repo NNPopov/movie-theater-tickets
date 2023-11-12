@@ -6,6 +6,7 @@ using CinemaTicketBooking.Application.MovieSessions.DTOs;
 using CinemaTicketBooking.Application.MovieSessions.Queries;
 using CinemaTicketBooking.Application.ShoppingCarts.Command.SelectSeats;
 using CinemaTicketBooking.Domain.MovieSessions;
+using CinemaTicketBooking.Domain.MovieSessions.Abstractions;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 

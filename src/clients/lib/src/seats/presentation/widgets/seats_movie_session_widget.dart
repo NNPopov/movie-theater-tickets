@@ -38,8 +38,6 @@ class _SeatsMovieSessionWidget extends State<SeatsMovieSessionWidget> {
     super.dispose();
   }
 
-  OverlayEntry? _overlayEntry;
-
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<SeatCubit, SeatState>(
@@ -122,7 +120,7 @@ class _SeatsMovieSessionWidget extends State<SeatsMovieSessionWidget> {
                     SizedBox(
                         height: 19,
                         width: 60,
-                        child: Text('Row: ${rowSeats[0].row}')),
+                        child: Text('${AppLocalizations.of(context)!.row}: ${rowSeats[0].row}')),
                     ListView.builder(
                         shrinkWrap: true,
                         scrollDirection: Axis.horizontal,

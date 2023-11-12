@@ -1,40 +1,43 @@
-﻿using CinemaTicketBooking.Application.Abstractions;
-using CinemaTicketBooking.Application.Common.Events;
+﻿using CinemaTicketBooking.Application.Common.Events;
+using CinemaTicketBooking.Domain.Seats.Abstractions;
+using CinemaTicketBooking.Domain.Services;
 using CinemaTicketBooking.Domain.ShoppingCarts;
 using Serilog;
 
 namespace CinemaTicketBooking.Application.MovieSessionSeats.Event.ExpiredSeatSelection;
 
-public class MovieSessionSeatExpiredReservationEventHandler : INotificationHandler<BaseApplicationEvent<SeatRemovedFromShoppingCartDomainEvent>>
+public class
+    MovieSessionSeatExpiredReservationEventHandler : INotificationHandler<
+        BaseApplicationEvent<SeatRemovedFromShoppingCartDomainEvent>>
 {
-    private readonly IMovieSessionSeatRepository _movieSessionSeatRepository;
+    private readonly MovieSessionSeatService _movieSessionSeatService;
     private readonly ILogger _logger;
 
     public MovieSessionSeatExpiredReservationEventHandler(
-        IMovieSessionSeatRepository movieSessionSeatRepository,
-        ILogger logger)
+        ILogger logger,
+        MovieSessionSeatService movieSessionSeatService)
     {
-        _movieSessionSeatRepository = movieSessionSeatRepository;
         _logger = logger;
+        _movieSessionSeatService = movieSessionSeatService;
     }
 
     public async Task Handle(BaseApplicationEvent<SeatRemovedFromShoppingCartDomainEvent> request,
         CancellationToken cancellationToken)
     {
-        var eventBody = (SeatRemovedFromShoppingCartDomainEvent)request.Event;
-        var movieSessionSeat =
-            await _movieSessionSeatRepository.GetByIdAsync(eventBody.MovieSessionId, eventBody.SeatRow, eventBody.SeatNumber, cancellationToken);
+        try
+        {
+            var eventBody = (SeatRemovedFromShoppingCartDomainEvent)request.Event;
+            await _movieSessionSeatService.ReturnToAvailable(eventBody.MovieSessionId,
+                eventBody.SeatRow,
+                eventBody.SeatNumber,
+                cancellationToken
+            );
 
-        if (movieSessionSeat is not null)
-        {
-            movieSessionSeat.ReturnToAvailable();
-            await _movieSessionSeatRepository.UpdateAsync(movieSessionSeat, cancellationToken);
-            _logger.Information("MovieSessionSeat returned to Available:{@MovieSessionSeat}", movieSessionSeat);
+            _logger.Debug("MovieSessionSeat returned to Available:{@MovieSessionSeat}", eventBody);
         }
-        else
+        catch (Exception e)
         {
-            _logger.Error("Couldnot find MovieSessionSeat, EventBody:{@eventBody}",
-                eventBody);
+            _logger.Information(e, "Unable returned to Available:{@SeatRemovedFromShoppingCartDomainEvent}", request);
         }
     }
 }

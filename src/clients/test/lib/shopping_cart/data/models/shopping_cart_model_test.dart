@@ -7,7 +7,7 @@ import 'package:movie_theater_tickets/src/shopping_carts/domain/entities/shoppin
 import '../../../../fixtures/fixture_reader.dart';
 
 void main() {
-  final tUserExamModel = ShoppingCartDto.empty();
+  final shoppingCartDtoEmpty = ShoppingCartDto.empty();
 
   final tShoppingCarDto = ShoppingCartDto(
       id: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
@@ -22,34 +22,36 @@ void main() {
         ShoppingCartSeatDto(seatNumber: 3, seatRow: 1)
       ]);
 
-  group('UserExamModel', () {
+  group('ShoppingCart', () {
     test('should be a subclass of [ShoppingCart] entity', () async {
-      expect(tUserExamModel, isA<ShoppingCart>());
+      expect(shoppingCartDtoEmpty, isA<ShoppingCart>());
     });
-
-    group('fromMap', () {
-      test('should return a valid [ShoppingCartDto] when the JSON is not null',
-          () async {
-        final map = jsonDecode(fixture('shopping_cart.json')) as Map<String, dynamic> ;
-        final result = ShoppingCartDto.fromJson(map);
-        expect(result, tShoppingCarDto);
-      });
-    });
-
-    group('toMap', () {
-      test('should return a Dart map containing the proper data', () async {
-        final map = jsonDecode(fixture('shopping_cart.json')) as Map<String, dynamic> ;
-        final result = tShoppingCarDto.toJson();
-        expect(result, map);
-      });
-    });
-    //
-    // group('copyWith', () {
-    //   test('should return a new [UserExamModel] with the same values',
-    //           () async {
-    //         final result = tUserExamModel.copyWith(examId: '');
-    //         expect(result.examId, equals(''));
-    //       });
-    // });
   });
+
+
+    test('should return a valid [ShoppingCartDto] when the JSON is not null',
+        () async {
+      final map =
+          jsonDecode(fixture('shopping_cart.json')) as Map<String, dynamic>;
+      final result = ShoppingCartDto.fromJson(map);
+      expect(result, tShoppingCarDto);
+    });
+
+
+
+    test('should return a Dart map containing the proper data', () async {
+      final map =
+          jsonDecode(fixture('shopping_cart.json')) as Map<String, dynamic>;
+      final result = tShoppingCarDto.toJson();
+      expect(result, map);
+
+  });
+  //
+  // group('copyWith', () {
+  //   test('should return a new [UserExamModel] with the same values',
+  //           () async {
+  //         final result = tUserExamModel.copyWith(examId: '');
+  //         expect(result.examId, equals(''));
+  //       });
+  // });
 }

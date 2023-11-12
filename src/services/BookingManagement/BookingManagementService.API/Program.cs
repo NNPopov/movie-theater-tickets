@@ -1,4 +1,3 @@
-using System.Net;
 using System.Text.Json.Serialization;
 using CinemaTicketBooking.Api;
 using CinemaTicketBooking.Api.Authentication;
@@ -6,17 +5,13 @@ using CinemaTicketBooking.Api.Endpoints.Common;
 using CinemaTicketBooking.Api.Sockets;
 using CinemaTicketBooking.Api.WorkerServices;
 using CinemaTicketBooking.Application;
-using CinemaTicketBooking.Application.Abstractions;
 using CinemaTicketBooking.Infrastructure;
 using CinemaTicketBooking.Infrastructure.Data;
 using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.Mvc.Formatters;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Options;
 using Serilog;
-using Serilog.Core;
-using StackExchange.Redis;
 using ILogger = Serilog.ILogger;
 
 var defaultCorsPolicy = "defaultCorsPolicy";
@@ -62,8 +57,6 @@ IdentityOptions identityOptions = new IdentityOptions();
 identityOptionsSection.Bind(identityOptions);
 services.Configure<IdentityOptions>(identityOptionsSection);
 
-//builder.Services.AddSingleton<IValidateOptions<IdentityOptions>, IdentityOptionsValidator>();
-
 services.AddApplicationServices()
     .AddInfrastructureServices(builder.Configuration)
     .AddApiServices(builder.Configuration)
@@ -100,8 +93,6 @@ app.UseHealthChecks("/Health");
 app.UseAuthentication();
 app.UseAuthorization();
 
-//app.UseEndpoints(endpoints => { endpoints.MapHub<CinemaHallSeatsHub>("/ws/cinema-hall-seats-hub"); });
-
 app.MapHub<CinemaHallSeatsHub>("/ws/cinema-hall-seats-hub",
 options =>
      {
@@ -113,7 +104,6 @@ options =>
      options.ApplicationMaxBufferSize = 65_536;
      options.TransportMaxBufferSize = 65_536;
      options.MinimumProtocolVersion = 0;
-      // Advanced SignalR configuration 89
      options.TransportSendTimeout = TimeSpan.FromSeconds(20);
      options.WebSockets.CloseTimeout = TimeSpan.FromSeconds(30);
      options.LongPolling.PollTimeout = TimeSpan.FromSeconds(20);
@@ -123,7 +113,7 @@ app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
 app.UseEndpoints(typeof(Program));
 
 
-//app.Migrate();
+app.UseMigrationsEndPoint();
 await app.InitialiseDatabaseAsync();
 
 

@@ -11,6 +11,9 @@ class Constants {
   static final BASE_API_URL = dotenv.env["BASE_API_URL"].toString();
   static final USE_HTTPS = bool.parse(dotenv.env["USE_HTTPS"].toString());
 
+
+  static final RETRY_POLICY= dotenv.env["RETRY_POLICY"].toString().split(',').map(int.parse).toList();
+
   //"https://api.client.fhc-dev.net";
 
   static const SHOPPING_CARD = 'SHOPPING_CARD';

@@ -1,6 +1,7 @@
 ﻿using CinemaTicketBooking.Application.Abstractions;
 using CinemaTicketBooking.Application.Exceptions;
 using CinemaTicketBooking.Domain.MovieSessions;
+using CinemaTicketBooking.Domain.MovieSessions.Abstractions;
 using CinemaTicketBooking.Domain.ShoppingCarts;
 using Serilog;
 

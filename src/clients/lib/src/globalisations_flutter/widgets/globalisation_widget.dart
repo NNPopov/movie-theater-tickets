@@ -24,19 +24,23 @@ class _GlobalisationWidget extends State<GlobalisationWidget> {
     Locale dropdownValue = list.first;
   return  BlocBuilder<GlobalisationCubit, LanguagenStatus>(
         builder: (context, lang) {
-    return DropdownButton<Locale>(
-      value: lang.locate,
-      elevation: 16,
-      style: TextStyle(color: Colors.black),
-      onChanged: (Locale? value) {
-        context.read<GlobalisationCubit>().setLanguage(value!);
-      },
-      items: list.map<DropdownMenuItem<Locale>>((Locale value) {
-        return DropdownMenuItem<Locale>(
-          value: value,
-          child: Text(value.languageCode),
-        );
-      }).toList(),
+    return SizedBox(
+      width: 70,
+      height: 40,
+      child: DropdownButton<Locale>(
+        value: lang.locate,
+        elevation: 16,
+        style: TextStyle(color: Colors.black),
+        onChanged: (Locale? value) {
+          context.read<GlobalisationCubit>().setLanguage(value!);
+        },
+        items: list.map<DropdownMenuItem<Locale>>((Locale value) {
+          return DropdownMenuItem<Locale>(
+            value: value,
+            child: Text(value.languageCode),
+          );
+        }).toList(),
+      ),
     );
     });
   }

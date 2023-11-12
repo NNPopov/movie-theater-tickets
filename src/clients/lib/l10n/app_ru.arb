@@ -1,10 +1,20 @@
 {
+  "movies":"Фильмы",
+
+  "stars":"Актеры",
+  "release_date":"Дата релиза",
   "select": "Выбрать",
   "screen":"Экран",
   "remove":"Удалить",
+
+  "row":"Ряд",
+
+  "movie_session":"Расписание",
+
   "sing_in":"Войти",
   "sing_out":"Выйти",
-  "@helloWorld": {
-    "description": "Привет"
-  }
+
+  "reconnecting_notification_text":"Подключение к серверу потеряно! Переподключение!",
+  "connection_lost_notification_text":"Подключение к серверу потеряно! Попробуйте переподключиться.",
+  "connection_lost_reconnect_btn":"Подключиться"
 }

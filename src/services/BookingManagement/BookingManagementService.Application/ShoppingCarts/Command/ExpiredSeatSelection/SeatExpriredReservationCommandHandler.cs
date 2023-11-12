@@ -1,4 +1,5 @@
 ﻿using CinemaTicketBooking.Application.Abstractions;
+using CinemaTicketBooking.Domain.Seats.Abstractions;
 using CinemaTicketBooking.Domain.ShoppingCarts;
 using Serilog;
 

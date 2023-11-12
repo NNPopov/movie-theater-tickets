@@ -1,5 +1,7 @@
 ﻿using CinemaTicketBooking.Application.Abstractions;
 using CinemaTicketBooking.Application.Exceptions;
+using CinemaTicketBooking.Domain.Seats.Abstractions;
+using CinemaTicketBooking.Domain.Services;
 using CinemaTicketBooking.Domain.ShoppingCarts;
 
 namespace CinemaTicketBooking.Application.ShoppingCarts.Command.PurchaseSeats;
@@ -11,18 +13,20 @@ public class PurchaseTicketsCommandHandler : IRequestHandler<PurchaseTicketsComm
 {
     private ISeatStateRepository _seatStateRepository;
 
+    private readonly MovieSessionSeatService _movieSessionSeatService;
     private readonly IMovieSessionSeatRepository _movieSessionSeatRepository;
     private readonly IShoppingCartRepository _shoppingCartRepository;
 
     public PurchaseTicketsCommandHandler(
         ISeatStateRepository seatStateRepository,
         IMovieSessionSeatRepository movieSessionSeatRepository,
-        IShoppingCartRepository shoppingCartRepository)
+        IShoppingCartRepository shoppingCartRepository, MovieSessionSeatService movieSessionSeatService)
     {
         _seatStateRepository = seatStateRepository;
 
         _movieSessionSeatRepository = movieSessionSeatRepository;
         _shoppingCartRepository = shoppingCartRepository;
+        _movieSessionSeatService = movieSessionSeatService;
     }
 
     public async Task<bool> Handle(PurchaseTicketsCommand request,
@@ -43,14 +47,18 @@ public class PurchaseTicketsCommandHandler : IRequestHandler<PurchaseTicketsComm
 
         foreach (var seat in cart.Seats)
         {
-            var reservedSeatValue1 =
-                await _movieSessionSeatRepository.GetByIdAsync(cart.MovieSessionId, seat.SeatRow, seat.SeatNumber,
-                    cancellationToken);
+            // var reservedSeatValue1 =
+            //     await _movieSessionSeatRepository.GetByIdAsync(cart.MovieSessionId, seat.SeatRow, seat.SeatNumber,
+            //         cancellationToken);
 
-            reservedSeatValue1.Sel(request.ShoppingCartId);
+          await  _movieSessionSeatService.PurchaseSeat(cart.MovieSessionId, 
+                seat.SeatRow,
+                seat.SeatNumber,
+                request.ShoppingCartId,
+                cancellationToken);
             
 
-            await _movieSessionSeatRepository.UpdateAsync(reservedSeatValue1, cancellationToken);
+            // await _movieSessionSeatRepository.UpdateAsync(reservedSeatValue1, cancellationToken);
         }
         
         cart.PurchaseComplete();

@@ -2,7 +2,7 @@
 
 namespace CinemaTicketBooking.Domain.CinemaHalls.Events;
 
-public class AuditoriumCreatedDomainEvent:IDomainEvent
+public sealed class AuditoriumCreatedDomainEvent:IDomainEvent
 {
     internal AuditoriumCreatedDomainEvent(CinemaHall cinemaHall) => CinemaHall = cinemaHall;
 

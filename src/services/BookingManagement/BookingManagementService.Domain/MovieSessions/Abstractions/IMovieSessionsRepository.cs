@@ -1,7 +1,6 @@
 ﻿using System.Linq.Expressions;
-using CinemaTicketBooking.Domain.MovieSessions;
 
-namespace CinemaTicketBooking.Application.Abstractions
+namespace CinemaTicketBooking.Domain.MovieSessions.Abstractions
 {
     public interface IMovieSessionsRepository
     {

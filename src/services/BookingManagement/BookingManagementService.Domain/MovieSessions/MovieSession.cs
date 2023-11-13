@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 
 namespace CinemaTicketBooking.Domain.MovieSessions;
 
-public class MovieSession : AggregateRoot
+public sealed class MovieSession : AggregateRoot
 {
     public Guid MovieId { get; private set; }
     public DateTime SessionDate { get; private set; }
@@ -19,7 +19,7 @@ public class MovieSession : AggregateRoot
     public bool IsEnabled { get; private set; }
 
     public bool SalesTerminated =>
-        SessionDate >= TimeProvider.System.GetUtcNow().DateTime && TicketsForSale > SoldTickets;
+        SessionDate >= TimeProvider.System.GetUtcNow().DateTime && TicketsForSale <= SoldTickets;
 
     public void SetSoldTickets(int soldTickets)
     {

@@ -9,18 +9,20 @@ WORKDIR /src
 #COPY ["BookingManagementService.API.csproj", "./src"]
 
 
-#COPY "CinemaTicketBookingService.sln" "CinemaTicketBookingService.sln"
+COPY "CinemaBookingManagement.sln" "CinemaBookingManagement.sln"
 
-COPY "services/BookingManagement/BookingManagementService.API/BookingManagementService.API.csproj" "BookingManagementService.API/BookingManagementService.API.csproj"
-COPY "services/BookingManagement/BookingManagementService.Application/BookingManagementService.Application.csproj" "BookingManagementService.Application/BookingManagementService.Application.csproj"
-COPY "services/BookingManagement/BookingManagementService.Domain/BookingManagementService.Domain.csproj" "BookingManagementService.Domain/BookingManagementService.Domain.csproj"
-COPY "services/BookingManagement/BookingManagementService.Infrastructure/BookingManagementService.Infrastructure.csproj" "BookingManagementService.Infrastructure/BookingManagementService.Infrastructure.csproj"
+COPY "BookingManagement/BookingManagementService.API/BookingManagementService.API.csproj" "BookingManagementService.API/BookingManagementService.API.csproj"
+COPY "BookingManagement/BookingManagementService.Application/BookingManagementService.Application.csproj" "BookingManagementService.Application/BookingManagementService.Application.csproj"
+COPY "BookingManagement/BookingManagementService.Domain/BookingManagementService.Domain.csproj" "BookingManagementService.Domain/BookingManagementService.Domain.csproj"
+COPY "BookingManagement/BookingManagementService.Infrastructure/BookingManagementService.Infrastructure.csproj" "BookingManagementService.Infrastructure/BookingManagementService.Infrastructure.csproj"
+
+COPY "Directory.Packages.props" "Directory.Packages.props"
 
 WORKDIR BookingManagementService.API
 RUN dotnet restore "BookingManagementService.API.csproj"
 
 COPY . .
-WORKDIR "services/BookingManagement/BookingManagementService.API"
+WORKDIR "BookingManagement/BookingManagementService.API"
 RUN dotnet publish  -c Release -o /app
 
 FROM build AS publish

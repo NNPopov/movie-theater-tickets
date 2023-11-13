@@ -2,6 +2,7 @@
 using CinemaTicketBooking.Application.Exceptions;
 using CinemaTicketBooking.Application.MovieSessions.DTOs;
 using CinemaTicketBooking.Domain.MovieSessions;
+using CinemaTicketBooking.Domain.MovieSessions.Abstractions;
 
 namespace CinemaTicketBooking.Application.MovieSessions.Queries;
 

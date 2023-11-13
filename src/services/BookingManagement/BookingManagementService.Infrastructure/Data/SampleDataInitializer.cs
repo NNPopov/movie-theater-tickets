@@ -102,10 +102,22 @@ public class SampleDataInitializer
             "tt0096874",
             "Michael J. Fox, Christopher Lloyd, Lea Thompson, Crispin Glover"
         );
-
         movie3 = movie3.SetKey(movieId3);
+        
+        var movie4 = Movie.Create(
+            "Back to the Future Part III",
+            new DateTime(1990, 05, 25),
+            "tt0099088",
+            "Michael J. Fox, Christopher Lloyd, Mary Steenburgen, Thomas F. Wilson"
+        );
 
-        // movie = movie.SetKey( movieId);
+        movie4 = movie4.SetKey(movieId4);
+
+        _context.Movies.Add(movie);
+        _context.Movies.Add(movie2);
+        _context.Movies.Add(movie3);
+        _context.Movies.Add(movie4);
+        await _context.SaveChangesAsync();
 
         var redAuditorium = CinemaHall.Create(
             name: "Red",
@@ -130,88 +142,117 @@ public class SampleDataInitializer
         );
         whiteAuditorium = whiteAuditorium.SetKey(whiteAuditoriumId);
 
-
-        var showtimeItem = MovieSession.Create(movieId: movie.Id,
-            auditoriumId: redAuditorium.Id,
-            new DateTime(2023, 11, 20),
-            //redAuditorium.Seats.Select(t => new SeatMovieSession(t.Row, t.SeatNumber)).ToList(),
-            redAuditorium.Seats.Count);
-
-        showtimeItem = showtimeItem.SetKey(movieSessionId);
-
-        var showtimeItem2 = MovieSession.Create(movieId: movie.Id,
-            auditoriumId: redAuditorium.Id,
-            new DateTime(2023, 11, 21),
-            //redAuditorium.Seats.Select(t => new SeatMovieSession(t.Row, t.SeatNumber)).ToList(),
-            redAuditorium.Seats.Count);
-
-        showtimeItem2 = showtimeItem2.SetKey(movieSessionId2);
-
-        var showtimeItem3 = MovieSession.Create(movieId: movie2.Id,
-            auditoriumId: whiteAuditorium.Id,
-            new DateTime(2023, 11, 22),
-            whiteAuditorium.Seats.Count);
-
-        showtimeItem3 = showtimeItem3.SetKey(movieSessionId3);
-
-        var showtimeItem4 = MovieSession.Create(movieId: movie.Id,
-            auditoriumId: blackAuditorium.Id,
-            new DateTime(2023, 11, 22),
-            blackAuditorium.Seats.Count);
-        showtimeItem4 = showtimeItem4.SetKey(movieSessionId4);
-
-        var showtimeItem5 = MovieSession.Create(movieId: movie2.Id,
-            auditoriumId: whiteAuditorium.Id,
-            new DateTime(2023, 11, 23),
-            whiteAuditorium.Seats.Count);
-        showtimeItem5 = showtimeItem5.SetKey(movieSessionId5);
-
-        var showtimeItem6 = MovieSession.Create(movieId: movie3.Id,
-            auditoriumId: whiteAuditorium.Id,
-            new DateTime(2023, 11, 27),
-            whiteAuditorium.Seats.Count);
-
-        showtimeItem6 = showtimeItem6.SetKey(movieSessionId6);
-
-        _context.Movies.Add(movie);
-        _context.Movies.Add(movie2);
-        _context.Movies.Add(movie3);
-        await _context.SaveChangesAsync();
-
         _context.CinemaHalls.Add(redAuditorium);
         _context.CinemaHalls.Add(blackAuditorium);
         _context.CinemaHalls.Add(whiteAuditorium);
         await _context.SaveChangesAsync();
+        
+        await CreateMovieSessionMovieSessionSeats(movie,
+            redAuditorium,
+            new DateTime(2023, 11, 20, 12, 00, 0),
+            movieSessionId);
 
-        _context.MovieSessions.Add(showtimeItem);
-        _context.MovieSessions.Add(showtimeItem2);
-        _context.MovieSessions.Add(showtimeItem3);
-        _context.MovieSessions.Add(showtimeItem4);
-        _context.MovieSessions.Add(showtimeItem5);
-        _context.MovieSessions.Add(showtimeItem6);
+        await CreateMovieSessionMovieSessionSeats(movie,
+            redAuditorium,
+            new DateTime(2023, 11, 21, 15,30,0),
+            movieSessionId2);
 
-        await _context.SaveChangesAsync();
+        await CreateMovieSessionMovieSessionSeats(movie2,
+            whiteAuditorium,
+            new DateTime(2023, 11, 21, 15,30,0),
+            movieSessionId3);
+        
+        await CreateMovieSessionMovieSessionSeats(movie2,
+            whiteAuditorium,
+            new DateTime(2023, 11, 23, 15,30,0),
+            movieSessionId4);
 
-        CreateMovieSessionSeats(redAuditorium, showtimeItem, _context);
-        CreateMovieSessionSeats(redAuditorium, showtimeItem2, _context);
-        CreateMovieSessionSeats(whiteAuditorium, showtimeItem3, _context);
-        CreateMovieSessionSeats(blackAuditorium, showtimeItem4, _context);
-        CreateMovieSessionSeats(whiteAuditorium, showtimeItem5, _context);
-        CreateMovieSessionSeats(whiteAuditorium, showtimeItem6, _context);
+        await CreateMovieSessionMovieSessionSeats(movie3,
+            blackAuditorium,
+            new DateTime(2023, 11, 22, 15,30,0),
+            movieSessionId5);
 
 
+        await CreateMovieSessionMovieSessionSeats(movie3,
+            whiteAuditorium,
+            new DateTime(2023, 11, 27, 15,30,0),
+            movieSessionId6);
+        
+        await CreateMovieSessionMovieSessionSeats(movie4,
+            whiteAuditorium,
+            new DateTime(2023, 11, 27, 19,00,0));
+        
+        await CreateMovieSessionMovieSessionSeats(movie4,
+            blackAuditorium,
+            new DateTime(2023, 11, 26, 08,30,0));
+        
+        await CreateMovieSessionMovieSessionSeats(movie4,
+            blackAuditorium,
+            new DateTime(2023, 11, 26, 11,00,0));
+        
+        await CreateMovieSessionMovieSessionSeats(movie4,
+            blackAuditorium,
+            new DateTime(2023, 11, 26, 13,30,0));
+        
+        await CreateMovieSessionMovieSessionSeats(movie4,
+            blackAuditorium,
+            new DateTime(2023, 11, 26, 16,00,0));
+        
+        await CreateMovieSessionMovieSessionSeats(movie4,
+            blackAuditorium,
+            new DateTime(2023, 11, 26, 19,00,0));
+        
+        await CreateMovieSessionMovieSessionSeats(movie4,
+            blackAuditorium,
+            new DateTime(2023, 11, 26, 22,30,0));
+        
+        await CreateMovieSessionMovieSessionSeats(movie4,
+            whiteAuditorium,
+            new DateTime(2023, 11, 27, 19,00,0));
+        
+        
+        await CreateMovieSessionMovieSessionSeats(movie4,
+            redAuditorium,
+            new DateTime(2023, 11, 26, 09,00,0));
+        
+        await CreateMovieSessionMovieSessionSeats(movie4,
+            redAuditorium,
+            new DateTime(2023, 11, 26, 12,30,0));
+        
+        await CreateMovieSessionMovieSessionSeats(movie4,
+            redAuditorium,
+            new DateTime(2023, 11, 26, 17,00,0));
+        
+        
+
+    }
+
+    private async Task CreateMovieSessionMovieSessionSeats(Movie movie, CinemaHall redAuditorium, DateTime sessionDate,
+        Guid? movieSessionId  = null)
+    {
+        var showtimeItem = MovieSession.Create(movieId: movie.Id,
+            auditoriumId: redAuditorium.Id,
+            sessionDate,
+            redAuditorium.Seats.Count);
+
+        showtimeItem = showtimeItem.SetKey(movieSessionId ?? Guid.NewGuid());
+
+        await _context.MovieSessions.AddAsync(showtimeItem);
+
+        await CreateMovieSessionSeats(redAuditorium, showtimeItem, _context);
+        
         await _context.SaveChangesAsync();
     }
 
 
-    private static void CreateMovieSessionSeats(CinemaHall redAuditorium, MovieSession showtimeItem,
+    private async Task  CreateMovieSessionSeats(CinemaHall redAuditorium, MovieSession showtimeItem,
         CinemaContext context)
     {
         foreach (var seat in redAuditorium.Seats)
         {
             var showtimeSeat = MovieSessionSeat.Create(showtimeItem.Id, seat.Row, seat.SeatNumber, 15);
 
-            context.MovieSessionSeats.Add(showtimeSeat);
+           await context.MovieSessionSeats.AddAsync(showtimeSeat);
         }
     }
 

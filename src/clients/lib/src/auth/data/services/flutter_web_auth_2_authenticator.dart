@@ -25,8 +25,8 @@ class FlutterWebAuth2Authenticator implements Authenticator {
 
     final result = await FlutterWebAuth2.authenticate(
         url: url.toString(),
-        callbackUrlScheme: _callbackPath,
-        preferEphemeral: true);
+        callbackUrlScheme: _callbackPath);
+       // preferEphemeral: true);
 
     final code = Uri.parse(result).queryParameters['code'];
 

@@ -16,9 +16,15 @@ public class ConnectionManager : IConnectionManager
     public void AddConnection(Guid shoppingCartId, string connectionId)
     {
         List<string> connectionIds = _cacheService.TryGet<List<string>>($"hub:{shoppingCartId}").Result;
-        
-        if(connectionIds != null)
-            connectionIds.Add(connectionId);
+
+        if (connectionIds != null)
+        {
+
+            if (!connectionIds.Exists(t=>t.Equals(connectionId)))
+            {
+                connectionIds.Add(connectionId);
+            }
+        }
         else
         {
             connectionIds= new List<string> { connectionId };

@@ -24,10 +24,6 @@ class CreatingShoppingCart extends ShoppingCartState {
   const CreatingShoppingCart(super.shoppingCard, super.version, super.hashId);
 }
 
-// class GettingShoppingCart extends ShoppingCartState {
-//   const GettingShoppingCart(super.shoppingCard, super.version, super.hashId);
-// }
-
 class ShoppingCartCurrentState extends ShoppingCartState {
   const ShoppingCartCurrentState(
       super.shoppingCard, super.version, super.hashId);
@@ -68,5 +64,3 @@ class ShoppingCartError extends ShoppingCartState {
   @override
   List<Object> get props => [message];
 }
-
-

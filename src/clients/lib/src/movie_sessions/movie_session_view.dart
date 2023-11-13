@@ -8,12 +8,15 @@ import '../auditorium_detail.dart';
 import '../auth/presentations/widgets/auth_widget.dart';
 import '../cinema_halls/presentation/cubit/cinema_hall_cubit.dart';
 import '../globalisations_flutter/widgets/globalisation_widget.dart';
-import '../movie_detail.dart';
+import '../home/presentation/widgets/home_app_bar.dart';
+import '../movies/presentation/views/movie_detail.dart';
+import '../shopping_carts/presentation/widgens/shopping_cart_icon_widget.dart';
 import 'domain/entities/movie_session.dart';
 import 'presentation/cubit/movie_session_cubit.dart';
 import '../movies/domain/entities/movie.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
+import 'package:collection/collection.dart';
 
 import '../movies/presentation/app/movie_theater_cubit.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -83,72 +86,128 @@ class _MovieSessionsView extends State<MovieSessionsView> {
 
   Widget BuildMovieSessions(
       List<MovieSession> movieSessions, BuildContext context) {
+    final movieSessionResult = groupBy(
+            movieSessions,
+            (movieSession) =>
+                '${movieSession.sessionDate.year}${movieSession.sessionDate.month}${movieSession.sessionDate.day}')
+        .values
+        .map((seatsByDate) => groupBy(
+                seatsByDate.toList(), (seatByDate) => seatByDate.cinemaHallId)
+            .values
+            .map((seatsBycinemaHallId) => seatsBycinemaHallId.toList()
+              ..sort((a, b) => a.sessionDate.compareTo(b.sessionDate)))
+            .toList()
+          ..sort((a, b) => -a[0].cinemaHallId.compareTo(b[0].cinemaHallId)))
+        .toList() ..sort((a, b) => a[0][0].sessionDate.compareTo(b[0][0].sessionDate));
+
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: const Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: Text("Movie session"),
-            ),
-            GlobalisationWidget(),
-            AuthWidget(),
-          ],
-        ),
+      appBar:  const HomeAppBar(),
+      body: Row(
+        children: [
+          BlocProvider(
+              key: const ValueKey('MoviesDetailView'),
+              create: (_) => MovieTheaterCubit(),
+              child: MoviesDetailView(widget.movie.id)),
+          Column(children: [
+            SizedBox(
+                height: 40,
+                width: 100,
+                child: Text(AppLocalizations.of(context)!.movies)),
+            SizedBox(
+             //   height: 1950,
+                width: 1100,
+                child: ListView.builder(
+                    shrinkWrap: true,
+                    scrollDirection: Axis.vertical,
+                    itemCount: movieSessionResult.length,
+                    itemBuilder: (context, index) {
+                      var rowSeats = movieSessionResult[index];
+                      var day = rowSeats[0][0];
+
+                      return Container(
+                        width: 900,
+                        //height: 200,
+                        child: Column(
+                          children: [
+                            Text(
+                                '${day.sessionDate.year}-${day.sessionDate.month}-${day.sessionDate.day}'),
+                            ListView.builder(
+                                shrinkWrap: true,
+                                scrollDirection: Axis.vertical,
+                                itemCount: rowSeats.length,
+                                itemBuilder: (context, index2) {
+                                  var rows = rowSeats[index2];
+
+                                  return Container(
+                                    width: 800,
+                                   // height: 240,
+                                    child: Column(
+                                      children: [
+                                        BlocProvider(
+                                            key: const ValueKey(
+                                                'AuditoriumDetailView'),
+                                            create: (_) => CinemaHallCubit(),
+                                            child: AuditoriumDetailView(
+                                                rows[0].cinemaHallId)),
+                                        Divider(
+                                          color: Colors.blue,
+                                        ),
+                                        Wrap(
+                                          spacing: 8.0,
+                                          // горизонтальный отступ между элементами
+                                          runSpacing: 4.0,
+                                          // вертикальный отступ между строками
+                                          children: rows.map((movieSession) {
+                                            return SizedBox(
+                                                height: 110,
+                                                width: 200,
+                                                child: Column(
+                                                  children: [
+                                                    Text(
+                                                        '${movieSession.sessionDate.hour}:${'${movieSession.sessionDate.minute}0'.substring(0, 2)}'),
+                                                    TextButton(
+                                                        style: ButtonStyle(
+                                                          padding: MaterialStateProperty
+                                                              .all(const EdgeInsets
+                                                                  .symmetric(
+                                                                  vertical: 1,
+                                                                  horizontal:
+                                                                      1)),
+                                                          foregroundColor:
+                                                              MaterialStateProperty
+                                                                  .all<Color>(
+                                                                      Colors
+                                                                          .blue),
+                                                        ),
+                                                        onPressed: () {
+                                                          pressMovieSession(
+                                                              movieSession);
+                                                        },
+                                                        child: Text(
+                                                            AppLocalizations.of(
+                                                                    context)!
+                                                                .select))
+                                                  ],
+                                                ));
+                                          }).toList(),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                }),
+                          ],
+                        ),
+                      );
+                    })),
+            ElevatedButton(
+              onPressed: () => buttonCarouselController.nextPage(
+                  duration: Duration(milliseconds: 300), curve: Curves.linear),
+              child: Text('→'),
+            )
+          ]),
+        ],
       ),
-      body: Column(children: [
-        SizedBox(height: 40, width: 100, child: Text('Movies')),
-        SizedBox(
-            height: 250,
-            width: 1000,
-            child: CarouselSlider(
-              items: movieSessions.map((movieSession) {
-                return SizedBox(
-                    height: 250,
-                    width: 450,
-                    child: Column(
-                      children: [
-                        BlocProvider(
-                            key: const ValueKey('MoviesDetailView'),
-                            create: (_) => MovieTheaterCubit(),
-                            child: MoviesDetailView(movieSession.movieId)),
-                        BlocProvider(
-                            key: const ValueKey('AuditoriumDetailView'),
-                            create: (_) => CinemaHallCubit(),
-                            child: AuditoriumDetailView(
-                                movieSession.cinemaHallId)),
-                        // Text('auditoriumId: ${movieSession.auditoriumId}'),
-                        Text('Session Date: ${movieSession.sessionDate}'),
-                        TextButton(
-                            style: ButtonStyle(
-                              padding: MaterialStateProperty.all(
-                                  const EdgeInsets.symmetric(
-                                      vertical: 1, horizontal: 1)),
-                              foregroundColor:
-                                  MaterialStateProperty.all<Color>(Colors.blue),
-                            ),
-                            onPressed: () {
-                               pressMovieSession(movieSession);
-                            },
-                            child: Text(AppLocalizations.of(context)!.select))
-                      ],
-                    ));
-              }).toList(),
-              carouselController: buttonCarouselController,
-              options: CarouselOptions(
-                  height: 300.0,
-                  enableInfiniteScroll: true,
-                  viewportFraction: 0.4,
-                  enlargeCenterPage: false,
-                  aspectRatio: 3.0),
-            )),
-        ElevatedButton(
-          onPressed: () => buttonCarouselController.nextPage(
-              duration: Duration(milliseconds: 300), curve: Curves.linear),
-          child: Text('→'),
-        )
-      ]),
     );
   }
 
@@ -158,9 +217,6 @@ class _MovieSessionsView extends State<MovieSessionsView> {
   }
 
   void pressMovieSession(MovieSession movieSession) {
-
     Navigator.pushNamed(context, SeatsView.id, arguments: movieSession);
-
-
   }
 }

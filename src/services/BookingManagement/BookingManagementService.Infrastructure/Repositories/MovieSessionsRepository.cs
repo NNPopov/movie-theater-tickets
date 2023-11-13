@@ -2,6 +2,7 @@
 using CinemaTicketBooking.Application.Abstractions;
 using CinemaTicketBooking.Domain.Entities;
 using CinemaTicketBooking.Domain.MovieSessions;
+using CinemaTicketBooking.Domain.MovieSessions.Abstractions;
 using CinemaTicketBooking.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 

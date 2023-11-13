@@ -20,16 +20,6 @@ namespace CinemaTicketBooking.Infrastructure.Data;
 //     }
 // }
 
-public interface ICinemaContext
-{
-    DbSet<CinemaHall> CinemaHalls { get; }
-    DbSet<MovieSession> MovieSessions { get; }
-    DbSet<MovieSessionSeat> MovieSessionSeats { get; }
-    DbSet<Movie> Movies { get; }
-    DbSet<IdempotentRequest> IdempotentRequests { get; }
-    Task<int> SaveChangesAsync(CancellationToken cancellationToken);
-}
-
 public class CinemaContext : DbContext, ICinemaContext
 {
     public CinemaContext(DbContextOptions<CinemaContext> options) : base(options)

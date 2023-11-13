@@ -1,10 +1,20 @@
 {
+  "movies":"Movies",
+
+  "stars":"Stars",
+  "release_date":"Release Date",
   "select": "Select",
   "screen":"Screen",
   "remove":"Remove",
+
+  "row":"Row",
+
+  "movie_session":"Movie session",
+
   "sing_in":"Sing in",
   "sing_out":"Sing out",
-  "@helloWorld": {
-    "description": "The conventional newborn programmer greeting"
-  }
+
+  "reconnecting_notification_text":"The connection to the server has been lost! Reconnecting!",
+  "connection_lost_notification_text":"The connection to the server has been lost! Please try reconnecting.",
+  "connection_lost_reconnect_btn":"Reconnect"
 }

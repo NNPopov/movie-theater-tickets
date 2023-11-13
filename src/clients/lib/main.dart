@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:movie_theater_tickets/src/globalisations_flutter/cubit/globalisation_cubit.dart';
-import 'package:movie_theater_tickets/src/gobal.dart';
+import 'package:movie_theater_tickets/src/global.dart';
 import 'core/services/router.main.dart';
 import 'injection_container.dart';
 import 'package:get_it/get_it.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:logger/logger.dart';
+// import 'package:logger/logger.dart';
+//
+// var logger = Logger(
+//   printer: PrettyPrinter(),
+// );
 
-var logger = Logger(
-  printer: PrettyPrinter(),
-);
-
-var loggerNoStack = Logger(
-  printer: PrettyPrinter(methodCount: 0),
-);
+// var loggerNoStack = Logger(
+//   printer: PrettyPrinter(methodCount: 0),
+// );
 
 final getIt = GetIt.instance;
 

@@ -1,5 +1,6 @@
 ﻿using CinemaTicketBooking.Application.Abstractions;
 using CinemaTicketBooking.Domain.Seats;
+using CinemaTicketBooking.Domain.Seats.Abstractions;
 using CinemaTicketBooking.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;

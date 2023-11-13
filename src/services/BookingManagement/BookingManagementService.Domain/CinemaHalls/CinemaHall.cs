@@ -3,7 +3,7 @@ using CinemaTicketBooking.Domain.Common;
 
 namespace CinemaTicketBooking.Domain.CinemaHalls;
 
-public class CinemaHall : AggregateRoot
+public sealed class CinemaHall : AggregateRoot
 {
     private readonly IList<SeatEntity> _seats;
 

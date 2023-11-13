@@ -22,6 +22,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		..\docker-compose.override.yml = ..\docker-compose.override.yml
 		..\..\README.md = ..\..\README.md
 		..\..\docs\BusinessRequirement.md = ..\..\docs\BusinessRequirement.md
+		Directory.Packages.props = Directory.Packages.props
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CinemaTicketBooking.Application.UnitTests", "BookingManagement\tests\CinemaTicketBooking.Application.UnitTests\CinemaTicketBooking.Application.UnitTests.csproj", "{8F203C2A-243F-4798-AD79-E717FEA4A905}"
@@ -34,6 +35,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nginx", "nginx", "{AFF88A3E
 		..\build\nginx\localhost.crt = ..\build\nginx\localhost.crt
 		..\build\nginx\localhost.key = ..\build\nginx\localhost.key
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CinemaTicketBooking.Domain.ArchitectureTests", "tests\CinemaTicketBooking.Domain.ArchitectureTests\CinemaTicketBooking.Domain.ArchitectureTests.csproj", "{0BCB6D56-7D3F-40AD-B4B3-41E31037ADD6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -61,6 +64,10 @@ Global
 		{8F203C2A-243F-4798-AD79-E717FEA4A905}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8F203C2A-243F-4798-AD79-E717FEA4A905}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8F203C2A-243F-4798-AD79-E717FEA4A905}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0BCB6D56-7D3F-40AD-B4B3-41E31037ADD6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0BCB6D56-7D3F-40AD-B4B3-41E31037ADD6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0BCB6D56-7D3F-40AD-B4B3-41E31037ADD6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0BCB6D56-7D3F-40AD-B4B3-41E31037ADD6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -73,6 +80,7 @@ Global
 		{8F203C2A-243F-4798-AD79-E717FEA4A905} = {3A5F471B-BDCE-4BF4-87B7-626CACDB2DEC}
 		{7C256F49-C29B-48F7-AC45-C810459AA3FC} = {9D9DC080-6DAA-4019-9BFF-60079FAB4A9B}
 		{AFF88A3E-57E8-479F-BD6C-BA538DAE800C} = {7C256F49-C29B-48F7-AC45-C810459AA3FC}
+		{0BCB6D56-7D3F-40AD-B4B3-41E31037ADD6} = {3A5F471B-BDCE-4BF4-87B7-626CACDB2DEC}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7564393F-74EB-4313-A6D5-442E81537B0A}

@@ -88,7 +88,7 @@ class ShoppingCartCubit extends Cubit<ShoppingCartState> {
 
   late final AssignClientUseCase _assignClientUseCase;
 
-   late String _hashId;
+  late String _hashId;
   late int version = 0;
 
   Future<void> updateShoppingCartState(
@@ -114,9 +114,8 @@ class ShoppingCartCubit extends Cubit<ShoppingCartState> {
       version = version + 1;
       emit(ShoppingCartError(
           ShoppingCart.empty(), _hashId, version, failure.errorMessage));
-
     }, (value) async {
-   //   _hashId = value.hashId;
+      //   _hashId = value.hashId;
 
       final resultShoppingCart = await _getShoppingCart(value.shoppingCartId);
 

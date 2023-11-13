@@ -2,9 +2,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:movie_theater_tickets/core/extensions/context_extensions.dart';
-import '../core/common/views/loading_view.dart';
-import '../core/utils/utils.dart';
-import 'movies/presentation/app/movie_theater_cubit.dart';
+import '../../../../core/common/views/loading_view.dart';
+import '../../../../core/utils/utils.dart';
+import '../app/movie_theater_cubit.dart';
+import '../../../globalisations_flutter/widgets/globalisation_widget.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class MoviesDetailView extends StatefulWidget {
   const MoviesDetailView(this.movieId, {super.key});
@@ -54,8 +56,8 @@ class _MoviesDetailViewView extends State<MoviesDetailView> {
 
         final movie = state.movie;
         return Column(children: [
-          Text("Title :${Text(movie.title)}"),
-          Text("Release Date :${movie.releaseDate}")
+          Text(movie.title),
+          Text('${AppLocalizations.of(context)!.release_date} :${movie.releaseDate.year}-${movie.releaseDate.month}-${movie.releaseDate.day}')
         ]);
       },
     );

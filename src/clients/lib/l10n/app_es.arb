@@ -1,10 +1,21 @@
 {
+
+  "movies":"Película",
+
+  "stars":"Stars",
+  "release_date":"Release Date",
   "select": "Elegir",
    "screen":"Pantalla",
    "remove":"Borrar",
+
+   "row":"Fila",
+
+  "movie_session":"Movie session",
+
    "sing_in":"Iniciar sesión",
    "sing_out":"Cerrar sesión",
-  "@helloWorld": {
-    "description": "Hola!"
-  }
+
+  "reconnecting_notification_text":"The connection to the server has been lost! Reconnecting!",
+  "connection_lost_notification_text":"The connection to the server has been lost! Please try reconnecting.",
+  "connection_lost_reconnect_btn":"Reconnect"
 }

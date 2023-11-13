@@ -1,5 +1,7 @@
 ﻿using CinemaTicketBooking.Application.Abstractions;
+using CinemaTicketBooking.Domain.MovieSessions.Abstractions;
 using CinemaTicketBooking.Domain.Seats;
+using CinemaTicketBooking.Domain.Seats.Abstractions;
 
 namespace CinemaTicketBooking.Application.MovieSessions.Queries;
 

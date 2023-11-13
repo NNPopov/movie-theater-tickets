@@ -194,7 +194,7 @@ public class ShoppingCart : AggregateRoot
 [method: JsonConstructor]
 public class SeatShoppingCart(short seatRow, short seatNumber) : Seat(seatRow, seatNumber);
 
-public record SeatRemovedFromShoppingCartDomainEvent(
+public sealed record SeatRemovedFromShoppingCartDomainEvent(
     Guid MovieSessionId,
     short SeatRow,
     short SeatNumber,

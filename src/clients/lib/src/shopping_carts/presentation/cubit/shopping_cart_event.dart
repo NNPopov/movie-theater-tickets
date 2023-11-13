@@ -1,15 +1,13 @@
 part of 'shopping_cart_cubit.dart';
 
-abstract class ShoppingCartEvent  extends Equatable {
-const ShoppingCartEvent();
+abstract class ShoppingCartEvent extends Equatable {
+  const ShoppingCartEvent();
 
   @override
   List<Object> get props => [];
-
 }
 
-class ShoppingCartUpdateEvent extends ShoppingCartEvent
-{
+class ShoppingCartUpdateEvent extends ShoppingCartEvent {
   const ShoppingCartUpdateEvent(this.shoppingCart);
 
   final ShoppingCart shoppingCart;
@@ -17,4 +15,3 @@ class ShoppingCartUpdateEvent extends ShoppingCartEvent
   @override
   List<Object> get props => [shoppingCart];
 }
-

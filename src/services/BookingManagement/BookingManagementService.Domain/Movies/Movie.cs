@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 
 namespace CinemaTicketBooking.Domain.Movies;
 
-public class Movie : AggregateRoot
+public sealed class Movie : AggregateRoot
 {
     [JsonConstructor]
     private Movie(Guid id,

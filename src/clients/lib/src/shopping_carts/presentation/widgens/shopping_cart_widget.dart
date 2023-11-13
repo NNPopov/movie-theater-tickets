@@ -61,7 +61,6 @@ class _ShoppingCartWidget extends State<ShoppingCartWidget> {
           context.read<ShoppingCartCubit>().state;
 
           var createdShoppingCard = state as ShoppingCartCurrentState;
-          var shoppingCardId = createdShoppingCard.shoppingCard.id;
 
           return Container(
             width: 220,
@@ -69,8 +68,10 @@ class _ShoppingCartWidget extends State<ShoppingCartWidget> {
             margin: const EdgeInsets.all(6.0),
             padding: const EdgeInsets.all(6.0),
             child: Column(children: [
-              Text("Shopping Cart:  ${shoppingCardId}"),
-              Text(" ${createdShoppingCard.shoppingCard.status}"),
+              Text("${createdShoppingCard.shoppingCard.status.toString()}"),
+              const SizedBox(
+                height: 30,
+              ),
               ListView.builder(
                   shrinkWrap: true,
                   scrollDirection: Axis.vertical,
@@ -99,7 +100,7 @@ class _ShoppingCartWidget extends State<ShoppingCartWidget> {
                               width: 140,
                               padding: const EdgeInsets.all(10.0),
                               child: Text(
-                                  "Row ${rowSeat.seatRow}, Number ${rowSeat.seatNumber}")),
+                                  "${AppLocalizations.of(context)!.row} ${rowSeat.seatRow}, Number ${rowSeat.seatNumber}")),
                           IconButton(
                             icon: const Icon(Icons.delete),
                             tooltip: AppLocalizations.of(context)!.remove,
@@ -156,19 +157,16 @@ class _ShoppingCartWidget extends State<ShoppingCartWidget> {
   }
 
   void onCreateShoppingCart() {
-  if(  context.read<ShoppingCartCubit>().state.shoppingCard.status != null)
-    {return;}
+    if (context.read<ShoppingCartCubit>().state.shoppingCard.status != null) {
+      return;
+    }
 
     showDialog<String>(
         context: context,
-        builder:
-            (BuildContext context) => BlocProvider(
+        builder: (BuildContext context) => BlocProvider(
               create: (BuildContext context) => ShoppingCartCubit(),
-              child:
-
-
-        BlocConsumer<ShoppingCartCubit, ShoppingCartState>(
-                builder:  (BuildContext context, ShoppingCartState state)  {
+              child: BlocConsumer<ShoppingCartCubit, ShoppingCartState>(
+                builder: (BuildContext context, ShoppingCartState state) {
                   return AlertDialog(
                     title: const Text('Shopping cart'),
                     content: const Text(
@@ -184,29 +182,26 @@ class _ShoppingCartWidget extends State<ShoppingCartWidget> {
                       ),
                       TextButton(
                         onPressed: () {
-                          var maxNumberOfSeats = int.parse(_maxSeatsController.text!);
-                          context.read<ShoppingCartCubit>().createShoppingCart(maxNumberOfSeats);
-
-
+                          var maxNumberOfSeats =
+                              int.parse(_maxSeatsController.text!);
+                          context
+                              .read<ShoppingCartCubit>()
+                              .createShoppingCart(maxNumberOfSeats);
                         },
                         child: const Text('Create a shopping card'),
                       ),
                     ],
                   );
-                }, listener: (BuildContext context, ShoppingCartState state) {
-
-            if (state is ShoppingCartCurrentState) {
-              Navigator.pop(context, _maxSeatsController.text);
-            }
-        },
+                },
+                listener: (BuildContext context, ShoppingCartState state) {
+                  if (state is ShoppingCartCurrentState) {
+                    Navigator.pop(context, _maxSeatsController.text);
+                  }
+                },
               ),
-            )
-
-    ).then((valueFromDialog) {
+            )).then((valueFromDialog) {
       if (valueFromDialog != "Cancel") {
-       context.read<ShoppingCartCubit>().GetShoppingCartIfExits();
-        // var maxNumberOfSeats = int.parse(valueFromDialog!);
-        // context.read<ShoppingCartCubit>().createShoppingCart(maxNumberOfSeats);
+        context.read<ShoppingCartCubit>().GetShoppingCartIfExits();
       }
     });
   }

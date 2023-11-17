@@ -2,8 +2,10 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:movie_theater_tickets/src/movie_sessions/domain/entities/movie_session.dart';
 import 'package:movie_theater_tickets/src/shopping_carts/presentation/cubit/shopping_cart_cubit.dart';
+import '../../src/about/presentation/views/shopping_cart_view.dart';
 import '../../src/auth/presentations/cubit/auth_cubit.dart';
 import '../../src/hub/presentation/cubit/connectivity_bloc.dart';
+import '../../src/shopping_carts/presentation/views/shopping_cart_view.dart';
 import '../buses/event_bus.dart';
 import '../../src/movie_sessions/movie_session_view.dart';
 import '../../src/movie_sessions/presentation/cubit/movie_session_cubit.dart';
@@ -26,6 +28,8 @@ GetIt getIt = GetIt.instance;
 
 Route<dynamic> generateRoute(RouteSettings settings) {
   log.info(settings.name);
+
+  print(settings.name);
 
   if (settings.name == MoviesView.id || settings.name == '/') {
     return _pageBuilder(
@@ -59,7 +63,9 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       ),
       settings: settings,
     );
-  } else if (settings.name == SeatsView.id && settings?.arguments != null) {
+  } else if (settings.name != null &&
+      settings.name!.contains(SeatsView.id) &&
+      settings?.arguments != null) {
     return _pageBuilder(
       (_) => MultiBlocProvider(
         providers: [
@@ -67,8 +73,8 @@ Route<dynamic> generateRoute(RouteSettings settings) {
           BlocProvider<ConnectivityBloc>(create: (_) => ConnectivityBloc()),
           BlocProvider<SeatCubit>(
             create: (context) => SeatCubit(
-                getMovieSessionById: getIt.get<GetSeatsByMovieSessionId>(),
-                eventBus: getIt.get<EventBus>()),
+                 getIt.get<GetSeatsByMovieSessionId>(),
+                getIt.get<EventBus>()),
           ),
           BlocProvider<ShoppingCartCubit>(
             create: (context) => ShoppingCartCubit(),
@@ -79,6 +85,39 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       settings: settings,
     );
   }
+  else if (settings.name == ShoppingCartView.id){
+
+    return _pageBuilder(
+          (_) =>MultiBlocProvider(
+            providers: [
+              BlocProvider<AuthCubit>(create: (_) => AuthCubit()),
+              BlocProvider<ConnectivityBloc>(create: (_) => ConnectivityBloc()),
+              BlocProvider<ShoppingCartCubit>(
+                create: (context) => ShoppingCartCubit(),
+              ),
+            ],
+            child: const ShoppingCartView(),
+          ),
+      settings: settings,
+    );
+  }
+  else if (settings.name == AboutUsView.id){
+
+    return _pageBuilder(
+          (_) =>MultiBlocProvider(
+        providers: [
+          BlocProvider<AuthCubit>(create: (_) => AuthCubit()),
+          BlocProvider<ConnectivityBloc>(create: (_) => ConnectivityBloc()),
+          BlocProvider<ShoppingCartCubit>(
+            create: (context) => ShoppingCartCubit(),
+          ),
+        ],
+        child: const AboutUsView(),
+      ),
+      settings: settings,
+    );
+  }
+
 
   return _pageBuilder(
     (_) => MultiBlocProvider(
@@ -98,6 +137,7 @@ PageRouteBuilder<dynamic> _pageBuilder(
   Widget Function(BuildContext) page, {
   required RouteSettings settings,
 }) {
+
   return PageRouteBuilder(
     settings: settings,
     transitionsBuilder: (_, animation, __, child) => FadeTransition(

@@ -17,7 +17,7 @@ import 'package:movie_theater_tickets/src/movies/domain/usecases/get_movies.dart
 import 'package:movie_theater_tickets/src/seats/data/repos/seat_repo_impl.dart';
 import 'package:movie_theater_tickets/src/seats/domain/repos/seat_repo.dart';
 import 'package:movie_theater_tickets/src/seats/domain/usecases/get_seats_by_movie_session_id.dart';
-import 'package:movie_theater_tickets/src/seats/domain/usecases/update_seats_sate.dart';
+import 'package:movie_theater_tickets/src/seats/domain/usecases/update_seats_sate_usecase.dart';
 import 'package:movie_theater_tickets/src/shopping_carts/data/repos/shopping_cart_local_repo_impl.dart';
 import 'package:movie_theater_tickets/src/shopping_carts/domain/repos/shopping_cart_local_repo.dart';
 import 'package:movie_theater_tickets/src/shopping_carts/domain/services/shopping_cart_service.dart';
@@ -76,7 +76,7 @@ Future<void> initializeDependencies() async {
 }
 
 void _initShoppingCart() {
-  getIt.registerLazySingleton<ShoppingCartService>(() => ShoppingCartService());
+  getIt.registerLazySingleton<ShoppingCartService>(() => ShoppingCartService(getIt.get()));
 
   getIt.registerLazySingleton<ShoppingCartLocalRepo>(
       () => ShoppingCartLocalRepoImpl());
@@ -85,9 +85,9 @@ void _initShoppingCart() {
       () => ReserveSeatsUseCase(getIt.get(), getIt.get(), getIt.get()));
   getIt.registerLazySingleton<ShoppingCartRepo>(() => ShoppingCartRepoImpl());
   getIt.registerLazySingleton<CreateShoppingCartUseCase>(
-      () => CreateShoppingCartUseCase());
+      () => CreateShoppingCartUseCase(getIt.get(),getIt.get(),getIt.get()));
   getIt.registerLazySingleton<GetShoppingCart>(
-      () => GetShoppingCart(getIt.get(), getIt.get()));
+      () => GetShoppingCart(getIt.get(), getIt.get(), getIt.get(), getIt.get(), getIt.get()));
   getIt.registerLazySingleton<SelectSeatUseCase>(
       () => SelectSeatUseCase(getIt.get(), getIt.get()));
   getIt.registerLazySingleton<UnselectSeatUseCase>(
@@ -101,24 +101,24 @@ void _initShoppingCart() {
 }
 
 void _initSeats() {
-  getIt.registerLazySingleton<UpdateSeatsState>(() => UpdateSeatsState());
+  getIt.registerLazySingleton<UpdateSeatsStateUseCase>(() => UpdateSeatsStateUseCase(getIt.get()));
   getIt.registerLazySingleton<SeatRepo>(() => SeatRepoImpl());
   getIt.registerLazySingleton<GetSeatsByMovieSessionId>(
-      () => GetSeatsByMovieSessionId());
+      () => GetSeatsByMovieSessionId(getIt.get(), getIt.get()));
 }
 
 void _initCinemaHall() {
-  getIt.registerLazySingleton<CinemaHallRepo>(() => CinemaHallRepoImpl());
-  getIt.registerLazySingleton<GetCinemaHallById>(() => GetCinemaHallById());
+  getIt.registerLazySingleton<CinemaHallRepo>(() => CinemaHallRepoImpl(getIt.get()));
+  getIt.registerLazySingleton<GetCinemaHallById>(() => GetCinemaHallById(getIt.get()));
 }
 
 void _initMovieSession() {
-  getIt.registerLazySingleton<GetMovieSessions>(() => GetMovieSessions());
-  getIt.registerLazySingleton<MovieSessionRepo>(() => MovieSessionRepoImpl());
+  getIt.registerLazySingleton<GetMovieSessions>(() => GetMovieSessions(getIt.get()));
+  getIt.registerLazySingleton<MovieSessionRepo>(() => MovieSessionRepoImpl(getIt.get()));
 }
 
 void _initMovie() {
-  getIt.registerLazySingleton<GetMovieById>(() => GetMovieById());
-  getIt.registerLazySingleton<GetMovies>(() => GetMovies());
-  getIt.registerLazySingleton<MovieRepo>(() => MovieRepoImpl());
+  getIt.registerLazySingleton<GetMovieById>(() => GetMovieById(getIt.get()));
+  getIt.registerLazySingleton<GetMovies>(() => GetMovies(getIt.get()));
+  getIt.registerLazySingleton<MovieRepo>(() => MovieRepoImpl(getIt.get()));
 }

@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-
+import 'package:movie_theater_tickets/core/services/router.main.dart';
 import '../../../../core/utils/utils.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-import '../../../seats/domain/entities/seat.dart';
 import '../../domain/entities/seat.dart';
 import '../cubit/shopping_cart_cubit.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -48,6 +46,8 @@ class _ShoppingCartWidget extends State<ShoppingCartWidget> {
         }
       },
       builder: (BuildContext context, ShoppingCartState state) {
+
+
         if (state is CreatingShoppingCart) {
           return const SizedBox(
             width: 150,
@@ -131,7 +131,7 @@ class _ShoppingCartWidget extends State<ShoppingCartWidget> {
                   onPressed: () {
                     onCompletePurchase();
                   },
-                  child: const Text('Complete purchase'),
+                  child:  Text(AppLocalizations.of(context)!.complete_purchases),
                 ),
             ]),
           );
@@ -142,7 +142,7 @@ class _ShoppingCartWidget extends State<ShoppingCartWidget> {
           height: 200,
           child: Column(
             children: [
-              const Text("Shopping Cart"),
+              Text(AppLocalizations.of(context)!.shopping_cart),
               TextButton(
                 onPressed: () {
                   onCreateShoppingCart();
@@ -161,14 +161,14 @@ class _ShoppingCartWidget extends State<ShoppingCartWidget> {
       return;
     }
 
-    showDialog<String>(
+    showDialog(
         context: context,
         builder: (BuildContext context) => BlocProvider(
               create: (BuildContext context) => ShoppingCartCubit(),
               child: BlocConsumer<ShoppingCartCubit, ShoppingCartState>(
                 builder: (BuildContext context, ShoppingCartState state) {
                   return AlertDialog(
-                    title: const Text('Shopping cart'),
+                    title: Text(AppLocalizations.of(context)!.shopping_cart),
                     content: const Text(
                         'Select the number of seats you are going to buy'),
                     actions: <Widget>[
@@ -177,14 +177,14 @@ class _ShoppingCartWidget extends State<ShoppingCartWidget> {
                         keyboardType: TextInputType.phone,
                       ),
                       TextButton(
-                        onPressed: () => Navigator.pop(context, 'Cancel'),
+                        onPressed: () => Navigator.of(context).pop(),
                         child: const Text('Cancel'),
                       ),
                       TextButton(
-                        onPressed: () {
+                        onPressed: () async {
                           var maxNumberOfSeats =
                               int.parse(_maxSeatsController.text!);
-                          context
+                          await context
                               .read<ShoppingCartCubit>()
                               .createShoppingCart(maxNumberOfSeats);
                         },
@@ -194,15 +194,15 @@ class _ShoppingCartWidget extends State<ShoppingCartWidget> {
                   );
                 },
                 listener: (BuildContext context, ShoppingCartState state) {
-                  if (state is ShoppingCartCurrentState) {
-                    Navigator.pop(context, _maxSeatsController.text);
+                  if (state is ShoppingCartCreatedState) {
+                    log.info('ShoppingCartCreatedState received');
+
+                    Navigator.of(context).pop();
                   }
                 },
               ),
-            )).then((valueFromDialog) {
-      if (valueFromDialog != "Cancel") {
-        context.read<ShoppingCartCubit>().GetShoppingCartIfExits();
-      }
+            )).then((valueFromDialog) async {
+      await context.read<ShoppingCartCubit>().GetShoppingCartIfExits();
     });
   }
 

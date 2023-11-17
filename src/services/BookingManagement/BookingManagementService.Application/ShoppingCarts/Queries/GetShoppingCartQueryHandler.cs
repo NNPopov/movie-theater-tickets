@@ -1,12 +1,13 @@
 ﻿using CinemaTicketBooking.Application.Abstractions;
 using CinemaTicketBooking.Application.Exceptions;
 using CinemaTicketBooking.Domain.ShoppingCarts;
+using CinemaTicketBooking.Domain.ShoppingCarts.Abstractions;
 
 namespace CinemaTicketBooking.Application.ShoppingCarts.Queries;
 
-public record GetShoppingCartQuery(Guid ShoppingCartId) : IRequest<ShoppingCartDto>;
+public record GetShoppingCartQuery(Guid ShoppingCartId) : IRequest<ShoppingCart>;
 
-public class GetShoppingCartQueryHandler : IRequestHandler<GetShoppingCartQuery, ShoppingCartDto>
+public class GetShoppingCartQueryHandler : IRequestHandler<GetShoppingCartQuery, ShoppingCart>
 {
     private readonly IMapper _mapper;
     private IShoppingCartRepository _shoppingCartRepository;
@@ -18,16 +19,16 @@ public class GetShoppingCartQueryHandler : IRequestHandler<GetShoppingCartQuery,
         _shoppingCartRepository = shoppingCartRepository;
     }
 
-    public async Task<ShoppingCartDto> Handle(GetShoppingCartQuery request,
+    public async Task<ShoppingCart> Handle(GetShoppingCartQuery request,
         CancellationToken cancellationToken)
     {
         
-        var cart = await _shoppingCartRepository.TryGetCart(request.ShoppingCartId);
+        var cart = await _shoppingCartRepository.GetByIdAsync(request.ShoppingCartId);
         
         if (cart is null)
             throw new ContentNotFoundException(request.ShoppingCartId.ToString(), nameof(ShoppingCart));
 
-        return _mapper.Map<ShoppingCartDto>(cart);
+        return cart;
     }
 }
 

@@ -6,6 +6,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../seats/domain/entities/seat.dart';
 import '../../domain/entities/seat.dart';
 import '../cubit/shopping_cart_cubit.dart';
+import '../views/shopping_cart_view.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ShoppingCartIconWidget extends StatefulWidget {
   const ShoppingCartIconWidget({super.key});
@@ -59,8 +61,10 @@ class _ShoppingCartIconWidget extends State<ShoppingCartIconWidget> {
             children: [
             IconButton(
                 icon: const Icon(Icons.shopping_cart),
-                tooltip: 'Remove',
-                onPressed: () {}
+                tooltip: AppLocalizations.of(context)!.shopping_cart,
+                onPressed: () {
+                  Navigator.pushNamed(context, ShoppingCartView.id);
+                }
             ),
             Text(
               countSelectedSeats,

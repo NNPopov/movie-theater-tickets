@@ -1,7 +1,7 @@
 
 using System.Runtime.CompilerServices;
 
-[assembly: InternalsVisibleTo("CinemaTicketBooking.Application.UnitTests")]
+[assembly: InternalsVisibleTo("CinemaTicketBooking.Domain.UnitTests")]
 
 
 

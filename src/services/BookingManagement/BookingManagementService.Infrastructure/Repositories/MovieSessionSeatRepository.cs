@@ -3,73 +3,71 @@ using CinemaTicketBooking.Domain.Seats;
 using CinemaTicketBooking.Domain.Seats.Abstractions;
 using CinemaTicketBooking.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Serilog;
 
 namespace CinemaTicketBooking.Infrastructure.Repositories;
 
-public class MovieSessionSeatRepository : IMovieSessionSeatRepository
-{
-    private readonly CinemaContext _context;
-    private readonly ILogger _logger;
-
-    private readonly IDomainEventTracker _domainEventTracker;
-
-    public MovieSessionSeatRepository(CinemaContext context,
+public class MovieSessionSeatRepository(CinemaContext context,
         ILogger logger,
         IDomainEventTracker domainEventTracker)
-    {
-        _context = context;
-        _logger = logger;
-        _domainEventTracker = domainEventTracker;
-    }
-
+    : IMovieSessionSeatRepository
+{
     public async Task AddAsync(MovieSessionSeat movieSessionSeat, CancellationToken cancellationToken)
     {
-        _context.MovieSessionSeats.Add(movieSessionSeat);
-        await _context.SaveChangesAsync(cancellationToken);
+        context.MovieSessionSeats.Add(movieSessionSeat);
+        await context.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task UpdateRangeAsync(ICollection<MovieSessionSeat> movieSessionSeats,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            context.MovieSessionSeats.UpdateRange(movieSessionSeats);
+            await context.SaveChangesAsync(cancellationToken);
+
+            foreach (var movieSessionSeat in movieSessionSeats)
+            {
+                await domainEventTracker.PublishDomainEvents(movieSessionSeat, cancellationToken);
+            }
+        }
+        catch (Exception e)
+        {
+            logger.Error(e, "Failed to update MovieSessionSeats");
+            throw;
+        }
     }
 
     public async Task UpdateAsync(MovieSessionSeat movieSessionSeat, CancellationToken cancellationToken)
     {
         try
         {
-            _context.MovieSessionSeats.Update(movieSessionSeat);
+            context.MovieSessionSeats.Update(movieSessionSeat);
 
-            await _context.SaveChangesAsync(cancellationToken);
+            await context.SaveChangesAsync(cancellationToken);
         }
         catch (Exception e)
         {
-            _logger.Error(e, "Failed to update MovieSessionSeats");
+            logger.Error(e, "Failed to update MovieSessionSeats");
+            throw;
         }
 
 
-        await _domainEventTracker.PublishDomainEvents(movieSessionSeat, cancellationToken);
-    }
-
-    private List<(string, string)> CreateWithValues<T>(PropertyValues values)
-    {
-        var entity = new List<(string, string)>();
-
-        foreach (var name in values.Properties)
-        {
-            entity.Add(new(name.Name, values[name.Name].ToString()));
-        }
-
-        return entity;
+        await domainEventTracker.PublishDomainEvents(movieSessionSeat, cancellationToken);
     }
 
     public async Task<ICollection<MovieSessionSeat>> GetByMovieSessionIdAsync(Guid movieSessionId,
         CancellationToken cancellationToken)
     {
-        return await _context.MovieSessionSeats.Where(t => t.MovieSessionId == movieSessionId)
+        return await context.MovieSessionSeats
+            .Where(t => t.MovieSessionId == movieSessionId)
             .ToListAsync(cancellationToken);
     }
 
     public async Task<MovieSessionSeat?> GetByIdAsync(Guid movieSessionId, short seatRow, short seatNumber,
         CancellationToken cancellationToken)
     {
-        return await _context
+        return await context
             .MovieSessionSeats
             .FirstOrDefaultAsync(t => t.MovieSessionId == movieSessionId &&
                                       t.SeatRow == seatRow &&

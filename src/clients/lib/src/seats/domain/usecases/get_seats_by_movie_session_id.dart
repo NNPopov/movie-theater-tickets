@@ -14,14 +14,10 @@ GetIt getIt = GetIt.instance;
 class GetSeatsByMovieSessionId
     extends FutureUsecaseWithParams<List<List<Seat>>, String> {
 
-  GetSeatsByMovieSessionId({SeatRepo? repo, EventHub? eventHub})
-  {
-    _repo = repo ?? getIt.get<SeatRepo>();
-    _eventHub = eventHub ?? getIt.get<EventHub>();
-  }
+  GetSeatsByMovieSessionId(this._repo, this._eventHub);
 
-  late SeatRepo _repo;
-  late EventHub _eventHub;
+  final SeatRepo _repo;
+  final EventHub _eventHub;
   final storage = const FlutterSecureStorage();
 
   @override

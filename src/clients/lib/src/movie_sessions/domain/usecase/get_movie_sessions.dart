@@ -10,13 +10,9 @@ GetIt getIt = GetIt.instance;
 class GetMovieSessions
     extends FutureUsecaseWithParams<List<MovieSession>, String> {
 
-  GetMovieSessions({MovieSessionRepo? repo})
-  {
-    _repo = repo ?? getIt.get<MovieSessionRepo>();
+  GetMovieSessions(this._repo);
 
-  }
-
-  late MovieSessionRepo _repo;
+  final MovieSessionRepo _repo;
 
   @override
   ResultFuture<List<MovieSession>> call(String movieId) =>

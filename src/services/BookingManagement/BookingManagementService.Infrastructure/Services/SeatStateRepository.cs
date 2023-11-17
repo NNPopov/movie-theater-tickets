@@ -1,5 +1,5 @@
-﻿using CinemaTicketBooking.Application.Abstractions;
-using CinemaTicketBooking.Application.ShoppingCarts.Command.SelectSeats;
+﻿using CinemaTicketBooking.Application.Abstractions.Repositories;
+using CinemaTicketBooking.Domain.ShoppingCarts;
 using Newtonsoft.Json;
 using StackExchange.Redis;
 
@@ -17,46 +17,7 @@ public class SeatStateRepository : ISeatStateRepository
         _redis = redis;
     }
 
-
-    public async Task<ICollection<SeatDto>> GetReservedSeats(Guid showtimeId)
-    {
-        var db = _redis.GetDatabase();
-        var reservedSeatsKey = await db.ExecuteAsync("KEYS", $"{KeyPrefix}:{showtimeId.ToString()}:*");
-
-        var re = (RedisResult[])reservedSeatsKey;
-        var response = re.Select(t =>
-        {
-            var key = t.ToString().Split(':');
-            return new SeatDto(Row: short.Parse(key[2]), Number: short.Parse(key[3]));
-        });
-        return response.ToList();
-    }
-
-
-    public async Task<string> StringGetAsync(string key)
-    {
-        var db = _redis.GetDatabase();
-
-        var value = await db.StringGetAsync(key);
-
-
-        return value;
-    }
-
-    public async Task<T?> GetAsync<T>(string key)
-    {
-        var db = _redis.GetDatabase();
-
-        string jsonValue = await db.StringGetAsync(key);
-
-        if (string.IsNullOrEmpty(jsonValue))
-            return default;
-
-        var value = JsonConvert.DeserializeObject<T>(jsonValue);
-        return value;
-    }
-
-    public async Task<SeatSelectedInfo> GetAsync(Guid movieSessionId, short seatRow, short seatNumber)
+    public async Task<SeatShoppingCart> GetAsync(Guid movieSessionId, short seatRow, short seatNumber)
     {
         var db = _redis.GetDatabase();
 
@@ -67,9 +28,8 @@ public class SeatStateRepository : ISeatStateRepository
         if (string.IsNullOrEmpty(jsonValue))
             return default;
 
-        return JsonConvert.DeserializeObject<SeatSelectedInfo>(jsonValue);
+        return JsonConvert.DeserializeObject<SeatShoppingCart>(jsonValue);
     }
-
 
     public async Task DeleteAsync(Guid movieSessionId, short seatRow, short seatNumber)
     {
@@ -85,43 +45,15 @@ public class SeatStateRepository : ISeatStateRepository
         return $"{KeyPrefix}:{movieSessionId.ToString()}:{seatRow}:{seatNumber}";
     }
 
-
-    public async Task<bool> SetAsync<T>(string key, T value, TimeSpan? expiry)
+    public async Task<bool> SetAsync(Guid movieSessionId, short seatRow, short seatNumber, TimeSpan? expiry)
     {
         var db = _redis.GetDatabase();
-        // var opts = new JsonSerializerOptions { ReferenceHandler = ReferenceHandler.IgnoreCycles};
+        var key = GetKey(movieSessionId, seatRow, seatNumber);
 
-
-        string jsonValue = JsonConvert.SerializeObject(value);
-
-        return await db.StringSetAsync(key, jsonValue, expiry, When.NotExists);
-    }
-
-
-    public async Task<bool> SetAsync(SeatSelectedInfo value, TimeSpan? expiry)
-    {
-        var db = _redis.GetDatabase();
-        var key = GetKey(value.MovieSessionId, value.SeatRow, value.SeatNumber);
-
-        string jsonValue = JsonConvert.SerializeObject(value);
+        string jsonValue = JsonConvert.SerializeObject(new SeatShoppingCart(seatRow, seatNumber));
 
         return await db.StringSetAsync(key, jsonValue, expiry);
     }
-
-    public async Task<bool> SetAsync<T>(string key, T value)
-    {
-        var db = _redis.GetDatabase();
-        //var opts = new JsonSerializerOptions { ReferenceHandler = ReferenceHandler.IgnoreCycles};
-
-        string jsonValue = JsonConvert.SerializeObject(value);
-
-        return await db.StringSetAsync(key, jsonValue);
-    }
-
-    public async Task<bool> StringSetIfNotExistsAsync(string key, string value, TimeSpan? expiry)
-    {
-        var db = _redis.GetDatabase();
-
-        return await db.StringSetAsync(key, value, expiry, When.NotExists);
-    }
+    
+    
 }

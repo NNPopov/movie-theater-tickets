@@ -7,6 +7,7 @@
 
         <IsPackable>false</IsPackable>
         <IsTestProject>true</IsTestProject>
+        <RootNamespace>CinemaTicketBooking.Application.UnitTests</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
@@ -26,7 +27,7 @@
 
 
     <ItemGroup>
-      <ProjectReference Include="..\..\BookingManagementService.API\BookingManagementService.API.csproj" />
+
       <ProjectReference Include="..\..\BookingManagementService.Application\BookingManagementService.Application.csproj" />
     </ItemGroup>
 

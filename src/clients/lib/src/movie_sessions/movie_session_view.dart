@@ -5,12 +5,10 @@ import 'package:movie_theater_tickets/src/seats_view.dart';
 import '../../core/common/views/loading_view.dart';
 import '../../core/utils/utils.dart';
 import '../auditorium_detail.dart';
-import '../auth/presentations/widgets/auth_widget.dart';
 import '../cinema_halls/presentation/cubit/cinema_hall_cubit.dart';
-import '../globalisations_flutter/widgets/globalisation_widget.dart';
+import '../dashboards/presentation/dashboard_widget.dart';
 import '../home/presentation/widgets/home_app_bar.dart';
-import '../movies/presentation/views/movie_detail.dart';
-import '../shopping_carts/presentation/widgens/shopping_cart_icon_widget.dart';
+import '../movies/presentation/widgets/movie_detail_widget.dart';
 import 'domain/entities/movie_session.dart';
 import 'presentation/cubit/movie_session_cubit.dart';
 import '../movies/domain/entities/movie.dart';
@@ -42,7 +40,6 @@ class _MovieSessionsView extends State<MovieSessionsView> {
 
   @override
   void initState() {
-    //completeExam = widget.exam;
     super.initState();
     getMovieSessions();
   }
@@ -103,109 +100,114 @@ class _MovieSessionsView extends State<MovieSessionsView> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar:  const HomeAppBar(),
-      body: Row(
+      body: Column(
         children: [
-          BlocProvider(
-              key: const ValueKey('MoviesDetailView'),
-              create: (_) => MovieTheaterCubit(),
-              child: MoviesDetailView(widget.movie.id)),
-          Column(children: [
-            SizedBox(
-                height: 40,
-                width: 100,
-                child: Text(AppLocalizations.of(context)!.movies)),
-            SizedBox(
-             //   height: 1950,
-                width: 1100,
-                child: ListView.builder(
-                    shrinkWrap: true,
-                    scrollDirection: Axis.vertical,
-                    itemCount: movieSessionResult.length,
-                    itemBuilder: (context, index) {
-                      var rowSeats = movieSessionResult[index];
-                      var day = rowSeats[0][0];
+          const DashboardWidget(route: MovieSessionsView.id),
+          Row(
+            children: [
+              BlocProvider(
+                  key: const ValueKey('MoviesDetailView'),
+                  create: (_) => MovieTheaterCubit(),
+                  child: MoviesDetailWidget(widget.movie.id)),
+              Column(children: [
+                SizedBox(
+                    height: 40,
+                    width: 100,
+                    child: Text(AppLocalizations.of(context)!.movies)),
+                SizedBox(
+                 //   height: 1950,
+                    width: 1100,
+                    child: ListView.builder(
+                        shrinkWrap: true,
+                        scrollDirection: Axis.vertical,
+                        itemCount: movieSessionResult.length,
+                        itemBuilder: (context, index) {
+                          var rowSeats = movieSessionResult[index];
+                          var day = rowSeats[0][0];
 
-                      return Container(
-                        width: 900,
-                        //height: 200,
-                        child: Column(
-                          children: [
-                            Text(
-                                '${day.sessionDate.year}-${day.sessionDate.month}-${day.sessionDate.day}'),
-                            ListView.builder(
-                                shrinkWrap: true,
-                                scrollDirection: Axis.vertical,
-                                itemCount: rowSeats.length,
-                                itemBuilder: (context, index2) {
-                                  var rows = rowSeats[index2];
+                          return Container(
+                            width: 900,
+                            //height: 200,
+                            child: Column(
+                              children: [
+                                Text(
+                                    '${day.sessionDate.year}-${day.sessionDate.month}-${day.sessionDate.day}'),
+                                ListView.builder(
+                                    shrinkWrap: true,
+                                    scrollDirection: Axis.vertical,
+                                    itemCount: rowSeats.length,
+                                    itemBuilder: (context, index2) {
+                                      var rows = rowSeats[index2];
 
-                                  return Container(
-                                    width: 800,
-                                   // height: 240,
-                                    child: Column(
-                                      children: [
-                                        BlocProvider(
-                                            key: const ValueKey(
-                                                'AuditoriumDetailView'),
-                                            create: (_) => CinemaHallCubit(),
-                                            child: AuditoriumDetailView(
-                                                rows[0].cinemaHallId)),
-                                        Divider(
-                                          color: Colors.blue,
+                                      return Container(
+                                        width: 800,
+                                       // height: 240,
+                                        child: Column(
+                                          children: [
+                                            BlocProvider(
+                                                key: const ValueKey(
+                                                    'AuditoriumDetailView'),
+                                                create: (_) => CinemaHallCubit(),
+                                                child: AuditoriumDetailView(
+                                                    rows[0].cinemaHallId)),
+                                            Divider(
+                                              color: Colors.blue,
+                                            ),
+                                            Wrap(
+                                              spacing: 8.0,
+                                              // горизонтальный отступ между элементами
+                                              runSpacing: 4.0,
+                                              // вертикальный отступ между строками
+                                              children: rows.map((movieSession) {
+                                                return SizedBox(
+                                                    height: 110,
+                                                    width: 200,
+                                                    child: Column(
+                                                      children: [
+                                                        Text(
+                                                            '${movieSession.sessionDate.hour}:${'${movieSession.sessionDate.minute}0'.substring(0, 2)}'),
+                                                        TextButton(
+                                                            style: ButtonStyle(
+                                                              padding: MaterialStateProperty
+                                                                  .all(const EdgeInsets
+                                                                      .symmetric(
+                                                                      vertical: 1,
+                                                                      horizontal:
+                                                                          1)),
+                                                              foregroundColor:
+                                                                  MaterialStateProperty
+                                                                      .all<Color>(
+                                                                          Colors
+                                                                              .blue),
+                                                            ),
+                                                            onPressed: () {
+                                                              pressMovieSession(
+                                                                  movieSession);
+                                                            },
+                                                            child: Text(
+                                                                AppLocalizations.of(
+                                                                        context)!
+                                                                    .select))
+                                                      ],
+                                                    ));
+                                              }).toList(),
+                                            ),
+                                          ],
                                         ),
-                                        Wrap(
-                                          spacing: 8.0,
-                                          // горизонтальный отступ между элементами
-                                          runSpacing: 4.0,
-                                          // вертикальный отступ между строками
-                                          children: rows.map((movieSession) {
-                                            return SizedBox(
-                                                height: 110,
-                                                width: 200,
-                                                child: Column(
-                                                  children: [
-                                                    Text(
-                                                        '${movieSession.sessionDate.hour}:${'${movieSession.sessionDate.minute}0'.substring(0, 2)}'),
-                                                    TextButton(
-                                                        style: ButtonStyle(
-                                                          padding: MaterialStateProperty
-                                                              .all(const EdgeInsets
-                                                                  .symmetric(
-                                                                  vertical: 1,
-                                                                  horizontal:
-                                                                      1)),
-                                                          foregroundColor:
-                                                              MaterialStateProperty
-                                                                  .all<Color>(
-                                                                      Colors
-                                                                          .blue),
-                                                        ),
-                                                        onPressed: () {
-                                                          pressMovieSession(
-                                                              movieSession);
-                                                        },
-                                                        child: Text(
-                                                            AppLocalizations.of(
-                                                                    context)!
-                                                                .select))
-                                                  ],
-                                                ));
-                                          }).toList(),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                }),
-                          ],
-                        ),
-                      );
-                    })),
-            ElevatedButton(
-              onPressed: () => buttonCarouselController.nextPage(
-                  duration: Duration(milliseconds: 300), curve: Curves.linear),
-              child: Text('→'),
-            )
-          ]),
+                                      );
+                                    }),
+                              ],
+                            ),
+                          );
+                        })),
+                ElevatedButton(
+                  onPressed: () => buttonCarouselController.nextPage(
+                      duration: Duration(milliseconds: 300), curve: Curves.linear),
+                  child: Text('→'),
+                )
+              ]),
+            ],
+          ),
         ],
       ),
     );

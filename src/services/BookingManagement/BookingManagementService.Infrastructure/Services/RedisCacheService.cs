@@ -1,4 +1,5 @@
 ﻿using CinemaTicketBooking.Application.Abstractions;
+using CinemaTicketBooking.Application.Abstractions.Services;
 using Newtonsoft.Json;
 using StackExchange.Redis;
 

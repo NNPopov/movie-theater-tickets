@@ -19,3 +19,6 @@ class SeatsUpdateEvent extends AppEvent
   @override
   List<Object> get props => [seats];
 }
+
+
+class ShoppingCartHashIdUpdated extends AppEvent{}

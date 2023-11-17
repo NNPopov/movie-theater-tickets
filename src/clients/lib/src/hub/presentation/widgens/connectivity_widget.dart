@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/common/widgets/overlay_dialog.dart';
-import '../../../movies/presentation/views/movie_view.dart';
 import '../cubit/connectivity_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -71,13 +70,13 @@ class _ConnectivityWidget extends State<ConnectivityWidget> {
             builder: (context) {
               return OverlayDialog(
                   header:  Text(AppLocalizations.of(context)!.connection_lost_notification_text,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 16,
                         color: Colors.black87,
                         decoration: TextDecoration.none,
                       )),
                   body: Container(
-                    width: 100,
+                    width: 120,
                     height: 50,
                     child: TextButton(
                       style: ButtonStyle(

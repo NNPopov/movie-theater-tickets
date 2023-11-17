@@ -33,8 +33,7 @@ class AuthServiceImpl implements AuthService {
     bool hasExpired = JwtDecoder.isExpired(token);
 
     if(hasExpired) {
-      await storage.delete(key: Constants.TOKEN_KEY);
-      authEventBus.send(UnauthorizedAuthStatus());
+      await logOut();
 
       return const Left(NotAuthorisedException(message: '', statusCode: 401));
     }
@@ -59,6 +58,7 @@ class AuthServiceImpl implements AuthService {
     bool hasExpired = JwtDecoder.isExpired(token);
 
     if(hasExpired) {
+      await logOut();
       return Right(ExpiredAuthStatus());
     }
 

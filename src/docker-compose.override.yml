@@ -1,12 +1,16 @@
 version: '3.8'
 
-# The default docker-compose.override file can use the "localhost" as the external name for testing web apps within the same dev machine.
-# The ESHOP_EXTERNAL_DNS_NAME_OR_IP environment variable is taken, by default, from the ".env" file defined like:
-#     ESHOP_EXTERNAL_DNS_NAME_OR_IP=localhost
-# but values present in the environment vars at runtime will always override those defined inside the .env file
-# An external IP or DNS name has to be used (instead localhost and the 10.0.75.1 IP) when testing the Web apps and the Xamarin apps from remote machines/devices using the same WiFi, for instance.
-
 services:
+  
+  rabbitmq:
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    volumes:
+      - ./build/rabbit/enabled_plugins:/etc/rabbitmq/enabled_plugins
+      - ./build/rabbit/plugins/elixir-1.13.4.ez:/opt/rabbitmq/plugins/elixir-1.13.4.ez
+      - ./build/rabbit/plugins/rabbitmq_message_deduplication-0.6.1.ez:/opt/rabbitmq/plugins/rabbitmq_message_deduplication-0.6.1.ez
+      
   nginx:
     volumes:
       - ./build/nginx/default.conf:/etc/nginx/conf.d/default.conf
@@ -35,6 +39,7 @@ services:
       - IdentityOptions__ValidIssuer=https://localhost:9443/realms/come-and-watch
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:80
+      - ConnectionStrings__EventBus=rabbitmq
       - ConnectionStrings__Redis=cinema-booking-cache:6379
       - ConnectionStrings__BookingDbContext=Server=booking-management-postgres;Port=5432;Database=booking_db;Username=booking_user;Password=password
       - SERILOG__USING__1:Serilog.Sinks.Seq

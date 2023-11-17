@@ -9,13 +9,9 @@ GetIt getIt = GetIt.instance;
 class GetCinemaHallById
     extends FutureUsecaseWithParams<CinemaHall, String> {
 
-  GetCinemaHallById({CinemaHallRepo? repo})
-  {
-    _repo = repo ?? getIt.get<CinemaHallRepo>();
+  GetCinemaHallById(this._repo);
 
-  }
-
-  late CinemaHallRepo _repo;
+  final CinemaHallRepo _repo;
 
   @override
   ResultFuture<CinemaHall> call(String cinemaHallId) =>

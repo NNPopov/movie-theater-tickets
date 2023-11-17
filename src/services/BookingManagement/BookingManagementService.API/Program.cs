@@ -7,6 +7,7 @@ using CinemaTicketBooking.Api.WorkerServices;
 using CinemaTicketBooking.Application;
 using CinemaTicketBooking.Infrastructure;
 using CinemaTicketBooking.Infrastructure.Data;
+using CinemaTicketBooking.Infrastructure.EventBus;
 using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
@@ -74,7 +75,9 @@ builder.Services.AddEndpointsApiExplorer();
 services.AddHealthChecks()
     .AddNpgSql(builder.Configuration.GetConnectionString("BookingDbContext"))
     .AddDbContextCheck<CinemaContext>("CinemaContext", HealthStatus.Unhealthy)
-    .AddRedis(builder.Configuration.GetConnectionString("Redis"), "Redis", HealthStatus.Unhealthy);
+    .AddRedis(builder.Configuration.GetConnectionString("Redis"), "Redis", HealthStatus.Unhealthy)
+    .AddRabbitMQ(rabbitConnectionString: $"{builder.Configuration.GetConnectionString("EventBus")}:5672", name: "RabbitMQ",
+        failureStatus: HealthStatus.Unhealthy);
 
 var app = builder.Build();
 
@@ -94,20 +97,20 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapHub<CinemaHallSeatsHub>("/ws/cinema-hall-seats-hub",
-options =>
-     {
-     options.Transports =
-         HttpTransportType.WebSockets |
-         HttpTransportType.LongPolling |
-         HttpTransportType.ServerSentEvents;
-     options.CloseOnAuthenticationExpiration = false;
-     options.ApplicationMaxBufferSize = 65_536;
-     options.TransportMaxBufferSize = 65_536;
-     options.MinimumProtocolVersion = 0;
-     options.TransportSendTimeout = TimeSpan.FromSeconds(20);
-     options.WebSockets.CloseTimeout = TimeSpan.FromSeconds(30);
-     options.LongPolling.PollTimeout = TimeSpan.FromSeconds(20);
-     }
+    options =>
+    {
+        options.Transports =
+            HttpTransportType.WebSockets |
+            HttpTransportType.LongPolling |
+            HttpTransportType.ServerSentEvents;
+        options.CloseOnAuthenticationExpiration = false;
+        options.ApplicationMaxBufferSize = 65_536;
+        options.TransportMaxBufferSize = 65_536;
+        options.MinimumProtocolVersion = 0;
+        options.TransportSendTimeout = TimeSpan.FromSeconds(20);
+        options.WebSockets.CloseTimeout = TimeSpan.FromSeconds(30);
+        options.LongPolling.PollTimeout = TimeSpan.FromSeconds(20);
+    }
 );
 app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
 app.UseEndpoints(typeof(Program));
@@ -115,6 +118,11 @@ app.UseEndpoints(typeof(Program));
 
 app.UseMigrationsEndPoint();
 await app.InitialiseDatabaseAsync();
+
+var eventBus = app.Services.GetRequiredService<IEventBus>();
+
+eventBus
+    .Subscribe<SeatExpiredSelectionIntegrationEvent, IIntegrationEventHandler<SeatExpiredSelectionIntegrationEvent>>();
 
 
 app.Run();

@@ -6,7 +6,6 @@ namespace CinemaTicketBooking.Application.Abstractions
     {
         Task<CinemaHall> GetAsync(Guid auditoriumId, CancellationToken cancel);
         
-        Task<ICollection<SeatEntity>> GetSeatsAsync(Guid auditoriumId, CancellationToken cancel);
         
         Task<ICollection<CinemaHall>> GetAllAsync(CancellationToken cancel);
     }

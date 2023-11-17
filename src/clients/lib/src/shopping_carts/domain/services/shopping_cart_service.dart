@@ -2,72 +2,41 @@ import 'dart:async';
 
 import 'package:get_it/get_it.dart';
 import '../../../../core/buses/event_bus.dart';
+import '../../../../core/errors/failures.dart';
 import '../../../../core/utils/typedefs.dart';
 import '../../../auth/domain/abstraction/auth_event_bus.dart';
 import '../../../auth/domain/services/auth_service.dart';
+import '../../../hub/app_events.dart';
 import '../entities/create_shopping_cart_response.dart';
+import '../entities/shopping_cart.dart';
 import '../repos/shopping_cart_local_repo.dart';
+import '../repos/shopping_cart_repo.dart';
 import '../usecases/assign_client_use_case.dart';
-import '../usecases/create_shopping_cart.dart';
-import '../usecases/create_shopping_cart.dart';
-import '../usecases/get_shopping_cart.dart';
-import '../usecases/reserve_seats.dart';
-import '../usecases/select_seat.dart';
-import '../usecases/shopping_cart_subscribe.dart';
-import '../usecases/unselect_seat.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:dartz/dartz.dart';
 
 GetIt getIt = GetIt.instance;
 
 class ShoppingCartService {
-  ShoppingCartService(
+  ShoppingCartService(this._repo,
       {ShoppingCartLocalRepo? localRepo,
-      CreateShoppingCartUseCase? createShoppingCartUseCase,
-      SelectSeatUseCase? selectSeatUseCase,
-      UnselectSeatUseCase? unselectSeatUseCase,
-      GetShoppingCart? getShoppingCartUseCase,
-      ShoppingCartUpdateSubscribeUseCase? shoppingCartUpdateSubscribeUseCase,
-      AssignClientUseCase? assignClientUseCase,
-      ReserveSeatsUseCase? reserveSeatsUseCase,
       EventBus? eventBus,
       AuthService? authService,
       AuthEventBus? authEventBus})
-      : _createShoppingCart =
-            createShoppingCartUseCase ?? getIt.get<CreateShoppingCartUseCase>(),
-        _selectSeatUseCase =
-            selectSeatUseCase ?? getIt.get<SelectSeatUseCase>(),
-        _unselectSeatUseCase =
-            unselectSeatUseCase ?? getIt.get<UnselectSeatUseCase>(),
-        _getShoppingCart =
-            getShoppingCartUseCase ?? getIt.get<GetShoppingCart>(),
-        _shoppingCartUpdateSubscribeUseCase =
-            shoppingCartUpdateSubscribeUseCase ??
-                getIt.get<ShoppingCartUpdateSubscribeUseCase>(),
-        _assignClientUseCase =
-            assignClientUseCase ?? getIt.get<AssignClientUseCase>(),
-        _reserveSeatsUseCase =
-            reserveSeatsUseCase ?? getIt.get<ReserveSeatsUseCase>(),
-        _eventBus = eventBus ?? getIt.get<EventBus>(),
+      : _eventBus = eventBus ?? getIt.get<EventBus>(),
         _authService = authService ?? getIt.get<AuthService>(),
         _authEventBus = authEventBus ?? getIt<AuthEventBus>(),
         _localRepo = localRepo ?? getIt<ShoppingCartLocalRepo>();
 
+  final ShoppingCartRepo _repo;
+
   late final StreamSubscription _appEventSubscription;
-  late final StreamSubscription _streamSubscription;
   final storage = const FlutterSecureStorage();
 
   late final ShoppingCartLocalRepo _localRepo;
   late final AuthEventBus _authEventBus;
   late final AuthService _authService;
   late final EventBus _eventBus;
-  late final CreateShoppingCartUseCase _createShoppingCart;
-  late final SelectSeatUseCase _selectSeatUseCase;
-  late final UnselectSeatUseCase _unselectSeatUseCase;
-  late final GetShoppingCart _getShoppingCart;
-  late final ShoppingCartUpdateSubscribeUseCase
-      _shoppingCartUpdateSubscribeUseCase;
-  late final ReserveSeatsUseCase _reserveSeatsUseCase;
 
   late final AssignClientUseCase _assignClientUseCase;
 
@@ -87,31 +56,36 @@ class ShoppingCartService {
     });
   }
 
-  ResultFuture<CreateShoppingCartResponse> createShoppingCart(
-      int maxNumberOfSeats) async {
-    var createShoppingCartCommand =
-        CreateShoppingCartCommand(maxNumberOfSeats: maxNumberOfSeats);
+  ResultFuture<ShoppingCart> getShoppingCartById(String shoppingCartId) async {
+    return await _repo.getShoppingCart(shoppingCartId);
+  }
 
-    final result = await _createShoppingCart(createShoppingCartCommand);
+  ResultFuture<CreateShoppingCartResponse>
+      getShoppingCartIfExistsForNotAnonymousUser() async {
+    var userStatus = await _authService.getCurrentStatus();
 
-    result.fold((failure) => Left(failure), (value) async {
-      var shoppingCartResult = await _getShoppingCart(value.shoppingCartId);
-
-      shoppingCartResult.fold((l) => null, (shoppingCart) async {
-        await _localRepo.setShoppingCart(shoppingCart);
-        var authStatus = await _authService.getCurrentStatus();
-
-        authStatus.fold((l) => null, (r) async {
-          if (r is AuthorizedAuthStatus) {
-            var assignClientResult =
-                await _assignClientUseCase(value.shoppingCartId);
-
-            assignClientResult.fold((l) => null, (r) async {});
-          }
-        });
-      });
+    return userStatus.fold((l) => Left(l), (r) async {
+      if (r is AuthorizedAuthStatus) {
+        return await _repo.getCurrentUserShoppingCart();
+      }
+      return const Left(NotAuthorisedException());
     });
+  }
+
+  ResultFuture<void> assignClient(String shoppingCartId) async {
+    var result = await _repo.assignClient(shoppingCartId);
+
 
     return result;
+  }
+
+  ResultFuture<CreateShoppingCartResponse> createShoppingCartForAnonymousUser(
+      int maxNumberOfSeats) async {
+    if (maxNumberOfSeats > 4 || maxNumberOfSeats < 1) {
+      return const Left(
+          ValidationFailure(message: 'Number of places should be from 1 to 4'));
+    }
+
+    return await _repo.createShoppingCart(maxNumberOfSeats);
   }
 }

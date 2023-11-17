@@ -1,14 +1,15 @@
 part of 'shopping_cart_cubit.dart';
 
 abstract class ShoppingCartState extends Equatable {
-  const ShoppingCartState(this.shoppingCard, this.hashId, this.version);
+  const ShoppingCartState(this.shoppingCard, //this.hashId,
+   this.version);
 
-  final String hashId;
+ // final String hashId;
   final ShoppingCart shoppingCard;
   final int version;
 
   @override
-  List<Object> get props => [shoppingCard, version, hashId];
+  List<Object> get props => [shoppingCard, version];
 }
 
 // class SelectingSeat extends ShoppingCartState {
@@ -21,17 +22,17 @@ abstract class ShoppingCartState extends Equatable {
 // }
 
 class CreatingShoppingCart extends ShoppingCartState {
-  const CreatingShoppingCart(super.shoppingCard, super.version, super.hashId);
+  const CreatingShoppingCart(super.shoppingCard, super.version);
 }
 
 class ShoppingCartCurrentState extends ShoppingCartState {
   const ShoppingCartCurrentState(
-      super.shoppingCard, super.version, super.hashId);
+      super.shoppingCard, super.version);
 }
 
 class ShoppingCartConflictState extends ShoppingCartState {
   const ShoppingCartConflictState(
-      super.shoppingCard, super.version, super.hashId);
+      super.shoppingCard, super.version);
 
   @override
   List<Object> get props => [shoppingCard, version];
@@ -39,7 +40,7 @@ class ShoppingCartConflictState extends ShoppingCartState {
 
 class ShoppingCartCreatedState extends ShoppingCartState {
   const ShoppingCartCreatedState(
-      super.shoppingCard, super.version, super.hashId);
+      super.shoppingCard, super.version);
 
   @override
   List<Object> get props => [shoppingCard, version];
@@ -47,17 +48,17 @@ class ShoppingCartCreatedState extends ShoppingCartState {
 
 class ShoppingCartInitialState extends ShoppingCartState {
   const ShoppingCartInitialState(
-      super.shoppingCard, super.hashId, super.version);
+      super.shoppingCard, super.hashId);
 }
 
 class ShoppingCartCreateValidationErrorState extends ShoppingCartError {
   const ShoppingCartCreateValidationErrorState(
-      super.shoppingCard, super.version, super.hashId, super.message);
+      super.shoppingCard, super.version,  super.message);
 }
 
 class ShoppingCartError extends ShoppingCartState {
   const ShoppingCartError(
-      super.shoppingCard, super.version, super.hashId, this.message);
+      super.shoppingCard, super.version, this.message);
 
   final String message;
 

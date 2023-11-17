@@ -9,13 +9,8 @@ GetIt getIt = GetIt.instance;
 class GetMovies
     extends FutureUsecaseWithoutParams<List<Movie>> {
 
-  GetMovies({MovieRepo? repo})
-  {
-    _repo = repo ?? getIt.get<MovieRepo>();
-
-  }
-
-  late MovieRepo _repo;
+  GetMovies(this._repo);
+  final MovieRepo _repo;
 
   @override
   ResultFuture<List<Movie>> call() =>

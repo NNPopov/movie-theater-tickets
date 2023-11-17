@@ -23,7 +23,7 @@ class ShoppingCartDto extends ShoppingCart {
           seats: List<Map<String, dynamic>>.from(json['seats'] as List<dynamic>)
               .map((e) => ShoppingCartSeatDto.fromJson(e) as ShoppingCartSeat)
               .toList(),
-          isAssigned: json['isAssigned'],
+          isAssigned: json['isAssigned'] ?? false,
         );
 
   ShoppingCartDto.empty()

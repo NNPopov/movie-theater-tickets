@@ -13,6 +13,8 @@ abstract class ShoppingCartRepo {
 
   ResultFuture<void>assignClient(String shoppingCartId);
 
+  ResultFuture<CreateShoppingCartResponse> getCurrentUserShoppingCart();
+
   ResultFuture<void>reserveSeats(String shoppingCartId);
 
   ResultFuture<void> selectSeat(

@@ -5,11 +5,10 @@ import 'package:movie_theater_tickets/core/extensions/context_extensions.dart';
 import '../../../../core/common/views/loading_view.dart';
 import '../../../../core/utils/utils.dart';
 import '../app/movie_theater_cubit.dart';
-import '../../../globalisations_flutter/widgets/globalisation_widget.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-class MoviesDetailView extends StatefulWidget {
-  const MoviesDetailView(this.movieId, {super.key});
+class MoviesDetailWidget extends StatefulWidget {
+  const MoviesDetailWidget(this.movieId, {super.key});
 
   final String movieId;
   static const id = 'movie';
@@ -18,7 +17,7 @@ class MoviesDetailView extends StatefulWidget {
   State<StatefulWidget> createState() => _MoviesDetailViewView();
 }
 
-class _MoviesDetailViewView extends State<MoviesDetailView> {
+class _MoviesDetailViewView extends State<MoviesDetailWidget> {
   @override
   void initState() {
     context.read<MovieTheaterCubit>().getMovieById(widget.movieId);

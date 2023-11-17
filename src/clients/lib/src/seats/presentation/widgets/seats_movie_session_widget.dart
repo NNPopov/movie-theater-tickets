@@ -23,10 +23,8 @@ class _SeatsMovieSessionWidget extends State<SeatsMovieSessionWidget> {
   @override
   void initState() {
     super.initState();
-    //Future.microtask(() async {
-    //await
+
     getSeats();
-    // });
   }
 
   Future<void> getSeats() async {

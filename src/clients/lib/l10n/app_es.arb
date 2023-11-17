@@ -10,12 +10,15 @@
 
    "row":"Fila",
 
-  "movie_session":"Movie session",
+   "shopping_cart":"Cesta de la compra",
+   "complete_purchases":"Completar compras",
+
+  "movie_session":"Horario de sesiones",
 
    "sing_in":"Iniciar sesión",
    "sing_out":"Cerrar sesión",
 
-  "reconnecting_notification_text":"The connection to the server has been lost! Reconnecting!",
-  "connection_lost_notification_text":"The connection to the server has been lost! Please try reconnecting.",
-  "connection_lost_reconnect_btn":"Reconnect"
+  "reconnecting_notification_text":"¡Se perdió la conexión con el servidor! ¡Reconectando!",
+  "connection_lost_notification_text":"¡Se perdió la conexión con el servidor! Intente volver a conectarse.",
+  "connection_lost_reconnect_btn":"Reconectar"
 }

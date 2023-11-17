@@ -1,22 +1,17 @@
-﻿using System.Xml.Schema;
-using CinemaTicketBooking.Application.Abstractions;
-using CinemaTicketBooking.Application.Exceptions;
-using CinemaTicketBooking.Domain.MovieSessions;
-using CinemaTicketBooking.Domain.MovieSessions.Abstractions;
-using CinemaTicketBooking.Domain.Seats;
-using CinemaTicketBooking.Domain.Seats.Abstractions;
+﻿using CinemaTicketBooking.Application.Abstractions;
+using CinemaTicketBooking.Application.Abstractions.Repositories;
+using CinemaTicketBooking.Domain.Error;
 using CinemaTicketBooking.Domain.Services;
 using CinemaTicketBooking.Domain.ShoppingCarts;
+using CinemaTicketBooking.Domain.ShoppingCarts.Abstractions;
 using Serilog;
 
 namespace CinemaTicketBooking.Application.ShoppingCarts.Command.SelectSeats;
 
 public record SelectSeatCommand
-    (Guid MovieSessionId, short SeatRow, short SeatNumber, Guid ShoppingCartId) : IRequest<bool>;
+    (Guid MovieSessionId, short SeatRow, short SeatNumber, Guid ShoppingCartId) : IRequest<Result>;
 
-public record SeatDto(short Row, short Number);
-
-public class SelectSeatCommandHandler : IRequestHandler<SelectSeatCommand, bool>
+public class SelectSeatCommandHandler : IRequestHandler<SelectSeatCommand, Result>
 {
     private readonly MovieSessionSeatService _movieSessionSeatService;
     private IShoppingCartRepository _shoppingCartRepository;
@@ -26,17 +21,13 @@ public class SelectSeatCommandHandler : IRequestHandler<SelectSeatCommand, bool>
     private ILogger _logger;
 
     public SelectSeatCommandHandler(
-        //IMovieSessionsRepository movieSessionsRepository,
         ISeatStateRepository seatStateRepository,
-        //IMovieSessionSeatRepository movieSessionSeatRepository,
         IShoppingCartRepository shoppingCartRepository,
         IDistributedLock distributedLock,
         IShoppingCartNotifier shoppingCartNotifier, ILogger logger,
         MovieSessionSeatService movieSessionSeatService)
     {
-      //  _movieSessionsRepository = movieSessionsRepository;
         _seatStateRepository = seatStateRepository;
-     //   _movieSessionSeatRepository = movieSessionSeatRepository;
         _shoppingCartRepository = shoppingCartRepository;
         _distributedLock = distributedLock;
         _shoppingCartNotifier = shoppingCartNotifier;
@@ -44,7 +35,7 @@ public class SelectSeatCommandHandler : IRequestHandler<SelectSeatCommand, bool>
         _movieSessionSeatService = movieSessionSeatService;
     }
 
-    public async Task<bool> Handle(SelectSeatCommand request,
+    public async Task<Result> Handle(SelectSeatCommand request,
         CancellationToken cancellationToken)
     {
         var lockKey = $"lock:{request.MovieSessionId}:{request.SeatRow}:{request.SeatNumber}";
@@ -55,20 +46,14 @@ public class SelectSeatCommandHandler : IRequestHandler<SelectSeatCommand, bool>
                          cancellationToken: cancellationToken))
         {
             if (!lockHandler.IsLocked)
-                return false;
+            {
+                return DomainErrors<ShoppingCart>.ConflictException("Seat already reserved");
+            }
 
-            cart = await _shoppingCartRepository.TryGetCart(request.ShoppingCartId);
+            cart = await _shoppingCartRepository.GetByIdAsync(request.ShoppingCartId);
 
             if (cart == null)
-                throw new ContentNotFoundException(request.ShoppingCartId.ToString(), nameof(ShoppingCart));
-
-
-            // var movieSession = await _movieSessionsRepository
-            //     .GetWithTicketsByIdAsync(
-            //         request.MovieSessionId, cancellationToken);
-            //
-            // if (movieSession == null)
-            //     throw new ContentNotFoundException(request.MovieSessionId.ToString(), nameof(MovieSession));
+                return DomainErrors<ShoppingCart>.NotFound(request.ShoppingCartId.ToString());
 
 
             if (cart.MovieSessionId != request.MovieSessionId)
@@ -83,12 +68,26 @@ public class SelectSeatCommandHandler : IRequestHandler<SelectSeatCommand, bool>
 
             if (!(reservedInRedis is null))
             {
-                return false;
+                return DomainErrors<ShoppingCart>.ConflictException("Seat already reserved");
             }
 
-            // Step 2 Select place
+
+            // Step Add seat to cart
             cart.AddSeats(new SeatShoppingCart(request.SeatRow, request.SeatNumber), request.MovieSessionId);
 
+
+            // Step 2 Select place
+
+            var result =
+                await _seatStateRepository.SetAsync(request.MovieSessionId,
+                    request.SeatRow,
+                    request.SeatNumber,
+                    new TimeSpan(0, 0, 120));
+
+            if (!result)
+            {
+                return DomainErrors<ShoppingCart>.InvalidOperation("Can't save seat. Try again later");
+            }
 
             await _movieSessionSeatService.SelectSeat(request.MovieSessionId,
                 request.SeatRow,
@@ -98,34 +97,12 @@ public class SelectSeatCommandHandler : IRequestHandler<SelectSeatCommand, bool>
                 cancellationToken
             );
 
-            // Step 3 Add seat to cart
-            var seatReservationInfo = new SeatSelectedInfo
-            (
-                SeatRow: request.SeatRow,
-                SeatNumber: request.SeatNumber,
-                MovieSessionId: request.MovieSessionId,
-                ShoppingCartId: request.ShoppingCartId
-            );
 
-
-            var result =
-                await _seatStateRepository.SetAsync(seatReservationInfo, new TimeSpan(0, 0, 120));
-
-            if (!result)
-            {
-                return false;
-            }
-
-            await _shoppingCartRepository.TrySetCart(cart);
+            await _shoppingCartRepository.SetAsync(cart);
         }
 
         await _shoppingCartNotifier.SentShoppingCartState(cart);
 
-        return true;
+        return Result.Success();
     }
 }
-
-public record SeatSelectedInfo(Guid ShoppingCartId,
-    Guid MovieSessionId,
-    short SeatNumber,
-    short SeatRow);

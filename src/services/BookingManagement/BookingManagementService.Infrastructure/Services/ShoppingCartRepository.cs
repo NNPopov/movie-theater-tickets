@@ -2,6 +2,7 @@
 using CinemaTicketBooking.Application.Common.Events;
 using CinemaTicketBooking.Domain.Common;
 using CinemaTicketBooking.Domain.ShoppingCarts;
+using CinemaTicketBooking.Domain.ShoppingCarts.Abstractions;
 using MediatR;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Newtonsoft.Json;
@@ -16,6 +17,8 @@ public class ShoppingCartRepository : IShoppingCartRepository
     private readonly IMediator _mediator;
 
     private const string KeyPrefix = "cart";
+    
+    private const string KeyClientPrefix = "client_session";
     
     private readonly IDomainEventTracker _domainEventTracker;
 
@@ -52,7 +55,7 @@ public class ShoppingCartRepository : IShoppingCartRepository
         shoppingCart.ClearDomainEvents();
     }
 
-    public async Task<ShoppingCart> TrySetCart(ShoppingCart shoppingCart)
+    public async Task<ShoppingCart> SetAsync(ShoppingCart shoppingCart)
     {
         var db = _redis.GetDatabase();
 
@@ -68,7 +71,7 @@ public class ShoppingCartRepository : IShoppingCartRepository
         return shoppingCart!;
     }
 
-    public async Task<ShoppingCart> TryGetCart(Guid cartId)
+    public async Task<ShoppingCart> GetByIdAsync(Guid cartId)
     {
         var db = _redis.GetDatabase();
 
@@ -80,5 +83,30 @@ public class ShoppingCartRepository : IShoppingCartRepository
             return default;
 
         return JsonConvert.DeserializeObject<ShoppingCart>(jsonValue);
+    }
+
+    public async Task<Guid> GetActiveShoppingCartByClientIdAsync(Guid clientId)
+    {
+        var db = _redis.GetDatabase();
+
+        var kartKey = $"{KeyClientPrefix}:{clientId}";
+
+        var jsonValue = await db.StringGetAsync(kartKey);
+
+        if (string.IsNullOrEmpty(jsonValue.ToString()))
+            return default;
+
+        return JsonConvert.DeserializeObject<Guid>(jsonValue);
+    }
+    
+    public async Task SetClientActiveShoppingCartAsync(Guid clientId, Guid shoppingCartId)
+    {
+        var db = _redis.GetDatabase();
+
+        var kartKey = $"{KeyClientPrefix}:{clientId}";
+
+        string jsonValue = JsonConvert.SerializeObject(shoppingCartId);
+
+        await db.StringSetAsync(kartKey, jsonValue, new TimeSpan(0, 0, 1200));
     }
 }

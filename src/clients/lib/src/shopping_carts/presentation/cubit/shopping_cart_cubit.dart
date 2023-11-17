@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:get_it/get_it.dart';
+import 'package:movie_theater_tickets/core/errors/failures.dart';
 import '../../../helpers/constants.dart';
 import '../../../../core/buses/event_bus.dart';
 import '../../../shopping_carts/domain/usecases/create_shopping_cart.dart';
@@ -51,26 +52,23 @@ class ShoppingCartCubit extends Cubit<ShoppingCartState> {
             assignClientUseCase ?? getIt.get<AssignClientUseCase>(),
         _reserveSeatsUseCase =
             reserveSeatsUseCase ?? getIt.get<ReserveSeatsUseCase>(),
-        _hashId = "",
+
         _eventBus = eventBus ?? getIt.get<EventBus>(),
-        super(ShoppingCartInitialState(ShoppingCart.empty(), '', 1)) {
+        super(ShoppingCartInitialState(ShoppingCart.empty(), 1)) {
     GetShoppingCartIfExits();
 
     _streamSubscription = _eventBus.stream.listen((event) {
       if (event is ShoppingCartUpdateEvent) {
         version = version + 1;
-        emit(ShoppingCartCurrentState(event.shoppingCart, _hashId, version));
+        emit(ShoppingCartCurrentState(event.shoppingCart, version));
       }
     });
   }
 
   Future<void> GetShoppingCartIfExits() async {
-    var shoppingCartId = await storage.read(key: Constants.SHOPPING_CARD_ID);
-    var hashId = await storage.read(key: Constants.SHOPPING_CARD_HASH_ID);
 
-    if (shoppingCartId != null && hashId != null) {
-      getShoppingCart(shoppingCartId);
-    }
+    await  getShoppingCart();
+
   }
 
   late final StreamSubscription _streamSubscription;
@@ -88,68 +86,71 @@ class ShoppingCartCubit extends Cubit<ShoppingCartState> {
 
   late final AssignClientUseCase _assignClientUseCase;
 
-  late String _hashId;
+
   late int version = 0;
 
   Future<void> updateShoppingCartState(
       ShoppingCartUpdateEvent event, Emitter<ShoppingCartState> emit) async {
     version = version + 1;
-    emit(ShoppingCartCurrentState(event.shoppingCart, _hashId, version));
+    emit(ShoppingCartCurrentState(event.shoppingCart,  version));
   }
 
   Future<void> createShoppingCart(int maxNumberOfSeats) async {
-    if (maxNumberOfSeats > 4 || maxNumberOfSeats < 1) {
-      emit(ShoppingCartCreateValidationErrorState(ShoppingCart.empty(), _hashId,
-          version, 'Number of places should be from 1 to 4'));
-      return;
-    }
+
     version = version + 1;
-    emit(CreatingShoppingCart(ShoppingCart.empty(), _hashId, version));
+    emit(CreatingShoppingCart(ShoppingCart.empty(),  version));
+
     final result =
-        await _shoppingCartService.createShoppingCart(maxNumberOfSeats);
+        await _createShoppingCart(CreateShoppingCartCommand(maxNumberOfSeats: maxNumberOfSeats));
 
     version = version + 1;
-
     result.fold((failure) {
-      version = version + 1;
-      emit(ShoppingCartError(
-          ShoppingCart.empty(), _hashId, version, failure.errorMessage));
-    }, (value) async {
-      //   _hashId = value.hashId;
 
-      final resultShoppingCart = await _getShoppingCart(value.shoppingCartId);
+      if(failure is ValidationFailure)
+        {
+          emit(ShoppingCartCreateValidationErrorState(ShoppingCart.empty(), version, failure.message));
+          return;
+        }
+
+      emit(ShoppingCartError(ShoppingCart.empty(),  version, failure.errorMessage));
+      return;
+
+    }, (value) async {
+
+      final resultShoppingCart = await _getShoppingCart();
 
       resultShoppingCart.fold((failure) {
         if (failure.statusCode == 204) {
           emit(
-              ShoppingCartInitialState(ShoppingCart.empty(), _hashId, version));
+              ShoppingCartInitialState(ShoppingCart.empty(),  version));
         } else {
           emit(ShoppingCartError(
-              ShoppingCart.empty(), _hashId, version, failure.errorMessage));
+              ShoppingCart.empty(), version, failure.errorMessage));
         }
       }, (shoppingCartValue) async {
-        version = version + 1;
-        emit(ShoppingCartCurrentState(shoppingCartValue, _hashId, version));
+        emit(ShoppingCartCreatedState(shoppingCartValue, version));
+        emit(ShoppingCartCurrentState(shoppingCartValue,  version));
       });
     });
   }
 
-  Future<void> getShoppingCart(String shoppingCartId) async {
-    version = version + 1;
-    emit(CreatingShoppingCart(ShoppingCart.empty(), _hashId, version));
 
-    final result = await _getShoppingCart(shoppingCartId);
+  Future<void> getShoppingCart() async {
+    version = version + 1;
+    emit(CreatingShoppingCart(ShoppingCart.empty(),  version));
+
+    final result = await _getShoppingCart();
 
     result.fold((failure) {
       if (failure.statusCode == 204) {
-        emit(ShoppingCartInitialState(ShoppingCart.empty(), _hashId, version));
+        emit(ShoppingCartInitialState(ShoppingCart.empty(),  version));
       } else {
         emit(ShoppingCartError(
-            ShoppingCart.empty(), _hashId, version, failure.errorMessage));
+            ShoppingCart.empty(),  version, failure.errorMessage));
       }
     }, (value) {
-      _shoppingCartUpdateSubscribeUseCase(shoppingCartId);
-      emit(ShoppingCartCurrentState(value, _hashId, version));
+
+      emit(ShoppingCartCurrentState(value, version));
     });
   }
 
@@ -167,7 +168,7 @@ class ShoppingCartCubit extends Cubit<ShoppingCartState> {
 
     result.fold(
         (l) => emit(ShoppingCartError(
-            state.shoppingCard, _hashId, version, l.errorMessage)),
+            state.shoppingCard,  version, l.errorMessage)),
         (r) async {});
   }
 
@@ -184,7 +185,7 @@ class ShoppingCartCubit extends Cubit<ShoppingCartState> {
     var result = await _unselectSeatUseCase(command);
     result.fold(
         (l) => emit(ShoppingCartError(
-            state.shoppingCard, _hashId, version, l.errorMessage)),
+            state.shoppingCard,  version, l.errorMessage)),
         (r) async {});
   }
 
@@ -193,7 +194,7 @@ class ShoppingCartCubit extends Cubit<ShoppingCartState> {
 
     result.fold(
         (l) => emit(ShoppingCartError(
-            state.shoppingCard, _hashId, version, l.errorMessage)),
+            state.shoppingCard,  version, l.errorMessage)),
         (r) async {});
   }
 

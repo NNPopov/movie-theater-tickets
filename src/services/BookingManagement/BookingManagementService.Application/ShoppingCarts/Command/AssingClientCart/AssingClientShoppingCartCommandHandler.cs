@@ -1,39 +1,54 @@
 ﻿using CinemaTicketBooking.Application.Abstractions;
-using CinemaTicketBooking.Application.Common;
-using CinemaTicketBooking.Application.Exceptions;
-using CinemaTicketBooking.Domain.ShoppingCarts;
+using CinemaTicketBooking.Domain.Error;
+using CinemaTicketBooking.Domain.ShoppingCarts.Abstractions;
 
 namespace CinemaTicketBooking.Application.ShoppingCarts.Command.AssingClientCart;
 
 public record AssignClientCartCommand(Guid ShoppingCartId, Guid ClientId) : //IdempotentRequest(RequestId),
-    IRequest<AssignClientCartResponse>;
+    IRequest<Result>;
 
-public class AssignClientCartCommandHandler : IRequestHandler<AssignClientCartCommand, AssignClientCartResponse>
+public class AssignClientCartCommandHandler(IShoppingCartRepository shoppingCartRepository,
+        IShoppingCartNotifier shoppingCartNotifier)
+    : IRequestHandler<AssignClientCartCommand, Result>
 {
-    private readonly IShoppingCartRepository _shoppingCartRepository;
-    private readonly IShoppingCartNotifier _shoppingCartNotifier;
-    public AssignClientCartCommandHandler(IShoppingCartRepository shoppingCartRepository, IShoppingCartNotifier shoppingCartNotifier)
-    {
-        _shoppingCartRepository = shoppingCartRepository;
-        _shoppingCartNotifier = shoppingCartNotifier;
-    }
-
-    public async Task<AssignClientCartResponse> Handle(AssignClientCartCommand request,
+    public async Task<Result> Handle(AssignClientCartCommand request,
         CancellationToken cancellationToken)
     {
-        var cart = await _shoppingCartRepository.TryGetCart(request.ShoppingCartId);
+        var cart = await shoppingCartRepository.GetByIdAsync(request.ShoppingCartId);
 
         if (cart == null)
         {
-            throw new ContentNotFoundException(request.ShoppingCartId.ToString(), nameof(ShoppingCart));
+            return DomainErrors<AssignClientCartCommandHandler>.NotFound("Shopping cart not found");
+        }
+        
+        var existingShoppingCartId = await shoppingCartRepository.GetActiveShoppingCartByClientIdAsync(request.ClientId);
+
+        if (existingShoppingCartId != Guid.Empty)
+        {
+            var existingShoppingCart = await shoppingCartRepository.GetByIdAsync(existingShoppingCartId);
+
+            if (existingShoppingCart != null && existingShoppingCartId != request.ShoppingCartId)
+            {
+                return DomainErrors<AssignClientCartCommandHandler>.ConflictException("Active Shopping cart already exists");
+            }
         }
 
-        cart.AssignClientId(request.ShoppingCartId);
+
+        var result = cart.AssignClientId(request.ShoppingCartId);
+
+        if (result.IsFailure)
+        {
+            return result;
+        }
+
+        await shoppingCartRepository.SetAsync(cart);
+
+        await shoppingCartRepository.SetClientActiveShoppingCartAsync(request.ClientId, request.ShoppingCartId);
         
-        await _shoppingCartRepository.TrySetCart(cart);
-        
-        await _shoppingCartNotifier.SentShoppingCartState(cart);
-        
-        return new AssignClientCartResponse(cart.Id);
+        shoppingCartNotifier.ReassignCartToClientID(cart);
+
+        await shoppingCartNotifier.SentShoppingCartState(cart);
+
+        return Result.Success();
     }
 }

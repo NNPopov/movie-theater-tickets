@@ -1,6 +1,7 @@
 ﻿using CinemaTicketBooking.Application.Abstractions;
 using CinemaTicketBooking.Domain.Seats.Abstractions;
 using CinemaTicketBooking.Domain.ShoppingCarts;
+using CinemaTicketBooking.Domain.ShoppingCarts.Abstractions;
 using Serilog;
 
 namespace CinemaTicketBooking.Application.ShoppingCarts.Command.ExpiredSeatSelection;
@@ -38,14 +39,12 @@ public class SeatExpiredReservationEventHandler : INotificationHandler<SeatExpir
 
         if (movieSessionSeat is null)
         {
-            _logger.Warning("Couldnot find MovieSessionSeat, MovieSessionId:{@MovieSessionId)}, SeatRow:{@SeatRow}, SeatNumber:{@SeatNumber} ",
-                request.MovieSessionId,
-                request.SeatRow,
-                request.SeatNumber);
+            _logger.Warning("Couldnot find MovieSessionSeat, MovieSession:{@MovieSession)}",
+                request);
             return;
         }
 
-        var cart = await _shoppingCartRepository.TryGetCart(movieSessionSeat.ShoppingCartId);
+        var cart = await _shoppingCartRepository.GetByIdAsync(movieSessionSeat.ShoppingCartId);
 
         if (cart is null)
         {
@@ -61,7 +60,7 @@ public class SeatExpiredReservationEventHandler : INotificationHandler<SeatExpir
 
         if (removeResult)
         {
-            await _shoppingCartRepository.TrySetCart(cart);
+            await _shoppingCartRepository.SetAsync(cart);
         }
         else
         {

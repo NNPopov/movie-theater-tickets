@@ -1,4 +1,5 @@
 ﻿using CinemaTicketBooking.Application.Exceptions;
+using CinemaTicketBooking.Domain.Error;
 using CinemaTicketBooking.Domain.Exceptions;
 using CinemaTicketBooking.Domain.MovieSessions;
 using CinemaTicketBooking.Domain.MovieSessions.Abstractions;
@@ -20,35 +21,62 @@ public sealed class MovieSessionSeatService
     }
 
 
-    public async Task PurchaseSeat(Guid movieSessionId,
-        short seatRow,
-        short seatNumber,
+    public async Task<Result> SelSeats(Guid movieSessionId,
+        ICollection<(short seatRow, short seatNumber)> seats,
         Guid shoppingCartId,
         CancellationToken cancellationToken)
     {
         await CheckSeatSaleAvailability(movieSessionId, cancellationToken);
 
-        var movieSessionSeat = await GetMovieSessionSeat(movieSessionId, seatRow, seatNumber, cancellationToken);
+        var movieSessionSeats = new List<MovieSessionSeat>();
 
-        movieSessionSeat.Sel(shoppingCartId);
+        foreach (var seat in seats)
+        {
+            var movieSessionSeat =
+                await GetMovieSessionSeat(movieSessionId, seat.seatRow, seat.seatNumber, cancellationToken);
 
-        await _movieSessionSeatRepository.UpdateAsync(movieSessionSeat, cancellationToken);
+
+            var result = movieSessionSeat.Sel(shoppingCartId);
+
+            if (result.IsFailure)
+            {
+                return result;
+            }
+            
+            movieSessionSeats.Add(movieSessionSeat);
+        }
+
+        await _movieSessionSeatRepository.UpdateRangeAsync(movieSessionSeats, cancellationToken);
+
+        return Result.Success();
     }
 
 
-    public async Task ReserveSeat(Guid movieSessionId,
-        short seatRow,
-        short seatNumber,
+    public async Task<Result> ReserveSeats(Guid movieSessionId,
+        ICollection<(short seatRow, short seatNumber)> seats,
         Guid shoppingCartId,
         CancellationToken cancellationToken)
     {
         await CheckSeatSaleAvailability(movieSessionId, cancellationToken);
+        var movieSessionSeats = new List<MovieSessionSeat>();
+        foreach (var seat in seats)
+        {
+            var movieSessionSeat =
+                await GetMovieSessionSeat(movieSessionId, seat.seatRow, seat.seatNumber, cancellationToken);
 
-        var movieSessionSeat = await GetMovieSessionSeat(movieSessionId, seatRow, seatNumber, cancellationToken);
+            var result = movieSessionSeat.Reserve(shoppingCartId);
+            
+            if (result.IsFailure)
+            {
+                return result;
+            }
+            
+            movieSessionSeats.Add(movieSessionSeat);
 
-        movieSessionSeat.Reserve(shoppingCartId);
+        }
+        await _movieSessionSeatRepository.UpdateRangeAsync(movieSessionSeats, cancellationToken);
 
-        await _movieSessionSeatRepository.UpdateAsync(movieSessionSeat, cancellationToken);
+        return Result.Success();
     }
 
     public async Task ReturnToAvailable(Guid movieSessionId,
@@ -104,7 +132,7 @@ public sealed class MovieSessionSeatService
         CancellationToken cancellationToken)
     {
         var movieSession = await _movieSessionsRepository
-                               .GetWithTicketsByIdAsync(
+                               .GetByIdAsync(
                                    movieSessionId, cancellationToken) ??
                            throw new ContentNotFoundException(movieSessionId.ToString(), nameof(MovieSession));
 

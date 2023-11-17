@@ -6,7 +6,6 @@ import '../core/common/views/loading_view.dart';
 import '../core/utils/utils.dart';
 import 'cinema_halls/presentation/cubit/cinema_hall_cubit.dart';
 import 'movies/presentation/app/movie_theater_cubit.dart';
-import 'package:carousel_slider/carousel_slider.dart';
 
 class AuditoriumDetailView extends StatefulWidget {
   const AuditoriumDetailView(this.auditoriumId, {super.key});
@@ -57,7 +56,6 @@ class _auditoriumDetailView extends State<AuditoriumDetailView> {
 
         final cinemaHall = state.auditorium;
         return Column(children: [
-          // Text("ID :${movie.id}"),
           Text("Auditorium name :${cinemaHall.description}")
         ]);
       },

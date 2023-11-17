@@ -12,11 +12,9 @@ import 'package:dartz/dartz.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:collection/collection.dart';
 
-GetIt getIt = GetIt.instance;
 
-class UpdateSeatsState extends FutureUsecaseWithParams<bool, List<Seat>> {
-  UpdateSeatsState({EventBus? eventBus})
-      : _eventBus = eventBus ?? getIt.get<EventBus>();
+class UpdateSeatsStateUseCase extends FutureUsecaseWithParams<bool, List<Seat>> {
+  UpdateSeatsStateUseCase(this._eventBus);
 
   late final EventBus _eventBus;
   final storage = const FlutterSecureStorage();

@@ -3,15 +3,13 @@ import 'dart:convert';
 import '../../helpers/constants.dart';
 import '../../seats/data/models/seat_dto.dart';
 import '../../seats/domain/entities/seat.dart';
-import '../../seats/domain/usecases/update_seats_sate.dart';
+import '../../seats/domain/usecases/update_seats_sate_usecase.dart';
 import '../../shopping_carts/data/models/shopping_cart_dto.dart';
 import '../../shopping_carts/domain/entities/shopping_cart.dart';
 import '../../shopping_carts/domain/usecases/update_state_shopping_cart.dart';
 import '../presentation/cubit/connectivity_bloc.dart';
 import '../domain/event_hub.dart';
 import 'package:signalr_netcore/signalr_client.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:get_it/get_it.dart';
 
 import '../../../core/buses/event_bus.dart';
 import 'package:logging/logging.dart';
@@ -24,7 +22,7 @@ class SignalREventHub implements EventHub {
 
   late HubConnection _hubConnection;
   late UpdateShoppingCartState updateShoppingCartState;
-  late UpdateSeatsState updateSeatsState;
+  late UpdateSeatsStateUseCase updateSeatsState;
   late EventBus eventBus;
 
   late String? _movieSessionId = null;

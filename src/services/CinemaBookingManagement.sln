@@ -25,7 +25,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Directory.Packages.props = Directory.Packages.props
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CinemaTicketBooking.Application.UnitTests", "BookingManagement\tests\CinemaTicketBooking.Application.UnitTests\CinemaTicketBooking.Application.UnitTests.csproj", "{8F203C2A-243F-4798-AD79-E717FEA4A905}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CinemaTicketBooking.Domain.UnitTests", "BookingManagement\tests\CinemaTicketBooking.Domain.UnitTests\CinemaTicketBooking.Domain.UnitTests.csproj", "{8F203C2A-243F-4798-AD79-E717FEA4A905}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{7C256F49-C29B-48F7-AC45-C810459AA3FC}"
 EndProject

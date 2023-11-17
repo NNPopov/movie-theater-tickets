@@ -14,11 +14,9 @@ import 'package:get_it/get_it.dart';
 GetIt getIt = GetIt.instance;
 
 class MovieRepoImpl implements MovieRepo {
-  late Dio _client;
+  final Dio _client;
 
-  MovieRepoImpl({Dio? client}) {
-    _client = client ?? getIt.get<Dio>();
-  }
+  MovieRepoImpl(this._client) ;
 
   @override
   ResultFuture<List<Movie>> getMovies() async {

@@ -4,6 +4,7 @@ using System.Text;
 using CinemaTicketBooking.Domain.Common;
 using CinemaTicketBooking.Domain.Common.Ensure;
 using CinemaTicketBooking.Domain.Common.Events;
+using CinemaTicketBooking.Domain.Error;
 using CinemaTicketBooking.Domain.Exceptions;
 using CinemaTicketBooking.Domain.MovieSessions;
 using Newtonsoft.Json;
@@ -65,7 +66,7 @@ public class ShoppingCart : AggregateRoot
         return sb.ToString();
     }
 
-    public void AssignClientId(Guid clientId)
+    public Result AssignClientId(Guid clientId)
     {
         Ensure.NotEmpty(clientId, "The clientId is required.", nameof(clientId));
 
@@ -76,6 +77,8 @@ public class ShoppingCart : AggregateRoot
             throw new ConflictException(nameof(ShoppingCart), Id.ToString());
 
         ClientId = clientId;
+
+        return Result.Success();
     }
 
     private ShoppingCart(Guid id, short maxNumberOfSeats) : base(id: id)

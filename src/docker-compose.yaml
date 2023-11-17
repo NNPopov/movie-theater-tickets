@@ -7,8 +7,13 @@ volumes:
     driver: local
     
 services:
+  
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    
   nginx:
     image: nginx
+    
   booking-management-ui:
     image: booking-management-ui:${MY_TAG:-latest}
     build:
@@ -41,6 +46,7 @@ services:
     depends_on:
       - cinema-booking-cache
       - logger-seq
+      - rabbitmq
   
   cinema-booking-cache:
     image: redis:latest

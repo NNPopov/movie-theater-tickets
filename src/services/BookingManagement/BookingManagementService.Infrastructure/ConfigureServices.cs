@@ -1,9 +1,12 @@
 ﻿using CinemaTicketBooking.Application.Abstractions;
+using CinemaTicketBooking.Application.Abstractions.Repositories;
 using CinemaTicketBooking.Application.Abstractions.Services;
 using CinemaTicketBooking.Domain.MovieSessions.Abstractions;
 using CinemaTicketBooking.Domain.Seats.Abstractions;
 using CinemaTicketBooking.Domain.Services;
+using CinemaTicketBooking.Domain.ShoppingCarts.Abstractions;
 using CinemaTicketBooking.Infrastructure.Data;
+using CinemaTicketBooking.Infrastructure.EventBus;
 using CinemaTicketBooking.Infrastructure.Repositories;
 using CinemaTicketBooking.Infrastructure.Services;
 using Microsoft.AspNetCore.Builder;
@@ -12,6 +15,8 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using RabbitMQ.Client;
+using Serilog;
 using StackExchange.Redis;
 
 namespace CinemaTicketBooking.Infrastructure;
@@ -64,7 +69,48 @@ public static class ConfigureServices
         services.AddScoped<ICinemaContext>(provider => provider.GetRequiredService<CinemaContext>());
         services.AddScoped<SampleDataInitializer>();
         
+        services.AddSingleton<IRabbitMQPersistentConnection>(sp =>
+        {
+            var logger = sp.GetRequiredService<ILogger>();
 
+            var factory = new ConnectionFactory()
+            {
+                HostName = configuration.GetConnectionString("EventBus"),
+                DispatchConsumersAsync = true
+            };
+
+            // if (!string.IsNullOrEmpty(eventBusSection["UserName"]))
+            // {
+            //     factory.UserName = eventBusSection["UserName"];
+            // }
+            //
+            // if (!string.IsNullOrEmpty(eventBusSection["Password"]))
+            // {
+            //     factory.Password = eventBusSection["Password"];
+            // }
+            //
+            // var retryCount = eventBusSection.GetValue("RetryCount", 5);
+
+            return new DefaultRabbitMQPersistentConnection(factory, logger, 5);
+        });
+
+        services.AddSingleton<IEventBus, EventBusRabbitMQ>(sp =>
+        {
+            var subscriptionClientName = "booking";//eventBusSection.GetRequiredValue("SubscriptionClientName");
+            var rabbitMQPersistentConnection = sp.GetRequiredService<IRabbitMQPersistentConnection>();
+            var logger = sp.GetRequiredService<ILogger>();
+            var eventBusSubscriptionsManager = sp.GetRequiredService<IEventBusSubscriptionsManager>();
+            var retryCount = 5;// eventBusSection.GetValue("RetryCount", 5);
+
+            return new EventBusRabbitMQ(rabbitMQPersistentConnection, 
+                logger, 
+                sp, 
+                eventBusSubscriptionsManager, 
+                subscriptionClientName, 
+                retryCount);
+        });
+        
+        services.AddSingleton<IEventBusSubscriptionsManager, InMemoryEventBusSubscriptionsManager>();
         return services;
     }
 

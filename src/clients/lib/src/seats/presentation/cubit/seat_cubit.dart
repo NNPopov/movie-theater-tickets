@@ -15,29 +15,29 @@ part 'seat_state.dart';
 GetIt getIt = GetIt.instance;
 
 class SeatCubit extends Cubit<SeatState> {
-
   final storage = const FlutterSecureStorage();
-  late GetSeatsByMovieSessionId _getMovieSessionById;
-
-  late int version = 0;
-
-  late EventBus _eventBus;
-
+  final GetSeatsByMovieSessionId _getMovieSessionById;
+  final EventBus _eventBus;
   late StreamSubscription _appEventSubscription;
 
-  SeatCubit({GetSeatsByMovieSessionId? getMovieSessionById, EventBus? eventBus})
-      : _getMovieSessionById =
-            getMovieSessionById ?? getIt.get<GetSeatsByMovieSessionId>(),
-        _eventBus = eventBus ?? getIt.get<EventBus>(),
-        super(const InitialState()) {
+  late int version = 0;
+  late String?  _movieSessionId = '';
 
-
+  SeatCubit(this._getMovieSessionById, this._eventBus)
+      : super(const InitialState()) {
     _appEventSubscription = _eventBus.stream.listen((event) {
       if (event is SeatsUpdateEvent) {
         var selectingSeat = event as SeatsUpdateEvent;
 
         emit(SeatsState(selectingSeat.seats));
       }
+
+      if (event is ShoppingCartHashIdUpdated) {
+        if(_movieSessionId!=null) {
+          _getSeats(_movieSessionId!);
+        }
+      }
+
     });
   }
 
@@ -46,14 +46,24 @@ class SeatCubit extends Cubit<SeatState> {
   void updateSeatsState(ShoppingCart shoppingCard) {}
 
   Future<void> getSeats(String movieSessionId) async {
+
+    _movieSessionId = movieSessionId;
+
+    _getSeats(movieSessionId);
+  }
+
+  Future<void> _getSeats(String movieSessionId) async {
+
+    _movieSessionId = movieSessionId;
+
     emit(const GettingSeats());
 
     final result = await _getMovieSessionById(movieSessionId);
 
     result.fold((failure) => emit(SeatsError(failure.errorMessage)),
-        (seats) async {
-      emit(SeatsState(seats));
-    });
+            (seats) async {
+          emit(SeatsState(seats));
+        });
   }
 
   @override

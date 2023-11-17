@@ -1,9 +1,7 @@
-using CinemaTicketBooking.Application.Exceptions;
 using CinemaTicketBooking.Domain.Common;
 using CinemaTicketBooking.Domain.Common.Ensure;
 using CinemaTicketBooking.Domain.Common.Events;
 using CinemaTicketBooking.Domain.Error;
-using CinemaTicketBooking.Domain.Exceptions;
 using CinemaTicketBooking.Domain.Seats.Events;
 using Newtonsoft.Json;
 
@@ -75,14 +73,13 @@ public sealed class MovieSessionSeat : ValueObject, IAggregateRoot
         
         if (Status != SeatStatus.Available)
         {
-           return MovieSessionSeatErrors.ConflictException;
-           // throw new ConflictException(nameof(MovieSessionSeat), this.ToString());
+            return DomainErrors<MovieSessionSeat>.ConflictException("Status should be Available");
         }
         
         if (shoppingCartId != ShoppingCartId && ShoppingCartId != Guid.Empty)
         {
-            return MovieSessionSeatErrors.MovieSessionSeatProcessed;
-           // throw new InvalidOperationException("The seat is already selected by another shopping cart.");
+            return DomainErrors<MovieSessionSeat>.InvalidOperation(
+                "The place is already being processed by another shopping cart");
         }
         
         if (ShoppingCartId == Guid.Empty)
@@ -110,9 +107,9 @@ public sealed class MovieSessionSeat : ValueObject, IAggregateRoot
     {
         Ensure.NotEmpty(shoppingCartId, "The shoppingCartId is required.", nameof(shoppingCartId));
 
-        if (Status != SeatStatus.Selected && Status != SeatStatus.Available) // || ShoppingCartId != shoppingCartId)
+        if (Status != SeatStatus.Selected && Status != SeatStatus.Available)
         {
-            throw new ConflictException(nameof(MovieSessionSeat), this.ToString());
+           return DomainErrors<MovieSessionSeat>.ConflictException("Status should be selected or available.");
         }
         
         var currentStatus = Status;
@@ -132,12 +129,13 @@ public sealed class MovieSessionSeat : ValueObject, IAggregateRoot
 
         if (ShoppingCartId != shoppingCartId)
         {
-            throw new InvalidOperationException("The seat is already selected by another shopping cart.");
+            return DomainErrors<MovieSessionSeat>.InvalidOperation(
+                "The place is already being processed by another shopping cart");
         }
         
         if (Status == SeatStatus.Sold)
         {
-            throw new ConflictException(nameof(MovieSessionSeat), this.ToString());
+            return DomainErrors<MovieSessionSeat>.ConflictException("Status should not be Sold.");
         }
         
         var currentStatus = Status;
@@ -155,7 +153,7 @@ public sealed class MovieSessionSeat : ValueObject, IAggregateRoot
     {
         if (Status == SeatStatus.Sold)
         {
-            throw new ConflictException(nameof(MovieSessionSeat), this.ToString());
+            return DomainErrors<MovieSessionSeat>.ConflictException("Status should not be Sold.");
         }
         
         var currentStatus = Status;

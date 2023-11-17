@@ -1,25 +1,30 @@
 import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:movie_theater_tickets/src/auth/domain/services/auth_service.dart';
 import 'package:movie_theater_tickets/src/hub/domain/event_hub.dart';
 import 'package:movie_theater_tickets/src/shopping_carts/domain/entities/create_shopping_cart_response.dart';
-import 'package:movie_theater_tickets/src/shopping_carts/domain/repos/shopping_cart_repo.dart';
+import 'package:movie_theater_tickets/src/shopping_carts/domain/services/shopping_cart_service.dart';
 import 'package:movie_theater_tickets/src/shopping_carts/domain/usecases/create_shopping_cart.dart';
 
-class MocShoppingCartRepo extends Mock implements ShoppingCartRepo {}
+class MocShoppingCartService extends Mock implements ShoppingCartService {}
 
 class MockEventHub extends Mock implements EventHub {}
 
+class MockAuthService extends Mock implements AuthService {}
+
 void main() {
   late CreateShoppingCartUseCase usecase;
-  late MocShoppingCartRepo repo;
+  late MocShoppingCartService repo;
   late CreateShoppingCartCommand createShoppingCartCommand;
   late MockEventHub hub;
+  late MockAuthService authService;
 
   setUp(() {
-    repo = MocShoppingCartRepo();
+    repo = MocShoppingCartService();
     hub = MockEventHub();
-    usecase = CreateShoppingCartUseCase(repo: repo, eventHub: hub);
+    authService=MockAuthService();
+    usecase = CreateShoppingCartUseCase( repo,  hub, authService);
   });
 
   group('CreateShoppingCart', () {
@@ -32,7 +37,7 @@ void main() {
 
       final result = await usecase(createShoppingCartCommand);
 
-      when(() => repo.createShoppingCart(any())).thenAnswer(
+      when(() => repo.createShoppingCartForAnonymousUser(any())).thenAnswer(
         (t) async => const Right(CreateShoppingCartResponse(
             'dcd5d892-4100-400b-b6f3-d4679f5b8db6',
             'f2a8d6cb31e38a1e5d7fc42e55daf53a')),
@@ -44,7 +49,7 @@ void main() {
           equals(const Right<dynamic, void>(
               'dcd5d892-4100-400b-b6f3-d4679f5b8db6')));
 
-      verify(() => repo.createShoppingCart(5)).called(1);
+      verify(() => repo.createShoppingCartForAnonymousUser(5)).called(1);
 
       verifyNoMoreInteractions(repo);
     });

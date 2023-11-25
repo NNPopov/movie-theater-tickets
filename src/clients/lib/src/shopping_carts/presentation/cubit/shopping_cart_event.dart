@@ -15,3 +15,8 @@ class ShoppingCartUpdateEvent extends ShoppingCartEvent {
   @override
   List<Object> get props => [shoppingCart];
 }
+
+class ShoppingCartDeleteEvent extends ShoppingCartEvent {
+
+}
+

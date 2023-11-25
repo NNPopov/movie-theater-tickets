@@ -24,7 +24,7 @@ class SeatCubit extends Cubit<SeatState> {
   late String?  _movieSessionId = '';
 
   SeatCubit(this._getMovieSessionById, this._eventBus)
-      : super(const InitialState()) {
+      : super( InitialState(List<Seat>.empty(growable: true))) {
     _appEventSubscription = _eventBus.stream.listen((event) {
       if (event is SeatsUpdateEvent) {
         var selectingSeat = event as SeatsUpdateEvent;
@@ -56,11 +56,11 @@ class SeatCubit extends Cubit<SeatState> {
 
     _movieSessionId = movieSessionId;
 
-    emit(const GettingSeats());
+    emit( GettingSeats( state.seats ));
 
     final result = await _getMovieSessionById(movieSessionId);
 
-    result.fold((failure) => emit(SeatsError(failure.errorMessage)),
+    result.fold((failure) => emit(SeatsError(state.seats , failure.errorMessage)),
             (seats) async {
           emit(SeatsState(seats));
         });

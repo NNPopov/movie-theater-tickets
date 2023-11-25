@@ -75,4 +75,4 @@ class ShoppingCart extends Equatable {
       ];
 }
 
-enum ShoppingCartStatus { InWork, SeatsReserved, PurchaseCompleted }
+enum ShoppingCartStatus { InWork, SeatsReserved, PurchaseCompleted, Deleted }

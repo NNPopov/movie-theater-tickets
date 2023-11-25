@@ -4,6 +4,7 @@ import 'package:bloc/bloc.dart';
 
 
 class BlocEventStateObserver extends BlocObserver {
+
   @override
   void onEvent(Bloc<dynamic, dynamic> bloc, Object? event) {
     super.onEvent(bloc, event);
@@ -14,6 +15,18 @@ class BlocEventStateObserver extends BlocObserver {
   void onChange(BlocBase<dynamic> bloc, Change<dynamic> change) {
     super.onChange(bloc, change);
     log('onChange $change');
+  }
+
+  @override
+  void onCreate(BlocBase<dynamic> bloc)  {
+    super.onCreate(bloc);
+    log('onCreate $bloc');
+  }
+
+  @override
+  void onClose(BlocBase<dynamic> bloc)  {
+    super.onClose(bloc);
+    log('onClose $bloc');
   }
 
   @override
@@ -28,6 +41,6 @@ class BlocEventStateObserver extends BlocObserver {
   @override
   void onError(BlocBase<dynamic> bloc, Object error, StackTrace stackTrace) {
     super.onError(bloc, error, stackTrace);
-    log('onError $error');
+    log('onError $bloc $error');
   }
 }

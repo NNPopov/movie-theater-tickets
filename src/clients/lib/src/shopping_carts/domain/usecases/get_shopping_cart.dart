@@ -3,7 +3,7 @@ import 'package:movie_theater_tickets/core/errors/failures.dart';
 import '../../../../core/buses/event_bus.dart';
 import '../../../../core/common/usecase.dart';
 import '../../../../core/utils/typedefs.dart';
-import '../../../auth/domain/abstraction/auth_event_bus.dart';
+import '../../../auth/domain/abstraction/auth_statuses.dart';
 import '../../../auth/domain/services/auth_service.dart';
 import '../../../helpers/constants.dart';
 import '../../../hub/app_events.dart';
@@ -14,8 +14,9 @@ import '../repos/shopping_cart_repo.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:dartz/dartz.dart';
 
-class GetShoppingCart extends FutureUsecaseWithoutParams<ShoppingCart> {
-  const GetShoppingCart(this._repo, this._localRepo, this._authService, this._eventHub, this._eventBus);
+class GetShoppingCartUseCase extends FutureUsecaseWithoutParams<ShoppingCart> {
+  const GetShoppingCartUseCase(this._repo, this._localRepo, this._authService,
+      this._eventHub, this._eventBus);
 
   final ShoppingCartRepo _repo;
   final ShoppingCartLocalRepo _localRepo;
@@ -28,23 +29,18 @@ class GetShoppingCart extends FutureUsecaseWithoutParams<ShoppingCart> {
   ResultFuture<ShoppingCart> call() async {
     var userStatus = await _authService.getCurrentStatus();
 
-    return userStatus.fold((l) async
-       {
-
-         var shoppingCartId = await storage.read(key: Constants.SHOPPING_CARD_ID);
-         if (shoppingCartId != null) {
-
-           await _eventHub.shoppingCartUpdateSubscribe(shoppingCartId);
-           return await GetShoppingCartById(shoppingCartId);
-         }
-         return const Left(NotFoundFailure(message: 'ShoppingCart not found', statusCode: 204));
-       }
-        , (r) async {
-      if (r is AuthorizedAuthStatus) {
-
+    return userStatus.fold((l) async {
+      var shoppingCartId = await storage.read(key: Constants.SHOPPING_CARD_ID);
+      if (shoppingCartId != null) {
+        await _eventHub.shoppingCartUpdateSubscribe(shoppingCartId);
+        return await GetShoppingCartById(shoppingCartId);
+      }
+      return const Left(
+          NotFoundFailure(message: 'ShoppingCart not found', statusCode: 204));
+    }, (r) async {
+      if (r.status == AuthenticationStatus.authorized) {
         var result = await _repo.getCurrentUserShoppingCart();
         return result.fold((l) {
-
           return Left(l);
         }, (value) async {
           await storage.write(
@@ -62,8 +58,8 @@ class GetShoppingCart extends FutureUsecaseWithoutParams<ShoppingCart> {
       if (shoppingCartId != null) {
         return await GetShoppingCartById(shoppingCartId);
       }
-      return const Left(NotFoundFailure(message: 'ShoppingCart not found', statusCode: 204));
-
+      return const Left(
+          NotFoundFailure(message: 'ShoppingCart not found', statusCode: 204));
     });
   }
 

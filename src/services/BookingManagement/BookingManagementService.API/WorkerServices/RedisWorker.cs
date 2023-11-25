@@ -1,25 +1,21 @@
-﻿using CinemaTicketBooking.Infrastructure.EventBus;
+﻿using CinemaTicketBooking.Api.IntegrationEvents.Events;
+using CinemaTicketBooking.Infrastructure.EventBus;
 using StackExchange.Redis;
 using ILogger = Serilog.ILogger;
 
 
 namespace CinemaTicketBooking.Api.WorkerServices;
 
-
-public record SeatExpiredSelectionIntegrationEvent
-    (Guid MovieSessionId, short SeatRow, short SeatNumber, Guid ShoppingKartId) : IntegrationEvent;
-
-
 public sealed class RedisSubscriber : BackgroundService
 {
     private readonly ILogger _logger;
     private readonly IConnectionMultiplexer _redis;
     private readonly ISubscriber _subscriber;
-    private  readonly IEventBus _eventBus;
+    private readonly IEventBus _eventBus;
 
     public RedisSubscriber(ILogger logger,
         IConnectionMultiplexer redis,
-        IServiceScopeFactory serviceScopeFactory, 
+        IServiceScopeFactory serviceScopeFactory,
         IEventBus eventBus)
     {
         _redis = redis;
@@ -38,7 +34,6 @@ public sealed class RedisSubscriber : BackgroundService
         {
             try
             {
-                
                 var keys = key.ToString().Split(':');
 
                 var keyPrefix = keys[0];
@@ -49,19 +44,33 @@ public sealed class RedisSubscriber : BackgroundService
                         var showtimeId = Guid.Parse(keys[1]);
                         var row = short.Parse(keys[2]);
                         var seat = short.Parse(keys[3]);
-                        
+
                         var seatExpiredReservationIntegrationEvent = new SeatExpiredSelectionIntegrationEvent(
                             MovieSessionId: showtimeId,
                             SeatRow: row,
                             SeatNumber: seat,
                             ShoppingKartId: Guid.Empty);
-                        
+
                         _eventBus.Publish(seatExpiredReservationIntegrationEvent, key.ToString());
-                        
+
 
                         _logger.Information(
-                            "seat-select EXPIRED. Message published: {@SeatExpiredReservationIntegrationEvent}",
+                            "Seat Select EXPIRED. Message published: {@SeatExpiredReservationIntegrationEvent}",
                             seatExpiredReservationIntegrationEvent);
+                        break;
+
+                    case "shopping_cart_ttl":
+                        var shoppingCartId = Guid.Parse(keys[1]);
+
+                        var shoppingCartExpiredIntegrationEvent = new ShoppingCartExpiredIntegrationEvent(
+                            ShoppingCartId: shoppingCartId);
+
+                        _eventBus.Publish(shoppingCartExpiredIntegrationEvent, key.ToString());
+
+
+                        _logger.Information(
+                            "Shopping Cart EXPIRED. Message published: {@ShoppingCartExpiredIntegrationEvent}",
+                            shoppingCartExpiredIntegrationEvent);
                         break;
                     default:
 

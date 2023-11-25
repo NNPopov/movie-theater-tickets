@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import '../../helpers/constants.dart';
@@ -11,26 +12,32 @@ import '../presentation/cubit/connectivity_bloc.dart';
 import '../domain/event_hub.dart';
 import 'package:signalr_netcore/signalr_client.dart';
 
-import '../../../core/buses/event_bus.dart';
 import 'package:logging/logging.dart';
 
 class SignalREventHub implements EventHub {
   SignalREventHub(
       {required this.updateShoppingCartState,
-      required this.eventBus,
+
       required this.updateSeatsState});
 
   late HubConnection _hubConnection;
-  late UpdateShoppingCartState updateShoppingCartState;
+  late ShoppingCartUpdateStateUseCase updateShoppingCartState;
   late UpdateSeatsStateUseCase updateSeatsState;
-  late EventBus eventBus;
+
+
+  final _controller = StreamController<ConnectivityEvent>();
+
+  @override
+  Stream<ConnectivityEvent> get status async* {
+    yield* _controller.stream;
+  }
 
   late String? _movieSessionId = null;
   late String? _shoppingCartId = null;
 
   @override
   Future subscribe() async {
-    eventBus.send(ReconnectingEvent());
+    _controller.add(ReconnectingEvent());
 
     final httpConnectionOptions = HttpConnectionOptions(
       logMessageContent: true,
@@ -67,18 +74,18 @@ class SignalREventHub implements EventHub {
 
     _hubConnection.onreconnected(({connectionId}) {
       _tryReconnect();
-      eventBus.send(ConnectedEvent());
+      _controller.add(ConnectedEvent());
 
       print("Connected called");
     });
 
     _hubConnection.onreconnecting(({error}) {
-      eventBus.send(ReconnectingEvent());
+      _controller.add(ReconnectingEvent());
       print("Reconnecting called");
     });
 
     _hubConnection.onclose(({error}) {
-      eventBus.send(DisconnectedEvent());
+      _controller.add(DisconnectedEvent());
       print("On Close called");
     });
 
@@ -88,9 +95,9 @@ class SignalREventHub implements EventHub {
 
     try {
       await _tryStartHub();
-      eventBus.send(ConnectedEvent());
+      _controller.add(ConnectedEvent());
     } on Exception catch (e) {
-      eventBus.send(DisconnectedEvent());
+      _controller.add(DisconnectedEvent());
     }
   }
 
@@ -153,9 +160,11 @@ class SignalREventHub implements EventHub {
         await _hubConnection.start();
 
         await _tryReconnect();
+
+
       }
     } on Exception catch (e) {
-      eventBus.send(DisconnectedEvent());
+      _controller.add(DisconnectedEvent());
     }
   }
 

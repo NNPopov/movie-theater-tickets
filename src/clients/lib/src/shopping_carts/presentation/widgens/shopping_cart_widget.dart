@@ -5,6 +5,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/entities/seat.dart';
 import '../cubit/shopping_cart_cubit.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:get_it/get_it.dart';
+
+final getIt = GetIt.instance;
 
 class ShoppingCartWidget extends StatefulWidget {
   const ShoppingCartWidget({super.key});
@@ -37,6 +40,10 @@ class _ShoppingCartWidget extends State<ShoppingCartWidget> {
         if (state is ShoppingCartConflictState) {
           Utils.showSnackBar(context, 'This place is already occupied');
         }
+        if (state is ShoppingCartDeleteState) {
+          Utils.showSnackBar(context, 'Shopping cart was expired or deleted');
+        }
+
       },
       buildWhen: (context, state) {
         if (state is ShoppingCartError) {
@@ -163,9 +170,12 @@ class _ShoppingCartWidget extends State<ShoppingCartWidget> {
 
     showDialog(
         context: context,
-        builder: (BuildContext context) => BlocProvider(
-              create: (BuildContext context) => ShoppingCartCubit(),
-              child: BlocConsumer<ShoppingCartCubit, ShoppingCartState>(
+         builder: (BuildContext context) =>
+             //BlocProvider(
+        //       create: (BuildContext context) => getIt.get<ShoppingCartCubit>(),
+        //       child:
+        //
+              BlocConsumer<ShoppingCartCubit, ShoppingCartState>(
                 builder: (BuildContext context, ShoppingCartState state) {
                   return AlertDialog(
                     title: Text(AppLocalizations.of(context)!.shopping_cart),
@@ -201,8 +211,9 @@ class _ShoppingCartWidget extends State<ShoppingCartWidget> {
                   }
                 },
               ),
-            )).then((valueFromDialog) async {
-      await context.read<ShoppingCartCubit>().GetShoppingCartIfExits();
+            //),
+    ).then((valueFromDialog) async {
+      await context.read<ShoppingCartCubit>().getShoppingCartIfExits();
     });
   }
 

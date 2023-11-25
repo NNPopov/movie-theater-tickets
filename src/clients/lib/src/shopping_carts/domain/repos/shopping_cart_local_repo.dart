@@ -10,4 +10,5 @@ abstract class ShoppingCartLocalRepo {
 
   ResultFuture<void> setShoppingCart(ShoppingCart shoppingCart);
 
+  ResultFuture<void> deleteShoppingCart(ShoppingCart shoppingCart);
 }

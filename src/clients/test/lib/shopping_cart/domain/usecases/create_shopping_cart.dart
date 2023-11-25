@@ -7,7 +7,7 @@ import 'package:movie_theater_tickets/src/shopping_carts/domain/entities/create_
 import 'package:movie_theater_tickets/src/shopping_carts/domain/services/shopping_cart_service.dart';
 import 'package:movie_theater_tickets/src/shopping_carts/domain/usecases/create_shopping_cart.dart';
 
-class MocShoppingCartService extends Mock implements ShoppingCartService {}
+class MocShoppingCartService extends Mock implements ShoppingCartAuthListener {}
 
 class MockEventHub extends Mock implements EventHub {}
 

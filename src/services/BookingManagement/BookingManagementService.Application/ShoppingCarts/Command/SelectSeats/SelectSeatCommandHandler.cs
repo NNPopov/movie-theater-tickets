@@ -101,7 +101,7 @@ public class SelectSeatCommandHandler : IRequestHandler<SelectSeatCommand, Resul
             await _shoppingCartRepository.SetAsync(cart);
         }
 
-        await _shoppingCartNotifier.SentShoppingCartState(cart);
+        //await _shoppingCartNotifier.SentShoppingCartState(cart);
 
         return Result.Success();
     }

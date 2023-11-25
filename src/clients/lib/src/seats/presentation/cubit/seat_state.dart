@@ -1,36 +1,34 @@
 part of 'seat_cubit.dart';
 
 abstract class SeatState  extends Equatable {
-const SeatState();
+const SeatState(this.seats);
 
+
+final List<Seat> seats;
   @override
-  List<Object> get props => [];
+  List<Object> get props => [seats];
 
 }
 
 
 class GettingSeats extends SeatState {
-  const GettingSeats();
+  const GettingSeats(super.seats);
 }
 
 class SeatsState extends SeatState {
-  const SeatsState(this.seats);
+  const SeatsState(super.seats);
 
-  final List<List<Seat>> seats;
-
-  @override
-  List<Object> get props => [seats];
 }
 
 class SeatsError extends SeatState {
-  const SeatsError(this.message);
+  const SeatsError(super.seats, this.message);
 
   final String message;
 
   @override
-  List<Object> get props => [message];
+  List<Object> get props => [super.seats, message];
 }
 
 class InitialState extends SeatState {
-  const InitialState();
+  const InitialState(super.seats);
 }

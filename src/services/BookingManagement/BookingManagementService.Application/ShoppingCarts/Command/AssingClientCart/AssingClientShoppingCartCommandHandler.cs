@@ -45,9 +45,9 @@ public class AssignClientCartCommandHandler(IShoppingCartRepository shoppingCart
 
         await shoppingCartRepository.SetClientActiveShoppingCartAsync(request.ClientId, request.ShoppingCartId);
         
-        shoppingCartNotifier.ReassignCartToClientID(cart);
-
-        await shoppingCartNotifier.SentShoppingCartState(cart);
+        // shoppingCartNotifier.ReassignCartToClientID(cart);
+        //
+        // await shoppingCartNotifier.SentShoppingCartState(cart);
 
         return Result.Success();
     }

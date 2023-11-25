@@ -21,7 +21,7 @@ class MovieRepoImpl implements MovieRepo {
   @override
   ResultFuture<List<Movie>> getMovies() async {
     try {
-      Response response = await _client.get('/api/movies');
+      Response response = await _client.get('/api/movies').timeout(const Duration( seconds: 5));
       List<dynamic> movies = jsonDecode(jsonEncode(response.data));
 
       List<Movie> movieDtos =

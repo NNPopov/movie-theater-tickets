@@ -48,10 +48,10 @@ public class CinemaHallEndpointApplicationBuilderExtensions : IEndpoints
 
 public class AuditoriumDTO 
 {
-    public Guid Id { get; set; }
+    public Guid Id { get; init; }
 
 
-    public string Description { get; set; }
+    public string Description { get; init; }
     
     private class Mapping : Profile
     {

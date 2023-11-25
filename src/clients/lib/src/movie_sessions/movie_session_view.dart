@@ -1,20 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:movie_theater_tickets/core/extensions/context_extensions.dart';
 import 'package:movie_theater_tickets/src/seats_view.dart';
 import '../../core/common/views/loading_view.dart';
+import '../../core/common/views/no_data_view.dart';
 import '../../core/utils/utils.dart';
 import '../auditorium_detail.dart';
 import '../cinema_halls/presentation/cubit/cinema_hall_cubit.dart';
 import '../dashboards/presentation/dashboard_widget.dart';
-import '../home/presentation/widgets/home_app_bar.dart';
 import '../movies/presentation/widgets/movie_detail_widget.dart';
 import 'domain/entities/movie_session.dart';
 import 'presentation/cubit/movie_session_cubit.dart';
 import '../movies/domain/entities/movie.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
-import 'package:collection/collection.dart';
+
 
 import '../movies/presentation/app/movie_theater_cubit.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -35,7 +34,7 @@ class _MovieSessionsView extends State<MovieSessionsView> {
   CarouselController buttonCarouselController = CarouselController();
 
   void getMovieSessions() {
-    context.read<MovieSessionCubit>().getMovieSessions(widget.movie.id);
+    context.read<MovieSessionCubit>().add( MovieSessionEvent(movieId: widget.movie.id));
   }
 
   @override
@@ -48,33 +47,20 @@ class _MovieSessionsView extends State<MovieSessionsView> {
   Widget build(BuildContext context) {
     return BlocConsumer<MovieSessionCubit, MovieSessionState>(
       listener: (context, state) {
-        if (state is MovieSessionError) {
-          Utils.showSnackBar(context, state.message);
+        if (state.status == MovieSessionStateStatus.error) {
+          Utils.showSnackBar(context, state.errorMessage!);
         }
       },
       builder: (context, state) {
-        if (state is! MovieSessionsLoaded && state is! MovieSessionError) {
+        if (state.status == MovieSessionStateStatus.fetching || state.status == MovieSessionStateStatus.initial) {
           return const LoadingView();
         }
-        if ((state is MovieSessionsLoaded && state.movieSession.isEmpty) ||
-            state is MovieSessionError) {
-          return Center(
-            child: Text(
-              'No courses found\nPlease contact '
-              'admin or if you are admin, add courses',
-              textAlign: TextAlign.center,
-              style: context.theme.textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: Colors.grey.withOpacity(0.5),
-              ),
-            ),
-          );
+        if ((state.status == MovieSessionStateStatus.loaded && state.movieSession.isEmpty
+        )) {
+          return NoDataView();
         }
 
-        state as MovieSessionsLoaded;
-
-        final movieSessions = state.movieSession
-          ..sort((a, b) => b.sessionDate.compareTo(a.sessionDate));
+        final movieSessions = state.movieSession;
 
         return BuildMovieSessions(movieSessions, context);
       },
@@ -82,32 +68,16 @@ class _MovieSessionsView extends State<MovieSessionsView> {
   }
 
   Widget BuildMovieSessions(
-      List<MovieSession> movieSessions, BuildContext context) {
-    final movieSessionResult = groupBy(
-            movieSessions,
-            (movieSession) =>
-                '${movieSession.sessionDate.year}${movieSession.sessionDate.month}${movieSession.sessionDate.day}')
-        .values
-        .map((seatsByDate) => groupBy(
-                seatsByDate.toList(), (seatByDate) => seatByDate.cinemaHallId)
-            .values
-            .map((seatsBycinemaHallId) => seatsBycinemaHallId.toList()
-              ..sort((a, b) => a.sessionDate.compareTo(b.sessionDate)))
-            .toList()
-          ..sort((a, b) => -a[0].cinemaHallId.compareTo(b[0].cinemaHallId)))
-        .toList() ..sort((a, b) => a[0][0].sessionDate.compareTo(b[0][0].sessionDate));
+      List<List<List<MovieSession>>> movieSessionResult, BuildContext context) {
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar:  const HomeAppBar(),
-      body: Column(
+    return  Column(
         children: [
           const DashboardWidget(route: MovieSessionsView.id),
           Row(
             children: [
               BlocProvider(
                   key: const ValueKey('MoviesDetailView'),
-                  create: (_) => MovieTheaterCubit(),
+                  create: (_) => MovieTheaterCubit(getIt.get(),getIt.get()),
                   child: MoviesDetailWidget(widget.movie.id)),
               Column(children: [
                 SizedBox(
@@ -150,7 +120,7 @@ class _MovieSessionsView extends State<MovieSessionsView> {
                                                 create: (_) => CinemaHallCubit(),
                                                 child: AuditoriumDetailView(
                                                     rows[0].cinemaHallId)),
-                                            Divider(
+                                            const Divider(
                                               color: Colors.blue,
                                             ),
                                             Wrap(
@@ -209,7 +179,6 @@ class _MovieSessionsView extends State<MovieSessionsView> {
             ],
           ),
         ],
-      ),
     );
   }
 

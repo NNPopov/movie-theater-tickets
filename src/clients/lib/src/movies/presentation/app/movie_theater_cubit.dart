@@ -11,10 +11,8 @@ part 'movie_theater_state.dart';
 GetIt getIt = GetIt.instance;
 
 class MovieTheaterCubit extends Cubit<MovieTheaterState> {
-  MovieTheaterCubit({GetMovies? getMovies, GetMovieById? getMovieById})
-      : _getMovies = getMovies ?? getIt.get<GetMovies>(),
-        _getMovieById = getMovieById ?? getIt.get<GetMovieById>(),
-        super(const InitialState());
+  MovieTheaterCubit(this._getMovies, this._getMovieById)
+      : super(const InitialState());
 
   late GetMovies _getMovies;
   late GetMovieById _getMovieById;

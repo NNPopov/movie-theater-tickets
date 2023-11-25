@@ -1,8 +1,6 @@
 import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-
-import '../../../../core/buses/event_bus.dart';
 import 'package:get_it/get_it.dart';
 
 import '../../domain/event_hub.dart';
@@ -10,11 +8,9 @@ import '../../domain/event_hub.dart';
 GetIt getIt = GetIt.instance;
 
 class ConnectivityBloc extends Cubit<ConnectivityState> {
-  ConnectivityBloc({EventBus? eventBus, EventHub? eventHub})
-      : _eventBus = eventBus ?? getIt.get<EventBus>(),
-        _eventHub=eventHub?? getIt.get<EventHub>(),
-        super(DisconnectedState()) {
-    _streamSubscription = _eventBus.stream.listen((event) {
+  ConnectivityBloc(this._eventHub):
+  super(DisconnectedState()) {
+    _streamSubscription = _eventHub.status.listen((event) {
 
       if (event is ReconnectingEvent) {
         emit(ReconnectingState());
@@ -37,7 +33,6 @@ class ConnectivityBloc extends Cubit<ConnectivityState> {
   }
 
   late final StreamSubscription _streamSubscription;
-  late final EventBus _eventBus;
   late final EventHub _eventHub;
 
   Future<void> close() async {

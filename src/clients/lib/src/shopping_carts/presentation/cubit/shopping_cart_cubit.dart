@@ -26,131 +26,108 @@ GetIt getIt = GetIt.instance;
 
 class ShoppingCartCubit extends Cubit<ShoppingCartState> {
   ShoppingCartCubit(
-      {ShoppingCartService? shoppingCartService,
-      CreateShoppingCartUseCase? createShoppingCartUseCase,
-      SelectSeatUseCase? selectSeatUseCase,
-      UnselectSeatUseCase? unselectSeatUseCase,
-      GetShoppingCart? getShoppingCartUseCase,
-      ShoppingCartUpdateSubscribeUseCase? shoppingCartUpdateSubscribeUseCase,
-      AssignClientUseCase? assignClientUseCase,
-      ReserveSeatsUseCase? reserveSeatsUseCase,
-      EventBus? eventBus})
-      : _shoppingCartService =
-            shoppingCartService ?? getIt<ShoppingCartService>(),
-        _createShoppingCart =
-            createShoppingCartUseCase ?? getIt.get<CreateShoppingCartUseCase>(),
-        _selectSeatUseCase =
-            selectSeatUseCase ?? getIt.get<SelectSeatUseCase>(),
-        _unselectSeatUseCase =
-            unselectSeatUseCase ?? getIt.get<UnselectSeatUseCase>(),
-        _getShoppingCart =
-            getShoppingCartUseCase ?? getIt.get<GetShoppingCart>(),
-        _shoppingCartUpdateSubscribeUseCase =
-            shoppingCartUpdateSubscribeUseCase ??
-                getIt.get<ShoppingCartUpdateSubscribeUseCase>(),
-        _assignClientUseCase =
-            assignClientUseCase ?? getIt.get<AssignClientUseCase>(),
-        _reserveSeatsUseCase =
-            reserveSeatsUseCase ?? getIt.get<ReserveSeatsUseCase>(),
-
-        _eventBus = eventBus ?? getIt.get<EventBus>(),
-        super(ShoppingCartInitialState(ShoppingCart.empty(), 1)) {
-    GetShoppingCartIfExits();
+      this._createShoppingCart,
+      this._selectSeatUseCase,
+      this._unselectSeatUseCase,
+      this._getShoppingCart,
+      this._shoppingCartUpdateSubscribeUseCase,
+      this._reserveSeatsUseCase,
+      this._eventBus)
+      : super(ShoppingCartInitialState(ShoppingCart.empty(), 1, '')) {
+    getShoppingCartIfExits();
 
     _streamSubscription = _eventBus.stream.listen((event) {
+      if (event is ShoppingCartDeleteEvent) {
+        version = version + 1;
+        emit(ShoppingCartDeleteState(ShoppingCart.empty(), version, hashId));
+        emit(ShoppingCartInitialState(ShoppingCart.empty(), version, hashId));
+      }
+
       if (event is ShoppingCartUpdateEvent) {
         version = version + 1;
-        emit(ShoppingCartCurrentState(event.shoppingCart, version));
+        emit(ShoppingCartCurrentState(event.shoppingCart, version, hashId));
       }
     });
   }
 
-  Future<void> GetShoppingCartIfExits() async {
-
-    await  getShoppingCart();
-
-  }
+  Future<void> getShoppingCartIfExits() async => await getShoppingCart();
 
   late final StreamSubscription _streamSubscription;
   final storage = const FlutterSecureStorage();
 
-  late final ShoppingCartService _shoppingCartService;
   late final EventBus _eventBus;
   late final CreateShoppingCartUseCase _createShoppingCart;
   late final SelectSeatUseCase _selectSeatUseCase;
   late final UnselectSeatUseCase _unselectSeatUseCase;
-  late final GetShoppingCart _getShoppingCart;
-  late final ShoppingCartUpdateSubscribeUseCase
-      _shoppingCartUpdateSubscribeUseCase;
+  late final GetShoppingCartUseCase _getShoppingCart;
+  late final ShoppingCartUpdateSubscribeUseCase      _shoppingCartUpdateSubscribeUseCase;
   late final ReserveSeatsUseCase _reserveSeatsUseCase;
 
-  late final AssignClientUseCase _assignClientUseCase;
 
-
+  String hashId = '';
   late int version = 0;
 
   Future<void> updateShoppingCartState(
       ShoppingCartUpdateEvent event, Emitter<ShoppingCartState> emit) async {
     version = version + 1;
-    emit(ShoppingCartCurrentState(event.shoppingCart,  version));
+    emit(ShoppingCartCurrentState(event.shoppingCart, version, hashId));
   }
 
   Future<void> createShoppingCart(int maxNumberOfSeats) async {
-
     version = version + 1;
-    emit(CreatingShoppingCart(ShoppingCart.empty(),  version));
+    emit(CreatingShoppingCart(ShoppingCart.empty(), version, hashId));
 
-    final result =
-        await _createShoppingCart(CreateShoppingCartCommand(maxNumberOfSeats: maxNumberOfSeats));
+    final result = await _createShoppingCart(
+        CreateShoppingCartCommand(maxNumberOfSeats: maxNumberOfSeats));
 
     version = version + 1;
     result.fold((failure) {
+      if (failure is ValidationFailure) {
+        emit(ShoppingCartCreateValidationErrorState(
+            ShoppingCart.empty(), version, hashId, failure.message));
+        return;
+      }
 
-      if(failure is ValidationFailure)
-        {
-          emit(ShoppingCartCreateValidationErrorState(ShoppingCart.empty(), version, failure.message));
-          return;
-        }
-
-      emit(ShoppingCartError(ShoppingCart.empty(),  version, failure.errorMessage));
+      emit(ShoppingCartError(
+          ShoppingCart.empty(), version, hashId, failure.errorMessage));
       return;
-
     }, (value) async {
-
       final resultShoppingCart = await _getShoppingCart();
 
       resultShoppingCart.fold((failure) {
         if (failure.statusCode == 204) {
-          emit(
-              ShoppingCartInitialState(ShoppingCart.empty(),  version));
+          emit(ShoppingCartInitialState(ShoppingCart.empty(), version, hashId));
         } else {
           emit(ShoppingCartError(
-              ShoppingCart.empty(), version, failure.errorMessage));
+              ShoppingCart.empty(), version, hashId, failure.errorMessage));
         }
       }, (shoppingCartValue) async {
-        emit(ShoppingCartCreatedState(shoppingCartValue, version));
-        emit(ShoppingCartCurrentState(shoppingCartValue,  version));
+        hashId = value;
+        emit(ShoppingCartCreatedState(shoppingCartValue, version, hashId));
+        emit(ShoppingCartCurrentState(shoppingCartValue, version, hashId));
       });
     });
   }
 
-
   Future<void> getShoppingCart() async {
     version = version + 1;
-    emit(CreatingShoppingCart(ShoppingCart.empty(),  version));
+    emit(CreatingShoppingCart(ShoppingCart.empty(), version, hashId));
 
     final result = await _getShoppingCart();
 
     result.fold((failure) {
       if (failure.statusCode == 204) {
-        emit(ShoppingCartInitialState(ShoppingCart.empty(),  version));
+        emit(ShoppingCartInitialState(ShoppingCart.empty(), version, hashId));
       } else {
         emit(ShoppingCartError(
-            ShoppingCart.empty(),  version, failure.errorMessage));
+            ShoppingCart.empty(), version, hashId, failure.errorMessage));
       }
-    }, (value) {
-
-      emit(ShoppingCartCurrentState(value, version));
+    }, (value) async {
+      var key = await storage.read(key: Constants.SHOPPING_CARD_HASH_ID);
+      if (key != null) {
+        hashId = key!;
+      }
+      emit(ShoppingCartCurrentState(value, version, hashId));
     });
   }
 
@@ -166,10 +143,11 @@ class ShoppingCartCubit extends Cubit<ShoppingCartState> {
 
     var result = await _selectSeatUseCase(command);
 
-    result.fold(
-        (l) => emit(ShoppingCartError(
-            state.shoppingCard,  version, l.errorMessage)),
-        (r) async {});
+    result.fold((l) {
+      version = version + 1;
+      emit(ShoppingCartError(
+          state.shoppingCard, version, hashId, l.errorMessage));
+    }, (r) async {});
   }
 
   Future<void> unSeatSelect(
@@ -185,17 +163,18 @@ class ShoppingCartCubit extends Cubit<ShoppingCartState> {
     var result = await _unselectSeatUseCase(command);
     result.fold(
         (l) => emit(ShoppingCartError(
-            state.shoppingCard,  version, l.errorMessage)),
+            state.shoppingCard, version, hashId, l.errorMessage)),
         (r) async {});
   }
 
   Future<void> completePurchase() async {
     var result = await _reserveSeatsUseCase();
 
-    result.fold(
-        (l) => emit(ShoppingCartError(
-            state.shoppingCard,  version, l.errorMessage)),
-        (r) async {});
+    result.fold((l) {
+      version = version + 1;
+      emit(ShoppingCartError(
+          state.shoppingCard, version, hashId, l.errorMessage));
+    }, (r) async {});
   }
 
   @override

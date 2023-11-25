@@ -14,7 +14,7 @@ class SeatsUpdateEvent extends AppEvent
 {
   const SeatsUpdateEvent(this.seats);
 
-  final List<List<Seat>> seats;
+  final List<Seat> seats;
 
   @override
   List<Object> get props => [seats];

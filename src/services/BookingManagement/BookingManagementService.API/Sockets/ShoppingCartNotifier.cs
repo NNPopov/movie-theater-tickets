@@ -12,6 +12,11 @@ public class ShoppingCartNotifier(IHubContext<CinemaHallSeatsHub, IBookingManage
     IMapper mapper,
     Serilog.ILogger logger):IShoppingCartNotifier
 {
+    public Task SentShoppingCartExpiredState(ShoppingCart shoppingCart)
+    {
+        throw new NotImplementedException();
+    }
+
     public async Task SentShoppingCartState(ShoppingCart shoppingCart)
     {
         try

@@ -6,10 +6,10 @@ using Serilog;
 
 namespace CinemaTicketBooking.Application.ShoppingCarts.Command.ExpiredSeatSelection;
 
-public record SeatExpiredSelectionEvent
+public record SeatExpiredSelectionCommand
     (Guid MovieSessionId, short SeatRow, short SeatNumber, Guid ShoppingKartId) : INotification;
 
-public class SeatExpiredReservationEventHandler : INotificationHandler<SeatExpiredSelectionEvent>
+public class SeatExpiredReservationEventHandler : INotificationHandler<SeatExpiredSelectionCommand>
 {
     private readonly IMovieSessionSeatRepository _movieSessionSeatRepository;
     private readonly ILogger _logger;
@@ -30,7 +30,7 @@ public class SeatExpiredReservationEventHandler : INotificationHandler<SeatExpir
         _shoppingCartNotifier = shoppingCartNotifier;
     }
 
-    public async Task Handle(SeatExpiredSelectionEvent request,
+    public async Task Handle(SeatExpiredSelectionCommand request,
         CancellationToken cancellationToken)
     {
         var movieSessionSeat =
@@ -72,6 +72,6 @@ public class SeatExpiredReservationEventHandler : INotificationHandler<SeatExpir
                 request.SeatNumber);
         }
         
-        await _shoppingCartNotifier.SentShoppingCartState(cart);
+       // await _shoppingCartNotifier.SentShoppingCartState(cart);
     }
 }

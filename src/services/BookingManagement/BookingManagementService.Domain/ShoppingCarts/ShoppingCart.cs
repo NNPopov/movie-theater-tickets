@@ -77,6 +77,8 @@ public class ShoppingCart : AggregateRoot
             throw new ConflictException(nameof(ShoppingCart), Id.ToString());
 
         ClientId = clientId;
+        
+        _domainEvents.Add(new ShoppingCartAssignedToClientDomainEvent(Id));
 
         return Result.Success();
     }
@@ -91,6 +93,8 @@ public class ShoppingCart : AggregateRoot
         MaxNumberOfSeats = maxNumberOfSeats;
         Status = ShoppingCartStatus.InWork;
         ClientId = Guid.Empty;
+        
+        _domainEvents.Add(new ShoppingCartCreatedDomainEvent(id));
     }
 
     public void SetShowTime(Guid showTimeId)
@@ -134,6 +138,9 @@ public class ShoppingCart : AggregateRoot
         {
             throw new DomainValidationException($"Seat has already been added to cart movieSessionId:{movieSessionId}, SeatRow:{seat.SeatRow}, SeatNumber:{seat.SeatNumber}.");
         }
+        
+        _domainEvents.Add(new SeatAddedToShoppingCartDomainEvent(MovieSessionId,
+            seat.SeatRow, seat.SeatNumber, Id));
 
         _seats.Add(seat);
     }
@@ -192,14 +199,48 @@ public class ShoppingCart : AggregateRoot
         if (Status == ShoppingCartStatus.SeatsReserved)
             Status = ShoppingCartStatus.PurchaseCompleted;
     }
+
+    public void Delete()
+    {
+        Status = ShoppingCartStatus.Deleted;
+        
+        _domainEvents.Add(new ShoppingCartDeletedDomainEvent(this));
+    }
 }
 
 [method: JsonConstructor]
 public class SeatShoppingCart(short seatRow, short seatNumber) : Seat(seatRow, seatNumber);
+
+
+public abstract record ShoppingCartDomainEvent(
+    Guid ShoppingCartId
+) : IDomainEvent;
+
+public sealed record SeatAddedToShoppingCartDomainEvent(
+    Guid MovieSessionId,
+    short SeatRow,
+    short SeatNumber,
+    Guid ShoppingCartId
+) : ShoppingCartDomainEvent(ShoppingCartId);
+
 
 public sealed record SeatRemovedFromShoppingCartDomainEvent(
     Guid MovieSessionId,
     short SeatRow,
     short SeatNumber,
     Guid ShoppingCartId
-) : IDomainEvent;
+) : ShoppingCartDomainEvent(ShoppingCartId);
+
+public sealed record ShoppingCartCreatedDomainEvent(
+    Guid ShoppingCartId
+) : ShoppingCartDomainEvent(ShoppingCartId);
+
+public sealed record ShoppingCartAssignedToClientDomainEvent(
+    Guid ShoppingCartId
+) : ShoppingCartDomainEvent(ShoppingCartId);
+
+
+
+public sealed record ShoppingCartDeletedDomainEvent(
+    ShoppingCart ShoppingCart
+) : ShoppingCartDomainEvent(ShoppingCart.Id);

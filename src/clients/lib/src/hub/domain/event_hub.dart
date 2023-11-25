@@ -1,5 +1,7 @@
 
 
+import '../presentation/cubit/connectivity_bloc.dart';
+
 abstract class EventHub
 {
 
@@ -10,5 +12,7 @@ abstract class EventHub
   Future seatsUpdateSubscribe(String movieSessionId);
 
   Future unsubscribe();
+
+  Stream<ConnectivityEvent> get status;
 
 }

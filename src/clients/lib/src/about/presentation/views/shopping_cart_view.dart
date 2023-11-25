@@ -20,11 +20,8 @@ class _AboutUsView extends State<AboutUsView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        backgroundColor: Colors.white,
-        appBar: const HomeAppBar(),
-        body: Column(children: [
+    return  Column(children: [
           const DashboardWidget(route: AboutUsView.id),
-        ]));
+        ]);
   }
 }

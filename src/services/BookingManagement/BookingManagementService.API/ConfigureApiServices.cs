@@ -1,5 +1,7 @@
 ﻿using System.Reflection;
 using CinemaTicketBooking.Api.Infrastructure;
+using CinemaTicketBooking.Api.IntegrationEvents.EventHandling;
+using CinemaTicketBooking.Api.IntegrationEvents.Events;
 using CinemaTicketBooking.Api.Sockets;
 using CinemaTicketBooking.Api.Sockets.Abstractions;
 using CinemaTicketBooking.Api.WorkerServices;
@@ -156,7 +158,9 @@ public static class ConfigureApiServices
 
         services
             .AddTransient<IIntegrationEventHandler<SeatExpiredSelectionIntegrationEvent>,
-                SeatExpiredSelectionIntegrationEventHandler>();
+                SeatExpiredSelectionIntegrationEventHandler>()
+            .AddTransient<IIntegrationEventHandler<ShoppingCartExpiredIntegrationEvent>,
+                ShoppingCartExpiredEventHandler>();
 
 
         return services;

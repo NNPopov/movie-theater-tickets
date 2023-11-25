@@ -2,6 +2,7 @@ using System.Text.Json.Serialization;
 using CinemaTicketBooking.Api;
 using CinemaTicketBooking.Api.Authentication;
 using CinemaTicketBooking.Api.Endpoints.Common;
+using CinemaTicketBooking.Api.IntegrationEvents.Events;
 using CinemaTicketBooking.Api.Sockets;
 using CinemaTicketBooking.Api.WorkerServices;
 using CinemaTicketBooking.Application;
@@ -76,7 +77,8 @@ services.AddHealthChecks()
     .AddNpgSql(builder.Configuration.GetConnectionString("BookingDbContext"))
     .AddDbContextCheck<CinemaContext>("CinemaContext", HealthStatus.Unhealthy)
     .AddRedis(builder.Configuration.GetConnectionString("Redis"), "Redis", HealthStatus.Unhealthy)
-    .AddRabbitMQ(rabbitConnectionString: $"{builder.Configuration.GetConnectionString("EventBus")}:5672", name: "RabbitMQ",
+    .AddRabbitMQ(rabbitConnectionString: $"{builder.Configuration.GetConnectionString("EventBus")}:5672",
+        name: "RabbitMQ",
         failureStatus: HealthStatus.Unhealthy);
 
 var app = builder.Build();
@@ -119,10 +121,13 @@ app.UseEndpoints(typeof(Program));
 app.UseMigrationsEndPoint();
 await app.InitialiseDatabaseAsync();
 
+
 var eventBus = app.Services.GetRequiredService<IEventBus>();
 
 eventBus
     .Subscribe<SeatExpiredSelectionIntegrationEvent, IIntegrationEventHandler<SeatExpiredSelectionIntegrationEvent>>();
+eventBus
+    .Subscribe<ShoppingCartExpiredIntegrationEvent, IIntegrationEventHandler<ShoppingCartExpiredIntegrationEvent>>();
 
 
 app.Run();

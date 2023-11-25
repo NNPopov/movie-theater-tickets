@@ -14,46 +14,48 @@ public class ShoppingCartRepository : IShoppingCartRepository
 {
     private readonly IConnectionMultiplexer _redis;
 
-    private readonly IMediator _mediator;
+    // private readonly IMediator _mediator;
 
     private const string KeyPrefix = "cart";
+    
+    private const string KeyPrefixTimeToLive = "shopping_cart_ttl";
     
     private const string KeyClientPrefix = "client_session";
     
     private readonly IDomainEventTracker _domainEventTracker;
 
     public ShoppingCartRepository(IConnectionMultiplexer redis,
-        IMediator mediator,
+     //   IMediator mediator,
         IDomainEventTracker domainEventTracker)
     {
         _redis = redis;
-        _mediator = mediator;
+     //   _mediator = mediator;
         _domainEventTracker = domainEventTracker;
     }
 
-    private async Task PublishDomainEvents(IAggregateRoot shoppingCart, CancellationToken cancellationToken = default)
-    {
-        var domainEvents = shoppingCart.GetDomainEvents();
-
-
-
-        IEnumerable<Task> tasks = domainEvents.Select(domainEvent =>
-        {
-            var baseApplicationEventBuilder = typeof(BaseApplicationEvent<>).MakeGenericType(domainEvent.GetType());
-
-            var appEvent = Activator.CreateInstance(baseApplicationEventBuilder,
-                domainEvent
-            );
-
-            return  _mediator.Publish(appEvent, cancellationToken);
-        });
-        
-
-
-        await Task.WhenAll(tasks);
-        
-        shoppingCart.ClearDomainEvents();
-    }
+    // private async Task PublishDomainEvents(IAggregateRoot shoppingCart, CancellationToken cancellationToken = default)
+    // {
+    //     var domainEvents = shoppingCart.GetDomainEvents();
+    //
+    //
+    //
+    //     IEnumerable<Task> tasks = domainEvents.Select(domainEvent =>
+    //     {
+    //         var baseApplicationEventBuilder = typeof(BaseApplicationEvent<>).MakeGenericType(domainEvent.GetType());
+    //
+    //         var appEvent = Activator.CreateInstance(baseApplicationEventBuilder,
+    //             domainEvent
+    //         );
+    //
+    //         return  _mediator.Publish(appEvent, cancellationToken);
+    //     });
+    //     
+    //
+    //
+    //     await Task.WhenAll(tasks);
+    //     
+    //     shoppingCart.ClearDomainEvents();
+    // }
 
     public async Task<ShoppingCart> SetAsync(ShoppingCart shoppingCart)
     {
@@ -63,12 +65,28 @@ public class ShoppingCartRepository : IShoppingCartRepository
 
         string jsonValue = JsonConvert.SerializeObject(shoppingCart);
 
-        await db.StringSetAsync(kartKey, jsonValue, new TimeSpan(0, 0, 1200));
-
+        await db.StringSetAsync(kartKey, jsonValue, new TimeSpan(0, 0, 3600));
+        
+        var timeToLiveKey = $"{KeyPrefixTimeToLive}:{shoppingCart.Id.ToString()}";   
+        await db.StringSetAsync(timeToLiveKey, timeToLiveKey, new TimeSpan(0, 0, 200));
+        
         await _domainEventTracker.PublishDomainEvents(shoppingCart);
-       // await PublishDomainEvents(shoppingCart);
 
         return shoppingCart!;
+    }
+
+    public async Task DeleteAsync(ShoppingCart shoppingCart)
+    {
+        var db = _redis.GetDatabase();
+
+        var kartKey = $"{KeyPrefix}:{shoppingCart.Id.ToString()}";
+
+        await db.KeyDeleteAsync(kartKey);
+        
+        var timeToLiveKey = $"{KeyPrefixTimeToLive}:{shoppingCart.Id.ToString()}";   
+        await db.KeyDeleteAsync(timeToLiveKey);
+
+        await _domainEventTracker.PublishDomainEvents(shoppingCart);
     }
 
     public async Task<ShoppingCart> GetByIdAsync(Guid cartId)

@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../../src/helpers/constants.dart';
 import 'auth-interceptor.dart';
 import 'package:get_it/get_it.dart';

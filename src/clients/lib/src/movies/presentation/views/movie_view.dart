@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:movie_theater_tickets/core/extensions/context_extensions.dart';
 import '../../../../core/common/views/loading_view.dart';
+import '../../../../core/common/views/no_data_view.dart';
 import '../../../../core/utils/utils.dart';
 import '../../../dashboards/presentation/dashboard_widget.dart';
 import '../../../home/presentation/widgets/home_app_bar.dart';
@@ -48,16 +49,7 @@ class _MoviesView extends State<MoviesView> {
         }
         if ((state is MoviesLoaded && state.movies.isEmpty) ||
             state is MovieTheaterError) {
-          return Center(
-            child: Text(
-              'No movie found\nPlease contact admin',
-              textAlign: TextAlign.center,
-              style: context.theme.textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: Colors.grey.withOpacity(0.5),
-              ),
-            ),
-          );
+          return NoDataView();
         }
 
         state as MoviesLoaded;
@@ -87,12 +79,7 @@ class _MoviesView extends State<MoviesView> {
       _itemsCount = 1;
     }
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: const HomeAppBar(),
-      // extendBody:true,
-      // extendBodyBehindAppBar:true,
-      body: Column(
+    return  Column(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
@@ -181,7 +168,6 @@ class _MoviesView extends State<MoviesView> {
                   duration: Duration(milliseconds: 300), curve: Curves.linear),
               child: Text('→'),
             )
-          ]),
-    );
+          ]);
   }
 }

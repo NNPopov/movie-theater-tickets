@@ -1,68 +1,71 @@
+import 'dart:async';
 import 'dart:convert';
 
-import '../../../../core/errors/exceptions.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/utils/typedefs.dart';
 import '../../../helpers/constants.dart';
-import '../../domain/abstraction/auth_event_bus.dart';
+import '../../domain/abstraction/auth_statuses.dart';
 import '../../domain/abstraction/authenticator.dart';
 import '../../domain/services/auth_service.dart';
 import 'package:dartz/dartz.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:get_it/get_it.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 
-GetIt getIt = GetIt.instance;
-
 class AuthServiceImpl implements AuthService {
-  AuthServiceImpl({required this.authenticator, required this.authEventBus});
+  AuthServiceImpl({required this.authenticator});
 
   final Authenticator authenticator;
-  final AuthEventBus authEventBus;
 
   final storage = const FlutterSecureStorage();
+
+  final _controller = StreamController<AuthStatus>.broadcast();
+
+  late AuthStatus authStatus =
+      AuthStatus(status: AuthenticationStatus.unauthorized);
+
+  Stream<AuthStatus> get status async* {
+    yield* _controller.stream;
+  }
+
 
   @override
   ResultFuture<String> getJwtToken() async {
     var token = await storage.read(key: Constants.TOKEN_KEY);
 
     if (token == null) {
-      return const Left(NotAuthorisedException(message: '', statusCode: 401));
+      if (authStatus.status != AuthenticationStatus.unauthorized) {
+        authStatus =
+            authStatus.copyWith(status: AuthenticationStatus.unauthorized);
+        _controller.add(authStatus);
+      }
+
+      return Left(NotAuthorisedException());
     }
 
     bool hasExpired = JwtDecoder.isExpired(token);
 
-    if(hasExpired) {
-      await logOut();
+    if (hasExpired) {
+      authStatus = authStatus.copyWith(status: AuthenticationStatus.expired);
 
-      return const Left(NotAuthorisedException(message: '', statusCode: 401));
+      if (authStatus.status != AuthenticationStatus.unauthorized ||
+          authStatus.status != AuthenticationStatus.expired) {
+        authStatus = authStatus.copyWith(status: AuthenticationStatus.expired);
+        _controller.add(authStatus);
+        await logOut();
+
+        print('AuthStatus changed to $authStatus');
+        return left(NotAuthorisedException());
+      }
     }
-
     return Right(token);
   }
 
-  @override
-  ResultFuture<void> setJwtToken(String token) async {
-    return Right(null);
-  }
 
   @override
   ResultFuture<AuthStatus> getCurrentStatus() async {
+    await getJwtToken();
 
-    var token = await storage.read(key: Constants.TOKEN_KEY);
-
-    if (token == null) {
-      return Right(UnauthorizedAuthStatus());
-    }
-
-    bool hasExpired = JwtDecoder.isExpired(token);
-
-    if(hasExpired) {
-      await logOut();
-      return Right(ExpiredAuthStatus());
-    }
-
-    return Right(AuthorizedAuthStatus());
+    return Right(authStatus);
   }
 
   @override
@@ -74,18 +77,27 @@ class AuthServiceImpl implements AuthService {
 
       await storage.write(key: Constants.TOKEN_KEY, value: accessToken);
 
-      authEventBus.send(AuthorizedAuthStatus());
+      authStatus = authStatus.copyWith(status: AuthenticationStatus.authorized);
 
-      return  Right(AuthorizedAuthStatus());
+      _controller.add(authStatus);
+      return Right(authStatus);
     });
   }
 
   @override
   ResultFuture<AuthStatus> logOut() async {
-    await storage.delete(key: Constants.TOKEN_KEY);
 
-    authEventBus.send(UnauthorizedAuthStatus());
+    if(authStatus.status == AuthenticationStatus.authorized || authStatus.status == AuthenticationStatus.expired) {
+      await storage.delete(key: Constants.TOKEN_KEY);
 
-    return  Right(UnauthorizedAuthStatus());
+      authStatus =
+          authStatus.copyWith(status: AuthenticationStatus.unauthorized);
+
+      _controller.add(authStatus);
+
+      print('AuthStatus changed to $authStatus');
+    }
+
+    return Right(authStatus);
   }
 }

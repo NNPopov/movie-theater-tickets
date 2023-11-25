@@ -1,36 +1,38 @@
 part of 'movie_session_cubit.dart';
 
-abstract class MovieSessionState  extends Equatable {
-const MovieSessionState();
+class MovieSessionEvent extends Equatable {
+  const MovieSessionEvent({required this.movieId});
+
+  final String movieId;
 
   @override
-  List<Object> get props => [];
-
+  List<Object> get props => [movieId];
 }
 
+@immutable
+class MovieSessionState extends Equatable {
+  MovieSessionState(
+      {this.movieSession = const [],
+      required this.status,
+      this.errorMessage = ''});
 
-class GettingMovieSession extends MovieSessionState {
-  const GettingMovieSession();
-}
+  final List<List<List<MovieSession>>> movieSession;
+  final MovieSessionStateStatus status;
+  late String? errorMessage;
 
-class MovieSessionsLoaded extends MovieSessionState {
-  const MovieSessionsLoaded(this.movieSession);
-
-  final List<MovieSession> movieSession;
+  MovieSessionState copyWith(
+      {List<List<List<MovieSession>>>? movieSession,
+      MovieSessionStateStatus? status,
+      String? errorMessage}) {
+    return MovieSessionState(
+      movieSession: movieSession ?? this.movieSession,
+      status: status ?? this.status,
+      errorMessage: errorMessage,
+    );
+  }
 
   @override
-  List<Object> get props => [movieSession];
+  List<Object> get props => [movieSession, status];
 }
 
-class MovieSessionError extends MovieSessionState {
-  const MovieSessionError(this.message);
-
-  final String message;
-
-  @override
-  List<Object> get props => [message];
-}
-
-class InitialState extends MovieSessionState {
-  const InitialState();
-}
+enum MovieSessionStateStatus { initial, fetching, loaded, error }

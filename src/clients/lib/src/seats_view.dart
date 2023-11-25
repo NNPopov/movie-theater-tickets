@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:movie_theater_tickets/src/seats/presentation/widgets/seats_movie_session_widget.dart';
+import 'package:movie_theater_tickets/src/seats/presentation/widgets/seats_movie_session_widget_2.dart';
 import 'package:movie_theater_tickets/src/shopping_carts/presentation/widgens/shopping_cart_widget.dart';
 import 'dashboards/presentation/dashboard_widget.dart';
 import 'hub/presentation/widgens/connectivity_widget.dart';
 import 'home/presentation/widgets/home_app_bar.dart';
 import 'movie_sessions/domain/entities/movie_session.dart';
+import 'package:get_it/get_it.dart';
+GetIt getIt = GetIt.instance;
 
 class SeatsView extends StatefulWidget {
   const SeatsView(this.movieSession, {super.key});
@@ -24,10 +26,7 @@ class _SeatsView extends State<SeatsView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        backgroundColor: Colors.white,
-        appBar: const HomeAppBar(),
-        body: Column(
+    return Column(
           children: [
 
             const DashboardWidget(route: SeatsView.id),
@@ -45,12 +44,12 @@ class _SeatsView extends State<SeatsView> {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const ConnectivityWidget(),
                           Expanded(
                             child: Align(
                               alignment: Alignment.topCenter,
-                              child: SeatsMovieSessionWidget(
+                              child: SeatsMovieSessionWidgetTwo(
                                 movieSession: widget.movieSession,
+                                  getCinemaHallInfo:getIt.get()
                               ),
                             ),
                           ),
@@ -63,7 +62,7 @@ class _SeatsView extends State<SeatsView> {
               );
             }),
           ],
-        ));
+        );
   }
 
   @override

@@ -15,7 +15,7 @@ class CinemaHallCubit extends Cubit<CinemaHallState> {
       : _getCinemaHallById = getCinemaHall ?? getIt.get<GetCinemaHallById>(),
         super(const InitialState());
 
-  late GetCinemaHallById _getCinemaHallById;
+  late final GetCinemaHallById _getCinemaHallById;
 
   Future<void> getAuditorium(String auditoriumId) async {
     emit(const GettingCinemaHall());

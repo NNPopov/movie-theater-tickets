@@ -12,19 +12,18 @@ import '../cubit/seat_cubit.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:dartz/dartz.dart' as t;
 
-class SeatsMovieSessionWidgetTwo extends StatefulWidget {
-  const SeatsMovieSessionWidgetTwo(
+class SeatsMovieSessionWidget extends StatefulWidget {
+  const SeatsMovieSessionWidget(
       {super.key, required this.movieSession, required this.getCinemaHallInfo});
 
   final MovieSession movieSession;
   final GetCinemaHallInfo getCinemaHallInfo;
 
   @override
-  State<SeatsMovieSessionWidgetTwo> createState() =>
-      _SeatsMovieSessionWidgetTwo();
+  State<SeatsMovieSessionWidget> createState() => _SeatsMovieSessionWidget();
 }
 
-class _SeatsMovieSessionWidgetTwo extends State<SeatsMovieSessionWidgetTwo> {
+class _SeatsMovieSessionWidget extends State<SeatsMovieSessionWidget> {
   @override
   void initState() {
     super.initState();
@@ -53,18 +52,14 @@ class _SeatsMovieSessionWidgetTwo extends State<SeatsMovieSessionWidgetTwo> {
           }
 
           return snapshot.data!.fold((l) {
-            return NoDataView();
+            return const NoDataView();
           }, (seatst) {
-            if (seatst != null) {
-              return BuildSeats(seatst!, context);
-            } else {
-              return NoDataView();
-            }
-          });
+            return buildSeats(seatst, context);
+                    });
         });
   }
 
-  Widget BuildSeats(List<List<Seat>> seats, BuildContext context) {
+  Widget buildSeats(List<List<Seat>> seats, BuildContext context) {
     var seatsWidth = seats[0].length * 19.0;
     var seatsHeight = seats.length * 22.0;
 
@@ -75,7 +70,7 @@ class _SeatsMovieSessionWidgetTwo extends State<SeatsMovieSessionWidgetTwo> {
       return Container(
           height: seatsHeight + 110,
           width: seatsWidth + 110,
-          padding: EdgeInsets.all(20),
+          padding: const EdgeInsets.all(20),
           alignment: Alignment.centerLeft,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10),
@@ -87,7 +82,7 @@ class _SeatsMovieSessionWidgetTwo extends State<SeatsMovieSessionWidgetTwo> {
           child: Column(children: [
             Row(
               children: [
-                SizedBox(height: 40, width: 60),
+                const SizedBox(height: 40, width: 60),
                 Container(
                     height: 40,
                     width: seatsWidth,
@@ -119,6 +114,9 @@ class _SeatsMovieSessionWidgetTwo extends State<SeatsMovieSessionWidgetTwo> {
 
                               return BlocSelector<SeatCubit, SeatState, Seat?>(
                                 selector: (SeatState state) {
+                                  if (state.status != SeatStateStatus.loaded) {
+                                    return null;
+                                  }
                                   if (state.seats.isEmpty) {
                                     return null;
                                   }
@@ -129,10 +127,11 @@ class _SeatsMovieSessionWidgetTwo extends State<SeatsMovieSessionWidgetTwo> {
                                   return seat;
                                 },
                                 builder: (BuildContext context, Seat? state) {
+
                                   if (state == null) {
-                                    return EmptySeat(context);
+                                    return emptySeat(context);
                                   }
-                                  return BuildSeat(state, context, hashId);
+                                  return buildSeat(state, context, hashId);
                                 },
                               );
                             })
@@ -142,13 +141,13 @@ class _SeatsMovieSessionWidgetTwo extends State<SeatsMovieSessionWidgetTwo> {
     });
   }
 
-  Widget EmptySeat(BuildContext context) {
+  Widget emptySeat(BuildContext context) {
     return const SeatWidget(text: '', backgroundColor: Colors.white);
   }
 
-  Widget BuildSeat(Seat seat, BuildContext context, String hashId) {
+  Widget buildSeat(Seat seat, BuildContext context, String hashId) {
     if (seat.blocked &&
-        seat.hashId==hashId &&
+        seat.hashId == hashId &&
         seat.seatStatus == SeatStatus.selected) {
       return SeatWidget(
           text: seat.seatNumber.toString(),
@@ -158,14 +157,13 @@ class _SeatsMovieSessionWidgetTwo extends State<SeatsMovieSessionWidgetTwo> {
           });
     }
     if (seat.blocked &&
-        seat.hashId==hashId &&
+        seat.hashId == hashId &&
         seat.seatStatus != SeatStatus.selected) {
       return SeatWidget(
           text: seat.seatNumber.toString(),
           backgroundColor: Colors.green,
           onPressed: () async {
             await onSeatUnselectPress(seat);
-            ;
           });
     } else if (seat.blocked && seat.hashId != hashId) {
       return SeatWidget(
@@ -185,7 +183,8 @@ class _SeatsMovieSessionWidgetTwo extends State<SeatsMovieSessionWidgetTwo> {
   }
 
   Future<void> onSelectSeatPress(Seat seat) async {
-    if (context.read<ShoppingCartCubit>().state is! ShoppingCartInitialState) {
+    if (context.read<ShoppingCartCubit>().state.status !=
+        ShoppingCartStateStatus.initial) {
       await context.read<ShoppingCartCubit>().seatSelect(
           row: seat.row,
           seatNumber: seat.seatNumber,
@@ -194,7 +193,8 @@ class _SeatsMovieSessionWidgetTwo extends State<SeatsMovieSessionWidgetTwo> {
   }
 
   Future<void> onSeatUnselectPress(Seat seat) async {
-    if (context.read<ShoppingCartCubit>().state is! ShoppingCartInitialState) {
+    if (context.read<ShoppingCartCubit>().state.status !=
+        ShoppingCartStateStatus.initial) {
       await context.read<ShoppingCartCubit>().unSeatSelect(
           row: seat.row,
           seatNumber: seat.seatNumber,

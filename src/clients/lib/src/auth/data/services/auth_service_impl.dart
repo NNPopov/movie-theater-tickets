@@ -23,6 +23,7 @@ class AuthServiceImpl implements AuthService {
   late AuthStatus authStatus =
       AuthStatus(status: AuthenticationStatus.unauthorized);
 
+  @override
   Stream<AuthStatus> get status async* {
     yield* _controller.stream;
   }
@@ -39,7 +40,8 @@ class AuthServiceImpl implements AuthService {
         _controller.add(authStatus);
       }
 
-      return Left(NotAuthorisedException());
+
+      return const Left(NotAuthorisedException());
     }
 
     bool hasExpired = JwtDecoder.isExpired(token);
@@ -54,7 +56,7 @@ class AuthServiceImpl implements AuthService {
         await logOut();
 
         print('AuthStatus changed to $authStatus');
-        return left(NotAuthorisedException());
+        return left(const NotAuthorisedException());
       }
     }
     return Right(token);

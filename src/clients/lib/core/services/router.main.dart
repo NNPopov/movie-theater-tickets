@@ -4,26 +4,22 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:movie_theater_tickets/src/movie_sessions/domain/entities/movie_session.dart';
 import '../../src/about/presentation/views/shopping_cart_view.dart';
 import '../../src/shopping_carts/presentation/views/shopping_cart_view.dart';
-import '../../src/movie_sessions/movie_session_view.dart';
-import '../../src/movie_sessions/presentation/cubit/movie_session_cubit.dart';
+import '../../src/movie_sessions/presentation/views/movie_session_view.dart';
+import '../../src/movie_sessions/presentation/cubit/movie_session_bloc.dart';
 import '../../src/movies/presentation/views/movie_view.dart';
 import '../../src/movies/domain/entities/movie.dart';
 import '../../src/movies/presentation/app/movie_theater_cubit.dart';
 import '../../src/seats/presentation/cubit/seat_cubit.dart';
-import '../../src/seats_view.dart';
+import '../../src/seats/presentation/views/seats_view.dart';
 import 'package:get_it/get_it.dart';
-import 'package:logging/logging.dart';
 
-final log = Logger('ExampleLogger');
+// final log = Logger('ExampleLogger');
 
-//
-// var logger = Logger(
-//   printer: PrettyPrinter(),
-// );
+
 GetIt getIt = GetIt.instance;
 
 Route<dynamic> generateRoute(RouteSettings settings) {
-  log.info(settings.name);
+  //log.info(settings.name);
 
   print(settings.name);
 
@@ -32,7 +28,7 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       (_) => MultiBlocProvider(
         providers: [
           BlocProvider(
-            create: (_) => MovieTheaterCubit(getIt.get(),getIt.get()),
+            create: (_) => MovieTheaterCubit(getIt.get()),
           ),
 
         ],
@@ -41,11 +37,11 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       settings: settings,
     );
   } else if (settings.name == MovieSessionsView.id &&
-      settings?.arguments != null) {
+      settings.arguments != null) {
     return _pageBuilder(
       (_) => MultiBlocProvider(
         providers: [
-          BlocProvider(create: (_) => MovieSessionCubit(getIt.get())),
+          BlocProvider(create: (_) => MovieSessionBloc(getIt.get())),
         ],
         child: MovieSessionsView(settings.arguments! as Movie),
       ),
@@ -53,7 +49,7 @@ Route<dynamic> generateRoute(RouteSettings settings) {
     );
   } else if (settings.name != null &&
       settings.name!.contains(SeatsView.id) &&
-      settings?.arguments != null) {
+      settings.arguments != null) {
     return _pageBuilder(
       (_) => MultiBlocProvider(
         providers: [
@@ -84,7 +80,7 @@ Route<dynamic> generateRoute(RouteSettings settings) {
     (_) => MultiBlocProvider(
       providers: [
         BlocProvider(
-          create: (_) => MovieTheaterCubit(getIt.get(),getIt.get()),
+          create: (_) => MovieTheaterCubit(getIt.get()),
         ),
       ],
       child: const MoviesView(),

@@ -11,7 +11,7 @@ public sealed class MovieSessionSeat : ValueObject, IAggregateRoot
 {
     private MovieSessionSeat()
     {
-        HashId = string.Empty;
+        ShoppingCartHashId = string.Empty;
     }
 
     [JsonConstructor]
@@ -21,7 +21,7 @@ public sealed class MovieSessionSeat : ValueObject, IAggregateRoot
         decimal price,
         SeatStatus status,
         Guid shoppingCartId,
-        string hashId)
+        string shoppingCartHashId)
     {
         MovieSessionId = movieSessionId;
         SeatNumber = seatNumber;
@@ -29,7 +29,7 @@ public sealed class MovieSessionSeat : ValueObject, IAggregateRoot
         Price = price;
         SeatRow = seatRow;
         ShoppingCartId = shoppingCartId;
-        HashId = hashId;
+        ShoppingCartHashId = shoppingCartHashId;
     }
     
     public static MovieSessionSeat Create(Guid movieSessionId, 
@@ -64,12 +64,12 @@ public sealed class MovieSessionSeat : ValueObject, IAggregateRoot
     
     public Guid ShoppingCartId { get; private set; }
     
-    public string HashId { get; private set; }
+    public string ShoppingCartHashId { get; private set; }
 
     internal Result Select(Guid shoppingCartId, string hashId)
     {
         Ensure.NotEmpty(shoppingCartId, "The shoppingCartId is required.", nameof(shoppingCartId));
-        Ensure.NotEmpty(hashId, "The hashId is required.", nameof(hashId));
+        Ensure.NotEmpty(hashId, "The shoppingCartHashId is required.", nameof(hashId));
         
         if (Status != SeatStatus.Available)
         {
@@ -85,9 +85,8 @@ public sealed class MovieSessionSeat : ValueObject, IAggregateRoot
         if (ShoppingCartId == Guid.Empty)
         {
             ShoppingCartId = shoppingCartId;
-            HashId = hashId;
+            ShoppingCartHashId = hashId;
         }
-        
 
         var currentStatus = Status;
 
@@ -98,10 +97,7 @@ public sealed class MovieSessionSeat : ValueObject, IAggregateRoot
         AddDomainEvent(domainEvent);
 
         return Result.Success();
-
     }
-
-
 
     internal Result Reserve(Guid shoppingCartId)
     {
@@ -123,7 +119,7 @@ public sealed class MovieSessionSeat : ValueObject, IAggregateRoot
         return Result.Success();
     }
 
-    internal Result Sel(Guid shoppingCartId)
+    internal Result Sell(Guid shoppingCartId)
     {
         Ensure.NotEmpty(shoppingCartId, "The shoppingCartId is required.", nameof(shoppingCartId));
 
@@ -160,7 +156,7 @@ public sealed class MovieSessionSeat : ValueObject, IAggregateRoot
 
         Status = SeatStatus.Available;
         ShoppingCartId = Guid.Empty;
-        HashId = string.Empty;
+        ShoppingCartHashId = string.Empty;
         
         var domainEvent = new MovieSessionSeatStatusUpdatedDomainEvent(this, currentStatus);
         
@@ -185,8 +181,7 @@ public sealed class MovieSessionSeat : ValueObject, IAggregateRoot
         return $"MovieSessionId:{MovieSessionId}, SeatRow:{SeatRow}, SeatNumber:{SeatNumber}, Status:{Status.ToString()}";
     }
 
-    [JsonIgnore]
-    protected readonly List<IDomainEvent> _domainEvents = new List<IDomainEvent>();
+    [JsonIgnore] private readonly List<IDomainEvent> _domainEvents = new List<IDomainEvent>();
 
 
     public IReadOnlyCollection<IDomainEvent> GetDomainEvents() => _domainEvents.AsReadOnly();

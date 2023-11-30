@@ -35,6 +35,7 @@ class ConnectivityBloc extends Cubit<ConnectivityState> {
   late final StreamSubscription _streamSubscription;
   late final EventHub _eventHub;
 
+  @override
   Future<void> close() async {
     await _streamSubscription.cancel();
     return await super.close();

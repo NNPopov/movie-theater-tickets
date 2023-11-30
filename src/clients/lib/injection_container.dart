@@ -18,6 +18,7 @@ import 'package:movie_theater_tickets/src/seats/domain/repos/seat_repo.dart';
 import 'package:movie_theater_tickets/src/seats/domain/usecases/get_cinema_hall_info.dart';
 import 'package:movie_theater_tickets/src/seats/domain/usecases/get_seats_by_movie_session_id.dart';
 import 'package:movie_theater_tickets/src/seats/domain/usecases/update_seats_sate_usecase.dart';
+import 'package:movie_theater_tickets/src/server_state/domain/usecases/update_server_state_usecase.dart';
 import 'package:movie_theater_tickets/src/shopping_carts/data/repos/shopping_cart_local_repo_impl.dart';
 import 'package:movie_theater_tickets/src/shopping_carts/domain/repos/shopping_cart_local_repo.dart';
 import 'package:movie_theater_tickets/src/shopping_carts/domain/services/shopping_cart_service.dart';
@@ -29,7 +30,6 @@ import 'package:movie_theater_tickets/src/shopping_carts/domain/usecases/select_
 import 'package:movie_theater_tickets/src/shopping_carts/domain/usecases/shopping_cart_subscribe.dart';
 import 'package:movie_theater_tickets/src/shopping_carts/domain/usecases/unselect_seat.dart';
 import 'package:movie_theater_tickets/src/shopping_carts/domain/usecases/update_state_shopping_cart.dart';
-import 'package:movie_theater_tickets/src/shopping_carts/presentation/cubit/shopping_cart_cubit.dart';
 import 'core/apis/auth-interceptor.dart';
 import 'core/apis/http_client.dart';
 import 'src/movies/data/repos/movie_repo_impl.dart';
@@ -52,25 +52,11 @@ Future<void> initializeDependencies() async {
   getIt.registerLazySingleton<AuthService>(() => AuthServiceImpl(authenticator: getIt()));
   getIt.registerLazySingleton<Authenticator>(
           () => FlutterWebAuth2Authenticator());
-  // getIt
-  //   ..registerFactory<ShoppingCartCubit>(
-  //           () => ShoppingCartCubit(
-  //             getIt.get(),
-  //             getIt.get(),
-  //             getIt.get(),
-  //             getIt.get(),
-  //             getIt.get(),
-  //             getIt.get(),
-  //             getIt.get(),
-  //             getIt.get(),
-  //             getIt.get(),
-  //           ));
-
 
   getIt.registerLazySingleton<EventBus>(() => EventBus());
 
   // Dio
-
+  _initServerState();
   _initSeats();
   _initMovie();
   _initCinemaHall();
@@ -78,12 +64,10 @@ Future<void> initializeDependencies() async {
   _initShoppingCart();
   // Dependencies
 
-
-
-
   getIt.registerLazySingleton<EventHub>(() => SignalREventHub(
-      updateShoppingCartState: getIt.get(), updateSeatsState: getIt.get()));
-
+      updateShoppingCartState: getIt.get(),
+      updateSeatsState: getIt.get(),
+      updateServerStateUseCase: getIt.get()));
   //UseCases
 
   getIt.get<EventHub>().subscribe();
@@ -94,10 +78,15 @@ Future<void> initializeDependencies() async {
 
   getIt.get<ShoppingCartAuthListener>().init();
 }
+void _initServerState()
+{
+  getIt.registerLazySingleton<UpdateServerStateUseCase>(
+          () => UpdateServerStateUseCase(getIt.get()));
+}
 
 void _initShoppingCart() {
   getIt.registerLazySingleton<ShoppingCartAuthListener>(
-      () => ShoppingCartAuthListener(getIt.get(), getIt.get(), getIt.get()));
+      () => ShoppingCartAuthListener(getIt.get(), getIt.get(), getIt.get(), getIt.get(), getIt.get(), getIt.get()));
 
   getIt.registerLazySingleton<ShoppingCartLocalRepo>(
       () => ShoppingCartLocalRepoImpl());

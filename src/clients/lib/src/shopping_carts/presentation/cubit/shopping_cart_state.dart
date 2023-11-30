@@ -1,62 +1,55 @@
 part of 'shopping_cart_cubit.dart';
 
-abstract class ShoppingCartState extends Equatable {
-  const ShoppingCartState(this.shoppingCard,
-   this.version, this.hashId,);
+@immutable
+class ShoppingCartState extends Equatable {
+  ShoppingCartState(
+      {required this.shoppingCart,
+      required this.hashId,
+      required this.status,
+      this.errorMessage});
 
   final String hashId;
-  final ShoppingCart shoppingCard;
-  final int version;
+  final ShoppingCart shoppingCart;
+  final ShoppingCartStateStatus status;
 
   @override
-  List<Object> get props => [shoppingCard, version, hashId];
+  List<Object> get props => [shoppingCart, hashId, status];
+
+  late String? errorMessage;
+
+  ShoppingCartState copyWith({
+    String? hashId,
+    ShoppingCart? shoppingCart,
+
+    ShoppingCartStateStatus? status,
+    String? errorMessage,
+  }) {
+    return ShoppingCartState(
+        shoppingCart: shoppingCart ?? this.shoppingCart,
+        hashId: hashId ?? this.hashId,
+        status: status ?? this.status,
+        errorMessage: errorMessage);
+  }
+
+  static ShoppingCartState initState() {
+    return ShoppingCartState(
+      shoppingCart: ShoppingCart.empty(),
+      hashId: '',
+      status: ShoppingCartStateStatus.initial,
+    );
+  }
+
+  static ShoppingCartState deletedState() {
+    return  initState().copyWith(status: ShoppingCartStateStatus.deleted);
+  }
 }
 
-
-class CreatingShoppingCart extends ShoppingCartState {
-  const CreatingShoppingCart(super.shoppingCard, super.version, super.hashId);
-}
-
-class ShoppingCartCurrentState extends ShoppingCartState {
-  const ShoppingCartCurrentState(
-      super.shoppingCard, super.version, super.hashId);
-}
-
-class ShoppingCartConflictState extends ShoppingCartState {
-  const ShoppingCartConflictState(
-      super.shoppingCard, super.version, super.hashId);
-
-
-}
-
-class ShoppingCartCreatedState extends ShoppingCartState {
-  const ShoppingCartCreatedState(
-      super.shoppingCard, super.version, super.hashId);
-
-
-}
-
-class ShoppingCartInitialState extends ShoppingCartState {
-  const ShoppingCartInitialState(
-      super.shoppingCard,super.version, super.hashId);
-}
-class ShoppingCartDeleteState extends ShoppingCartState {
-  const ShoppingCartDeleteState(
-      super.shoppingCard,super.version, super.hashId);
-}
-
-
-class ShoppingCartCreateValidationErrorState extends ShoppingCartError {
-  const ShoppingCartCreateValidationErrorState(
-      super.shoppingCard, super.version, super.hashId,  super.message);
-}
-
-class ShoppingCartError extends ShoppingCartState {
-  const ShoppingCartError(
-      super.shoppingCard, super.version, super.hashId, this.message);
-
-  final String message;
-
-  @override
-  List<Object> get props => [shoppingCard, version, hashId, message];
+enum ShoppingCartStateStatus {
+  initial,
+  creating,
+  created,
+  error,
+  createValidationError,
+  deleted,
+  update
 }

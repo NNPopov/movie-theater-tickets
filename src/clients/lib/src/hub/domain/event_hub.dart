@@ -9,6 +9,8 @@ abstract class EventHub
 
   Future shoppingCartUpdateSubscribe(String shoppingCartId);
 
+  Future shoppingCartRemoveSubscribe(String shoppingCartId);
+
   Future seatsUpdateSubscribe(String movieSessionId);
 
   Future unsubscribe();

@@ -1,21 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:movie_theater_tickets/src/seats_view.dart';
-import '../../core/common/views/loading_view.dart';
-import '../../core/common/views/no_data_view.dart';
-import '../../core/utils/utils.dart';
-import '../auditorium_detail.dart';
-import '../cinema_halls/presentation/cubit/cinema_hall_cubit.dart';
-import '../dashboards/presentation/dashboard_widget.dart';
-import '../movies/presentation/widgets/movie_detail_widget.dart';
-import 'domain/entities/movie_session.dart';
-import 'presentation/cubit/movie_session_cubit.dart';
-import '../movies/domain/entities/movie.dart';
+import 'package:movie_theater_tickets/src/seats/presentation/views/seats_view.dart';
+import '../../../../core/common/views/loading_view.dart';
+import '../../../../core/common/views/no_data_view.dart';
+import '../../../../core/utils/utils.dart';
+import '../../../auditorium_detail.dart';
+import '../../../cinema_halls/presentation/cubit/cinema_hall_cubit.dart';
+import '../../../dashboards/presentation/dashboard_widget.dart';
+import '../../../movies/presentation/app/movie_cubit.dart';
+import '../../../movies/presentation/widgets/movie_detail_widget.dart';
+import '../../domain/entities/movie_session.dart';
+import '../cubit/movie_session_bloc.dart';
+import '../../../movies/domain/entities/movie.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 
-
-import '../movies/presentation/app/movie_theater_cubit.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 GetIt getIt = GetIt.instance;
@@ -34,7 +33,7 @@ class _MovieSessionsView extends State<MovieSessionsView> {
   CarouselController buttonCarouselController = CarouselController();
 
   void getMovieSessions() {
-    context.read<MovieSessionCubit>().add( MovieSessionEvent(movieId: widget.movie.id));
+    context.read<MovieSessionBloc>().add( MovieSessionEvent(movieId: widget.movie.id));
   }
 
   @override
@@ -45,7 +44,7 @@ class _MovieSessionsView extends State<MovieSessionsView> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<MovieSessionCubit, MovieSessionState>(
+    return BlocConsumer<MovieSessionBloc, MovieSessionState>(
       listener: (context, state) {
         if (state.status == MovieSessionStateStatus.error) {
           Utils.showSnackBar(context, state.errorMessage!);
@@ -57,7 +56,7 @@ class _MovieSessionsView extends State<MovieSessionsView> {
         }
         if ((state.status == MovieSessionStateStatus.loaded && state.movieSession.isEmpty
         )) {
-          return NoDataView();
+          return const NoDataView();
         }
 
         final movieSessions = state.movieSession;
@@ -77,7 +76,7 @@ class _MovieSessionsView extends State<MovieSessionsView> {
             children: [
               BlocProvider(
                   key: const ValueKey('MoviesDetailView'),
-                  create: (_) => MovieTheaterCubit(getIt.get(),getIt.get()),
+                  create: (_) => MovieCubit(getIt.get()),
                   child: MoviesDetailWidget(widget.movie.id)),
               Column(children: [
                 SizedBox(
@@ -95,7 +94,7 @@ class _MovieSessionsView extends State<MovieSessionsView> {
                           var rowSeats = movieSessionResult[index];
                           var day = rowSeats[0][0];
 
-                          return Container(
+                          return SizedBox(
                             width: 900,
                             //height: 200,
                             child: Column(
@@ -109,7 +108,7 @@ class _MovieSessionsView extends State<MovieSessionsView> {
                                     itemBuilder: (context, index2) {
                                       var rows = rowSeats[index2];
 
-                                      return Container(
+                                      return SizedBox(
                                         width: 800,
                                        // height: 240,
                                         child: Column(
@@ -125,9 +124,7 @@ class _MovieSessionsView extends State<MovieSessionsView> {
                                             ),
                                             Wrap(
                                               spacing: 8.0,
-                                              // горизонтальный отступ между элементами
                                               runSpacing: 4.0,
-                                              // вертикальный отступ между строками
                                               children: rows.map((movieSession) {
                                                 return SizedBox(
                                                     height: 110,
@@ -172,8 +169,8 @@ class _MovieSessionsView extends State<MovieSessionsView> {
                         })),
                 ElevatedButton(
                   onPressed: () => buttonCarouselController.nextPage(
-                      duration: Duration(milliseconds: 300), curve: Curves.linear),
-                  child: Text('→'),
+                      duration: const Duration(milliseconds: 300), curve: Curves.linear),
+                  child: const Text('→'),
                 )
               ]),
             ],

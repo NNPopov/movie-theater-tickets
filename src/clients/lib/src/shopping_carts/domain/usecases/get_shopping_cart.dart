@@ -1,4 +1,3 @@
-import 'package:equatable/equatable.dart';
 import 'package:movie_theater_tickets/core/errors/failures.dart';
 import '../../../../core/buses/event_bus.dart';
 import '../../../../core/common/usecase.dart';

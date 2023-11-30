@@ -55,5 +55,17 @@ public class SeatStateRepository : ISeatStateRepository
         return await db.StringSetAsync(key, jsonValue, expiry);
     }
     
+    public async Task<bool> SetAsync(Guid movieSessionId, short seatRow, short seatNumber, DateTime expires)
+    {
+        var db = _redis.GetDatabase();
+        var key = GetKey(movieSessionId, seatRow, seatNumber);
+
+        var expiryTimeSpan = expires.Subtract(TimeProvider.System.GetUtcNow().DateTime);
+
+        string jsonValue = JsonConvert.SerializeObject(new SeatShoppingCart(seatRow, seatNumber));
+
+        return await db.StringSetAsync(key, jsonValue, expiryTimeSpan);
+    }
+    
     
 }

@@ -30,7 +30,7 @@ class _GlobalisationWidget extends State<GlobalisationWidget> {
       child: DropdownButton<Locale>(
         value: lang.locate,
         elevation: 16,
-        style: TextStyle(color: Colors.black),
+        style: const TextStyle(color: Colors.black),
         onChanged: (Locale? value) {
           context.read<GlobalisationCubit>().setLanguage(value!);
         },

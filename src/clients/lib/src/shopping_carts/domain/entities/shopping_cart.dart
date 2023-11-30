@@ -2,7 +2,6 @@ import 'package:equatable/equatable.dart';
 import 'package:movie_theater_tickets/src/shopping_carts/domain/entities/seat.dart';
 import 'package:dartz/dartz.dart';
 import '../../../../core/errors/failures.dart';
-import '../../../../core/utils/typedefs.dart';
 
 class ShoppingCart extends Equatable {
   final int? maxNumberOfSeats;

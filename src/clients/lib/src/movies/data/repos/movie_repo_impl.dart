@@ -9,7 +9,6 @@ import '../../domain/repos/movie_repo.dart';
 import '../models/movie_dto.dart';
 import 'package:get_it/get_it.dart';
 
-import 'package:get_it/get_it.dart';
 
 GetIt getIt = GetIt.instance;
 
@@ -25,7 +24,7 @@ class MovieRepoImpl implements MovieRepo {
       List<dynamic> movies = jsonDecode(jsonEncode(response.data));
 
       List<Movie> movieDtos =
-          movies.map((json) => MovieDto.fromJson(json) as Movie).toList();
+          movies.map((json) => MovieDto.fromJson(json)).toList();
 
       return Right(movieDtos);
     } on DioException catch (e) {

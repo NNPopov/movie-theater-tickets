@@ -36,7 +36,7 @@ public sealed class MovieSessionSeatService
                 await GetMovieSessionSeat(movieSessionId, seat.seatRow, seat.seatNumber, cancellationToken);
 
 
-            var result = movieSessionSeat.Sel(shoppingCartId);
+            var result = movieSessionSeat.Sell(shoppingCartId);
 
             if (result.IsFailure)
             {

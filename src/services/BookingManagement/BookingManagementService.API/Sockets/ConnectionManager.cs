@@ -1,5 +1,4 @@
 ﻿using CinemaTicketBooking.Api.Sockets.Abstractions;
-using CinemaTicketBooking.Application.Abstractions;
 using CinemaTicketBooking.Application.Abstractions.Services;
 
 namespace CinemaTicketBooking.Api.Sockets;
@@ -52,7 +51,27 @@ public class ConnectionManager : IConnectionManager
        _cacheService.Remove($"hub:{shoppingCartId}");
        
     }
-    
+
+    public void RemoveSubscriptionShoppingCartId(Guid shoppingCartId, string connectionId)
+    {
+        List<string> connectionIds = _cacheService.TryGet<List<string>>($"hub:{shoppingCartId}").Result;
+
+        if (connectionIds != null)
+        {
+
+            if (!connectionIds.Exists(t=>t.Equals(connectionId)))
+            {
+                connectionIds.Remove(connectionId);
+            }
+        }
+        else
+        {
+            connectionIds= new List<string> { connectionId };
+        }
+        
+        _cacheService.Set($"hub:{shoppingCartId}", connectionIds, new TimeSpan(2, 0, 0));
+    }
+
     public IEnumerable<string> GetConnectionId(Guid shoppingCartId)
     {
         List<string> connectionIds = _cacheService.TryGet<List<string>>($"hub:{shoppingCartId}").Result;

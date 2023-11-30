@@ -40,7 +40,7 @@ public class
                     Row = allSeats.SeatRow,
                     Blocked = allSeats.Status == SeatStatus.Available ? false : true,
                     SeatStatus = allSeats.Status,
-                    HashId = allSeats.HashId
+                    HashId = allSeats.ShoppingCartHashId
                 });
 
         return seats.ToList();

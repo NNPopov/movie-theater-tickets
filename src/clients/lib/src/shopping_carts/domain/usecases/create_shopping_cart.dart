@@ -7,7 +7,6 @@ import '../../../auth/domain/services/auth_service.dart';
 import '../../../helpers/constants.dart';
 import '../../../hub/domain/event_hub.dart';
 import '../entities/create_shopping_cart_response.dart';
-import '../entities/shopping_cart.dart';
 import '../repos/shopping_cart_repo.dart';
 import 'package:get_it/get_it.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';

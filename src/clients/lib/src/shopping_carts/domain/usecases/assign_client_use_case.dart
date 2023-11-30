@@ -1,4 +1,3 @@
-import 'package:movie_theater_tickets/src/shopping_carts/domain/usecases/select_seat.dart';
 import '../../../../core/common/usecase.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/utils/typedefs.dart';

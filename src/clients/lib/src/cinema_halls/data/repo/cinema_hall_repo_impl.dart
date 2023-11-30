@@ -9,7 +9,6 @@ import '../../domain/repo/cinema_hall_repo.dart';
 import '../models/cinema_hall_dto.dart';
 import 'package:get_it/get_it.dart';
 
-import 'package:get_it/get_it.dart';
 
 GetIt getIt = GetIt.instance;
 

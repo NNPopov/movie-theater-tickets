@@ -1,4 +1,3 @@
-import 'package:equatable/equatable.dart';
 import '../../../../core/common/usecase.dart';
 import '../../../../core/utils/typedefs.dart';
 import '../../../hub/domain/event_hub.dart';

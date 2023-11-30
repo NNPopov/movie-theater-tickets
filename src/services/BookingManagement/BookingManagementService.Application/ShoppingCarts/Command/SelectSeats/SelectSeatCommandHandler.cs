@@ -71,9 +71,10 @@ public class SelectSeatCommandHandler : IRequestHandler<SelectSeatCommand, Resul
                 return DomainErrors<ShoppingCart>.ConflictException("Seat already reserved");
             }
 
-
+            DateTime expires
+                = TimeProvider.System.GetUtcNow().DateTime.AddMinutes(2);
             // Step Add seat to cart
-            cart.AddSeats(new SeatShoppingCart(request.SeatRow, request.SeatNumber), request.MovieSessionId);
+            cart.AddSeats(new SeatShoppingCart(request.SeatRow, request.SeatNumber, expires ), request.MovieSessionId);
 
 
             // Step 2 Select place
@@ -81,8 +82,7 @@ public class SelectSeatCommandHandler : IRequestHandler<SelectSeatCommand, Resul
             var result =
                 await _seatStateRepository.SetAsync(request.MovieSessionId,
                     request.SeatRow,
-                    request.SeatNumber,
-                    new TimeSpan(0, 0, 120));
+                    request.SeatNumber, expires);
 
             if (!result)
             {

@@ -10,7 +10,7 @@ class MenuItemWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
  return   Container(
-   margin: EdgeInsets.only(left: 100, right: 100),
+   margin: const EdgeInsets.only(left: 100, right: 100),
       width: 150,
       height: 50,
       child: TextButton(

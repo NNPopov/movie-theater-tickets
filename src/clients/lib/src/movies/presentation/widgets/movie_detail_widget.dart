@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/common/views/loading_view.dart';
 import '../../../../core/common/views/no_data_view.dart';
 import '../../../../core/utils/utils.dart';
+import '../app/movie_cubit.dart';
 import '../app/movie_theater_cubit.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
@@ -20,28 +21,26 @@ class MoviesDetailWidget extends StatefulWidget {
 class _MoviesDetailViewView extends State<MoviesDetailWidget> {
   @override
   void initState() {
-    context.read<MovieTheaterCubit>().getMovieById(widget.movieId);
+    context.read<MovieCubit>().getMovieById(widget.movieId);
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<MovieTheaterCubit, MovieTheaterState>(
+    return BlocConsumer<MovieCubit, MovieState>(
       listener: (context, state) {
-        if (state is MovieTheaterError) {
-          Utils.showSnackBar(context, state.message);
+        if (state.status == MoviesStatus.error) {
+          Utils.showSnackBar(context, state.errorMessage!);
         }
       },
       builder: (context, state) {
-        if (state is! MovieLoaded && state is! MovieTheaterError) {
+        if ((state.status == MoviesStatus.fetching ||
+            state.status == MoviesStatus.initial)) {
           return const LoadingView();
         }
-        if ((state is MovieLoaded && state.movie == null) ||
-            state is MovieTheaterError) {
-          return NoDataView();
+        if ((state.status == MoviesStatus.completed && state.movie == null)) {
+          return const NoDataView();
         }
-
-        state as MovieLoaded;
 
         final movie = state.movie;
         return Column(children: [

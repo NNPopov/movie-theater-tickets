@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class OverlayDialog extends StatelessWidget {
@@ -21,7 +20,7 @@ class OverlayDialog extends StatelessWidget {
             width: 2,
           ),
         ),
-        padding: EdgeInsets.all(20),
+        padding: const EdgeInsets.all(20),
         width: 450,
         height: 250,
         child: Column(

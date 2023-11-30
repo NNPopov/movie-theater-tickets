@@ -146,7 +146,7 @@ public class MovieSessionSeatSpecification
         var movieSessionSeat =
             PrepareReservedMovieSessionSeat(movieSessionId, seatNumber, seatRow, price, shoppingCartId);
 
-        movieSessionSeat.Sel(shoppingCartId);
+        movieSessionSeat.Sell(shoppingCartId);
 
         movieSessionSeat.Status.Should().Be(SeatStatus.Sold);
         movieSessionSeat.MovieSessionId.Should().Be(movieSessionId);

@@ -1,10 +1,14 @@
 import 'dart:async';
 import 'dart:convert';
 
+import '../../../core/common/app_logger.dart';
 import '../../helpers/constants.dart';
 import '../../seats/data/models/seat_dto.dart';
 import '../../seats/domain/entities/seat.dart';
 import '../../seats/domain/usecases/update_seats_sate_usecase.dart';
+import '../../server_state/data/models/server_state_dto.dart';
+import '../../server_state/domain/entities/server_state.dart';
+import '../../server_state/domain/usecases/update_server_state_usecase.dart';
 import '../../shopping_carts/data/models/shopping_cart_dto.dart';
 import '../../shopping_carts/domain/entities/shopping_cart.dart';
 import '../../shopping_carts/domain/usecases/update_state_shopping_cart.dart';
@@ -17,13 +21,15 @@ import 'package:logging/logging.dart';
 class SignalREventHub implements EventHub {
   SignalREventHub(
       {required this.updateShoppingCartState,
+      required this.updateSeatsState,
+      required this.updateServerStateUseCase});
 
-      required this.updateSeatsState});
+  final logger = getLogger(SignalREventHub);
 
   late HubConnection _hubConnection;
   late ShoppingCartUpdateStateUseCase updateShoppingCartState;
   late UpdateSeatsStateUseCase updateSeatsState;
-
+  late UpdateServerStateUseCase updateServerStateUseCase;
 
   final _controller = StreamController<ConnectivityEvent>();
 
@@ -45,22 +51,19 @@ class SignalREventHub implements EventHub {
     );
 
     try {
-      if (_hubConnection != null) {
-        if (_hubConnection.state != HubConnectionState.Connected) {
-          await _hubConnection.stop();
-        }
+      if (_hubConnection.state != HubConnectionState.Connected) {
+        await _hubConnection.stop();
       }
-    } catch (e) {}
+    } catch (e) {
+
+      logger.e("hubConnection was disconnected with error", error: e );
+    }
 
     Logger.root.level = Level.ALL;
-    // Writes the log messages to the console
     Logger.root.onRecord.listen((LogRecord rec) {
-      print('${rec.level.name}: ${rec.time}: ${rec.message}');
+      logger.d('${rec.level.name}: ${rec.time}: ${rec.message}');
     });
 
-    // If you want only to log out the message for the higer level hub protocol:
-    final hubProtLogger = Logger("SignalR - hub");
-// If youn want to also to log out transport messages:
     final transportProtLogger = Logger("SignalR - transport");
 
     var baseUrl = Constants.BASE_API_URL;
@@ -76,56 +79,71 @@ class SignalREventHub implements EventHub {
       _tryReconnect();
       _controller.add(ConnectedEvent());
 
-      print("Connected called");
+      logger.d("Connected called");
     });
 
     _hubConnection.onreconnecting(({error}) {
       _controller.add(ReconnectingEvent());
-      print("Reconnecting called");
+      logger.i("Reconnecting called");
     });
 
     _hubConnection.onclose(({error}) {
       _controller.add(DisconnectedEvent());
-      print("On Close called");
+      logger.e("On Close called", error: error );
     });
 
     _hubConnection.on('SentShoppingCartState', _shoppingCartStateUpdate);
 
     _hubConnection.on('SentCinemaHallSeatsState', _seatsStateUpdate);
 
+    _hubConnection.on('SentServerState', _sentServerState);
+
     try {
       await _tryStartHub();
       _controller.add(ConnectedEvent());
-    } on Exception catch (e) {
+    } on Exception {
       _controller.add(DisconnectedEvent());
     }
   }
 
   Future<void> _shoppingCartStateUpdate(List<Object?>? args) async {
-    print('shoppingCartStateUpdate recived');
-    var senderName = args?[0];
-    var movies = jsonDecode(jsonEncode(senderName));
+    try {
+      logger.d('shoppingCartStateUpdate received');
+      var senderName = args?[0];
+      var movies = jsonDecode(jsonEncode(senderName));
 
-    ShoppingCart shoppingCartValue =
-        ShoppingCartDto.fromJson(movies) as ShoppingCart;
+      ShoppingCart shoppingCartValue = ShoppingCartDto.fromJson(movies);
 
-    await updateShoppingCartState(shoppingCartValue);
+      await updateShoppingCartState(shoppingCartValue);
+    } on Exception catch (e) {
+      logger.e('Unable process shoppingCartStateUpdate  $args', error: e);
+    }
   }
 
   Future<void> _seatsStateUpdate(List<Object?>? args) async {
-    print('seatsStateUpdate recived');
+    logger.d('seatsStateUpdate recived');
 
     List<dynamic> movies = jsonDecode(jsonEncode(args?[0]));
 
-    List<Seat> seatDtos =
-        movies.map((json) => SeatDto.fromJson(json) as Seat).toList();
+    List<Seat> seatDtos = movies.map((json) => SeatDto.fromJson(json)).toList();
 
     await updateSeatsState(seatDtos);
   }
 
+  Future<void> _sentServerState(List<Object?>? args) async {
+    logger.d('sentServerState received');
+
+    var movies = jsonDecode(jsonEncode(args?[0]));
+
+    ServerState serverState =
+        ServerStateDto.fromJson(movies as Map<String, dynamic>);
+
+    await updateServerStateUseCase(serverState);
+  }
+
   @override
   Future unsubscribe() async {
-    print('unsubscribe');
+    logger.i('unsubscribe');
   }
 
   @override
@@ -160,30 +178,36 @@ class SignalREventHub implements EventHub {
         await _hubConnection.start();
 
         await _tryReconnect();
-
-
       }
-    } on Exception catch (e) {
+    } on Exception {
       _controller.add(DisconnectedEvent());
     }
   }
 
   Future _tryReconnect() async {
-    print('tryReconnect');
+    logger.d('tryReconnect');
     if (_movieSessionId != null) {
       if (_movieSessionId!.isNotEmpty) {
         await _seatsUpdateSubscribe(_movieSessionId!);
-        print('seatsUpdateSubscribe reconnected');
+        logger.d('seatsUpdateSubscribe reconnected');
       }
     }
 
     if (_shoppingCartId != null) {
       if (_shoppingCartId!.isNotEmpty) {
         await _shoppingCartUpdateSubscribe(_shoppingCartId!);
-        print('shoppingCartUpdateSubscribe reconnected');
+        logger.d('shoppingCartUpdateSubscribe reconnected');
       }
     }
 
-    print('tryReconnect reconnected');
+    logger.d('tryReconnect reconnected');
+  }
+
+  @override
+  Future<void> shoppingCartRemoveSubscribe(String shoppingCartId) async {
+    _shoppingCartId = null;
+    logger.d('shoppingCartRemoveSubscribe');
+    await _hubConnection
+        .invoke('UnsubscribeShoppingCart', args: <Object>[shoppingCartId]);
   }
 }

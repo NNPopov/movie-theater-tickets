@@ -1,39 +1,26 @@
 import 'dart:async' as domain;
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:get_it/get_it.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:movie_theater_tickets/src/movies/domain/entities/movie.dart';
-import '../../domain/usecases/get_movie_by_id.dart';
 import '../../domain/usecases/get_movies.dart';
 
 part 'movie_theater_state.dart';
 
-GetIt getIt = GetIt.instance;
-
 class MovieTheaterCubit extends Cubit<MovieTheaterState> {
-  MovieTheaterCubit(this._getMovies, this._getMovieById)
-      : super(const InitialState());
+  MovieTheaterCubit(this._getMovies)
+      : super( MovieTheaterState.initial());
 
-  late GetMovies _getMovies;
-  late GetMovieById _getMovieById;
+  late final GetMovies _getMovies;
 
   domain.Future<void> getMovies() async {
-    emit(const GettingMovies());
+    emit(MovieTheaterState.fetching());
     final result = await _getMovies();
 
     result.fold(
-      (failure) => emit(MovieTheaterError(failure.errorMessage)),
-      (questions) => emit(MoviesLoaded(questions)),
+      (failure) => emit(state.copyWith(
+          status: MoviesStatus.error, errorMessage: failure.errorMessage)),
+      (movies) => emit(state.copyWith(movies: movies, status: MoviesStatus.completed)),
     );
-  }
-
-  domain.Future<void> getMovieById(String movieId) async {
-    emit(const GettingMovie());
-    final result = await _getMovieById(movieId);
-
-    result.fold(
-        (failure) => emit(MovieTheaterError(failure.errorMessage)),
-        (movie) =>
-            emit(MovieLoaded(movie)));
   }
 }

@@ -4,7 +4,8 @@ import '../../../globalisations_flutter/widgets/globalisation_widget.dart';
 import '../../../shopping_carts/presentation/widgens/shopping_cart_icon_widget.dart';
 
 class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
-  const HomeAppBar({super.key});
+  const HomeAppBar( this.navigatorKey, {super.key, });
+  final GlobalKey<NavigatorState> navigatorKey;
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +18,7 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
               margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 2),
               padding: const EdgeInsets.symmetric( horizontal: 2),
               height: 60,
-              child: const Row(
+              child:  Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
@@ -28,7 +29,7 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
                     ),
                   ),
                   GlobalisationWidget(),
-                  ShoppingCartIconWidget(),
+                  ShoppingCartIconWidget(navigatorKey),
                   AuthWidget(),
                 ],
               ),

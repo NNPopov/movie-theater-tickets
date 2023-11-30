@@ -153,6 +153,7 @@ public static class ConfigureApiServices
 
         services.AddScoped<ICinemaHallSeatsNotifier, CinemaHallSeatsNotifier>()
             .AddScoped<IShoppingCartNotifier, ShoppingCartNotifier>()
+            .AddScoped<IServerStateNotifier, ServerStateNotifier>()
             .AddSingleton<IConnectionManager>(t => ConnectionManager.Factory(t.GetRequiredService<ICacheService>()));
 
 

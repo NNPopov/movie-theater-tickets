@@ -72,6 +72,25 @@ public class CinemaHallSeatsHub(IConnectionManager connectionManager,
             logger.Error(e, "Failed to add AddConnection");
         }
     }
+    
+    public async Task UnsubscribeShoppingCart(Guid shoppingCardId)
+    {
+        try
+        {
+            var cart = await mediator.Send(new GetShoppingCartQuery(shoppingCardId));
+
+            var shoppingCartIdOrClientId = cart.ClientId != Guid.Empty ? cart.ClientId : cart.Id;
+
+            connectionManager.RemoveSubscriptionShoppingCartId(shoppingCartIdOrClientId, Context.ConnectionId);
+          
+            logger.Debug("The customer has unsubscribed to shopping cart updates shoppingCartId:{@ShoppingCartId}",
+                shoppingCardId);
+        }
+        catch (Exception e)
+        {
+            logger.Error(e, "Failed to add AddConnection");
+        }
+    }
 
 
     public override Task OnDisconnectedAsync(Exception exception)

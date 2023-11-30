@@ -19,7 +19,7 @@ class UpdateSeatsStateUseCase
     try {
       _eventBus.send(SeatsUpdateEvent(params));
 
-      return Right(true);
+      return const Right(true);
     } on Exception catch (e) {
       return Left(ServerFailure(message: e.toString(), statusCode: 500));
     }

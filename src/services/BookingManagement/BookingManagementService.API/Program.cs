@@ -69,7 +69,10 @@ services.AddControllers(opt => { opt.OutputFormatters.RemoveType<HttpNoContentOu
     .AddJsonOptions(options => { options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve; });
 
 services.AddSingleton<RedisSubscriber>();
+services.AddSingleton<TimeWorker>();
 services.AddHostedService<RedisSubscriber>();
+services.AddHostedService<TimeWorker>();
+
 
 builder.Services.AddEndpointsApiExplorer();
 

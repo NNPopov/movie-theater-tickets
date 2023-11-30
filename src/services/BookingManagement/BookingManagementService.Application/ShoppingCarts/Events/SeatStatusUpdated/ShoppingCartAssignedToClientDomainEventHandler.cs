@@ -26,7 +26,7 @@ public class
             return;
         }
 
-        shoppingCartNotifier.ReassignCartToClientID(shoppingCart);
+        shoppingCartNotifier.ReassignCartToClientId(shoppingCart);
 
         await shoppingCartNotifier.SentShoppingCartState(shoppingCart);
 

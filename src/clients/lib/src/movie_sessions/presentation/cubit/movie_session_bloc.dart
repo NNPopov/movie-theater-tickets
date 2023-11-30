@@ -11,25 +11,28 @@ part 'movie_session_state.dart';
 
 GetIt getIt = GetIt.instance;
 
-class MovieSessionCubit extends Bloc<MovieSessionEvent,MovieSessionState> {
-  MovieSessionCubit(this._getMovieSessionsUseCase)
-      :
-        super( MovieSessionState( status:  MovieSessionStateStatus.initial))
-  {
+class MovieSessionBloc extends Bloc<MovieSessionEvent, MovieSessionState> {
+  MovieSessionBloc(this._getMovieSessionsUseCase)
+      : super(MovieSessionState(status: MovieSessionStateStatus.initial)) {
     on<MovieSessionEvent>(_getMovieSessions);
   }
 
   late final GetMovieSessions _getMovieSessionsUseCase;
 
-  Future<void> _getMovieSessions(MovieSessionEvent event,
-  Emitter<MovieSessionState> emit,) async {
+  Future<void> _getMovieSessions(
+    MovieSessionEvent event,
+    Emitter<MovieSessionState> emit,
+  ) async {
     emit(state.copyWith(status: MovieSessionStateStatus.fetching));
 
     final result = await _getMovieSessionsUseCase(event.movieId);
 
     result.fold(
-      (failure) => emit(state.copyWith(status: MovieSessionStateStatus.error, errorMessage: failure.errorMessage)),
-      (movieSessions) => emit(state.copyWith(movieSession: movieSessions, status: MovieSessionStateStatus.loaded)),
+      (failure) => emit(state.copyWith(
+          status: MovieSessionStateStatus.error,
+          errorMessage: failure.errorMessage)),
+      (movieSessions) => emit(state.copyWith(
+          movieSession: movieSessions, status: MovieSessionStateStatus.loaded)),
     );
   }
 }

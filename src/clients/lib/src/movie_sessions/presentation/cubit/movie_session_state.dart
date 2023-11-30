@@ -1,4 +1,4 @@
-part of 'movie_session_cubit.dart';
+part of 'movie_session_bloc.dart';
 
 class MovieSessionEvent extends Equatable {
   const MovieSessionEvent({required this.movieId});

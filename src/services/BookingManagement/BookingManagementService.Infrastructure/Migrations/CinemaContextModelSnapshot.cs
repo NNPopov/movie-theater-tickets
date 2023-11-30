@@ -147,7 +147,7 @@ namespace CinemaTicketBooking.Infrastructure.Migrations
                         .HasColumnType("smallint")
                         .HasColumnName("seat_number");
 
-                    b.Property<string>("HashId")
+                    b.Property<string>("ShoppingCartHashId")
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("hash_id");

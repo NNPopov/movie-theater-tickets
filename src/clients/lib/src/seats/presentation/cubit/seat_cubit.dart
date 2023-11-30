@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../../hub/app_events.dart';
@@ -21,23 +22,23 @@ class SeatCubit extends Cubit<SeatState> {
   late StreamSubscription _appEventSubscription;
 
   late int version = 0;
-  late String?  _movieSessionId = '';
+  late String? _movieSessionId = '';
 
   SeatCubit(this._getMovieSessionById, this._eventBus)
-      : super( InitialState(List<Seat>.empty(growable: true))) {
+      : super(SeatState.initState()) {
     _appEventSubscription = _eventBus.stream.listen((event) {
       if (event is SeatsUpdateEvent) {
-        var selectingSeat = event as SeatsUpdateEvent;
+        var selectingSeat = event;
 
-        emit(SeatsState(selectingSeat.seats));
+        emit(state.copyWith(
+            seats: selectingSeat.seats, status: SeatStateStatus.loaded));
       }
 
       if (event is ShoppingCartHashIdUpdated) {
-        if(_movieSessionId!=null) {
+        if (_movieSessionId != null) {
           _getSeats(_movieSessionId!);
         }
       }
-
     });
   }
 
@@ -46,24 +47,23 @@ class SeatCubit extends Cubit<SeatState> {
   void updateSeatsState(ShoppingCart shoppingCard) {}
 
   Future<void> getSeats(String movieSessionId) async {
-
     _movieSessionId = movieSessionId;
-
     _getSeats(movieSessionId);
   }
 
   Future<void> _getSeats(String movieSessionId) async {
-
     _movieSessionId = movieSessionId;
 
-    emit( GettingSeats( state.seats ));
+    emit(state.copyWith(status: SeatStateStatus.fetching));
 
     final result = await _getMovieSessionById(movieSessionId);
 
-    result.fold((failure) => emit(SeatsError(state.seats , failure.errorMessage)),
-            (seats) async {
-          emit(SeatsState(seats));
-        });
+    result.fold(
+        (failure) => emit(state.copyWith(
+            status: SeatStateStatus.error,
+            errorMessage: failure.errorMessage)), (seats) async {
+      emit(state.copyWith(seats: seats, status: SeatStateStatus.loaded));
+    });
   }
 
   @override

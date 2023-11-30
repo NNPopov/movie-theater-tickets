@@ -1,11 +1,9 @@
 import '../../../../core/common/usecase.dart';
 import '../../../../core/utils/typedefs.dart';
-import '../../../helpers/constants.dart';
 import '../../../hub/domain/event_hub.dart';
 import '../entities/seat.dart';
 import 'package:get_it/get_it.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:collection/collection.dart';
 import 'package:dartz/dartz.dart';
 import '../repos/seat_repo.dart';
 

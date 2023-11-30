@@ -1,4 +1,3 @@
-import 'package:movie_theater_tickets/src/shopping_carts/domain/usecases/select_seat.dart';
 import '../../../../core/common/usecase.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/utils/typedefs.dart';
@@ -11,7 +10,7 @@ import 'package:dartz/dartz.dart';
 
 class ReserveSeatsUseCase extends FutureUsecaseWithoutParams<void> {
   const ReserveSeatsUseCase(
-      this._repo, this._localRepo, AuthService this._authService);
+      this._repo, this._localRepo, this._authService);
 
   final storage = const FlutterSecureStorage();
   final ShoppingCartRepo _repo;

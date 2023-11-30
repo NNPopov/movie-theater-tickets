@@ -11,40 +11,33 @@ GetIt getIt = GetIt.instance;
 
 class GetMovieSessions
     extends FutureUsecaseWithParams<List<List<List<MovieSession>>>, String> {
-
   GetMovieSessions(this._repo);
 
   final MovieSessionRepo _repo;
 
   @override
   ResultFuture<List<List<List<MovieSession>>>> call(String movieId) async {
-
     var movieSessionsResponse = await _repo.getMovieSessionByMovieId(movieId);
 
-   return movieSessionsResponse.fold((l) => Left(l), (movieSessions)
-    {
+    return movieSessionsResponse.fold((l) => Left(l), (movieSessions) {
       final movieSessionResult = groupBy(
-          movieSessions,
+              movieSessions,
               (movieSession) =>
-          '${movieSession.sessionDate.year}${movieSession.sessionDate
-              .month}${movieSession.sessionDate.day}')
+                  '${movieSession.sessionDate.year}${movieSession.sessionDate.month}${movieSession.sessionDate.day}')
           .values
-          .map((seatsByDate) =>
-      groupBy(
-          seatsByDate.toList(), (seatByDate) => seatByDate.cinemaHallId)
-          .values
-          .map((seatsBycinemaHallId) =>
-      seatsBycinemaHallId.toList()
-        ..sort((a, b) => a.sessionDate.compareTo(b.sessionDate)))
-          .toList()
-        ..sort((a, b) => -a[0].cinemaHallId.compareTo(b[0].cinemaHallId)))
+          .map((seatsByDate) => groupBy(
+                  seatsByDate.toList(), (seatByDate) => seatByDate.cinemaHallId)
+              .values
+              .map((seatsBycinemaHallId) => seatsBycinemaHallId.toList()
+                ..sort((a, b) => a.sessionDate.compareTo(b.sessionDate)))
+              .toList()
+            ..sort((a, b) => -a[0].cinemaHallId.compareTo(b[0].cinemaHallId)))
           .toList()
         ..sort((a, b) => a[0][0].sessionDate.compareTo(b[0][0].sessionDate));
 
-     return Right(movieSessionResult);
+      return Right(movieSessionResult);
     });
 
     //return movieSessionResult;
   }
-
 }

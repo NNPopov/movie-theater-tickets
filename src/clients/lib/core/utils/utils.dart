@@ -1,10 +1,8 @@
-import 'dart:io';
 
 // import 'package:education_app_tutorial/core/common/features/video/data/models/video_model.dart';
 // import 'package:education_app_tutorial/core/common/features/video/domain/entities/video.dart';
 // import 'package:education_app_tutorial/core/extensions/string_extensions.dart';
 // import 'package:file_picker/file_picker.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../res/colours.dart';

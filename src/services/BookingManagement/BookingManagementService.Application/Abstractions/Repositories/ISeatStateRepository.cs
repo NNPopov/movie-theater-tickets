@@ -11,4 +11,6 @@ public interface ISeatStateRepository
     
 
     Task<SeatShoppingCart> GetAsync(Guid movieSessionId, short seatRow, short seatNumber);
+
+   Task<bool> SetAsync(Guid movieSessionId, short seatRow, short seatNumber, DateTime expires);
 }

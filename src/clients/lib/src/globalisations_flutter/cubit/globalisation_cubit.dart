@@ -7,7 +7,7 @@ import 'package:get_it/get_it.dart';
 GetIt getIt = GetIt.instance;
 
 class GlobalisationCubit extends Cubit<LanguagenStatus> {
-  GlobalisationCubit() : super(const CurrentLanguagenStatus(Locale('en'))) {}
+  GlobalisationCubit() : super(const CurrentLanguagenStatus(Locale('en')));
 
   domain.Future<void> setLanguage(Locale lang) async {
     emit(CurrentLanguagenStatus(lang));

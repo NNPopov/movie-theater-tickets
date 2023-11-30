@@ -1,8 +1,8 @@
-import 'package:movie_theater_tickets/src/shopping_carts/domain/usecases/select_seat.dart';
 import '../../../../core/common/usecase.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../../core/utils/typedefs.dart';
-import '../../../auth/domain/abstraction/auth_event_bus.dart';
+
+import '../../../auth/domain/abstraction/auth_statuses.dart';
 import '../../../auth/domain/services/auth_service.dart';
 import '../repos/shopping_cart_local_repo.dart';
 import '../repos/shopping_cart_repo.dart';
@@ -22,9 +22,9 @@ class AssignClientUseCase extends FutureUsecaseWithParams<void, String> {
     var userStatus = await _authService.getCurrentStatus();
 
     return userStatus.fold((l) => Left(l), (r) async {
-      if (r is! AuthorizedAuthStatus) {
+      if (r.status != AuthenticationStatus.authorized) {
         return const Left(
-            NotAuthorisedException(message: 'NotAuthorised', statusCode: 401));
+            NotAuthorisedException());
       }
 
       var shoppingCartResult = await _localRepo.getShoppingCart();

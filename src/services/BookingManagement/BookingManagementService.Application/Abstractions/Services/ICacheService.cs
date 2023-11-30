@@ -1,4 +1,4 @@
-﻿namespace CinemaTicketBooking.Application.Abstractions;
+﻿namespace CinemaTicketBooking.Application.Abstractions.Services;
 
 public interface ICacheService
 {

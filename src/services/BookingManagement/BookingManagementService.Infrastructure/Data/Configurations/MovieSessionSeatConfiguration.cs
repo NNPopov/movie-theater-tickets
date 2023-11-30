@@ -31,7 +31,7 @@ public class MovieSessionSeatConfiguration : IEntityTypeConfiguration<MovieSessi
         builder.Property(entry => entry.ShoppingCartId)
             .HasColumnName("shopping_cart_id");
 
-        builder.Property(entry => entry.HashId)
+        builder.Property(entry => entry.ShoppingCartHashId)
             .HasColumnName("hash_id");
     }
 }

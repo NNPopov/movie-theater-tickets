@@ -9,25 +9,22 @@ import '../../domain/repos/movie_repo.dart';
 import '../models/movie_dto.dart';
 import 'package:get_it/get_it.dart';
 
-import 'package:get_it/get_it.dart';
 
 GetIt getIt = GetIt.instance;
 
 class MovieRepoImpl implements MovieRepo {
-  late Dio _client;
+  final Dio _client;
 
-  MovieRepoImpl({Dio? client}) {
-    _client = client ?? getIt.get<Dio>();
-  }
+  MovieRepoImpl(this._client) ;
 
   @override
   ResultFuture<List<Movie>> getMovies() async {
     try {
-      Response response = await _client.get('/api/movies');
+      Response response = await _client.get('/api/movies').timeout(const Duration( seconds: 5));
       List<dynamic> movies = jsonDecode(jsonEncode(response.data));
 
       List<Movie> movieDtos =
-          movies.map((json) => MovieDto.fromJson(json) as Movie).toList();
+          movies.map((json) => MovieDto.fromJson(json)).toList();
 
       return Right(movieDtos);
     } on DioException catch (e) {

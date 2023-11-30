@@ -1,19 +1,13 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:movie_theater_tickets/core/extensions/context_extensions.dart';
 import '../../../../core/common/views/loading_view.dart';
+import '../../../../core/common/views/no_data_view.dart';
 import '../../../../core/utils/utils.dart';
-import '../../../auth/presentations/widgets/auth_widget.dart';
-
-import '../../../home/presentation/widgets/home_app_bar.dart';
-import '../../../movie_sessions/movie_session_view.dart';
-import '../../../shopping_carts/presentation/widgens/shopping_cart_icon_widget.dart';
+import '../../../dashboards/presentation/dashboard_widget.dart';
+import '../../../movie_sessions/presentation/views/movie_session_view.dart';
 import '../../domain/entities/movie.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import '../app/movie_theater_cubit.dart';
-import '../../../globalisations_flutter/widgets/globalisation_widget.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class MoviesView extends StatefulWidget {
@@ -42,29 +36,18 @@ class _MoviesView extends State<MoviesView> {
   Widget build(BuildContext context) {
     return BlocConsumer<MovieTheaterCubit, MovieTheaterState>(
       listener: (context, state) {
-        if (state is MovieTheaterError) {
-          Utils.showSnackBar(context, state.message);
+        if (state.status == MoviesStatus.error) {
+          Utils.showSnackBar(context, state.errorMessage ?? '');
         }
       },
       builder: (context, state) {
-        if (state is! MoviesLoaded && state is! MovieTheaterError) {
+        if (state.status == MoviesStatus.fetching ||
+            state.status == MoviesStatus.initial) {
           return const LoadingView();
         }
-        if ((state is MoviesLoaded && state.movies.isEmpty) ||
-            state is MovieTheaterError) {
-          return Center(
-            child: Text(
-              'No movie found\nPlease contact admin',
-              textAlign: TextAlign.center,
-              style: context.theme.textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: Colors.grey.withOpacity(0.5),
-              ),
-            ),
-          );
+        if ((state.status == MoviesStatus.completed && state.movies.isEmpty)) {
+          return const NoDataView();
         }
-
-        state as MoviesLoaded;
 
         final movies = state.movies
           ..sort((a, b) => b.releaseDate.compareTo(a.releaseDate));
@@ -91,98 +74,108 @@ class _MoviesView extends State<MoviesView> {
       _itemsCount = 1;
     }
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: const HomeAppBar(),
-      // extendBody:true,
-      // extendBodyBehindAppBar:true,
-      body: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-             SizedBox(height: 40, width: 100, child: Text(AppLocalizations.of(context)!.movies)),
-            Expanded(
-                child: Align(
-              alignment: Alignment.topCenter,
-              child: CarouselSlider(
-                items: movies.map((rowSeats) {
-                  return    Container(
-                      width: 320,
-                      height: 650,
-                      alignment: Alignment.bottomLeft,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(
-                          color: Colors.blue,
-                          width: 2,
+    return Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          const DashboardWidget(route: MoviesView.id),
+          SizedBox(
+              height: 40,
+              width: 100,
+              child: Text(AppLocalizations.of(context)!.movies)),
+          Expanded(
+              child: Align(
+            alignment: Alignment.topCenter,
+            child: CarouselSlider(
+              items: movies.map((rowSeats) {
+                return Container(
+                  width: 320,
+                  height: 650,
+                  alignment: Alignment.bottomLeft,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: Colors.blue,
+                      width: 2,
+                    ),
+                  ),
+                  margin: const EdgeInsets.all(5.0),
+                  padding: const EdgeInsets.all(20.0),
+                  child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Align(
+                            child: Text(rowSeats.title,
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                    color: Colors.grey))),
+                        const SizedBox(
+                          height: 10,
                         ),
-                      ),
-                      margin: const EdgeInsets.all(5.0),
-                      padding: const EdgeInsets.all(20.0),
-                      child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Align(
-                                child: Text(rowSeats.title,
-                                    style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16,
-                                        color: Colors.grey))),
-                            const SizedBox(
-                              height: 10,
-                            ),
-                            Text(
-                                '${AppLocalizations.of(context)!.stars}: ${rowSeats.stars}'),
-                            Text(
-                                '${AppLocalizations.of(context)!.release_date}: ${rowSeats.releaseDate.year}-${rowSeats.releaseDate.month}-${rowSeats.releaseDate.day} '),
-                            Text('imdbId: ${rowSeats.imdbId}'),
-                            const Expanded(
-                              child: SizedBox(),
-                            ),
-                            Align(
-                              alignment: Alignment.center,
-                              child: TextButton(
-                                  style: ButtonStyle(
-                                    padding: MaterialStateProperty.all(
-                                        const EdgeInsets.symmetric(
-                                            vertical: 1, horizontal: 1)),
-                                    foregroundColor:
-                                        MaterialStateProperty.all<Color>(
-                                            Colors.blue),
-                                  ),
-                                  onPressed: () {
-                                    movieSeat(rowSeats);
-                                  },
-                                  child: Text(
-                                      AppLocalizations.of(context)!.select)),
-                            )
-                          ]),
-
-                  );
-                }).toList(),
-                carouselController: buttonCarouselController,
-                options: CarouselOptions(
-                  height: 670.0,
-                  enableInfiniteScroll: true,
-                  viewportFraction: 1.0 / _itemsCount,
-                  enlargeCenterPage: false,
-                  aspectRatio: 3.0,
-                  enlargeStrategy: CenterPageEnlargeStrategy.height,
-                  onPageChanged: (index, reason) {
-                    setState(() {
-                      _current = index;
-                    });
-                  },
-                ),
+                        Container(
+                          height: 290,
+                          width: 290,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(5.0),
+                            color: Colors.white,
+                            image: const DecorationImage(
+                                fit: BoxFit.fill,
+                                image: NetworkImage(
+                                  'https://picsum.photos/250?image=9',
+                                )),
+                          ),
+                        ),
+                        Text(
+                            '${AppLocalizations.of(context)!.stars}: ${rowSeats.stars}'),
+                        Text(
+                            '${AppLocalizations.of(context)!.release_date}: ${rowSeats.releaseDate.year}-${rowSeats.releaseDate.month}-${rowSeats.releaseDate.day} '),
+                        Text('imdbId: ${rowSeats.imdbId}'),
+                        const Expanded(
+                          child: SizedBox(),
+                        ),
+                        Align(
+                          alignment: Alignment.center,
+                          child: TextButton(
+                              style: ButtonStyle(
+                                padding: MaterialStateProperty.all(
+                                    const EdgeInsets.symmetric(
+                                        vertical: 1, horizontal: 1)),
+                                foregroundColor:
+                                    MaterialStateProperty.all<Color>(
+                                        Colors.blue),
+                              ),
+                              onPressed: () {
+                                movieSeat(rowSeats);
+                              },
+                              child:
+                                  Text(AppLocalizations.of(context)!.select)),
+                        )
+                      ]),
+                );
+              }).toList(),
+              carouselController: buttonCarouselController,
+              options: CarouselOptions(
+                height: 670.0,
+                enableInfiniteScroll: true,
+                viewportFraction: 1.0 / _itemsCount,
+                enlargeCenterPage: false,
+                aspectRatio: 3.0,
+                enlargeStrategy: CenterPageEnlargeStrategy.height,
+                onPageChanged: (index, reason) {
+                  setState(() {
+                    _current = index;
+                  });
+                },
               ),
-            )),
-            ElevatedButton(
-              onPressed: () => buttonCarouselController.nextPage(
-                  duration: Duration(milliseconds: 300), curve: Curves.linear),
-              child: Text('→'),
-            )
-          ]),
-    );
+            ),
+          )),
+          ElevatedButton(
+            onPressed: () => buttonCarouselController.nextPage(
+                duration: const Duration(milliseconds: 300), curve: Curves.linear),
+            child: const Text('→'),
+          )
+        ]);
   }
 }

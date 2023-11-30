@@ -1,117 +1,80 @@
 import 'dart:async';
-
-import 'package:get_it/get_it.dart';
 import '../../../../core/buses/event_bus.dart';
-import '../../../../core/utils/typedefs.dart';
-import '../../../auth/domain/abstraction/auth_event_bus.dart';
+import '../../../auth/domain/abstraction/auth_statuses.dart';
 import '../../../auth/domain/services/auth_service.dart';
-import '../entities/create_shopping_cart_response.dart';
+import '../../../helpers/constants.dart';
+import '../../../hub/app_events.dart';
+import '../../../hub/domain/event_hub.dart';
+import '../../presentation/cubit/shopping_cart_cubit.dart';
 import '../repos/shopping_cart_local_repo.dart';
 import '../usecases/assign_client_use_case.dart';
-import '../usecases/create_shopping_cart.dart';
-import '../usecases/create_shopping_cart.dart';
-import '../usecases/get_shopping_cart.dart';
-import '../usecases/reserve_seats.dart';
-import '../usecases/select_seat.dart';
-import '../usecases/shopping_cart_subscribe.dart';
-import '../usecases/unselect_seat.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:dartz/dartz.dart';
 
-GetIt getIt = GetIt.instance;
+import '../usecases/get_shopping_cart.dart';
 
-class ShoppingCartService {
-  ShoppingCartService(
-      {ShoppingCartLocalRepo? localRepo,
-      CreateShoppingCartUseCase? createShoppingCartUseCase,
-      SelectSeatUseCase? selectSeatUseCase,
-      UnselectSeatUseCase? unselectSeatUseCase,
-      GetShoppingCart? getShoppingCartUseCase,
-      ShoppingCartUpdateSubscribeUseCase? shoppingCartUpdateSubscribeUseCase,
-      AssignClientUseCase? assignClientUseCase,
-      ReserveSeatsUseCase? reserveSeatsUseCase,
-      EventBus? eventBus,
-      AuthService? authService,
-      AuthEventBus? authEventBus})
-      : _createShoppingCart =
-            createShoppingCartUseCase ?? getIt.get<CreateShoppingCartUseCase>(),
-        _selectSeatUseCase =
-            selectSeatUseCase ?? getIt.get<SelectSeatUseCase>(),
-        _unselectSeatUseCase =
-            unselectSeatUseCase ?? getIt.get<UnselectSeatUseCase>(),
-        _getShoppingCart =
-            getShoppingCartUseCase ?? getIt.get<GetShoppingCart>(),
-        _shoppingCartUpdateSubscribeUseCase =
-            shoppingCartUpdateSubscribeUseCase ??
-                getIt.get<ShoppingCartUpdateSubscribeUseCase>(),
-        _assignClientUseCase =
-            assignClientUseCase ?? getIt.get<AssignClientUseCase>(),
-        _reserveSeatsUseCase =
-            reserveSeatsUseCase ?? getIt.get<ReserveSeatsUseCase>(),
-        _eventBus = eventBus ?? getIt.get<EventBus>(),
-        _authService = authService ?? getIt.get<AuthService>(),
-        _authEventBus = authEventBus ?? getIt<AuthEventBus>(),
-        _localRepo = localRepo ?? getIt<ShoppingCartLocalRepo>();
+class ShoppingCartAuthListener {
+  ShoppingCartAuthListener(
+      this._localRepo, this._assignClientUseCase, this._authService, this._eventHub, this._eventBus, this._getShoppingCartUseCase);
 
-  late final StreamSubscription _appEventSubscription;
-  late final StreamSubscription _streamSubscription;
   final storage = const FlutterSecureStorage();
 
-  late final ShoppingCartLocalRepo _localRepo;
-  late final AuthEventBus _authEventBus;
-  late final AuthService _authService;
-  late final EventBus _eventBus;
-  late final CreateShoppingCartUseCase _createShoppingCart;
-  late final SelectSeatUseCase _selectSeatUseCase;
-  late final UnselectSeatUseCase _unselectSeatUseCase;
-  late final GetShoppingCart _getShoppingCart;
-  late final ShoppingCartUpdateSubscribeUseCase
-      _shoppingCartUpdateSubscribeUseCase;
-  late final ReserveSeatsUseCase _reserveSeatsUseCase;
+  final EventHub _eventHub;
+  final EventBus _eventBus;
+
+  final ShoppingCartLocalRepo _localRepo;
 
   late final AssignClientUseCase _assignClientUseCase;
+  late final GetShoppingCartUseCase _getShoppingCartUseCase;
+  late final StreamSubscription<AuthStatus> _authenticationStatusSubscription;
+
+  final AuthService _authService;
 
   Future<void> init() async {
-    _appEventSubscription = _authEventBus.stream.listen((event) async {
-      if (event is AuthorizedAuthStatus) {
+    _authenticationStatusSubscription =
+        _authService.status.listen((event) async {
+      if (event.status == AuthenticationStatus.authorized) {
         var shoppingCartResult = await _localRepo.getShoppingCart();
 
-        shoppingCartResult.fold((l) => null, (r) async {
+        shoppingCartResult.fold((l) async {
+
+        await  _getShoppingCartUseCase();
+
+
+
+        _eventBus.send(const ShoppingCartHashIdIdUpdateEvent());
+
+        }, (r) async {
           var assignClientResult = await _assignClientUseCase(r.id!);
 
+
+
           assignClientResult.fold((l) => null, (r) async {
+
+
             return const Right(null);
           });
         });
       }
-    });
-  }
 
-  ResultFuture<CreateShoppingCartResponse> createShoppingCart(
-      int maxNumberOfSeats) async {
-    var createShoppingCartCommand =
-        CreateShoppingCartCommand(maxNumberOfSeats: maxNumberOfSeats);
+      if (event.status == AuthenticationStatus.unauthorized) {
+        var shoppingCartResult = await _localRepo.getShoppingCart();
 
-    final result = await _createShoppingCart(createShoppingCartCommand);
+        shoppingCartResult.fold((l) {}, (shoppingCart) async {
+          await _localRepo.deleteShoppingCart(shoppingCart);
 
-    result.fold((failure) => Left(failure), (value) async {
-      var shoppingCartResult = await _getShoppingCart(value.shoppingCartId);
+          _eventBus.send(ShoppingCartHashIdUpdated());
 
-      shoppingCartResult.fold((l) => null, (shoppingCart) async {
-        await _localRepo.setShoppingCart(shoppingCart);
-        var authStatus = await _authService.getCurrentStatus();
+          _eventHub.shoppingCartRemoveSubscribe(shoppingCart.id!);
 
-        authStatus.fold((l) => null, (r) async {
-          if (r is AuthorizedAuthStatus) {
-            var assignClientResult =
-                await _assignClientUseCase(value.shoppingCartId);
-
-            assignClientResult.fold((l) => null, (r) async {});
-          }
+          return const Right(null);
         });
-      });
-    });
 
-    return result;
+        await storage.delete(key: Constants.SHOPPING_CARD_ID);
+        await storage.delete(key: Constants.SHOPPING_CARD_HASH_ID);
+
+        _eventBus.send(ShoppingCartDeleteEvent());
+      }
+    });
   }
 }

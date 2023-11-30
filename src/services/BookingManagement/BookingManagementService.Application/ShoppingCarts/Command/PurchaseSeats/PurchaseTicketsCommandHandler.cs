@@ -1,15 +1,17 @@
 ﻿using CinemaTicketBooking.Application.Abstractions;
+using CinemaTicketBooking.Application.Abstractions.Repositories;
 using CinemaTicketBooking.Application.Exceptions;
+using CinemaTicketBooking.Domain.Error;
 using CinemaTicketBooking.Domain.Seats.Abstractions;
 using CinemaTicketBooking.Domain.Services;
 using CinemaTicketBooking.Domain.ShoppingCarts;
+using CinemaTicketBooking.Domain.ShoppingCarts.Abstractions;
 
 namespace CinemaTicketBooking.Application.ShoppingCarts.Command.PurchaseSeats;
 
-public record PurchaseTicketsCommand( Guid ShoppingCartId) : IRequest<bool>;
+public record PurchaseTicketsCommand(Guid ShoppingCartId) : IRequest<Result>;
 
-
-public class PurchaseTicketsCommandHandler : IRequestHandler<PurchaseTicketsCommand, bool>
+public class PurchaseTicketsCommandHandler : IRequestHandler<PurchaseTicketsCommand, Result>
 {
     private ISeatStateRepository _seatStateRepository;
 
@@ -29,46 +31,35 @@ public class PurchaseTicketsCommandHandler : IRequestHandler<PurchaseTicketsComm
         _movieSessionSeatService = movieSessionSeatService;
     }
 
-    public async Task<bool> Handle(PurchaseTicketsCommand request,
+    public async Task<Result> Handle(PurchaseTicketsCommand request,
         CancellationToken cancellationToken)
     {
-        // var showtime = await _movieSessionsRepository
-        //     .GetWithTicketsByIdAsync(
-        //         request.ShoppingCartId, cancellationToken);
-        //
-        // if (showtime == null)
-        //     throw new Exception();
-
-
-        var cart = await _shoppingCartRepository.TryGetCart(request.ShoppingCartId);
+        var cart = await _shoppingCartRepository.GetByIdAsync(request.ShoppingCartId);
 
         if (cart == null)
-            throw new ContentNotFoundException(request.ShoppingCartId.ToString(), nameof(ShoppingCart));
+        {
+            return DomainErrors<ShoppingCart>.NotFound(request.ShoppingCartId.ToString());
+        }
+
+        var result = await _movieSessionSeatService.SelSeats(cart.MovieSessionId,
+            cart.Seats.Select(t => (t.SeatRow, t.SeatNumber)).ToList(),
+            request.ShoppingCartId,
+            cancellationToken);
+
+        if (result.IsFailure)
+        {
+            return result;
+        }
+
+
+        cart.PurchaseComplete();
+        await _shoppingCartRepository.SetAsync(cart);
 
         foreach (var seat in cart.Seats)
         {
-            // var reservedSeatValue1 =
-            //     await _movieSessionSeatRepository.GetByIdAsync(cart.MovieSessionId, seat.SeatRow, seat.SeatNumber,
-            //         cancellationToken);
-
-          await  _movieSessionSeatService.PurchaseSeat(cart.MovieSessionId, 
-                seat.SeatRow,
-                seat.SeatNumber,
-                request.ShoppingCartId,
-                cancellationToken);
-            
-
-            // await _movieSessionSeatRepository.UpdateAsync(reservedSeatValue1, cancellationToken);
+            await _seatStateRepository.DeleteAsync(cart.MovieSessionId,seat.SeatRow,seat.SeatNumber);
         }
-        
-        cart.PurchaseComplete();
-        await _shoppingCartRepository.TrySetCart(cart);
 
-        // foreach (var seat in cart.Seats)
-        // {
-        //     await _seatStateRepository.DeleteAsync(cart.MovieSessionId,seat.SeatRow,seat.SeatNumber);
-        // }
-
-        return true;
+        return Result.Success();
     }
 }

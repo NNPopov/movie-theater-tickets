@@ -1,7 +1,6 @@
 import 'package:equatable/equatable.dart';
 import '../../../../core/common/usecase.dart';
 import '../../../../core/utils/typedefs.dart';
-import '../../../helpers/constants.dart';
 import '../entities/seat.dart';
 import '../entities/shopping_cart.dart';
 import '../repos/shopping_cart_local_repo.dart';

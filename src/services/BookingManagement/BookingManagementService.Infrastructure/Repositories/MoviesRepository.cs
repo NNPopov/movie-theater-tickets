@@ -1,4 +1,5 @@
 ﻿using CinemaTicketBooking.Application.Abstractions;
+using CinemaTicketBooking.Application.Abstractions.Services;
 using CinemaTicketBooking.Domain.Movies;
 using CinemaTicketBooking.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;

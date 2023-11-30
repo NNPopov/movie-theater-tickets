@@ -1,4 +1,6 @@
 {
+  "page_under_construction":"Page Under Construction",
+
   "movies":"Movies",
 
   "stars":"Stars",
@@ -8,6 +10,9 @@
   "remove":"Remove",
 
   "row":"Row",
+
+  "shopping_cart":"Shopping Cart",
+  "complete_purchases":"Complete your purchases",
 
   "movie_session":"Movie session",
 

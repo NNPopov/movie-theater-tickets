@@ -12,11 +12,9 @@ import 'package:get_it/get_it.dart';
 GetIt getIt = GetIt.instance;
 
 class MovieSessionRepoImpl implements MovieSessionRepo {
-  late Dio _client;
+  final Dio _client;
 
-  MovieSessionRepoImpl({Dio? client}) {
-    _client = client ?? getIt.get<Dio>();
-  }
+  MovieSessionRepoImpl( this._client) ;
 
   @override
   ResultFuture<MovieSession> getMovieSession(String movieSessionId) async {

@@ -1,7 +1,6 @@
 import '../../domain/entities/seat.dart';
 import 'seat_dto.dart';
 import '../../domain/entities/shopping_cart.dart';
-import 'package:equatable/equatable.dart';
 
 class ShoppingCartDto extends ShoppingCart {
   ShoppingCartDto(
@@ -21,9 +20,9 @@ class ShoppingCartDto extends ShoppingCart {
           movieSessionId: json['movieSessionId'],
           status: ShoppingCartStatus.values[json['status']],
           seats: List<Map<String, dynamic>>.from(json['seats'] as List<dynamic>)
-              .map((e) => ShoppingCartSeatDto.fromJson(e) as ShoppingCartSeat)
+              .map((e) => ShoppingCartSeatDto.fromJson(e as Map<String, dynamic>)as ShoppingCartSeat)
               .toList(),
-          isAssigned: json['isAssigned'],
+          isAssigned: json['isAssigned'] ?? false,
         );
 
   ShoppingCartDto.empty()

@@ -1,6 +1,5 @@
 import 'dart:ui';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'dart:convert';
 
 class Constants {
 
@@ -14,7 +13,8 @@ class Constants {
 
   static final RETRY_POLICY= dotenv.env["RETRY_POLICY"].toString().split(',').map(int.parse).toList();
 
-  //"https://api.client.fhc-dev.net";
+
+  static final double SEAT_EXPIRATION_SEC = double.parse(dotenv.env["SEAT_EXPIRATION_SEC"].toString());
 
   static const SHOPPING_CARD = 'SHOPPING_CARD';
   static const TOKEN_KEY = 'TOKEN';

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:movie_theater_tickets/src/auth/presentations/bloc/auth_event.dart';
 
-import '../../domain/abstraction/auth_event_bus.dart';
-import '../cubit/auth_cubit.dart';
+import '../../domain/abstraction/auth_statuses.dart';
+import '../bloc/auth_cubit.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class AuthWidget extends StatefulWidget {
@@ -20,24 +21,11 @@ class _AuthWidget extends State<AuthWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<AuthCubit, AuthStatus>(
-      listener: (context, state) {
-        // if (state is ShoppingCartError) {
-        //   Utils.showSnackBar(context, state.message);
-        // }
-        // if (state is ShoppingCartConflictState) {
-        //   Utils.showSnackBar(context, 'This place is already occupied');
-        // }
-      },
-      // buildWhen: (context, state) {
-      //   if (state is ShoppingCartError) {
-      //     return false;
-      //   } else {
-      //     return true;
-      //   }
-      // },
+    return BlocBuilder<AuthBloc, AuthStatus>(
       builder: (BuildContext context, AuthStatus state) {
-        if (state is AuthorizedAuthStatus) {
+        print('tatus resived $state.status');
+
+        if (state.status == AuthenticationStatus.authorized) {
           return SizedBox(
             width: 70,
             height: 40,
@@ -46,8 +34,8 @@ class _AuthWidget extends State<AuthWidget> {
                 borderRadius: BorderRadius.circular(1),
               ),
             ),
-              onPressed: ()  async {
-                await context.read<AuthCubit>().logOut();
+              onPressed: ()   {
+                 context.read<AuthBloc>().add(LogOutEvent());
               },
               child:  Text(AppLocalizations.of(context)!.sing_out),
             ),
@@ -62,8 +50,8 @@ class _AuthWidget extends State<AuthWidget> {
               borderRadius: BorderRadius.circular(1),
             ),
           ),
-            onPressed: () async {
-              await context.read<AuthCubit>().logInt();
+            onPressed: ()  {
+               context.read<AuthBloc>().add(LogInEvent());
             },
             child:  Text(AppLocalizations.of(context)!.sing_in),
           ),

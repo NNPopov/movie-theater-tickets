@@ -11,8 +11,6 @@ namespace CinemaTicketBooking.Domain.MovieSessions.Abstractions
         
         Task<MovieSession> GetByIdAsync(Guid movieSessionId,
             CancellationToken cancel);
-
-        Task<MovieSession> GetWithMoviesByIdAsync(Guid id, CancellationToken cancel);
-        Task<MovieSession> GetWithTicketsByIdAsync(Guid id, CancellationToken cancel);
+        
     }
 }

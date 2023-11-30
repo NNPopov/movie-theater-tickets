@@ -9,13 +9,8 @@ GetIt getIt = GetIt.instance;
 class GetMovieById
     extends FutureUsecaseWithParams<Movie, String> {
 
-  GetMovieById({MovieRepo? repo})
-  {
-    _repo = repo ?? getIt.get<MovieRepo>();
-
-  }
-
-  late MovieRepo _repo;
+  GetMovieById(this._repo);
+  final MovieRepo _repo;
 
   @override
   ResultFuture<Movie> call(String movieId) =>

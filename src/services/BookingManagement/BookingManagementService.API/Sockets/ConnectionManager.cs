@@ -1,5 +1,5 @@
 ﻿using CinemaTicketBooking.Api.Sockets.Abstractions;
-using CinemaTicketBooking.Application.Abstractions;
+using CinemaTicketBooking.Application.Abstractions.Services;
 
 namespace CinemaTicketBooking.Api.Sockets;
 
@@ -12,6 +12,12 @@ public class ConnectionManager : IConnectionManager
         _cacheService = cacheService;
     }
     
+    
+    public void AddConnections(Guid id, IEnumerable<string> connectionIds)
+    {
+        
+        _cacheService.Set($"hub:{id}", connectionIds, new TimeSpan(2, 0, 0));
+    }
     
     public void AddConnection(Guid shoppingCartId, string connectionId)
     {
@@ -43,11 +49,29 @@ public class ConnectionManager : IConnectionManager
     public void RemoveShoppingCartId(Guid shoppingCartId)
     {
        _cacheService.Remove($"hub:{shoppingCartId}");
-        
-       // var item = _signalRConnections.FirstOrDefault(t => t.shoppingCartId == shoppingCartId);
-       //  _signalRConnections.Remove(item);
+       
     }
-    
+
+    public void RemoveSubscriptionShoppingCartId(Guid shoppingCartId, string connectionId)
+    {
+        List<string> connectionIds = _cacheService.TryGet<List<string>>($"hub:{shoppingCartId}").Result;
+
+        if (connectionIds != null)
+        {
+
+            if (!connectionIds.Exists(t=>t.Equals(connectionId)))
+            {
+                connectionIds.Remove(connectionId);
+            }
+        }
+        else
+        {
+            connectionIds= new List<string> { connectionId };
+        }
+        
+        _cacheService.Set($"hub:{shoppingCartId}", connectionIds, new TimeSpan(2, 0, 0));
+    }
+
     public IEnumerable<string> GetConnectionId(Guid shoppingCartId)
     {
         List<string> connectionIds = _cacheService.TryGet<List<string>>($"hub:{shoppingCartId}").Result;

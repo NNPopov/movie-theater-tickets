@@ -9,16 +9,13 @@ import '../../domain/repo/cinema_hall_repo.dart';
 import '../models/cinema_hall_dto.dart';
 import 'package:get_it/get_it.dart';
 
-import 'package:get_it/get_it.dart';
 
 GetIt getIt = GetIt.instance;
 
 class CinemaHallRepoImpl implements CinemaHallRepo {
-  late Dio _client;
+  final Dio _client;
 
-  CinemaHallRepoImpl({Dio? client}) {
-    _client = client ?? getIt.get<Dio>();
-  }
+  CinemaHallRepoImpl(this._client) ;
 
   @override
   ResultFuture<CinemaHall> getCinemaHallById(String cinemaHallId) async {

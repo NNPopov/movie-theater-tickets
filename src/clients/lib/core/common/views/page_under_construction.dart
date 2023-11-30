@@ -11,7 +11,7 @@ class PageUnderConstruction extends StatelessWidget {
       appBar: AppBar(),
       extendBodyBehindAppBar: true,
       body:
-        Center(
+        const Center(
           child: Text("Page Under Construction"),
 
       ),

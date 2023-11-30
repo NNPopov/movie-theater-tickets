@@ -1,8 +1,10 @@
 ﻿using CinemaTicketBooking.Application.Abstractions;
+using CinemaTicketBooking.Application.Abstractions.Repositories;
 using CinemaTicketBooking.Application.Exceptions;
 using CinemaTicketBooking.Domain.MovieSessions;
 using CinemaTicketBooking.Domain.MovieSessions.Abstractions;
 using CinemaTicketBooking.Domain.ShoppingCarts;
+using CinemaTicketBooking.Domain.ShoppingCarts.Abstractions;
 using Serilog;
 
 namespace CinemaTicketBooking.Application.ShoppingCarts.Command.UnselectSeats;
@@ -43,7 +45,7 @@ public class UnselectSeatCommandHandler : IRequestHandler<UnselectSeatCommand, b
         CancellationToken cancellationToken)
     {
         var movieSession = await _movieSessionsRepository
-            .GetWithTicketsByIdAsync(
+            .GetByIdAsync(
                 request.MovieSessionId, cancellationToken);
 
         if (movieSession is null)
@@ -51,7 +53,7 @@ public class UnselectSeatCommandHandler : IRequestHandler<UnselectSeatCommand, b
 
         //Step 1: Remove seat from cart
 
-        var cart = await _shoppingCartRepository.TryGetCart(request.ShoppingCartId);
+        var cart = await _shoppingCartRepository.GetByIdAsync(request.ShoppingCartId);
 
         if (cart is null)
             throw new ContentNotFoundException(request.ShoppingCartId.ToString(), nameof(ShoppingCart));
@@ -64,7 +66,7 @@ public class UnselectSeatCommandHandler : IRequestHandler<UnselectSeatCommand, b
         cart.TryRemoveSeats(new SeatShoppingCart(request.SeatRow, request.SeatNumber));
 
 
-        await _shoppingCartRepository.TrySetCart(cart);
+        await _shoppingCartRepository.SetAsync(cart);
 
         //Step 2: Remove teptorary select
 
@@ -77,7 +79,7 @@ public class UnselectSeatCommandHandler : IRequestHandler<UnselectSeatCommand, b
         }
 
 
-        await _shoppingCartNotifier.SentShoppingCartState(cart);
+       // await _shoppingCartNotifier.SentShoppingCartState(cart);
 
         //Step 3: return seat back to store 
 

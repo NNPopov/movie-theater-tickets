@@ -1,8 +1,13 @@
 ﻿using System.Reflection;
 using CinemaTicketBooking.Api.Infrastructure;
+using CinemaTicketBooking.Api.IntegrationEvents.EventHandling;
+using CinemaTicketBooking.Api.IntegrationEvents.Events;
 using CinemaTicketBooking.Api.Sockets;
 using CinemaTicketBooking.Api.Sockets.Abstractions;
+using CinemaTicketBooking.Api.WorkerServices;
 using CinemaTicketBooking.Application.Abstractions;
+using CinemaTicketBooking.Application.Abstractions.Services;
+using CinemaTicketBooking.Infrastructure.EventBus;
 using Microsoft.Extensions.Options;
 using Microsoft.OpenApi.Models;
 using Serilog.Core;
@@ -99,19 +104,20 @@ public static class ConfigureApiServices
     {
         services
             .AddSignalR(
-                hubOptions => {
-                     hubOptions.KeepAliveInterval = TimeSpan.FromSeconds(20);
-                     hubOptions.MaximumReceiveMessageSize = 65_536;
-                     hubOptions.HandshakeTimeout = TimeSpan.FromSeconds(15);
-                     hubOptions.MaximumParallelInvocationsPerClient = 2;
-                     hubOptions.EnableDetailedErrors = true; 
+                hubOptions =>
+                {
+                    hubOptions.KeepAliveInterval = TimeSpan.FromSeconds(20);
+                    hubOptions.MaximumReceiveMessageSize = 65_536;
+                    hubOptions.HandshakeTimeout = TimeSpan.FromSeconds(15);
+                    hubOptions.MaximumParallelInvocationsPerClient = 2;
+                    hubOptions.EnableDetailedErrors = true;
                     hubOptions.StreamBufferCapacity = 15;
                     if (hubOptions?.SupportedProtocols is not null)
-                         {
-                         foreach (var protocol in hubOptions.SupportedProtocols)
-                             logger.Error($"SignalR supports {protocol} protocol.");
-                         }
-                     })
+                    {
+                        foreach (var protocol in hubOptions.SupportedProtocols)
+                            logger.Error($"SignalR supports {protocol} protocol.");
+                    }
+                })
             .AddStackExchangeRedis(
                 o =>
                 {
@@ -147,7 +153,16 @@ public static class ConfigureApiServices
 
         services.AddScoped<ICinemaHallSeatsNotifier, CinemaHallSeatsNotifier>()
             .AddScoped<IShoppingCartNotifier, ShoppingCartNotifier>()
+            .AddScoped<IServerStateNotifier, ServerStateNotifier>()
             .AddSingleton<IConnectionManager>(t => ConnectionManager.Factory(t.GetRequiredService<ICacheService>()));
+
+
+        services
+            .AddTransient<IIntegrationEventHandler<SeatExpiredSelectionIntegrationEvent>,
+                SeatExpiredSelectionIntegrationEventHandler>()
+            .AddTransient<IIntegrationEventHandler<ShoppingCartExpiredIntegrationEvent>,
+                ShoppingCartExpiredEventHandler>();
+
 
         return services;
     }

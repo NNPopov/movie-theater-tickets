@@ -11,6 +11,7 @@
       "launchUrl": "swagger/index.html",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
+        "ConnectionStrings__EventBus":"localhost",
         "ConnectionStrings__Redis":"localhost:6379",
         "ConnectionStrings__BookingDbContext":"Server=localhost;Port=5452;Database=booking_db;Username=booking_user;Password=password",
         "IdentityOptions__RedirectUrl": "https://localhost:7629/swagger/oauth2-redirect.html",

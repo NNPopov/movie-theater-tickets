@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
-
-import '../../../../core/utils/utils.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-import '../../../seats/domain/entities/seat.dart';
-import '../../domain/entities/seat.dart';
 import '../cubit/shopping_cart_cubit.dart';
+import '../views/shopping_cart_view.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
+
+
 
 class ShoppingCartIconWidget extends StatefulWidget {
-  const ShoppingCartIconWidget({super.key});
+  const ShoppingCartIconWidget(this.navigatorKey,{super.key });
 
+ final  GlobalKey<NavigatorState> navigatorKey;
   @override
   State<ShoppingCartIconWidget> createState() => _ShoppingCartIconWidget();
 }
@@ -20,6 +21,7 @@ class _ShoppingCartIconWidget extends State<ShoppingCartIconWidget> {
     super.initState();
   }
 
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<ShoppingCartCubit, ShoppingCartState>(
@@ -28,9 +30,9 @@ class _ShoppingCartIconWidget extends State<ShoppingCartIconWidget> {
         return true;
       },
       builder: (BuildContext context, ShoppingCartState state) {
-        String countSelectedSeats = "0";
+        String countSelectedSeats = '0';
 
-        if (state is CreatingShoppingCart) {
+        if (state.status == ShoppingCartStateStatus.creating) {
           return const SizedBox(
             width: 70,
             height: 40,
@@ -44,12 +46,11 @@ class _ShoppingCartIconWidget extends State<ShoppingCartIconWidget> {
             ),
           );
         }
-        if (state is! ShoppingCartInitialState && state is! ShoppingCartError) {
-          var createdShoppingCard = state as ShoppingCartCurrentState;
-          var shoppingCardId = createdShoppingCard.shoppingCard.id;
-          countSelectedSeats = createdShoppingCard
-              .shoppingCard.shoppingCartSeat.length
-              .toString() ?? "0";
+        if (state.status != ShoppingCartStateStatus.initial && state.status != ShoppingCartStateStatus.error) {
+
+          countSelectedSeats = state
+              .shoppingCart.shoppingCartSeat.length
+              .toString() ?? '0';
         }
 
         return SizedBox(
@@ -59,12 +60,15 @@ class _ShoppingCartIconWidget extends State<ShoppingCartIconWidget> {
             children: [
             IconButton(
                 icon: const Icon(Icons.shopping_cart),
-                tooltip: 'Remove',
-                onPressed: () {}
+                tooltip: AppLocalizations.of(context)!.shopping_cart,
+                onPressed: () {
+                widget.navigatorKey.currentState?.pushNamed(ShoppingCartView.id);
+                //  Navigator.pushNamed(context, ShoppingCartView.id);
+                }
             ),
             Text(
               countSelectedSeats,
-              style: TextStyle(fontSize: 12),
+              style: const TextStyle(fontSize: 12),
             )
             ],
           ),

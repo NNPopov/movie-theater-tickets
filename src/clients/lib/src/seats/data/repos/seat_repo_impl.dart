@@ -26,7 +26,7 @@ class SeatRepoImpl implements SeatRepo {
       List<dynamic> movies = jsonDecode(jsonEncode(response.data));
 
       List<Seat> seatDtos =
-      movies.map((json) => SeatDto.fromJson(json) as Seat).toList();
+      movies.map((json) => SeatDto.fromJson(json)).toList();
 
       return Right(seatDtos);
     } on DioException catch (e) {

@@ -8,6 +8,9 @@ public interface IMovieSessionSeatRepository
     Task UpdateAsync(MovieSessionSeat movieSessionSeat,
         CancellationToken cancellationToken);
 
+    Task UpdateRangeAsync(ICollection<MovieSessionSeat> movieSessionSeats,
+        CancellationToken cancellationToken);
+
     Task<ICollection<MovieSessionSeat>> GetByMovieSessionIdAsync(Guid movieSessionId,
         CancellationToken cancellationToken);
 

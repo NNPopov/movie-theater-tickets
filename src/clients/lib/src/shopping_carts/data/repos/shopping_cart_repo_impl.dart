@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:dartz/dartz.dart';
 import 'package:movie_theater_tickets/core/utils/typedefs.dart';
 import 'package:dio/dio.dart';
-import '../../../../core/errors/exceptions.dart';
 import '../../../../core/errors/failures.dart';
 import '../../domain/entities/create_shopping_cart_response.dart';
 import '../../domain/entities/seat.dart';
@@ -32,15 +31,15 @@ class ShoppingCartRepoImpl implements ShoppingCartRepo {
       final response = await _client.post('/api/shoppingcarts',
           data: request.toJson(),
           options:
-          Options(headers: {'X-Idempotency-Key': Guid.newGuid.toString()}));
+              Options(headers: {'X-Idempotency-Key': Guid.newGuid.toString()}));
 
-      var shoppingCart =
-      CreateShoppingCartResponse.fromJson(response.data as Map<String, dynamic>)
-      as CreateShoppingCartResponse;
+      var shoppingCart = CreateShoppingCartResponse.fromJson(
+          response.data as Map<String, dynamic>);
 
       return Right(shoppingCart);
     } on Exception catch (e) {
-      return Left(ServerFailure(message: e.toString(), statusCode: e.toString()));
+      return Left(
+          ServerFailure(message: e.toString(), statusCode: e.toString()));
     }
   }
 
@@ -77,9 +76,9 @@ class ShoppingCartRepoImpl implements ShoppingCartRepo {
           '/api/shoppingcarts/${shoppingCart.id}/seats/select',
           data: request.toJson(),
           options:
-          Options(headers: {'X-Idempotency-Key': Guid.newGuid.toString()}));
+              Options(headers: {'X-Idempotency-Key': Guid.newGuid.toString()}));
 
-      return Right(null);
+      return const Right(null);
     } on DioException catch (e) {
       if (e.response?.statusCode == 409) {
         return Left(ConflictFailure(message: e.message!));
@@ -103,9 +102,40 @@ class ShoppingCartRepoImpl implements ShoppingCartRepo {
           '/api/shoppingcarts/${shoppingCart.id}/seats/unselect',
           data: request.toJson(),
           options:
-          Options(headers: {'X-Idempotency-Key': Guid.newGuid.toString()}));
+              Options(headers: {'X-Idempotency-Key': Guid.newGuid.toString()}));
 
-      return Right(null);
+      return const Right(null);
+    } on Exception catch (e) {
+      return Left(ServerFailure(message: e.toString(), statusCode: 500));
+    }
+  }
+
+  @override
+  ResultFuture<CreateShoppingCartResponse> getCurrentUserShoppingCart() async {
+    try {
+      final response = await _client.get('/api/shoppingcarts/current',
+          options:
+              Options(headers: {'X-Idempotency-Key': Guid.newGuid.toString()}));
+
+      if (response.statusCode == 204) {
+        return const Left(NotFoundFailure( statusCode: 204));
+      }
+
+      var shoppingCart = CreateShoppingCartResponse.fromJson(
+          response.data as Map<String, dynamic>);
+
+      return Right(shoppingCart);
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 409) {
+        return Left(ConflictFailure(message: e.toString()));
+      }
+      if (e.response?.statusCode == 204) {
+        return Left(NotFoundFailure(message: e.toString()));
+      }
+      if (e.response?.statusCode == 404) {
+        return Left(NotFoundFailure(message: e.toString()));
+      }
+      return Left(ServerFailure(message: e.toString(), statusCode: 500));
     } on Exception catch (e) {
       return Left(ServerFailure(message: e.toString(), statusCode: 500));
     }
@@ -115,11 +145,22 @@ class ShoppingCartRepoImpl implements ShoppingCartRepo {
   ResultFuture<void> assignClient(String shoppingCartId) async {
     try {
       final response = await _client.put(
-          '/api/shoppingcarts/${shoppingCartId}/assignclient',
+          '/api/shoppingcarts/$shoppingCartId/assignclient',
           options:
-          Options(headers: {'X-Idempotency-Key': Guid.newGuid.toString()}));
+              Options(headers: {'X-Idempotency-Key': Guid.newGuid.toString()}));
 
-      return Right(null);
+      return const Right(null);
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 409) {
+        return Left(ConflictFailure(message: e.toString()));
+      }
+      if (e.response?.statusCode == 204) {
+        return Left(NotFoundFailure(message: e.toString()));
+      }
+      if (e.response?.statusCode == 404) {
+        return Left(NotFoundFailure(message: e.toString()));
+      }
+      return Left(ServerFailure(message: e.toString(), statusCode: 500));
     } on Exception catch (e) {
       return Left(ServerFailure(message: e.toString(), statusCode: 500));
     }
@@ -129,11 +170,11 @@ class ShoppingCartRepoImpl implements ShoppingCartRepo {
   ResultFuture<void> reserveSeats(String shoppingCartId) async {
     try {
       final response = await _client.post(
-          '/api/shoppingcarts/${shoppingCartId}/reservations',
+          '/api/shoppingcarts/$shoppingCartId/reservations',
           options:
-          Options(headers: {'X-Idempotency-Key': Guid.newGuid.toString()}));
+              Options(headers: {'X-Idempotency-Key': Guid.newGuid.toString()}));
 
-      return Right(null);
+      return const Right(null);
     } on Exception catch (e) {
       return Left(ServerFailure(message: e.toString(), statusCode: 500));
     }

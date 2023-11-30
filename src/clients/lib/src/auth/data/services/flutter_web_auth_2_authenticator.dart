@@ -17,8 +17,9 @@ class FlutterWebAuth2Authenticator implements Authenticator {
   final String _callbackPath = dotenv.env["CALLBACK_PATH"].toString();
   final String _identityAuthPath = dotenv.env["IDENTITY_AUTH_PATH"].toString();
 
+  @override
   ResultFuture<String> logIn() async {
-    final callbackUrlScheme = '${_clientBaseUrl}/${_callbackPath}';
+    final callbackUrlScheme = '$_clientBaseUrl/$_callbackPath';
 
     Uri url = createAuthenticateUri(
         _identityHost, _identityAuthPath, callbackUrlScheme, _useHttps);
@@ -46,8 +47,8 @@ class FlutterWebAuth2Authenticator implements Authenticator {
   }
 
   Uri createCodeExchangeUri(
-      String identityHost, String identityAuthPath, bool use_https) {
-    if (use_https) {
+      String identityHost, String identityAuthPath, bool useHttps) {
+    if (useHttps) {
       return Uri.https(identityHost, identityAuthPath);
     } else {
       return Uri.http(identityHost, identityAuthPath);
@@ -55,14 +56,14 @@ class FlutterWebAuth2Authenticator implements Authenticator {
   }
 
   Uri createAuthenticateUri(String identityHost, String identityAuthPath,
-      String callbackUrlScheme, bool use_https) {
+      String callbackUrlScheme, bool useHttps) {
     var queryParameters = {
       'response_type': 'code',
       'client_id': _clientId,
-      'redirect_uri': '$callbackUrlScheme',
+      'redirect_uri': callbackUrlScheme,
       'scope': 'email openid phone'
     };
-    if (use_https) {
+    if (useHttps) {
       return Uri.https(identityHost, identityAuthPath, queryParameters);
     } else {
       return Uri.http(identityHost, identityAuthPath, queryParameters);

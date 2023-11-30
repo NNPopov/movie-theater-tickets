@@ -1,10 +1,10 @@
 #See https://aka.ms/containerfastmode to understand how Visual Studio uses this Dockerfile to build your images for faster debugging.
-FROM mcr.microsoft.com/dotnet/aspnet:8.0.100-preview.7-jammy AS base
+FROM mcr.microsoft.com/dotnet/aspnet:8.0.100 AS base
 WORKDIR /app
 EXPOSE 80
 #EXPOSE 443
 
-FROM mcr.microsoft.com/dotnet/sdk:8.0.100-preview.7-jammy AS build
+FROM mcr.microsoft.com/dotnet/sdk:8.0.100 AS build
 WORKDIR /src
 #COPY ["BookingManagementService.API.csproj", "./src"]
 

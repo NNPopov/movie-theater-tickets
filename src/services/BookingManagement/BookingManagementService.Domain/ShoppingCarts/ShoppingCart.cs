@@ -4,6 +4,7 @@ using System.Text;
 using CinemaTicketBooking.Domain.Common;
 using CinemaTicketBooking.Domain.Common.Ensure;
 using CinemaTicketBooking.Domain.Common.Events;
+using CinemaTicketBooking.Domain.Error;
 using CinemaTicketBooking.Domain.Exceptions;
 using CinemaTicketBooking.Domain.MovieSessions;
 using Newtonsoft.Json;
@@ -47,15 +48,15 @@ public class ShoppingCart : AggregateRoot
         ClientId = clientId;
         HashId = hashId;
     }
-    
+
     static string ComputeMD5(string s)
     {
         StringBuilder sb = new StringBuilder();
-        
+
         using (MD5 md5 = MD5.Create())
         {
             byte[] hashValue = md5.ComputeHash(Encoding.UTF8.GetBytes(s));
-            
+
             foreach (byte b in hashValue)
             {
                 sb.Append($"{b:X2}");
@@ -65,7 +66,7 @@ public class ShoppingCart : AggregateRoot
         return sb.ToString();
     }
 
-    public void AssignClientId(Guid clientId)
+    public Result AssignClientId(Guid clientId)
     {
         Ensure.NotEmpty(clientId, "The clientId is required.", nameof(clientId));
 
@@ -76,6 +77,10 @@ public class ShoppingCart : AggregateRoot
             throw new ConflictException(nameof(ShoppingCart), Id.ToString());
 
         ClientId = clientId;
+
+        _domainEvents.Add(new ShoppingCartAssignedToClientDomainEvent(Id));
+
+        return Result.Success();
     }
 
     private ShoppingCart(Guid id, short maxNumberOfSeats) : base(id: id)
@@ -88,6 +93,8 @@ public class ShoppingCart : AggregateRoot
         MaxNumberOfSeats = maxNumberOfSeats;
         Status = ShoppingCartStatus.InWork;
         ClientId = Guid.Empty;
+
+        _domainEvents.Add(new ShoppingCartCreatedDomainEvent(id));
     }
 
     public void SetShowTime(Guid showTimeId)
@@ -115,10 +122,10 @@ public class ShoppingCart : AggregateRoot
     {
         Ensure.NotEmpty(MovieSessionId, "The MovieSessionId is required.", nameof(MovieSessionId));
         Ensure.NotEmpty(movieSessionId, "The movieSessionId is required.", nameof(movieSessionId));
-        
+
         if (Status != ShoppingCartStatus.InWork)
             throw new ConflictException(nameof(ShoppingCart), Id.ToString());
-        
+
         if (MovieSessionId != movieSessionId)
             throw new DomainValidationException($"The Seat does not belong to the cinema hall being processed.");
 
@@ -126,11 +133,15 @@ public class ShoppingCart : AggregateRoot
         {
             throw new DomainValidationException($"Number of seats cannot be greater than {MaxNumberOfSeats}.");
         }
-        
+
         if (_seats.Any(t => t.SeatRow == seat.SeatRow && t.SeatNumber == seat.SeatNumber))
         {
-            throw new DomainValidationException($"Seat has already been added to cart movieSessionId:{movieSessionId}, SeatRow:{seat.SeatRow}, SeatNumber:{seat.SeatNumber}.");
+            throw new DomainValidationException(
+                $"Seat has already been added to cart movieSessionId:{movieSessionId}, SeatRow:{seat.SeatRow}, SeatNumber:{seat.SeatNumber}.");
         }
+
+        _domainEvents.Add(new SeatAddedToShoppingCartDomainEvent(MovieSessionId,
+            seat.SeatRow, seat.SeatNumber, Id));
 
         _seats.Add(seat);
     }
@@ -189,14 +200,50 @@ public class ShoppingCart : AggregateRoot
         if (Status == ShoppingCartStatus.SeatsReserved)
             Status = ShoppingCartStatus.PurchaseCompleted;
     }
+
+    public void Delete()
+    {
+        Status = ShoppingCartStatus.Deleted;
+
+        _domainEvents.Add(new ShoppingCartDeletedDomainEvent(this));
+    }
 }
 
 [method: JsonConstructor]
-public class SeatShoppingCart(short seatRow, short seatNumber) : Seat(seatRow, seatNumber);
+public class SeatShoppingCart(short seatRow, short seatNumber, DateTime? SelectionExpirationTime = null)
+    : Seat(seatRow, seatNumber)
+{
+
+    
+    public DateTime? SelectionExpirationTime { get; private set; } = SelectionExpirationTime;
+};
+
+public abstract record ShoppingCartDomainEvent(
+    Guid ShoppingCartId
+) : IDomainEvent;
+
+public sealed record SeatAddedToShoppingCartDomainEvent(
+    Guid MovieSessionId,
+    short SeatRow,
+    short SeatNumber,
+    Guid ShoppingCartId
+) : ShoppingCartDomainEvent(ShoppingCartId);
 
 public sealed record SeatRemovedFromShoppingCartDomainEvent(
     Guid MovieSessionId,
     short SeatRow,
     short SeatNumber,
     Guid ShoppingCartId
-) : IDomainEvent;
+) : ShoppingCartDomainEvent(ShoppingCartId);
+
+public sealed record ShoppingCartCreatedDomainEvent(
+    Guid ShoppingCartId
+) : ShoppingCartDomainEvent(ShoppingCartId);
+
+public sealed record ShoppingCartAssignedToClientDomainEvent(
+    Guid ShoppingCartId
+) : ShoppingCartDomainEvent(ShoppingCartId);
+
+public sealed record ShoppingCartDeletedDomainEvent(
+    ShoppingCart ShoppingCart
+) : ShoppingCartDomainEvent(ShoppingCart.Id);

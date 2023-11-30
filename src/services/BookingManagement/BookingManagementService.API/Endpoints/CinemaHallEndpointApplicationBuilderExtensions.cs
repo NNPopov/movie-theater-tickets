@@ -13,10 +13,10 @@ public class CinemaHallEndpointApplicationBuilderExtensions : IEndpoints
     public static void DefineEndpoints(IEndpointRouteBuilder endpointRouteBuilder)
     {
         endpointRouteBuilder.MapGet($"{BaseRoute}",
-                async (ICinemaHallRepository auditoriumsRepository, IMapper mapper,
+                async (ICinemaHallRepository cinemaHallRepository, IMapper mapper,
                     CancellationToken cancellationToken) =>
                 {
-                    var auditoriums = await auditoriumsRepository.GetAllAsync(
+                    var auditoriums = await cinemaHallRepository.GetAllAsync(
                         cancellationToken);
 
                     
@@ -29,11 +29,11 @@ public class CinemaHallEndpointApplicationBuilderExtensions : IEndpoints
         
         endpointRouteBuilder.MapGet($"{BaseRoute}/{{cinemaHallId}}",
                 async (Guid cinemaHallId,
-                    ICinemaHallRepository auditoriumsRepository, 
+                    ICinemaHallRepository cinemaHallRepository, 
                     IMapper mapper,
                     CancellationToken cancellationToken) =>
                 {
-                    var auditorium = await auditoriumsRepository.GetAsync(cinemaHallId,
+                    var auditorium = await cinemaHallRepository.GetAsync(cinemaHallId,
                         cancellationToken);
 
                     
@@ -48,10 +48,10 @@ public class CinemaHallEndpointApplicationBuilderExtensions : IEndpoints
 
 public class AuditoriumDTO 
 {
-    public Guid Id { get; set; }
+    public Guid Id { get; init; }
 
 
-    public string Description { get; set; }
+    public string Description { get; init; }
     
     private class Mapping : Profile
     {

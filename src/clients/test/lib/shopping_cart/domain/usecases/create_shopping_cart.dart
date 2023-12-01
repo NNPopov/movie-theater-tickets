@@ -4,10 +4,11 @@ import 'package:mocktail/mocktail.dart';
 import 'package:movie_theater_tickets/src/auth/domain/services/auth_service.dart';
 import 'package:movie_theater_tickets/src/hub/domain/event_hub.dart';
 import 'package:movie_theater_tickets/src/shopping_carts/domain/entities/create_shopping_cart_response.dart';
+import 'package:movie_theater_tickets/src/shopping_carts/domain/repos/shopping_cart_repo.dart';
 import 'package:movie_theater_tickets/src/shopping_carts/domain/services/shopping_cart_service.dart';
 import 'package:movie_theater_tickets/src/shopping_carts/domain/usecases/create_shopping_cart.dart';
 
-class MocShoppingCartService extends Mock implements ShoppingCartAuthListener {}
+class MocShoppingCartService extends Mock implements ShoppingCartRepo {}
 
 class MockEventHub extends Mock implements EventHub {}
 
@@ -24,7 +25,7 @@ void main() {
     repo = MocShoppingCartService();
     hub = MockEventHub();
     authService=MockAuthService();
-    usecase = CreateShoppingCartUseCase( repo,  hub, authService);
+    usecase = CreateShoppingCartUseCase(  hub, authService, repo);
   });
 
   group('CreateShoppingCart', () {
@@ -37,7 +38,7 @@ void main() {
 
       final result = await usecase(createShoppingCartCommand);
 
-      when(() => repo.createShoppingCartForAnonymousUser(any())).thenAnswer(
+      when(() => repo.createShoppingCart(any())).thenAnswer(
         (t) async => const Right(CreateShoppingCartResponse(
             'dcd5d892-4100-400b-b6f3-d4679f5b8db6',
             'f2a8d6cb31e38a1e5d7fc42e55daf53a')),
@@ -49,7 +50,7 @@ void main() {
           equals(const Right<dynamic, void>(
               'dcd5d892-4100-400b-b6f3-d4679f5b8db6')));
 
-      verify(() => repo.createShoppingCartForAnonymousUser(5)).called(1);
+      verify(() => repo.createShoppingCart(5)).called(1);
 
       verifyNoMoreInteractions(repo);
     });

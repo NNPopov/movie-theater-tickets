@@ -17,10 +17,10 @@ GetIt getIt = GetIt.instance;
 
 class CreateShoppingCartUseCase
     extends FutureUsecaseWithParams<String, CreateShoppingCartCommand> {
-  CreateShoppingCartUseCase(this._service, this._eventHub, this._authService, this._repo);
+  CreateShoppingCartUseCase( this._eventHub, this._authService, this._repo);
 
   final storage = const FlutterSecureStorage();
-  final ShoppingCartAuthListener _service;
+
   final EventHub _eventHub;
   final AuthService _authService;
   final ShoppingCartRepo _repo;

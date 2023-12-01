@@ -45,27 +45,17 @@ public class SeatStateRepository : ISeatStateRepository
         return $"{KeyPrefix}:{movieSessionId.ToString()}:{seatRow}:{seatNumber}";
     }
 
-    public async Task<bool> SetAsync(Guid movieSessionId, short seatRow, short seatNumber, TimeSpan? expiry)
+    public async Task<bool> SetAsync(Guid movieSessionId, SeatShoppingCart seatShoppingCart)
+   
     {
         var db = _redis.GetDatabase();
-        var key = GetKey(movieSessionId, seatRow, seatNumber);
+        var key = GetKey(movieSessionId, seatShoppingCart.SeatRow, seatShoppingCart.SeatNumber);
 
-        string jsonValue = JsonConvert.SerializeObject(new SeatShoppingCart(seatRow, seatNumber));
-
-        return await db.StringSetAsync(key, jsonValue, expiry);
-    }
-    
-    public async Task<bool> SetAsync(Guid movieSessionId, short seatRow, short seatNumber, DateTime expires)
-    {
-        var db = _redis.GetDatabase();
-        var key = GetKey(movieSessionId, seatRow, seatNumber);
-
-        var expiryTimeSpan = expires.Subtract(TimeProvider.System.GetUtcNow().DateTime);
-
-        string jsonValue = JsonConvert.SerializeObject(new SeatShoppingCart(seatRow, seatNumber));
+        var expiryTimeSpan = seatShoppingCart.SelectionExpirationTime.Value.Subtract(TimeProvider.System.GetUtcNow().DateTime);
+        
+        string jsonValue = JsonConvert.SerializeObject(seatShoppingCart);
 
         return await db.StringSetAsync(key, jsonValue, expiryTimeSpan);
     }
-    
     
 }

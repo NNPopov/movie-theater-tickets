@@ -33,7 +33,7 @@ public class ShoppingCartSpecification
         // Arrange
         var shoppingCart = ShoppingCart.Create(5);
         shoppingCart.SetShowTime(showTimeId);
-        var seat = Substitute.For<SeatShoppingCart>((short)1, (short)1);
+        var seat = Substitute.For<SeatShoppingCart>((short)1, (short)1, (decimal)100.00, null);
 
         // Act
         shoppingCart.AddSeats(seat, showTimeId);
@@ -50,7 +50,7 @@ public class ShoppingCartSpecification
         var showTimeId = Guid.NewGuid();
         var shoppingCart = ShoppingCart.Create(1);
         shoppingCart.SetShowTime(showTimeId);
-        var seat = Substitute.For<SeatShoppingCart>((short)1, (short)1);
+        var seat = Substitute.For<SeatShoppingCart>((short)1, (short)1, (decimal)100.00, null);
        
 
         // Act
@@ -69,7 +69,7 @@ public class ShoppingCartSpecification
         var showTimeId = Guid.NewGuid();
         var shoppingCart = ShoppingCart.Create(1);
         shoppingCart.SetShowTime(showTimeId);
-        var seat = Substitute.For<SeatShoppingCart>((short)1, (short)1);
+        var seat = Substitute.For<SeatShoppingCart>((short)1, (short)1, (decimal)100.00, null);
         shoppingCart.AddSeats(seat, showTimeId);
 
         // Act
@@ -87,11 +87,11 @@ public class ShoppingCartSpecification
         var showTimeId = Guid.NewGuid();
         var shoppingCart = ShoppingCart.Create(1);
         shoppingCart.SetShowTime(showTimeId);
-        var seat = Substitute.For<SeatShoppingCart>((short)1, (short)1);
+        var seat = Substitute.For<SeatShoppingCart>((short)1, (short)1, (decimal)100.00, null);
         shoppingCart.AddSeats(seat, showTimeId);
 
         // Act
-        var seat2 = Substitute.For<SeatShoppingCart>((short)1, (short)2);
+        var seat2 = Substitute.For<SeatShoppingCart>((short)1, (short)2, (decimal)100.00, null);
         var result = () => shoppingCart.AddSeats(seat2, showTimeId);
 
         // Assert
@@ -120,11 +120,11 @@ public class ShoppingCartSpecification
         // Arrange
         var shoppingCart = ShoppingCart.Create(5);
         shoppingCart.SetShowTime(showTimeId);
-        var seat = NSubstitute.Substitute.For<SeatShoppingCart>((short)1, (short)1);
+        var seat = NSubstitute.Substitute.For<SeatShoppingCart>((short)1, (short)1, (decimal)100.00, null);
         shoppingCart.AddSeats(seat, showTimeId);
 
         // Act
-        var result = shoppingCart.TryRemoveSeats(seat);
+        var result = shoppingCart.TryRemoveSeats(seat.SeatRow, seat.SeatNumber);
 
         // Assert
         result.Should().Be(true);

@@ -1,6 +1,7 @@
 ﻿using CinemaTicketBooking.Application.Abstractions;
 using CinemaTicketBooking.Application.Abstractions.Repositories;
 using CinemaTicketBooking.Domain.Error;
+using CinemaTicketBooking.Domain.PriceServices;
 using CinemaTicketBooking.Domain.Services;
 using CinemaTicketBooking.Domain.ShoppingCarts;
 using CinemaTicketBooking.Domain.ShoppingCarts.Abstractions;
@@ -71,31 +72,34 @@ public class SelectSeatCommandHandler : IRequestHandler<SelectSeatCommand, Resul
                 return DomainErrors<ShoppingCart>.ConflictException("Seat already reserved");
             }
 
-            DateTime expires
-                = TimeProvider.System.GetUtcNow().DateTime.AddMinutes(2);
-            // Step Add seat to cart
-            cart.AddSeats(new SeatShoppingCart(request.SeatRow, request.SeatNumber, expires ), request.MovieSessionId);
-
-
-            // Step 2 Select place
-
-            var result =
-                await _seatStateRepository.SetAsync(request.MovieSessionId,
-                    request.SeatRow,
-                    request.SeatNumber, expires);
-
-            if (!result)
-            {
-                return DomainErrors<ShoppingCart>.InvalidOperation("Can't save seat. Try again later");
-            }
-
-            await _movieSessionSeatService.SelectSeat(request.MovieSessionId,
+            var seat = await _movieSessionSeatService.SelectSeat(request.MovieSessionId,
                 request.SeatRow,
                 request.SeatNumber,
                 request.ShoppingCartId,
                 cart.HashId,
                 cancellationToken
             );
+            
+            DateTime expires
+                = TimeProvider.System.GetUtcNow().DateTime.AddMinutes(2);
+            // Step Add seat to cart
+            var selectSeat = new SeatShoppingCart(request.SeatRow, request.SeatNumber, seat.Price, expires);
+            cart.AddSeats(selectSeat, request.MovieSessionId);
+            
+            cart.CalculateCartAmount(new PriceService());
+
+            // Step 2 Select place
+
+            var result =
+                await _seatStateRepository.SetAsync(request.MovieSessionId,
+                    selectSeat);
+
+            if (!result)
+            {
+                return DomainErrors<ShoppingCart>.InvalidOperation("Can't save seat. Try again later");
+            }
+
+
 
 
             await _shoppingCartRepository.SetAsync(cart);

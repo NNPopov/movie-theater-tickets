@@ -3,6 +3,7 @@ using CinemaTicketBooking.Application.Abstractions.Repositories;
 using CinemaTicketBooking.Application.Exceptions;
 using CinemaTicketBooking.Domain.MovieSessions;
 using CinemaTicketBooking.Domain.MovieSessions.Abstractions;
+using CinemaTicketBooking.Domain.PriceServices;
 using CinemaTicketBooking.Domain.ShoppingCarts;
 using CinemaTicketBooking.Domain.ShoppingCarts.Abstractions;
 using Serilog;
@@ -63,8 +64,8 @@ public class UnselectSeatCommandHandler : IRequestHandler<UnselectSeatCommand, b
             throw new ContentNotFoundException(request.ShoppingCartId.ToString(), nameof(ShoppingCart));
         }
 
-        cart.TryRemoveSeats(new SeatShoppingCart(request.SeatRow, request.SeatNumber));
-
+        cart.TryRemoveSeats(request.SeatRow, request.SeatNumber);
+        cart.CalculateCartAmount(new PriceService());
 
         await _shoppingCartRepository.SetAsync(cart);
 

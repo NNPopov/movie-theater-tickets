@@ -7,6 +7,7 @@ using CinemaTicketBooking.Domain.Common.Events;
 using CinemaTicketBooking.Domain.Error;
 using CinemaTicketBooking.Domain.Exceptions;
 using CinemaTicketBooking.Domain.MovieSessions;
+using CinemaTicketBooking.Domain.ShoppingCarts.Abstractions;
 using Newtonsoft.Json;
 
 namespace CinemaTicketBooking.Domain.ShoppingCarts;
@@ -26,6 +27,8 @@ public class ShoppingCart : AggregateRoot
     public string HashId { get; private set; }
 
     public ShoppingCartStatus Status { get; private set; }
+    
+    public PriceCalculationResult PriceCalculationResult { get; private set; }
 
     public IReadOnlyList<SeatShoppingCart> Seats => _seats.AsReadOnly();
 
@@ -37,7 +40,8 @@ public class ShoppingCart : AggregateRoot
         SeatShoppingCart[]? seats,
         ShoppingCartStatus status,
         Guid clientId,
-        string hashId) : base(id: id)
+        string hashId,
+            PriceCalculationResult priceCalculationResult) : base(id: id)
     {
         MovieSessionId = movieSessionId;
 
@@ -47,6 +51,7 @@ public class ShoppingCart : AggregateRoot
         _seats = seats == null ? default : seats.ToList();
         ClientId = clientId;
         HashId = hashId;
+        PriceCalculationResult = priceCalculationResult;
     }
 
     static string ComputeMD5(string s)
@@ -146,20 +151,22 @@ public class ShoppingCart : AggregateRoot
         _seats.Add(seat);
     }
 
-    public bool TryRemoveSeats(SeatShoppingCart seat)
+    public bool TryRemoveSeats(short seatRow, short seatNumber)
     {
         Ensure.NotEmpty(MovieSessionId, "The MovieSessionId is required.", nameof(MovieSessionId));
 
         if (Status == ShoppingCartStatus.PurchaseCompleted)
             throw new ConflictException(nameof(ShoppingCart), Id.ToString());
 
-        if (!_seats.Exists(t => t == seat))
+        var seat = _seats.FirstOrDefault(t => t.SeatRow == seatRow && t.SeatNumber == seatNumber);
+
+        if (seat is null)
             return false;
 
         _seats.Remove(seat);
 
         _domainEvents.Add(new SeatRemovedFromShoppingCartDomainEvent(MovieSessionId,
-            seat.SeatRow, seat.SeatNumber, Id));
+            seatRow, seatNumber, Id));
 
         return true;
     }
@@ -201,6 +208,20 @@ public class ShoppingCart : AggregateRoot
             Status = ShoppingCartStatus.PurchaseCompleted;
     }
 
+    public PriceCalculationResult CalculateCartAmount( IPriceService priceService)
+    {
+        Ensure.NotEmpty(MovieSessionId, "The MovieSessionId is required.", nameof(MovieSessionId));
+
+        if (Status == ShoppingCartStatus.PurchaseCompleted)
+            throw new ConflictException(nameof(ShoppingCart), Id.ToString());
+
+        PriceCalculationResult= priceService.GetCartAmount(_seats);
+        
+        return PriceCalculationResult;
+    }
+
+
+
     public void Delete()
     {
         Status = ShoppingCartStatus.Deleted;
@@ -210,15 +231,14 @@ public class ShoppingCart : AggregateRoot
 }
 
 [method: JsonConstructor]
-public class SeatShoppingCart(short seatRow, short seatNumber, DateTime? SelectionExpirationTime = null)
+public class SeatShoppingCart(short seatRow, short seatNumber, decimal price, DateTime? SelectionExpirationTime = null)
     : Seat(seatRow, seatNumber)
 {
-
-    
+    public decimal Price { get; private set; } = price;
     public DateTime? SelectionExpirationTime { get; private set; } = SelectionExpirationTime;
 };
 
-public abstract record ShoppingCartDomainEvent(
+public abstract  record ShoppingCartDomainEvent(
     Guid ShoppingCartId
 ) : IDomainEvent;
 

@@ -1,4 +1,5 @@
 ﻿using CinemaTicketBooking.Application.Abstractions;
+using CinemaTicketBooking.Domain.PriceServices;
 using CinemaTicketBooking.Domain.Seats.Abstractions;
 using CinemaTicketBooking.Domain.ShoppingCarts;
 using CinemaTicketBooking.Domain.ShoppingCarts.Abstractions;
@@ -56,10 +57,11 @@ public class SeatExpiredReservationEventHandler : INotificationHandler<SeatExpir
         }
 
 
-        var removeResult = cart.TryRemoveSeats(new SeatShoppingCart(request.SeatRow, request.SeatNumber));
+        var removeResult = cart.TryRemoveSeats(request.SeatRow, request.SeatNumber);
 
         if (removeResult)
         {
+            cart.CalculateCartAmount(new PriceService());
             await _shoppingCartRepository.SetAsync(cart);
         }
         else

@@ -7,10 +7,10 @@ public interface ISeatStateRepository
 {
     Task DeleteAsync(Guid movieSessionId, short seatRow, short seatNumber);
     
-    Task<bool> SetAsync(Guid movieSessionId, short seatRow, short seatNumber, TimeSpan? expiry);
+   // Task<bool> SetAsync(Guid movieSessionId, SeatShoppingCart seatShoppingCart , TimeSpan? expiry);
     
 
     Task<SeatShoppingCart> GetAsync(Guid movieSessionId, short seatRow, short seatNumber);
 
-   Task<bool> SetAsync(Guid movieSessionId, short seatRow, short seatNumber, DateTime expires);
+   Task<bool> SetAsync(Guid movieSessionId, SeatShoppingCart seatShoppingCart);
 }

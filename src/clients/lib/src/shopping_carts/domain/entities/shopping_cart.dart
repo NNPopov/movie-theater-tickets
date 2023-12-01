@@ -11,29 +11,30 @@ class ShoppingCart extends Equatable {
   final bool? isAssigned;
   final ShoppingCartStatus? status;
   late List<ShoppingCartSeat> shoppingCartSeat;
+  late PriceCalculationResult? priceCalculationResult;
 
-   ShoppingCart({
-    this.maxNumberOfSeats,
-    this.createdCard,
-    this.id,
-    this.movieSessionId,
-    this.status,
-    List<ShoppingCartSeat>? seats,
-    this.isAssigned,
-  }) {
+  ShoppingCart(
+      {this.maxNumberOfSeats,
+      this.createdCard,
+      this.id,
+      this.movieSessionId,
+      this.status,
+      List<ShoppingCartSeat>? seats,
+      this.isAssigned,
+      this.priceCalculationResult}) {
     shoppingCartSeat = seats ?? [];
   }
 
-   ShoppingCart.empty()
+  ShoppingCart.empty()
       : this(
-    maxNumberOfSeats: 0,
-    createdCard: DateTime.parse('1900-01-01'),
-    id: '',
-    movieSessionId: '',
-    status: null,
-    seats: null,
-    isAssigned: false
-  );
+            maxNumberOfSeats: 0,
+            createdCard: DateTime.parse('1900-01-01'),
+            id: '',
+            movieSessionId: '',
+            status: null,
+            seats: null,
+            isAssigned: false,
+            priceCalculationResult: null);
 
   Either<Failure, void> addSeat(ShoppingCartSeat seat) {
     if (status != ShoppingCartStatus.InWork) {
@@ -59,8 +60,6 @@ class ShoppingCart extends Equatable {
 
     return const Right(null);
   }
-
-
 
   @override
   List<Object?> get props => [

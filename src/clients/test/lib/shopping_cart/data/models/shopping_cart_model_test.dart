@@ -16,10 +16,10 @@ void main() {
       maxNumberOfSeats: 4,
       status: ShoppingCartStatus.SeatsReserved,
       isAssigned: true,
-      seats: const [
-        ShoppingCartSeatDto(seatNumber: 1, seatRow: 1),
-        ShoppingCartSeatDto(seatNumber: 2, seatRow: 1),
-        ShoppingCartSeatDto(seatNumber: 3, seatRow: 1)
+      seats:  [
+        ShoppingCartSeatDto(seatNumber: 1, seatRow: 1, selectionExpirationTime: DateTime.parse("2023-09-28 19:28:53.299Z"), price: 15.0),
+        ShoppingCartSeatDto(seatNumber: 2, seatRow: 1, selectionExpirationTime: DateTime.parse("2023-09-28 19:28:53.299Z"), price: 15.0),
+        ShoppingCartSeatDto(seatNumber: 3, seatRow: 1, selectionExpirationTime: DateTime.parse("2023-09-28 19:28:53.299Z"), price: 15.0),
       ]);
 
   group('ShoppingCart', () {

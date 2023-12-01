@@ -98,7 +98,7 @@ void _initShoppingCart() {
   getIt.registerLazySingleton<ShoppingCartRepo>(() => ShoppingCartRepoImpl());
   getIt.registerLazySingleton<CreateShoppingCartUseCase>(() =>
       CreateShoppingCartUseCase(
-          getIt.get(), getIt.get(), getIt.get(), getIt.get()));
+          getIt.get(), getIt.get(), getIt.get()));
   getIt.registerLazySingleton<GetShoppingCartUseCase>(() =>
       GetShoppingCartUseCase(
           getIt.get(), getIt.get(), getIt.get(), getIt.get(), getIt.get()));

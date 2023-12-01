@@ -8,15 +8,22 @@
   "seats": [
     {
       "seatRow": 1,
-      "seatNumber": 1
+      "seatNumber": 1,
+      "selectionExpirationTime": "2023-09-28 19:28:53.299Z",
+      "price": 15.0
     },
     {
       "seatRow": 1,
-      "seatNumber": 2
+      "seatNumber": 2,
+      "selectionExpirationTime": "2023-09-28 19:28:53.299Z",
+      "price": 15.0
     },
     {
       "seatRow": 1,
-      "seatNumber": 3
+      "seatNumber": 3,
+      "selectionExpirationTime": "2023-09-28 19:28:53.299Z",
+      "price": 15.0
     }
-  ]
+  ],
+  "priceCalculationResult": null
 }

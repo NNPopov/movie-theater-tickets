@@ -93,7 +93,7 @@ class _ShoppingCartWidget extends State<ShoppingCartWidget> {
                   var rowSeat =
                       shoppingCartState.shoppingCart.shoppingCartSeat[rowIndex];
                   return Container(
-                    width: 220,
+                    width: 255,
                     height: 70,
                     alignment: Alignment.centerLeft,
                     decoration: BoxDecoration(
@@ -111,10 +111,16 @@ class _ShoppingCartWidget extends State<ShoppingCartWidget> {
                           children: [
                             Container(
                                 height: 40,
-                                width: 140,
-                                padding: const EdgeInsets.all(10.0),
+                                width: 125,
+                                padding: EdgeInsets.symmetric(vertical:10,horizontal: 0),
                                 child: Text(
                                     "${AppLocalizations.of(context)!.row} ${rowSeat.seatRow}, Number ${rowSeat.seatNumber}")),
+                            Container(
+                                height: 40,
+                                width: 25,
+                                padding:  EdgeInsets.symmetric(vertical:10,horizontal: 0),
+                                child: Text(
+                                    "${rowSeat.price}€")),
                             IconButton(
                               icon: const Icon(Icons.delete),
                               tooltip: AppLocalizations.of(context)!.remove,
@@ -141,31 +147,6 @@ class _ShoppingCartWidget extends State<ShoppingCartWidget> {
                 },
                 child: Text(AppLocalizations.of(context)!.complete_purchases),
               ),
-            // if (state.shoppingCart.shoppingCartSeat.isNotEmpty &&
-            //     !state.shoppingCart.isAssigned!)
-            //   AuthSafeAreaWidget(
-            //     authenticated: TextButton(
-            //       onPressed: () async {
-            //         onCompletePurchase();
-            //         //  onAssignClient();
-            //       },
-            //       child: Text(AppLocalizations.of(context)!.complete_purchases),
-            //     ),
-            //     notAuthenticated: TextButton(
-            //       onPressed: () {
-            //         context.read<AuthBloc>().add(LogInEvent());
-            //       },
-            //       child: Text(AppLocalizations.of(context)!.complete_purchases),
-            //     ),
-            //   ),
-            // if (state.shoppingCart.shoppingCartSeat.isNotEmpty &&
-            //     state.shoppingCart.isAssigned!)
-            //   TextButton(
-            //     onPressed: () {
-            //       onCompletePurchase();
-            //     },
-            //     child: Text(AppLocalizations.of(context)!.complete_purchases),
-            //   ),
           ]);
         }
 
@@ -187,72 +168,76 @@ class _ShoppingCartWidget extends State<ShoppingCartWidget> {
   Widget expirationProgressBar(ShoppingCartSeat rowSeat) {
     return BlocBuilder<ServerStateCubit, ServerState>(
         builder: (BuildContext context, ServerState state) {
-      if (rowSeat.selectionExpirationTime != null &&
-          state != ServerState.initState()) {
-        Duration timeBeforeExpiration =
-            rowSeat.selectionExpirationTime!.difference(state.serverDateTime);
-        int timeBeforeExpirationSeconds = timeBeforeExpiration.inSeconds;
+      return seatExpirationProgressBar(rowSeat, state);
+    });
+  }
 
-        double expirationValue = 0;
+  Container seatExpirationProgressBar(ShoppingCartSeat rowSeat, ServerState state) {
+    if (rowSeat.selectionExpirationTime != null &&
+        state != ServerState.initState()) {
+      Duration timeBeforeExpiration =
+          rowSeat.selectionExpirationTime!.difference(state.serverDateTime);
+      int timeBeforeExpirationSeconds = timeBeforeExpiration.inSeconds;
 
-        if (timeBeforeExpirationSeconds < Constants.SEAT_EXPIRATION_SEC + 100) {
-          var expirationPercentage =
-              timeBeforeExpirationSeconds / Constants.SEAT_EXPIRATION_SEC;
+      double expirationValue = 0;
 
-          if (expirationPercentage > 0.9) {
-            expirationValue = 100;
-          } else if (expirationPercentage > 0.8) {
-            expirationValue = 90;
-          } else if (expirationPercentage > 0.7) {
-            expirationValue = 80;
-          } else if (expirationPercentage > 0.6) {
-            expirationValue = 70;
-          } else if (expirationPercentage > 0.5) {
-            expirationValue = 60;
-          } else if (expirationPercentage > 0.4) {
-            expirationValue = 50;
-          } else if (expirationPercentage > 0.3) {
-            expirationValue = 40;
-          } else if (expirationPercentage > 0.2) {
-            expirationValue = 30;
-          } else if (expirationPercentage > 0.1) {
-            expirationValue = 20;
-          } else {
-            expirationValue = 10;
-          }
+      if (timeBeforeExpirationSeconds < Constants.SEAT_EXPIRATION_SEC + 100) {
+        var expirationPercentage =
+            timeBeforeExpirationSeconds / Constants.SEAT_EXPIRATION_SEC;
+
+        if (expirationPercentage > 0.9) {
+          expirationValue = 100;
+        } else if (expirationPercentage > 0.8) {
+          expirationValue = 90;
+        } else if (expirationPercentage > 0.7) {
+          expirationValue = 80;
+        } else if (expirationPercentage > 0.6) {
+          expirationValue = 70;
+        } else if (expirationPercentage > 0.5) {
+          expirationValue = 60;
+        } else if (expirationPercentage > 0.4) {
+          expirationValue = 50;
+        } else if (expirationPercentage > 0.3) {
+          expirationValue = 40;
+        } else if (expirationPercentage > 0.2) {
+          expirationValue = 30;
+        } else if (expirationPercentage > 0.1) {
+          expirationValue = 20;
+        } else {
+          expirationValue = 10;
         }
-        var containerColour = expirationValue <= 20
-            ? Colors.red
-            : expirationValue <= 60
-                ? Colors.blue
-                : Colors.green;
-
-        return Container(
-          alignment: Alignment.centerLeft,
-          width: 220,
-          child: Container(
-            alignment: Alignment.centerLeft,
-            height: 3,
-            width: expirationValue * 1.9,
-            padding: const EdgeInsets.all(0.0),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(1),
-              color: containerColour,
-              border: Border.all(
-                color: containerColour,
-                width: 2,
-              ),
-            ),
-          ),
-        );
       }
+      var containerColour = expirationValue <= 20
+          ? Colors.red
+          : expirationValue <= 60
+              ? Colors.blue
+              : Colors.green;
 
       return Container(
-        height: 3,
-        width: 40,
-        padding: const EdgeInsets.all(2.0),
+        alignment: Alignment.centerLeft,
+        width: 220,
+        child: Container(
+          alignment: Alignment.centerLeft,
+          height: 3,
+          width: expirationValue * 1.9,
+          padding: const EdgeInsets.all(0.0),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(1),
+            color: containerColour,
+            border: Border.all(
+              color: containerColour,
+              width: 2,
+            ),
+          ),
+        ),
       );
-    });
+    }
+
+    return Container(
+      height: 3,
+      width: 30,
+      padding: const EdgeInsets.all(2.0),
+    );
   }
 
   void onCreateShoppingCart() {

@@ -10,7 +10,8 @@ class ShoppingCartDto extends ShoppingCart {
       super.movieSessionId,
       super.status,
       super.seats,
-      super.isAssigned});
+      super.isAssigned,
+      super.priceCalculationResult});
 
   ShoppingCartDto.fromJson(Map<String, dynamic> json)
       : super(
@@ -20,9 +21,16 @@ class ShoppingCartDto extends ShoppingCart {
           movieSessionId: json['movieSessionId'],
           status: ShoppingCartStatus.values[json['status']],
           seats: List<Map<String, dynamic>>.from(json['seats'] as List<dynamic>)
-              .map((e) => ShoppingCartSeatDto.fromJson(e as Map<String, dynamic>)as ShoppingCartSeat)
+              .map((e) =>
+                  ShoppingCartSeatDto.fromJson(e as Map<String, dynamic>)
+                      as ShoppingCartSeat)
               .toList(),
           isAssigned: json['isAssigned'] ?? false,
+          priceCalculationResult: json['priceCalculationResult'] != null
+              ? PriceCalculationResultDto.fromJson(
+                      json['priceCalculationResult'] as Map<String, dynamic>)
+                  as PriceCalculationResult
+              : null,
         );
 
   ShoppingCartDto.empty()
@@ -33,7 +41,8 @@ class ShoppingCartDto extends ShoppingCart {
             movieSessionId: '',
             status: ShoppingCartStatus.InWork,
             seats: null,
-            isAssigned: false);
+            isAssigned: false,
+            priceCalculationResult: null);
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = {};
@@ -48,18 +57,22 @@ class ShoppingCartDto extends ShoppingCart {
             .toList()
         : null;
     data['isAssigned'] = isAssigned;
+    data['priceCalculationResult'] = priceCalculationResult != null
+        ? (priceCalculationResult as PriceCalculationResultDto).toJson()
+        : null;
+
     return data;
   }
 
-  ShoppingCart copyWith({
-    int? maxNumberOfSeats,
-    DateTime? createdCard,
-    String? id,
-    String? movieSessionId,
-    ShoppingCartStatus? status,
-    List<ShoppingCartSeatDto>? seats,
-    bool? isAssigned,
-  }) {
+  ShoppingCart copyWith(
+      {int? maxNumberOfSeats,
+      DateTime? createdCard,
+      String? id,
+      String? movieSessionId,
+      ShoppingCartStatus? status,
+      List<ShoppingCartSeatDto>? seats,
+      bool? isAssigned,
+      PriceCalculationResult? priceCalculationResult}) {
     return ShoppingCart(
         maxNumberOfSeats: maxNumberOfSeats ?? this.maxNumberOfSeats,
         createdCard: createdCard ?? this.createdCard,
@@ -67,7 +80,9 @@ class ShoppingCartDto extends ShoppingCart {
         movieSessionId: movieSessionId ?? this.movieSessionId,
         status: status ?? this.status,
         seats: seats ?? shoppingCartSeat,
-        isAssigned: isAssigned ?? this.isAssigned);
+        isAssigned: isAssigned ?? this.isAssigned,
+        priceCalculationResult:
+            priceCalculationResult ?? this.priceCalculationResult);
   }
 }
 
@@ -81,6 +96,7 @@ extension ShoppingCarMap on ShoppingCart {
       status: this.status,
       seats: this.shoppingCartSeat,
       isAssigned: this.isAssigned,
+      priceCalculationResult: this.priceCalculationResult,
     );
   }
 }

@@ -91,7 +91,7 @@ public sealed class MovieSessionSeatService
         await _movieSessionSeatRepository.UpdateAsync(movieSessionSeat, cancellationToken);
     }
 
-    public async Task SelectSeat(Guid movieSessionId,
+    public async Task<MovieSessionSeat> SelectSeat(Guid movieSessionId,
         short seatRow,
         short seatNumber,
         Guid shoppingCartId,
@@ -112,6 +112,8 @@ public sealed class MovieSessionSeatService
         {
             throw new ConflictException(nameof(MovieSessionSeat), this.ToString());
         }
+
+        return movieSessionSeat;
     }
 
     private async Task<MovieSessionSeat> GetMovieSessionSeat(Guid movieSessionId,

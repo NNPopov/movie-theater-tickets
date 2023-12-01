@@ -16,6 +16,8 @@ public class DomainSpecifications
         var result = Types.InAssembly(DomainAssembly)
             .That()
             .ImplementInterface(typeof(IDomainEvent))
+            .And()
+            .AreNotAbstract()
             .Should()
             .BeSealed()
             .GetResult();

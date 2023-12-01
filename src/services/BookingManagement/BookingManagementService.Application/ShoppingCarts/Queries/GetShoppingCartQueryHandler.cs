@@ -46,6 +46,8 @@ public class ShoppingCartDto
     
     public IReadOnlyList<SeatShoppingCart> Seats { get; set; }
     
+    public PriceCalculationResult PriceCalculationResult { get;  set; }
+    
     public bool IsAssigned { get; set; }
     
     private class Mapping : Profile

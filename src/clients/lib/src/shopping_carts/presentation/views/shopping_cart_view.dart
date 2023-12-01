@@ -130,7 +130,20 @@ class _ShoppingCartView extends State<ShoppingCartView> {
                     ),
                   );
                 }),
-
+            if (state.status != ShoppingCartStateStatus.initial &&
+                state.shoppingCart != null &&
+                state.shoppingCart.priceCalculationResult != null &&
+                state.shoppingCart.priceCalculationResult
+                        ?.totalCartAmountAfterDiscounts !=
+                    null)
+              Container(
+                width: 600,
+                height: 70,
+                child: Text(
+                    'totalCartAmountBeforeDiscounts: ${state.shoppingCart!.priceCalculationResult!.totalCartAmountBeforeDiscounts.toString()}'+
+                    'totalCartDiscounts: ${state.shoppingCart!.priceCalculationResult!.totalCartDiscounts.toString()}'+
+                    'totalCartAmountAfterDiscounts: ${state.shoppingCart!.priceCalculationResult!.totalCartAmountAfterDiscounts.toString()}'),
+              ),
             if (state.shoppingCart.shoppingCartSeat.isNotEmpty &&
                 state.shoppingCart.isAssigned!)
               TextButton(

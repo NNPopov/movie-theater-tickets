@@ -70,7 +70,7 @@ public class ShoppingCartEndpointApplicationBuilderExtensions : IEndpoints
             .Produces(204)
             .Produces(409);
 
-        endpointRouteBuilder.MapPut($"{BaseRoute}/{{shoppingCartId}}/assignclient", async (
+        endpointRouteBuilder.MapPut($"{BaseRoute}/{{ShoppingCartId}}/assignclient", async (
                 [FromRoute] Guid shoppingCartId,
                 ClaimsPrincipal user,
                 ISender sender,
@@ -102,7 +102,7 @@ public class ShoppingCartEndpointApplicationBuilderExtensions : IEndpoints
             .Produces(204)
             .Produces(409);
 
-        endpointRouteBuilder.MapPost($"{BaseRoute}/{{shoppingCartId}}/seats/select", async (
+        endpointRouteBuilder.MapPost($"{BaseRoute}/{{ShoppingCartId}}/seats/select", async (
                 [FromRoute] Guid shoppingCartId,
                 [FromBody] ReserveSeatsRequest reserveSeatsRequest,
                 ISender sender,
@@ -123,7 +123,7 @@ public class ShoppingCartEndpointApplicationBuilderExtensions : IEndpoints
             .Produces(201)
             .Produces(204);
 
-        endpointRouteBuilder.MapDelete($"{BaseRoute}/{{shoppingCartId}}/seats/unselect", async (
+        endpointRouteBuilder.MapDelete($"{BaseRoute}/{{ShoppingCartId}}/seats/unselect", async (
                 [FromRoute] Guid shoppingCartId,
                 [FromBody] UnselectSeatsRequest reserveSeatsRequest,
                 [FromServices] ISender sender,
@@ -140,7 +140,7 @@ public class ShoppingCartEndpointApplicationBuilderExtensions : IEndpoints
             .Produces<bool>(201, "application/json")
             .Produces(204);
 
-        endpointRouteBuilder.MapPost($"{BaseRoute}/{{shoppingCartId}}/reservations", async (
+        endpointRouteBuilder.MapPost($"{BaseRoute}/{{ShoppingCartId}}/reservations", async (
                 [FromRoute] Guid shoppingCartId,
                 [FromServices] ISender sender,
                 CancellationToken cancellationToken) =>
@@ -155,7 +155,7 @@ public class ShoppingCartEndpointApplicationBuilderExtensions : IEndpoints
             .Produces<bool>(201, "application/json")
             .Produces(204);
 
-        endpointRouteBuilder.MapDelete($"{BaseRoute}/{{shoppingCartId}}/unreserve", async (
+        endpointRouteBuilder.MapDelete($"{BaseRoute}/{{ShoppingCartId}}/unreserve", async (
                 [FromRoute] Guid shoppingCartId,
                 [FromHeader(Name = "X-Idempotency-Key")]
                 string requestId,
@@ -177,7 +177,7 @@ public class ShoppingCartEndpointApplicationBuilderExtensions : IEndpoints
             .Produces<bool>(200, "application/json")
             .Produces(204);
 
-        endpointRouteBuilder.MapPost($"{BaseRoute}/{{shoppingCartId}}/purchase", async ([FromRoute] Guid shoppingCartId,
+        endpointRouteBuilder.MapPost($"{BaseRoute}/{{ShoppingCartId}}/purchase", async ([FromRoute] Guid shoppingCartId,
                 [FromServices] ISender sender,
                 CancellationToken cancellationToken) =>
             {
@@ -192,7 +192,7 @@ public class ShoppingCartEndpointApplicationBuilderExtensions : IEndpoints
             .Produces(204);
 
 
-        endpointRouteBuilder.MapGet($"{BaseRoute}/{{shoppingCartId}}",
+        endpointRouteBuilder.MapGet($"{BaseRoute}/{{ShoppingCartId}}",
                 async ([FromRoute] Guid shoppingCartId,
                     [FromServices] IMediator mediator,
                     CancellationToken cancellationToken) =>

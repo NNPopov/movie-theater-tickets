@@ -78,9 +78,7 @@ public class UnselectSeatCommandHandler : IRequestHandler<UnselectSeatCommand, b
         {
             await _seatStateRepository.DeleteAsync(request.MovieSessionId, request.SeatRow, request.SeatNumber);
         }
-
-
-       // await _shoppingCartNotifier.SentShoppingCartState(cart);
+        
 
         //Step 3: return seat back to store 
 

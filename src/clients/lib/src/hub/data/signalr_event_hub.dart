@@ -9,6 +9,8 @@ import '../../seats/domain/usecases/update_seats_sate_usecase.dart';
 import '../../server_state/data/models/server_state_dto.dart';
 import '../../server_state/domain/entities/server_state.dart';
 import '../../server_state/domain/usecases/update_server_state_usecase.dart';
+import '../../shopping_carts/data/models/seat_info_dto.dart';
+import '../../shopping_carts/data/models/select_seat_dto.dart';
 import '../../shopping_carts/data/models/shopping_cart_dto.dart';
 import '../../shopping_carts/domain/entities/shopping_cart.dart';
 import '../../shopping_carts/domain/usecases/update_state_shopping_cart.dart';
@@ -55,8 +57,7 @@ class SignalREventHub implements EventHub {
         await _hubConnection.stop();
       }
     } catch (e) {
-
-      logger.e("hubConnection was disconnected with error", error: e );
+      logger.e("hubConnection was disconnected with error", error: e);
     }
 
     Logger.root.level = Level.ALL;
@@ -89,7 +90,7 @@ class SignalREventHub implements EventHub {
 
     _hubConnection.onclose(({error}) {
       _controller.add(DisconnectedEvent());
-      logger.e("On Close called", error: error );
+      logger.e("On Close called", error: error);
     });
 
     _hubConnection.on('SentShoppingCartState', _shoppingCartStateUpdate);
@@ -121,13 +122,13 @@ class SignalREventHub implements EventHub {
   }
 
   Future<void> _seatsStateUpdate(List<Object?>? args) async {
-    logger.d('seatsStateUpdate recived');
+    logger.d('seatsStateUpdate received');
 
     List<dynamic> movies = jsonDecode(jsonEncode(args?[0]));
 
-    List<Seat> seatDtos = movies.map((json) => SeatDto.fromJson(json)).toList();
+    List<Seat> seatsDto = movies.map((json) => SeatDto.fromJson(json)).toList();
 
-    await updateSeatsState(seatDtos);
+    await updateSeatsState(seatsDto);
   }
 
   Future<void> _sentServerState(List<Object?>? args) async {
@@ -161,6 +162,26 @@ class SignalREventHub implements EventHub {
   }
 
   @override
+  Future seatSelect(SeatInfoDto seatSelectRequestDto) async {
+    await _hubConnection.invoke('SeatSelect', args: <Object>[
+      seatSelectRequestDto.shoppingCartId,
+      seatSelectRequestDto.row,
+      seatSelectRequestDto.number,
+      seatSelectRequestDto.showtimeId
+    ]);
+  }
+
+  @override
+  Future seatUnselect(SeatInfoDto seatSelectRequestDto) async {
+    await _hubConnection.invoke('SeatUnselect', args: <Object>[
+      seatSelectRequestDto.shoppingCartId,
+      seatSelectRequestDto.row,
+      seatSelectRequestDto.number,
+      seatSelectRequestDto.showtimeId
+    ]);
+  }
+
+  @override
   Future shoppingCartUpdateSubscribe(String shoppingCartId) async {
     _shoppingCartId = shoppingCartId;
 
@@ -186,21 +207,28 @@ class SignalREventHub implements EventHub {
 
   Future _tryReconnect() async {
     logger.d('tryReconnect');
-    if (_movieSessionId != null) {
-      if (_movieSessionId!.isNotEmpty) {
-        await _seatsUpdateSubscribe(_movieSessionId!);
-        logger.d('seatsUpdateSubscribe reconnected');
+
+    try {
+      if (_movieSessionId != null) {
+        if (_movieSessionId!.isNotEmpty) {
+          await _seatsUpdateSubscribe(_movieSessionId!);
+          logger.d('seatsUpdateSubscribe reconnected');
+        }
       }
+    } on Exception catch (e) {
+      logger.e('Unable resubscribe movieSessionId', error: e);
+    }
+    try {
+      if (_shoppingCartId != null) {
+        if (_shoppingCartId!.isNotEmpty) {
+          await _shoppingCartUpdateSubscribe(_shoppingCartId!);
+          logger.d('shoppingCartUpdateSubscribe reconnected');
+        }
+      }
+    } on Exception catch (e) {
+      logger.e('Unable resubscribe shoppingCartId', error: e);
     }
 
-    if (_shoppingCartId != null) {
-      if (_shoppingCartId!.isNotEmpty) {
-        await _shoppingCartUpdateSubscribe(_shoppingCartId!);
-        logger.d('shoppingCartUpdateSubscribe reconnected');
-      }
-    }
-
-    logger.d('tryReconnect reconnected');
   }
 
   @override

@@ -4,7 +4,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:movie_theater_tickets/src/movies/domain/entities/movie.dart';
 import '../../domain/usecases/get_movie_by_id.dart';
-import 'movie_theater_cubit.dart';
+import '../../../movie_sessions/presentation/cubit/movie_theater_cubit.dart';
 
 part 'movie_state.dart';
 

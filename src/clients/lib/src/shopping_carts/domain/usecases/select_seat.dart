@@ -1,6 +1,9 @@
 import 'package:equatable/equatable.dart';
 import '../../../../core/common/usecase.dart';
 import '../../../../core/utils/typedefs.dart';
+import '../../../hub/domain/event_hub.dart';
+import '../../data/models/seat_info_dto.dart';
+import '../../data/models/select_seat_dto.dart';
 import '../entities/seat.dart';
 import '../entities/shopping_cart.dart';
 import '../repos/shopping_cart_local_repo.dart';
@@ -25,9 +28,16 @@ class SelectSeatUseCase
       var resultAddSeat = shoppingCart.addSeat(params.seat);
 
       return resultAddSeat.fold(
-          (l) => Left(l),
-          (r) => _repo.selectSeat(
-              shoppingCart, params.seat, params.movieSessionId));
+        (l) => Left(l),
+        (r) =>
+          _repo.selectSeat(
+            SeatInfoDto(
+                row: params.seat.seatRow!,
+                number: params.seat.seatNumber!,
+                showtimeId: params.movieSessionId,
+                shoppingCartId: shoppingCart.id!),
+            ),
+      );
     });
   }
 }

@@ -2,20 +2,75 @@
 using CinemaTicketBooking.Api.Sockets.Abstractions;
 using CinemaTicketBooking.Application.Abstractions.Services;
 using CinemaTicketBooking.Application.MovieSessions.Queries;
+using CinemaTicketBooking.Application.ShoppingCarts.Command.SelectSeats;
+using CinemaTicketBooking.Application.ShoppingCarts.Command.UnselectSeats;
 using CinemaTicketBooking.Application.ShoppingCarts.Queries;
+using CinemaTicketBooking.Domain.ShoppingCarts;
 using MediatR;
 using Microsoft.AspNetCore.SignalR;
 using ILogger = Serilog.ILogger;
 
 namespace CinemaTicketBooking.Api.Sockets;
 
-public class CinemaHallSeatsHub(IConnectionManager connectionManager,
+public class BookingManagementServiceHub(
+    IConnectionManager connectionManager,
     ILogger logger,
     IMediator mediator,
     ICacheService cacheService,
     IMapper mapper
 ) : Hub<IBookingManagementStateUpdater>
 {
+    
+    public async Task SeatSelect(Guid shoppingCartId,
+     short row ,
+     short number,
+     Guid showtimeId)
+    {
+        try
+        {
+            var cart = await mediator.Send(new GetShoppingCartQuery(shoppingCartId));
+            
+            await SubscribeToCartUpdatesIfNotSubscribed(cart);
+
+            var query = new SelectSeatCommand(MovieSessionId: showtimeId,
+                SeatRow: row,
+                SeatNumber: number,
+                ShoppingCartId: shoppingCartId);
+            var result = await mediator.Send(query);
+        }
+        catch (Exception e)
+        {
+            logger.Error(e, "Failed select seat");
+        }
+    }
+
+
+
+    public async Task SeatUnselect(Guid shoppingCartId,
+        short row ,
+        short number,
+        Guid showtimeId)
+    {
+        try
+        {
+            var cart = await mediator.Send(new GetShoppingCartQuery(shoppingCartId));
+            
+            await SubscribeToCartUpdatesIfNotSubscribed(cart);
+
+
+            var query = new UnselectSeatCommand(MovieSessionId: showtimeId,
+                SeatRow: row,
+                SeatNumber: number,
+                ShoppingCartId: shoppingCartId);
+            var result = await mediator.Send(query);
+        }
+        catch (Exception e)
+        {
+            logger.Error(e, "Failed unselect seat");
+        }
+    }
+
+
     public async Task SubscribeToUpdateSeatsGroup(Guid movieSessionId)
     {
         try
@@ -49,30 +104,28 @@ public class CinemaHallSeatsHub(IConnectionManager connectionManager,
         }
     }
 
-    public async Task RegisterShoppingCart(Guid shoppingCardId)
+    public async Task RegisterShoppingCart(Guid shoppingCartId)
     {
         try
         {
-            var cart = await mediator.Send(new GetShoppingCartQuery(shoppingCardId));
-
-            var shoppingCartIdOrClientId = cart.ClientId != Guid.Empty ? cart.ClientId : cart.Id;
-
-            connectionManager.AddConnection(shoppingCartIdOrClientId, Context.ConnectionId);
+            var cart = await mediator.Send(new GetShoppingCartQuery(shoppingCartId));
+            
+             await SubscribeToCartUpdatesIfNotSubscribed(cart);
 
             var shoppingCartDto = mapper.Map<ShoppingCartDto>(cart);
 
 
             await Clients.Client(Context.ConnectionId).SentShoppingCartState(shoppingCartDto);
 
-            logger.Debug("The customer has subscribed to shopping cart updates shoppingCartId:{@ShoppingCartId}",
-                shoppingCardId);
+            logger.Debug("The customer has subscribed to shopping cart updates ShoppingCartId:{@ShoppingCartId}",
+                shoppingCartId);
         }
         catch (Exception e)
         {
             logger.Error(e, "Failed to add AddConnection");
         }
     }
-    
+
     public async Task UnsubscribeShoppingCart(Guid shoppingCardId)
     {
         try
@@ -82,8 +135,8 @@ public class CinemaHallSeatsHub(IConnectionManager connectionManager,
             var shoppingCartIdOrClientId = cart.ClientId != Guid.Empty ? cart.ClientId : cart.Id;
 
             connectionManager.RemoveSubscriptionShoppingCartId(shoppingCartIdOrClientId, Context.ConnectionId);
-          
-            logger.Debug("The customer has unsubscribed to shopping cart updates shoppingCartId:{@ShoppingCartId}",
+
+            logger.Debug("The customer has unsubscribed to shopping cart updates ShoppingCartId:{@ShoppingCartId}",
                 shoppingCardId);
         }
         catch (Exception e)
@@ -109,5 +162,13 @@ public class CinemaHallSeatsHub(IConnectionManager connectionManager,
         }
 
         return base.OnDisconnectedAsync(exception);
+    }
+    
+    private async Task SubscribeToCartUpdatesIfNotSubscribed(ShoppingCart shoppingCart)
+    {
+        var shoppingCartIdOrClientId = shoppingCart.ClientId != Guid.Empty ? shoppingCart.ClientId : shoppingCart.Id;
+
+        //Add connection if not exists
+        connectionManager.AddConnection(shoppingCartIdOrClientId, Context.ConnectionId);
     }
 }

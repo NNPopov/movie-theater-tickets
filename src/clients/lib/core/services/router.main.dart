@@ -3,18 +3,18 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:movie_theater_tickets/src/movie_sessions/domain/entities/movie_session.dart';
 import '../../src/about/presentation/views/shopping_cart_view.dart';
+import '../../src/cinema_halls/presentation/cubit/movie_cubit.dart';
 import '../../src/shopping_carts/presentation/views/shopping_cart_view.dart';
 import '../../src/movie_sessions/presentation/views/movie_session_view.dart';
 import '../../src/movie_sessions/presentation/cubit/movie_session_bloc.dart';
 import '../../src/movies/presentation/views/movie_view.dart';
 import '../../src/movies/domain/entities/movie.dart';
-import '../../src/movies/presentation/app/movie_theater_cubit.dart';
+import '../../src/movie_sessions/presentation/cubit/movie_theater_cubit.dart';
 import '../../src/seats/presentation/cubit/seat_cubit.dart';
 import '../../src/seats/presentation/views/seats_view.dart';
 import 'package:get_it/get_it.dart';
 
 // final log = Logger('ExampleLogger');
-
 
 GetIt getIt = GetIt.instance;
 
@@ -30,7 +30,6 @@ Route<dynamic> generateRoute(RouteSettings settings) {
           BlocProvider(
             create: (_) => MovieTheaterCubit(getIt.get()),
           ),
-
         ],
         child: const MoviesView(),
       ),
@@ -53,11 +52,11 @@ Route<dynamic> generateRoute(RouteSettings settings) {
     return _pageBuilder(
       (_) => MultiBlocProvider(
         providers: [
-
           BlocProvider<SeatCubit>(
-            create: (context) => SeatCubit(
-                getIt.get(), getIt.get()),
+            create: (context) => SeatCubit(getIt.get(), getIt.get()),
           ),
+          BlocProvider<CinemaHallInfoCubit>(
+              create: (context) => CinemaHallInfoCubit(getIt.get()))
         ],
         child: SeatsView(settings.arguments! as MovieSession),
       ),
@@ -65,13 +64,12 @@ Route<dynamic> generateRoute(RouteSettings settings) {
     );
   } else if (settings.name == ShoppingCartView.id) {
     return _pageBuilder(
-      (_) =>  const ShoppingCartView(),
-
+      (_) => const ShoppingCartView(),
       settings: settings,
     );
   } else if (settings.name == AboutUsView.id) {
     return _pageBuilder(
-      (_) =>  const AboutUsView(),
+      (_) => const AboutUsView(),
       settings: settings,
     );
   }
@@ -99,6 +97,6 @@ PageRouteBuilder<dynamic> _pageBuilder(
       opacity: animation,
       child: child,
     ),
-    pageBuilder: (context, __, ___) =>  page(context),
+    pageBuilder: (context, __, ___) => page(context),
   );
 }

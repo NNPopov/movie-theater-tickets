@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.SignalR;
 namespace CinemaTicketBooking.Api.Sockets;
 
 public class ServerStateNotifier(
-    IHubContext<CinemaHallSeatsHub, IBookingManagementStateUpdater> context,
+    IHubContext<BookingManagementServiceHub, IBookingManagementStateUpdater> context,
     Serilog.ILogger logger) : IServerStateNotifier
 {
 

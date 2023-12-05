@@ -2,10 +2,12 @@ import 'dart:convert';
 import 'package:dartz/dartz.dart';
 import 'package:movie_theater_tickets/core/utils/typedefs.dart';
 import 'package:dio/dio.dart';
+import 'package:movie_theater_tickets/src/movie_sessions/domain/entities/active_movie.dart';
 import 'package:movie_theater_tickets/src/movie_sessions/domain/entities/movie_session.dart';
 import '../../../../core/errors/exceptions.dart';
 import '../../../../core/errors/failures.dart';
 import '../../domain/repos/movie_session_repo.dart';
+import '../models/active_movie_dto.dart';
 import '../models/movie_session_dto.dart';
 import 'package:get_it/get_it.dart';
 
@@ -41,6 +43,21 @@ class MovieSessionRepoImpl implements MovieSessionRepo {
           movieSessions.map((model) => MovieSessionDto.fromJson(model)));
 
       return Right(movieSessionDtos);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message, statusCode: e.statusCode));
+    }
+  }
+
+  @override
+  ResultFuture<List<ActiveMovie>> getActiveMovies() async {
+    try {
+      final activeMoviesResponse = await _client.get('/api/moviesessions/activemovies');
+      var activeMoviesData = activeMoviesResponse.data as List;
+
+      var activeMovieList  = List<ActiveMovieDto>.from(
+          activeMoviesData.map((model) => ActiveMovieDto.fromJson(model)));
+
+      return Right(activeMovieList );
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message, statusCode: e.statusCode));
     }

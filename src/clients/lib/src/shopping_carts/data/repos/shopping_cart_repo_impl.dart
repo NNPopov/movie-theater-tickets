@@ -3,11 +3,13 @@ import 'package:dartz/dartz.dart';
 import 'package:movie_theater_tickets/core/utils/typedefs.dart';
 import 'package:dio/dio.dart';
 import '../../../../core/errors/failures.dart';
+import '../../../hub/domain/event_hub.dart';
 import '../../domain/entities/create_shopping_cart_response.dart';
 import '../../domain/entities/seat.dart';
 import '../../domain/entities/shopping_cart.dart';
 import '../../domain/repos/shopping_cart_repo.dart';
 import '../models/create_shopping_cart_dto.dart';
+import '../models/seat_info_dto.dart';
 import '../models/select_seat_dto.dart';
 import '../models/shopping_cart_dto.dart';
 import 'package:flutter_guid/flutter_guid.dart';
@@ -16,11 +18,9 @@ import 'package:get_it/get_it.dart';
 GetIt getIt = GetIt.instance;
 
 class ShoppingCartRepoImpl implements ShoppingCartRepo {
-  late Dio _client;
-
-  ShoppingCartRepoImpl({Dio? client}) {
-    _client = client ?? getIt.get<Dio>();
-  }
+  final Dio _client;
+  final EventHub _eventHub;
+  ShoppingCartRepoImpl(this._client, this._eventHub);
 
   @override
   ResultFuture<CreateShoppingCartResponse> createShoppingCart(
@@ -64,20 +64,19 @@ class ShoppingCartRepoImpl implements ShoppingCartRepo {
   }
 
   @override
-  ResultFuture<void> selectSeat(ShoppingCart shoppingCart,
-      ShoppingCartSeat seat, String movieSessionId) async {
+  ResultFuture<void> selectSeat(SeatInfoDto seatInfo) async {
     try {
-      var request = SelectSeatShoppingCartDto(
-          row: seat.seatRow!,
-          number: seat.seatNumber!,
-          showtimeId: movieSessionId);
-
-      final response = await _client.post(
-          '/api/shoppingcarts/${shoppingCart.id}/seats/select',
-          data: request.toJson(),
-          options:
-              Options(headers: {'X-Idempotency-Key': Guid.newGuid.toString()}));
-
+      // var request = SelectSeatShoppingCartDto(
+      //     row: seat.seatRow!,
+      //     number: seat.seatNumber!,
+      //     showtimeId: movieSessionId);
+      //
+      // final response = await _client.post(
+      //     '/api/shoppingcarts/${shoppingCart.id}/seats/select',
+      //     data: request.toJson(),
+      //     options:
+      //         Options(headers: {'X-Idempotency-Key': Guid.newGuid.toString()}));
+      _eventHub.seatSelect(seatInfo);
       return const Right(null);
     } on DioException catch (e) {
       if (e.response?.statusCode == 409) {
@@ -90,19 +89,21 @@ class ShoppingCartRepoImpl implements ShoppingCartRepo {
   }
 
   @override
-  ResultFuture<void> unselectSeat(ShoppingCart shoppingCart,
-      ShoppingCartSeat seat, String movieSessionId) async {
+  ResultFuture<void> unselectSeat(SeatInfoDto seatInfo) async {
     try {
-      var request = SelectSeatShoppingCartDto(
-          row: seat.seatRow!,
-          number: seat.seatNumber!,
-          showtimeId: movieSessionId);
+      // var request = SelectSeatShoppingCartDto(
+      //     row: seat.seatRow!,
+      //     number: seat.seatNumber!,
+      //     showtimeId: movieSessionId);
 
-      final response = await _client.delete(
-          '/api/shoppingcarts/${shoppingCart.id}/seats/unselect',
-          data: request.toJson(),
-          options:
-              Options(headers: {'X-Idempotency-Key': Guid.newGuid.toString()}));
+
+      _eventHub.seatUnselect(seatInfo);
+      //),
+      // final response = await _client.delete(
+      //     '/api/shoppingcarts/${shoppingCart.id}/seats/unselect',
+      //     data: request.toJson(),
+      //     options:
+      //         Options(headers: {'X-Idempotency-Key': Guid.newGuid.toString()}));
 
       return const Right(null);
     } on Exception catch (e) {

@@ -4,25 +4,30 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/common/views/loading_view.dart';
 import '../../../../core/common/views/no_data_view.dart';
 import '../../../../core/utils/utils.dart';
+import '../../../movie_sessions/presentation/views/movie_session_view.dart';
+import '../../domain/entities/movie.dart';
 import '../app/movie_cubit.dart';
 import '../../../movie_sessions/presentation/cubit/movie_theater_cubit.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-class MoviesDetailWidget extends StatefulWidget {
-  const MoviesDetailWidget(this.movieId, {super.key});
+class MovieDetailWidget extends StatefulWidget {
+  const MovieDetailWidget(this.movieId, {super.key});
 
   final String movieId;
-  static const id = 'movie';
 
   @override
-  State<StatefulWidget> createState() => _MoviesDetailViewView();
+  State<StatefulWidget> createState() => _MovieDetailViewView();
 }
 
-class _MoviesDetailViewView extends State<MoviesDetailWidget> {
+class _MovieDetailViewView extends State<MovieDetailWidget> {
   @override
   void initState() {
     context.read<MovieCubit>().getMovieById(widget.movieId);
     super.initState();
+  }
+
+  Future<void> movieSeat(Movie movie) async {
+    Navigator.pushNamed(context, MovieSessionsView.id, arguments: movie);
   }
 
   @override
@@ -45,7 +50,7 @@ class _MoviesDetailViewView extends State<MoviesDetailWidget> {
         final movie = state.movie;
         return Container(
           width: 320,
-          height: 550,
+          height: 650,
           alignment: Alignment.bottomLeft,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10),
@@ -82,13 +87,31 @@ class _MoviesDetailViewView extends State<MoviesDetailWidget> {
                         )),
                   ),
                 ),
-                Text('${AppLocalizations.of(context)!.stars}: ${movie.stars}'),
+                Text(
+                    '${AppLocalizations.of(context)!.stars}: ${movie.stars}'),
                 Text(
                     '${AppLocalizations.of(context)!.release_date}: ${movie.releaseDate.year}-${movie.releaseDate.month}-${movie.releaseDate.day} '),
                 Text('imdbId: ${movie.imdbId}'),
                 const Expanded(
                   child: SizedBox(),
                 ),
+                Align(
+                  alignment: Alignment.center,
+                  child: TextButton(
+                      style: ButtonStyle(
+                        padding: MaterialStateProperty.all(
+                            const EdgeInsets.symmetric(
+                                vertical: 1, horizontal: 1)),
+                        foregroundColor:
+                        MaterialStateProperty.all<Color>(
+                            Colors.blue),
+                      ),
+                      onPressed: () {
+                        movieSeat(movie);
+                      },
+                      child:
+                      Text(AppLocalizations.of(context)!.select)),
+                )
               ]),
         );
       },

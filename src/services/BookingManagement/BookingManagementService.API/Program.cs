@@ -101,7 +101,7 @@ app.UseHealthChecks("/Health");
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapHub<CinemaHallSeatsHub>("/ws/cinema-hall-seats-hub",
+app.MapHub<BookingManagementServiceHub>("/ws/cinema-hall-seats-hub",
     options =>
     {
         options.Transports =

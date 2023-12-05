@@ -1,4 +1,7 @@
 ﻿using CinemaTicketBooking.Application.Abstractions;
+using CinemaTicketBooking.Application.Abstractions.Repositories;
+using CinemaTicketBooking.Application.ShoppingCarts.Base;
+using CinemaTicketBooking.Application.ShoppingCarts.Command.SelectSeats;
 using CinemaTicketBooking.Domain.Error;
 using CinemaTicketBooking.Domain.ShoppingCarts.Abstractions;
 
@@ -7,25 +10,24 @@ namespace CinemaTicketBooking.Application.ShoppingCarts.Command.AssingClientCart
 public record AssignClientCartCommand(Guid ShoppingCartId, Guid ClientId) : //IdempotentRequest(RequestId),
     IRequest<Result>;
 
-public class AssignClientCartCommandHandler(IShoppingCartRepository shoppingCartRepository,
-        IShoppingCartNotifier shoppingCartNotifier)
-    : IRequestHandler<AssignClientCartCommand, Result>
+public class AssignClientCartCommandHandler(IActiveShoppingCartRepository activeShoppingCartRepository,   IShoppingCartLifecycleManager shoppingCartLifecycleManager)
+    : ActiveShoppingCartHandler(activeShoppingCartRepository, shoppingCartLifecycleManager), IRequestHandler<AssignClientCartCommand, Result>
 {
     public async Task<Result> Handle(AssignClientCartCommand request,
         CancellationToken cancellationToken)
     {
-        var cart = await shoppingCartRepository.GetByIdAsync(request.ShoppingCartId);
+        var cart = await activeShoppingCartRepository.GetByIdAsync(request.ShoppingCartId);
 
         if (cart == null)
         {
             return DomainErrors<AssignClientCartCommandHandler>.NotFound("Shopping cart not found");
         }
         
-        var existingShoppingCartId = await shoppingCartRepository.GetActiveShoppingCartByClientIdAsync(request.ClientId);
+        var existingShoppingCartId = await activeShoppingCartRepository.GetActiveShoppingCartByClientIdAsync(request.ClientId);
 
         if (existingShoppingCartId != Guid.Empty)
         {
-            var existingShoppingCart = await shoppingCartRepository.GetByIdAsync(existingShoppingCartId);
+            var existingShoppingCart = await activeShoppingCartRepository.GetByIdAsync(existingShoppingCartId);
 
             if (existingShoppingCart != null && existingShoppingCartId != request.ShoppingCartId)
             {
@@ -41,13 +43,9 @@ public class AssignClientCartCommandHandler(IShoppingCartRepository shoppingCart
             return result;
         }
 
-        await shoppingCartRepository.SetAsync(cart);
+        await SaveShoppingCart(cart);
 
-        await shoppingCartRepository.SetClientActiveShoppingCartAsync(request.ClientId, request.ShoppingCartId);
-        
-        // shoppingCartNotifier.ReassignCartToClientID(cart);
-        //
-        // await shoppingCartNotifier.SentShoppingCartState(cart);
+        await activeShoppingCartRepository.SetClientActiveShoppingCartAsync(request.ClientId, request.ShoppingCartId);
 
         return Result.Success();
     }

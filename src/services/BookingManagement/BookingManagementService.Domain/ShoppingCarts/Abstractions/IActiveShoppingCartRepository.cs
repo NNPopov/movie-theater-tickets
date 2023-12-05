@@ -1,8 +1,8 @@
 namespace CinemaTicketBooking.Domain.ShoppingCarts.Abstractions;
 
-public interface IShoppingCartRepository
+public interface IActiveShoppingCartRepository
 {
-    Task<ShoppingCart> SetAsync(ShoppingCart shoppingCart);
+    Task<ShoppingCart> SaveAsync(ShoppingCart shoppingCart);
     
     Task DeleteAsync(ShoppingCart shoppingCart);
 

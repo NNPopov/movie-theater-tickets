@@ -8,30 +8,32 @@ public record UnreserveSeatsCommand(Guid ShoppingCartId, Guid RequestId) : Idemp
 
 public class UnreserveSeatsCommandHandler : IRequestHandler<UnreserveSeatsCommand>
 {
-    private ISeatStateRepository _seatStateRepository;
-
-
-    private readonly IShoppingCartRepository _shoppingCartRepository;
+    private readonly IShoppingCartSeatLifecycleManager _shoppingCartSeatLifecycleManager;
+    private readonly IShoppingCartLifecycleManager _shoppingCartLifecycleManager;
+    private readonly IActiveShoppingCartRepository _activeShoppingCartRepository;
 
     public UnreserveSeatsCommandHandler(
-        IShoppingCartRepository shoppingCartRepository,
-        ISeatStateRepository seatStateRepository)
+        IActiveShoppingCartRepository activeShoppingCartRepository,
+        IShoppingCartSeatLifecycleManager shoppingCartSeatLifecycleManager, 
+        IShoppingCartLifecycleManager shoppingCartLifecycleManager)
     {
-        _shoppingCartRepository = shoppingCartRepository;
-        _seatStateRepository = seatStateRepository;
+        _activeShoppingCartRepository = activeShoppingCartRepository;
+        _shoppingCartSeatLifecycleManager = shoppingCartSeatLifecycleManager;
+        _shoppingCartLifecycleManager = shoppingCartLifecycleManager;
     }
 
     public async Task Handle(UnreserveSeatsCommand request,
         CancellationToken cancellationToken)
     {
-        var cart = await _shoppingCartRepository.GetByIdAsync(request.ShoppingCartId);
+        var cart = await _activeShoppingCartRepository.GetByIdAsync(request.ShoppingCartId);
 
         cart.ClearCart();
         
         foreach (var seat in cart.Seats)
         {
-            await _seatStateRepository.DeleteAsync(cart.MovieSessionId, seat.SeatRow, seat.SeatNumber);
+            await _shoppingCartSeatLifecycleManager.DeleteAsync(cart.MovieSessionId, seat.SeatRow, seat.SeatNumber);
         }
-        await _shoppingCartRepository.SetAsync(cart);
+        await _activeShoppingCartRepository.SaveAsync(cart);
+        await _shoppingCartLifecycleManager.SetAsync(cart.Id);
     }
 }

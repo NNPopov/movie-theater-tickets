@@ -1,7 +1,5 @@
-﻿using CinemaTicketBooking.Application.Abstractions;
-using CinemaTicketBooking.Application.Common.Behaviours;
+﻿using CinemaTicketBooking.Application.Common.Behaviours;
 using CinemaTicketBooking.Application.Common.Events;
-using CinemaTicketBooking.Application.ShoppingCarts.Command.SelectSeats;
 using CinemaTicketBooking.Application.ShoppingCarts.Events.SeatStatusUpdated;
 using CinemaTicketBooking.Domain.ShoppingCarts;
 using Microsoft.Extensions.DependencyInjection;

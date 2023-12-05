@@ -210,8 +210,13 @@ public class ShoppingCart : AggregateRoot
 
     public PriceCalculationResult CalculateCartAmount( IPriceService priceService)
     {
-        Ensure.NotEmpty(MovieSessionId, "The MovieSessionId is required.", nameof(MovieSessionId));
 
+        if (MovieSessionId == Guid.Empty)
+        {
+            return priceService.GetCartAmount(_seats);
+        }
+    
+        
         if (Status == ShoppingCartStatus.PurchaseCompleted)
             throw new ConflictException(nameof(ShoppingCart), Id.ToString());
 

@@ -97,9 +97,6 @@ class _MoviesView extends State<MoviesView> {
                   child: MovieDetailWidget(rowSeats.id),
                 );
 
-
-                // BlocProvider<MovieTheaterCubit>
-                // return MovieDetailWidget(rowSeats.id);
               }).toList(),
               carouselController: buttonCarouselController,
               options: CarouselOptions(
@@ -123,74 +120,5 @@ class _MoviesView extends State<MoviesView> {
             child: const Text('→'),
           )
         ]);
-  }
-
-  Widget buildBovieContainer(Movie rowSeats, BuildContext context) {
-       return Container(
-      width: 320,
-      height: 650,
-      alignment: Alignment.bottomLeft,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(
-          color: Colors.blue,
-          width: 2,
-        ),
-      ),
-      margin: const EdgeInsets.all(5.0),
-      padding: const EdgeInsets.all(20.0),
-      child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Align(
-                child: Text(rowSeats.title,
-                    style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                        color: Colors.grey))),
-            const SizedBox(
-              height: 10,
-            ),
-            Container(
-              height: 290,
-              width: 290,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(5.0),
-                color: Colors.white,
-                image: const DecorationImage(
-                    fit: BoxFit.fill,
-                    image: NetworkImage(
-                      'https://picsum.photos/250?image=9',
-                    )),
-              ),
-            ),
-            Text(
-                '${AppLocalizations.of(context)!.stars}: ${rowSeats.stars}'),
-            Text(
-                '${AppLocalizations.of(context)!.release_date}: ${rowSeats.releaseDate.year}-${rowSeats.releaseDate.month}-${rowSeats.releaseDate.day} '),
-            Text('imdbId: ${rowSeats.imdbId}'),
-            const Expanded(
-              child: SizedBox(),
-            ),
-            Align(
-              alignment: Alignment.center,
-              child: TextButton(
-                  style: ButtonStyle(
-                    padding: MaterialStateProperty.all(
-                        const EdgeInsets.symmetric(
-                            vertical: 1, horizontal: 1)),
-                    foregroundColor:
-                        MaterialStateProperty.all<Color>(
-                            Colors.blue),
-                  ),
-                  onPressed: () {
-                    movieSeat(rowSeats);
-                  },
-                  child:
-                      Text(AppLocalizations.of(context)!.select)),
-            )
-          ]),
-    );
   }
 }

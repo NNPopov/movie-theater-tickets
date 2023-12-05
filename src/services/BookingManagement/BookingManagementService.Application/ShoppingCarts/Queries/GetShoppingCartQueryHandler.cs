@@ -10,20 +10,20 @@ public record GetShoppingCartQuery(Guid ShoppingCartId) : IRequest<ShoppingCart>
 public class GetShoppingCartQueryHandler : IRequestHandler<GetShoppingCartQuery, ShoppingCart>
 {
     private readonly IMapper _mapper;
-    private IShoppingCartRepository _shoppingCartRepository;
+    private IActiveShoppingCartRepository _activeShoppingCartRepository;
 
     public GetShoppingCartQueryHandler(IMapper mapper,
-        IShoppingCartRepository shoppingCartRepository)
+        IActiveShoppingCartRepository activeShoppingCartRepository)
     {
         _mapper = mapper;
-        _shoppingCartRepository = shoppingCartRepository;
+        _activeShoppingCartRepository = activeShoppingCartRepository;
     }
 
     public async Task<ShoppingCart> Handle(GetShoppingCartQuery request,
         CancellationToken cancellationToken)
     {
         
-        var cart = await _shoppingCartRepository.GetByIdAsync(request.ShoppingCartId);
+        var cart = await _activeShoppingCartRepository.GetByIdAsync(request.ShoppingCartId);
         
         if (cart is null)
             throw new ContentNotFoundException(request.ShoppingCartId.ToString(), nameof(ShoppingCart));

@@ -28,13 +28,8 @@ public class
             .GetAllAsync(t => t.SessionDate > TimeProvider.System.GetUtcNow(), cancellationToken);
 
 
-        return movieSession.Select(t => new ActiveMovieDto { Id = t.MovieId, Title = "Movie"}).Distinct().ToList();
+        return movieSession.Select(t => new ActiveMovieDto( t.MovieId, "Movie")).Distinct().ToList();
     }
 }
 
-public record ActiveMovieDto
-{
-    public Guid Id { get; init; }
-    
-    public string Title { get; init; }
-}
+public record ActiveMovieDto( Guid Id, string Title);

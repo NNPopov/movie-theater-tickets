@@ -10,7 +10,7 @@ using StackExchange.Redis;
 
 namespace CinemaTicketBooking.Infrastructure.Services;
 
-public class ShoppingCartRepository : IShoppingCartRepository
+public class ActiveShoppingCartRepository : IActiveShoppingCartRepository
 {
     private readonly IConnectionMultiplexer _redis;
 
@@ -18,13 +18,13 @@ public class ShoppingCartRepository : IShoppingCartRepository
 
     private const string KeyPrefix = "cart";
     
-    private const string KeyPrefixTimeToLive = "shopping_cart_ttl";
+
     
     private const string KeyClientPrefix = "client_session";
     
     private readonly IDomainEventTracker _domainEventTracker;
 
-    public ShoppingCartRepository(IConnectionMultiplexer redis,
+    public ActiveShoppingCartRepository(IConnectionMultiplexer redis,
      //   IMediator mediator,
         IDomainEventTracker domainEventTracker)
     {
@@ -57,7 +57,7 @@ public class ShoppingCartRepository : IShoppingCartRepository
     //     shoppingCart.ClearDomainEvents();
     // }
 
-    public async Task<ShoppingCart> SetAsync(ShoppingCart shoppingCart)
+    public async Task<ShoppingCart> SaveAsync(ShoppingCart shoppingCart)
     {
         var db = _redis.GetDatabase();
 
@@ -67,9 +67,7 @@ public class ShoppingCartRepository : IShoppingCartRepository
 
         await db.StringSetAsync(kartKey, jsonValue, new TimeSpan(0, 0, 3600));
         
-        var timeToLiveKey = $"{KeyPrefixTimeToLive}:{shoppingCart.Id.ToString()}";   
-        await db.StringSetAsync(timeToLiveKey, timeToLiveKey, new TimeSpan(0, 0, 200));
-        
+
         await _domainEventTracker.PublishDomainEvents(shoppingCart);
 
         return shoppingCart!;
@@ -83,8 +81,6 @@ public class ShoppingCartRepository : IShoppingCartRepository
 
         await db.KeyDeleteAsync(kartKey);
         
-        var timeToLiveKey = $"{KeyPrefixTimeToLive}:{shoppingCart.Id.ToString()}";   
-        await db.KeyDeleteAsync(timeToLiveKey);
 
         await _domainEventTracker.PublishDomainEvents(shoppingCart);
     }

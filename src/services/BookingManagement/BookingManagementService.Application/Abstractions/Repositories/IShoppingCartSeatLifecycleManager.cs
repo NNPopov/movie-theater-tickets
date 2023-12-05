@@ -3,14 +3,11 @@ using CinemaTicketBooking.Domain.ShoppingCarts;
 
 namespace CinemaTicketBooking.Application.Abstractions.Repositories;
 
-public interface ISeatStateRepository
+public interface IShoppingCartSeatLifecycleManager
 {
     Task DeleteAsync(Guid movieSessionId, short seatRow, short seatNumber);
-    
-   // Task<bool> SetAsync(Guid movieSessionId, SeatShoppingCart seatShoppingCart , TimeSpan? expiry);
-    
 
     Task<SeatShoppingCart> GetAsync(Guid movieSessionId, short seatRow, short seatNumber);
 
-   Task<bool> SetAsync(Guid movieSessionId, SeatShoppingCart seatShoppingCart);
+    Task<bool> SetAsync(Guid movieSessionId, SeatShoppingCart seatShoppingCart);
 }

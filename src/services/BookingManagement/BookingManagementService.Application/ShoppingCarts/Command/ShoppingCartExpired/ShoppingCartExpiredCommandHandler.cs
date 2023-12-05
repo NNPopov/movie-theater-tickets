@@ -12,25 +12,21 @@ public class ShoppingCartExpiredCommandHandler : INotificationHandler<ShoppingCa
 
     private readonly ILogger _logger;
 
-    private readonly IShoppingCartRepository _shoppingCartRepository;
+    private readonly IActiveShoppingCartRepository _activeShoppingCartRepository;
     
-    private readonly IShoppingCartNotifier _shoppingCartNotifier;
-
     public ShoppingCartExpiredCommandHandler(
-        IShoppingCartRepository shoppingCartRepository,
-        ILogger logger,
-        IShoppingCartNotifier shoppingCartNotifier)
+        IActiveShoppingCartRepository activeShoppingCartRepository,
+        ILogger logger)
     {
-        _shoppingCartRepository = shoppingCartRepository;
+        _activeShoppingCartRepository = activeShoppingCartRepository;
         _logger = logger;
-        _shoppingCartNotifier = shoppingCartNotifier;
     }
 
     public async Task Handle(ShoppingCartExpiredCommand request,
         CancellationToken cancellationToken)
     {
 
-        var cart = await _shoppingCartRepository.GetByIdAsync(request.ShoppingCartId);
+        var cart = await _activeShoppingCartRepository.GetByIdAsync(request.ShoppingCartId);
 
         if (cart is null)
         {
@@ -40,7 +36,7 @@ public class ShoppingCartExpiredCommandHandler : INotificationHandler<ShoppingCa
         }
 
         cart.Delete();
-        await _shoppingCartRepository.DeleteAsync(cart);
+        await _activeShoppingCartRepository.DeleteAsync(cart);
         
         _logger.Warning( "ShoppingCart Deleted:{@ShoppingCart}", cart);
 

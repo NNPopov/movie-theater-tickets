@@ -1,4 +1,7 @@
 ﻿using CinemaTicketBooking.Application.Abstractions;
+using CinemaTicketBooking.Application.Abstractions.Repositories;
+using CinemaTicketBooking.Application.ShoppingCarts.Base;
+using CinemaTicketBooking.Application.ShoppingCarts.Command.SelectSeats;
 using CinemaTicketBooking.Domain.PriceServices;
 using CinemaTicketBooking.Domain.Seats.Abstractions;
 using CinemaTicketBooking.Domain.ShoppingCarts;
@@ -10,25 +13,19 @@ namespace CinemaTicketBooking.Application.ShoppingCarts.Command.ExpiredSeatSelec
 public record SeatExpiredSelectionCommand
     (Guid MovieSessionId, short SeatRow, short SeatNumber, Guid ShoppingKartId) : INotification;
 
-public class SeatExpiredReservationEventHandler : INotificationHandler<SeatExpiredSelectionCommand>
+public class SeatExpiredReservationEventHandler :ActiveShoppingCartHandler, INotificationHandler<SeatExpiredSelectionCommand>
 {
     private readonly IMovieSessionSeatRepository _movieSessionSeatRepository;
     private readonly ILogger _logger;
 
-    private readonly IShoppingCartRepository _shoppingCartRepository;
-    
-    private readonly IShoppingCartNotifier _shoppingCartNotifier;
-
     public SeatExpiredReservationEventHandler(
         IMovieSessionSeatRepository movieSessionSeatRepository,
-        IShoppingCartRepository shoppingCartRepository,
+        IActiveShoppingCartRepository activeShoppingCartRepository,
         ILogger logger,
-        IShoppingCartNotifier shoppingCartNotifier)
+        IShoppingCartLifecycleManager shoppingCartLifecycleManager):base(activeShoppingCartRepository, shoppingCartLifecycleManager)
     {
         _movieSessionSeatRepository = movieSessionSeatRepository;
-        _shoppingCartRepository = shoppingCartRepository;
         _logger = logger;
-        _shoppingCartNotifier = shoppingCartNotifier;
     }
 
     public async Task Handle(SeatExpiredSelectionCommand request,
@@ -45,24 +42,22 @@ public class SeatExpiredReservationEventHandler : INotificationHandler<SeatExpir
             return;
         }
 
-        var cart = await _shoppingCartRepository.GetByIdAsync(movieSessionSeat.ShoppingCartId);
+        var cart = await ActiveShoppingCartRepository.GetByIdAsync(movieSessionSeat.ShoppingCartId);
 
         if (cart is null)
         {
-            _logger.Warning( "Couldnot find ShoppingCart. " +
+            _logger.Warning( "Couldn't find ShoppingCart. " +
                              " movieSessionSeat:{@movieSessionSeat}, request:{@request}",
                 movieSessionSeat,
                 request);
             return;
         }
 
-
         var removeResult = cart.TryRemoveSeats(request.SeatRow, request.SeatNumber);
 
         if (removeResult)
         {
-            cart.CalculateCartAmount(new PriceService());
-            await _shoppingCartRepository.SetAsync(cart);
+            await SaveShoppingCart(cart);
         }
         else
         {
@@ -74,6 +69,5 @@ public class SeatExpiredReservationEventHandler : INotificationHandler<SeatExpir
                 request.SeatNumber);
         }
         
-       // await _shoppingCartNotifier.SentShoppingCartState(cart);
     }
 }

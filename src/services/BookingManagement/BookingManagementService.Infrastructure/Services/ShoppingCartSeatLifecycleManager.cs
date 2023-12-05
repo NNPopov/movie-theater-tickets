@@ -5,14 +5,14 @@ using StackExchange.Redis;
 
 namespace CinemaTicketBooking.Infrastructure.Services;
 
-public class SeatStateRepository : ISeatStateRepository
+public class ShoppingCartSeatLifecycleManager : IShoppingCartSeatLifecycleManager
 {
     private readonly IConnectionMultiplexer _redis;
 
     private const string KeyPrefix = "seat-select";
 
 
-    public SeatStateRepository(IConnectionMultiplexer redis)
+    public ShoppingCartSeatLifecycleManager(IConnectionMultiplexer redis)
     {
         _redis = redis;
     }
@@ -44,6 +44,8 @@ public class SeatStateRepository : ISeatStateRepository
     {
         return $"{KeyPrefix}:{movieSessionId.ToString()}:{seatRow}:{seatNumber}";
     }
+
+
 
     public async Task<bool> SetAsync(Guid movieSessionId, SeatShoppingCart seatShoppingCart)
    

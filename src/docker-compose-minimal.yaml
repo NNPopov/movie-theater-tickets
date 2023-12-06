@@ -37,6 +37,7 @@ services:
       - SERILOG__USING__1:Serilog.Sinks.Seq
       - SERILOG__WRITETO__1__ARGS__SERVERURL=http://logger-seq
       - SERILOG__WRITETO__1__NAME=Seq
+      - ShoppingCartConfiguration__ShoppingCartTimeToLiveSec=120
     ports:
         - "9453:80"
   cinema-booking-cache:

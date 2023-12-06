@@ -7,7 +7,7 @@ using Serilog;
 
 namespace CinemaTicketBooking.Application.ShoppingCarts.Events.SeatStatusUpdated;
 
-public class
+internal sealed class
     ShoppingCartUpdatedEventHandler<T>(
         IShoppingCartNotifier shoppingCartNotifier,
         ILogger logger,

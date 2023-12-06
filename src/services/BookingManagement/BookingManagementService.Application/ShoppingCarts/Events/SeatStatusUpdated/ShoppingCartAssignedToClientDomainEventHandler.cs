@@ -7,7 +7,7 @@ using Serilog;
 
 namespace CinemaTicketBooking.Application.ShoppingCarts.Events.SeatStatusUpdated;
 
-public class
+internal sealed class
     ShoppingCartAssignedToClientDomainEventHandler(
         IShoppingCartNotifier shoppingCartNotifier,
         ILogger logger,
@@ -44,7 +44,9 @@ public class
         }
         catch (Exception e)
         {
-            logger.Error(e, "Error  SentShoppingCartState and send ReassignCartToClient:{@ShoppingCartAssignedToClientDomainEvent}", request);
+            logger.Error(e,
+                "Error  SentShoppingCartState and send ReassignCartToClient:{@ShoppingCartAssignedToClientDomainEvent}",
+                request);
         }
     }
 }

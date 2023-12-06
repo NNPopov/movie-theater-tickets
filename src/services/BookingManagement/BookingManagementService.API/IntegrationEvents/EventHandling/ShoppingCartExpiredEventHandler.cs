@@ -8,7 +8,8 @@ using ILogger = Serilog.ILogger;
 
 namespace CinemaTicketBooking.Api.IntegrationEvents.EventHandling;
 
-public class ShoppingCartExpiredEventHandler(IMediator mediator,
+public class ShoppingCartExpiredEventHandler(
+    IMediator mediator,
     ILogger logger) : IIntegrationEventHandler<ShoppingCartExpiredIntegrationEvent>
 {
     private readonly ILogger _logger = logger ?? throw new System.ArgumentNullException(nameof(logger));
@@ -21,15 +22,24 @@ public class ShoppingCartExpiredEventHandler(IMediator mediator,
     /// <returns></returns>
     public async Task Handle(ShoppingCartExpiredIntegrationEvent integrationEvent)
     {
-        _logger.Information("Handling integration integrationEvent: {IntegrationEventId} - ({@IntegrationEvent})", integrationEvent.Id, integrationEvent);
-            
-            
-        var seatExpiredReservationEvent = new ShoppingCartExpiredCommand(
-            ShoppingCartId: integrationEvent.ShoppingCartId);
-            
-        _logger.Debug(
-            "Sending command: {@SeatExpiredReservationEvent})", seatExpiredReservationEvent);
+        try
+        {
+            _logger.Information("Handling integration integrationEvent: {IntegrationEventId} - ({@IntegrationEvent})",
+                integrationEvent.Id, integrationEvent);
 
-        await mediator.Publish(seatExpiredReservationEvent);
+
+            var seatExpiredReservationEvent = new ShoppingCartExpiredCommand(
+                ShoppingCartId: integrationEvent.ShoppingCartId);
+
+            _logger.Debug(
+                "Sending command: {@SeatExpiredReservationEvent})", seatExpiredReservationEvent);
+
+            await mediator.Publish(seatExpiredReservationEvent);
+        }
+        catch (Exception e)
+        {
+            _logger.Error(e, "Error occurred while handling integration event: {IntegrationEventId} - ({@IntegrationEvent})",
+                integrationEvent.Id, integrationEvent);
+        }
     }
 }

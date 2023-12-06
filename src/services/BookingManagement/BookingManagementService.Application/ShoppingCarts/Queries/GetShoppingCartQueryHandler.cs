@@ -7,7 +7,7 @@ namespace CinemaTicketBooking.Application.ShoppingCarts.Queries;
 
 public record GetShoppingCartQuery(Guid ShoppingCartId) : IRequest<ShoppingCart>;
 
-public class GetShoppingCartQueryHandler : IRequestHandler<GetShoppingCartQuery, ShoppingCart>
+internal sealed class GetShoppingCartQueryHandler : IRequestHandler<GetShoppingCartQuery, ShoppingCart>
 {
     private readonly IMapper _mapper;
     private IActiveShoppingCartRepository _activeShoppingCartRepository;
@@ -22,9 +22,8 @@ public class GetShoppingCartQueryHandler : IRequestHandler<GetShoppingCartQuery,
     public async Task<ShoppingCart> Handle(GetShoppingCartQuery request,
         CancellationToken cancellationToken)
     {
-        
         var cart = await _activeShoppingCartRepository.GetByIdAsync(request.ShoppingCartId);
-        
+
         if (cart is null)
             throw new ContentNotFoundException(request.ShoppingCartId.ToString(), nameof(ShoppingCart));
 
@@ -37,19 +36,19 @@ public class ShoppingCartDto
     public short MaxNumberOfSeats { get; set; }
 
     public DateTime CreatedAt { get; set; }
-    
+
     public Guid Id { get; set; }
-    
+
     public Guid MovieSessionId { get; set; }
-    
-    public ShoppingCartStatus Status { get;  set; }
-    
+
+    public ShoppingCartStatus Status { get; set; }
+
     public IReadOnlyList<SeatShoppingCart> Seats { get; set; }
-    
-    public PriceCalculationResult PriceCalculationResult { get;  set; }
-    
+
+    public PriceCalculationResult PriceCalculationResult { get; set; }
+
     public bool IsAssigned { get; set; }
-    
+
     private class Mapping : Profile
     {
         public Mapping()

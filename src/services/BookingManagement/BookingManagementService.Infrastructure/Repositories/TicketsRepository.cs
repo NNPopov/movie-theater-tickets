@@ -15,7 +15,7 @@
 //             _context = context;
 //         }
 //
-//         public Task<TicketEntity> GetAsync(Guid id, CancellationToken cancel)
+//         public Task<TicketEntity> IsSeatReservedAsync(Guid id, CancellationToken cancel)
 //         {
 //             return _context.Tickets.FirstOrDefaultAsync(x => x.Id == id, cancel);
 //         }

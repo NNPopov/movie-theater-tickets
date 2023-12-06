@@ -24,6 +24,7 @@ public class ActiveShoppingCartHandler
 
     protected async Task SaveShoppingCart(ShoppingCart shoppingCart)
     {
+
         shoppingCart.CalculateCartAmount(new PriceService());
         await ActiveShoppingCartRepository.SaveAsync(shoppingCart);
         await ShoppingCartLifecycleManager.SetAsync(shoppingCart.Id);

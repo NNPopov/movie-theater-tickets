@@ -7,7 +7,8 @@ public interface IShoppingCartSeatLifecycleManager
 {
     Task DeleteAsync(Guid movieSessionId, short seatRow, short seatNumber);
 
-    Task<SeatShoppingCart> GetAsync(Guid movieSessionId, short seatRow, short seatNumber);
+    Task<bool> IsSeatReservedAsync(Guid movieSessionId, short seatRow, short seatNumber);
 
     Task<bool> SetAsync(Guid movieSessionId, SeatShoppingCart seatShoppingCart);
+    Task<bool> SetAsync(Guid movieSessionId, Guid shoppingCartId, short seatRow, short seatNumber, DateTime expires);
 }

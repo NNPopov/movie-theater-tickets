@@ -11,7 +11,7 @@ public record CreateMovieSessionCommand(
     Guid AuditoriumId,
     DateTime SessionDate) : IRequest<Guid>;
 
-public class CreateMovieSessionCommandHandler : IRequestHandler<CreateMovieSessionCommand, Guid>
+internal sealed class CreateMovieSessionCommandHandler : IRequestHandler<CreateMovieSessionCommand, Guid>
 {
     // private readonly IMapper _mapper;
     private IMovieSessionsRepository _movieSessionsRepository;

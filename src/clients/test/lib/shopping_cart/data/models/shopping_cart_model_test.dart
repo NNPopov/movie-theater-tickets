@@ -11,7 +11,7 @@ void main() {
 
   final tShoppingCarDto = ShoppingCartDto(
       id: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-      createdCard: DateTime.parse("2023-09-28 19:28:53.299Z"),
+      createdAt: DateTime.parse("2023-09-28 19:28:53.299Z"),
       movieSessionId: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       maxNumberOfSeats: 4,
       status: ShoppingCartStatus.SeatsReserved,

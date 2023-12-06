@@ -6,7 +6,7 @@ using Serilog;
 
 namespace CinemaTicketBooking.Application.MovieSessionSeats.Event.ExpiredSeatSelection;
 
-public class
+internal sealed class
     MovieSessionSeatExpiredReservationEventHandler : INotificationHandler<
     BaseApplicationEvent<SeatRemovedFromShoppingCartDomainEvent>>
 {

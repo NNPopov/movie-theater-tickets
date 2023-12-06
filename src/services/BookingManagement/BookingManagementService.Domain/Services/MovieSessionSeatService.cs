@@ -143,4 +143,9 @@ public sealed class MovieSessionSeatService
             throw new Exception($"{nameof(MovieSession)} has been terminated.");
         }
     }
+
+    public Task<MovieSessionSeat> GetSeat(Guid movieSessionId, short seatRow, short seatNumber, CancellationToken cancellationToken)
+    {
+        return GetMovieSessionSeat(movieSessionId, seatRow, seatNumber, cancellationToken);
+    }
 }

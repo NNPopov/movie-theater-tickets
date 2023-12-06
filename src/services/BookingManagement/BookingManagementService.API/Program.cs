@@ -59,7 +59,7 @@ IdentityOptions identityOptions = new IdentityOptions();
 identityOptionsSection.Bind(identityOptions);
 services.Configure<IdentityOptions>(identityOptionsSection);
 
-services.AddApplicationServices()
+services.AddApplicationServices(builder.Configuration)
     .AddInfrastructureServices(builder.Configuration)
     .AddApiServices(builder.Configuration)
     .AddWebSockets(builder.Configuration, logger)

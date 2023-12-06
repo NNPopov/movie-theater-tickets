@@ -17,7 +17,7 @@ public class ShoppingCartSeatLifecycleManager : IShoppingCartSeatLifecycleManage
         _redis = redis;
     }
 
-    public async Task<SeatShoppingCart> GetAsync(Guid movieSessionId, short seatRow, short seatNumber)
+    public async Task<bool> IsSeatReservedAsync(Guid movieSessionId, short seatRow, short seatNumber)
     {
         var db = _redis.GetDatabase();
 
@@ -26,9 +26,9 @@ public class ShoppingCartSeatLifecycleManager : IShoppingCartSeatLifecycleManage
         string jsonValue = await db.StringGetAsync(key);
 
         if (string.IsNullOrEmpty(jsonValue))
-            return default;
+            return false;
 
-        return JsonConvert.DeserializeObject<SeatShoppingCart>(jsonValue);
+        return true;
     }
 
     public async Task DeleteAsync(Guid movieSessionId, short seatRow, short seatNumber)
@@ -59,5 +59,17 @@ public class ShoppingCartSeatLifecycleManager : IShoppingCartSeatLifecycleManage
 
         return await db.StringSetAsync(key, jsonValue, expiryTimeSpan);
     }
-    
+
+    public async Task<bool> SetAsync(Guid movieSessionId, Guid shoppingCartId, short seatRow, short seatNumber,
+        DateTime expires)
+    {
+        var db = _redis.GetDatabase();
+        var key = GetKey(movieSessionId, seatRow, seatNumber);
+
+        var expiryTimeSpan = expires.Subtract(TimeProvider.System.GetUtcNow().DateTime);
+        
+        string jsonValue = JsonConvert.SerializeObject(shoppingCartId);
+
+        return await db.StringSetAsync(key, jsonValue, expiryTimeSpan);
+    }
 }

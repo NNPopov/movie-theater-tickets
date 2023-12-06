@@ -9,7 +9,7 @@ using Serilog;
 
 namespace CinemaTicketBooking.Application.MovieSessionSeats.Event.SeatStatusUpdated;
 
-public class
+internal sealed class
     SeatStatusUpdatedCommandHandler : INotificationHandler<
     BaseApplicationEvent<MovieSessionSeatStatusUpdatedDomainEvent>>
 {

@@ -6,7 +6,7 @@ using CinemaTicketBooking.Domain.ShoppingCarts.Abstractions;
 namespace CinemaTicketBooking.Application.ShoppingCarts.Command.UnreserveSeats;
 public record UnreserveSeatsCommand(Guid ShoppingCartId, Guid RequestId) : IdempotentRequest(RequestId), IRequest;
 
-public class UnreserveSeatsCommandHandler : IRequestHandler<UnreserveSeatsCommand>
+internal sealed  class UnreserveSeatsCommandHandler : IRequestHandler<UnreserveSeatsCommand>
 {
     private readonly IShoppingCartSeatLifecycleManager _shoppingCartSeatLifecycleManager;
     private readonly IShoppingCartLifecycleManager _shoppingCartLifecycleManager;

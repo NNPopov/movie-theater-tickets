@@ -13,7 +13,7 @@
 //             IEnumerable<ShowTimeSeatEntity> selectedSeats,
 //             CancellationToken cancel);
 //
-//         Task<TicketEntity> GetAsync(Guid id, CancellationToken cancel);
+//         Task<TicketEntity> IsSeatReservedAsync(Guid id, CancellationToken cancel);
 //
 //         Task<IEnumerable<TicketEntity>> GetEnrichedAsync(Guid showtimeId,
 //             CancellationToken cancel);

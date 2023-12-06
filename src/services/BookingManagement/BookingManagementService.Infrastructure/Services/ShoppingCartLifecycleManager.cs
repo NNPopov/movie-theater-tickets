@@ -1,5 +1,7 @@
 ﻿using CinemaTicketBooking.Application.Abstractions.Repositories;
+using CinemaTicketBooking.Application.ShoppingCarts;
 using CinemaTicketBooking.Domain.ShoppingCarts;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using StackExchange.Redis;
 
@@ -11,9 +13,12 @@ public class ShoppingCartLifecycleManager : IShoppingCartLifecycleManager
 
     private const string KeyPrefixTimeToLive = "shopping_cart_ttl";
     
-    public ShoppingCartLifecycleManager(IConnectionMultiplexer redis)
+    private readonly ShoppingCartConfiguration _shoppingCartConfiguration;
+    
+    public ShoppingCartLifecycleManager(IConnectionMultiplexer redis, IOptionsSnapshot<ShoppingCartConfiguration> config)
     {
         _redis = redis;
+        _shoppingCartConfiguration = config.Value;
     }
 
     public async Task<SeatShoppingCart> GetAsync(Guid shoppingCartId)
@@ -41,13 +46,13 @@ public class ShoppingCartLifecycleManager : IShoppingCartLifecycleManager
         return $"{KeyPrefixTimeToLive}:{shoppingCartId.ToString()}"; 
     }
 
-
-
     public async Task SetAsync(Guid shoppingCartId)
     {
+        var expiry =TimeSpan.FromSeconds(_shoppingCartConfiguration.ShoppingCartTimeToLiveSec);
+        
         var db = _redis.GetDatabase();
         var timeToLiveKey = GetKey(shoppingCartId);   
-        await db.StringSetAsync(timeToLiveKey, timeToLiveKey, new TimeSpan(0, 0, 200));
+        await db.StringSetAsync(timeToLiveKey, timeToLiveKey, expiry);
     }
     
 }

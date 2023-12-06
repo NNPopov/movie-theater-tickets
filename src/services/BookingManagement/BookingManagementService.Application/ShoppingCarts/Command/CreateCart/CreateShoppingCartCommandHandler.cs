@@ -15,7 +15,7 @@ public record CreateShoppingCartCommand(short MaxNumberOfSeats, Guid RequestId) 
 
 public record CreateShoppingCartResponse(Guid ShoppingCartId, string HashId);
 
-public class CreateShoppingCartCommandHandler(IDataHasher dataHasher,
+internal sealed class CreateShoppingCartCommandHandler(IDataHasher dataHasher,
     IActiveShoppingCartRepository activeShoppingCartRepository,
     IShoppingCartLifecycleManager shoppingCartLifecycleManager, ILogger logger)
     : ActiveShoppingCartHandler(activeShoppingCartRepository, shoppingCartLifecycleManager, logger),

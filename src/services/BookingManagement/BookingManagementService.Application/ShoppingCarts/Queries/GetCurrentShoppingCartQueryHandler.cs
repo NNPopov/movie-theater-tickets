@@ -10,7 +10,7 @@ namespace CinemaTicketBooking.Application.ShoppingCarts.Queries;
 
 public record GetCurrentShoppingCartQuery(Guid ClientId) : IRequest<CreateShoppingCartResponse>;
 
-public class GetCurrentShoppingCartQueryHandler(IMapper mapper,
+internal sealed class GetCurrentShoppingCartQueryHandler(IMapper mapper,
         IActiveShoppingCartRepository activeShoppingCartRepository)
     : IRequestHandler<GetCurrentShoppingCartQuery, CreateShoppingCartResponse>
 {

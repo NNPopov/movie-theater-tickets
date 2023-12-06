@@ -11,7 +11,7 @@ namespace CinemaTicketBooking.Application.ShoppingCarts.Command.PurchaseSeats;
 
 public record PurchaseTicketsCommand(Guid ShoppingCartId) : IRequest<Result>;
 
-public class PurchaseTicketsCommandHandler : IRequestHandler<PurchaseTicketsCommand, Result>
+internal sealed  class PurchaseTicketsCommandHandler : IRequestHandler<PurchaseTicketsCommand, Result>
 {
     private IShoppingCartSeatLifecycleManager _shoppingCartSeatLifecycleManager;
 

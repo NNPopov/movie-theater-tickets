@@ -6,7 +6,7 @@ using Serilog;
 
 namespace CinemaTicketBooking.Application.ShoppingCarts.Events.SeatStatusUpdated;
 
-public class
+internal sealed class
     ShoppingCartDeletedEventHandler(
         IShoppingCartNotifier shoppingCartNotifier,
         ILogger logger)
@@ -27,7 +27,6 @@ public class
             await shoppingCartNotifier.SentShoppingCartState(eventBody.ShoppingCart);
 
             logger.Debug("ShoppingCartDomainEvent state {@ShoppingCart} delete", eventBody.ShoppingCart);
-            
         }
         catch (Exception e)
         {

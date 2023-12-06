@@ -85,18 +85,18 @@ packages:
     dependency: "direct dev"
     description:
       name: dio
-      sha256: "417e2a6f9d83ab396ec38ff4ea5da6c254da71e4db765ad737a42af6930140b7"
+      sha256: "797e1e341c3dd2f69f2dad42564a6feff3bfb87187d05abb93b9609e6f1645c3"
       url: "https://pub.dev"
     source: hosted
-    version: "5.3.3"
+    version: "5.4.0"
   dio_cache_interceptor:
     dependency: "direct dev"
     description:
       name: dio_cache_interceptor
-      sha256: "7c0cb435963f08aa751ae8769b360d462f01160adc1d2d5b80e3b8c450b386e3"
+      sha256: fb7905c0d12075d8786a6b63bffd64ae062d053f682cfaf28d145a2686507308
       url: "https://pub.dev"
     source: hosted
-    version: "3.4.4"
+    version: "3.5.0"
   equatable:
     dependency: "direct dev"
     description:
@@ -683,5 +683,5 @@ packages:
     source: hosted
     version: "1.0.3"
 sdks:
-  dart: ">=3.2.0 <4.0.0"
-  flutter: ">=3.16.0"
+  dart: ">=3.2.3 <4.0.0"
+  flutter: ">=3.16.3"

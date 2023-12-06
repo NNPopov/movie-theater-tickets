@@ -65,8 +65,6 @@ public class ReserveTicketsCommandHandler : IRequestHandler<ReserveTicketsComman
             await _shoppingCartSeatLifecycleManager.DeleteAsync(cart.MovieSessionId,seat.SeatRow,seat.SeatNumber);
         }
         
-       // await _shoppingCartNotifier.SentShoppingCartState(cart);
-
         return Result.Success();
     }
 }

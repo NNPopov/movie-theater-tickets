@@ -16,16 +16,14 @@ public record SeatExpiredSelectionCommand
 public class SeatExpiredReservationEventHandler :ActiveShoppingCartHandler, INotificationHandler<SeatExpiredSelectionCommand>
 {
     private readonly IMovieSessionSeatRepository _movieSessionSeatRepository;
-    private readonly ILogger _logger;
 
     public SeatExpiredReservationEventHandler(
         IMovieSessionSeatRepository movieSessionSeatRepository,
         IActiveShoppingCartRepository activeShoppingCartRepository,
         ILogger logger,
-        IShoppingCartLifecycleManager shoppingCartLifecycleManager):base(activeShoppingCartRepository, shoppingCartLifecycleManager)
+        IShoppingCartLifecycleManager shoppingCartLifecycleManager):base(activeShoppingCartRepository, shoppingCartLifecycleManager, logger)
     {
         _movieSessionSeatRepository = movieSessionSeatRepository;
-        _logger = logger;
     }
 
     public async Task Handle(SeatExpiredSelectionCommand request,
@@ -37,7 +35,7 @@ public class SeatExpiredReservationEventHandler :ActiveShoppingCartHandler, INot
 
         if (movieSessionSeat is null)
         {
-            _logger.Warning("Couldnot find MovieSessionSeat, MovieSession:{@MovieSession)}",
+            Logger.Warning("Couldn't find MovieSessionSeat, MovieSession:{@MovieSession)}",
                 request);
             return;
         }
@@ -46,8 +44,8 @@ public class SeatExpiredReservationEventHandler :ActiveShoppingCartHandler, INot
 
         if (cart is null)
         {
-            _logger.Warning( "Couldn't find ShoppingCart. " +
-                             " movieSessionSeat:{@movieSessionSeat}, request:{@request}",
+            Logger.Warning( "Couldn't find ShoppingCart. " +
+                            " movieSessionSeat:{@MovieSessionSeat}, request:{@Request}",
                 movieSessionSeat,
                 request);
             return;
@@ -61,8 +59,8 @@ public class SeatExpiredReservationEventHandler :ActiveShoppingCartHandler, INot
         }
         else
         {
-            _logger.Warning( "Seat could not be removed from the cart ShoppingCart, Id:{@ShoppingCartId}. " +
-                             " MovieSessionId:{@MovieSessionId}, SeatRow:{@SeatRow}, SeatNumber:{@SeatNumber}",
+            Logger.Warning( "Seat could not be removed from the cart ShoppingCart, Id:{@ShoppingCartId}. " +
+                            " MovieSessionId:{@MovieSessionId}, SeatRow:{@SeatRow}, SeatNumber:{@SeatNumber}",
                 movieSessionSeat.ShoppingCartId,
                 request.MovieSessionId,
                 request.SeatRow,

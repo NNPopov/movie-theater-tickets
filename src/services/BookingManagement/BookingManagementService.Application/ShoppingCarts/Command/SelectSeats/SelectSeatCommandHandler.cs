@@ -20,10 +20,9 @@ public class SelectSeatCommandHandler(
     ILogger logger,
     MovieSessionSeatService movieSessionSeatService,
     IShoppingCartLifecycleManager shoppingCartLifecycleManager)
-    : ActiveShoppingCartHandler(activeShoppingCartRepository, shoppingCartLifecycleManager),
+    : ActiveShoppingCartHandler(activeShoppingCartRepository, shoppingCartLifecycleManager, logger),
         IRequestHandler<SelectSeatCommand, Result>
 {
-    private ILogger _logger = logger;
 
     public async Task<Result> Handle(SelectSeatCommand request,
         CancellationToken cancellationToken)

@@ -5,7 +5,7 @@ import '../../../../core/errors/failures.dart';
 
 class ShoppingCart extends Equatable {
   final int? maxNumberOfSeats;
-  final DateTime? createdCard;
+  final DateTime? createdAt;
   final String? id;
   final String? movieSessionId;
   final bool? isAssigned;
@@ -15,7 +15,7 @@ class ShoppingCart extends Equatable {
 
   ShoppingCart(
       {this.maxNumberOfSeats,
-      this.createdCard,
+      this.createdAt,
       this.id,
       this.movieSessionId,
       this.status,
@@ -28,7 +28,7 @@ class ShoppingCart extends Equatable {
   ShoppingCart.empty()
       : this(
             maxNumberOfSeats: 0,
-            createdCard: DateTime.parse('1900-01-01'),
+            createdAt: DateTime.parse('1900-01-01'),
             id: '',
             movieSessionId: '',
             status: null,
@@ -64,7 +64,7 @@ class ShoppingCart extends Equatable {
   @override
   List<Object?> get props => [
         maxNumberOfSeats,
-        createdCard,
+        createdAt,
         id,
         movieSessionId,
         status,

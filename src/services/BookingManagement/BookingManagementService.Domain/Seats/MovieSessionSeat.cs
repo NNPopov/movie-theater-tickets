@@ -52,11 +52,11 @@ public sealed class MovieSessionSeat : ValueObject, IAggregateRoot
 
 
 
-    public Guid MovieSessionId { get; private set; }
+    public Guid MovieSessionId { get; }
 
-    public short SeatNumber { get; private set; }
+    public short SeatNumber { get; }
 
-    public short SeatRow { get; private set; }
+    public short SeatRow { get; }
 
     public decimal Price { get; private set; }
 
@@ -164,8 +164,6 @@ public sealed class MovieSessionSeat : ValueObject, IAggregateRoot
         
         return Result.Success();
     }
-
-
 
     public override IEnumerable<object> GetEqualityComponents()
     {

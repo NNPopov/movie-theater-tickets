@@ -1,6 +1,8 @@
 ﻿using CinemaTicketBooking.Application.Exceptions;
 using CinemaTicketBooking.Domain.Exceptions;
 using CinemaTicketBooking.Domain.ShoppingCarts;
+using CinemaTicketBooking.Domain.ShoppingCarts.Abstractions;
+using CinemaTicketBooking.Domain.ShoppingCarts.Events;
 using FluentAssertions;
 using NSubstitute;
 using Xunit;
@@ -9,6 +11,13 @@ namespace CinemaTicketBooking.Application.UnitTests.ShoppingCarts;
 
 public class ShoppingCartSpecification
 {
+    private IDataHasher dataHasher;
+
+    public ShoppingCartSpecification()
+    {
+        dataHasher = Substitute.For<IDataHasher>();
+    }
+
     [Fact]
     public void CreateShoppingCart_property_should_be_not_null()
     {
@@ -16,13 +25,14 @@ public class ShoppingCartSpecification
         short maxNumberOfSeats = 10;
 
         // Act
-        var shoppingCart = ShoppingCart.Create(maxNumberOfSeats);
+        var shoppingCart = ShoppingCart.Create(maxNumberOfSeats, dataHasher);
 
         // Assert
         shoppingCart.Should().NotBeNull();
         shoppingCart.HashId.Should().NotBeNull();
         shoppingCart.MaxNumberOfSeats.Should().Be(maxNumberOfSeats);
         shoppingCart.Status.Should().Be(ShoppingCartStatus.InWork);
+        shoppingCart.GetDomainEvents().Should().Contain(x => x is ShoppingCartCreatedDomainEvent);
     }
 
 
@@ -31,7 +41,7 @@ public class ShoppingCartSpecification
     {
         var showTimeId = Guid.NewGuid();
         // Arrange
-        var shoppingCart = ShoppingCart.Create(5);
+        var shoppingCart = ShoppingCart.Create(5, dataHasher);
         shoppingCart.SetShowTime(showTimeId);
         var seat = Substitute.For<SeatShoppingCart>((short)1, (short)1, (decimal)100.00, null);
 
@@ -41,33 +51,34 @@ public class ShoppingCartSpecification
         // Assert
         shoppingCart.Seats.Should().Contain(seat);
         shoppingCart.Seats.Should().HaveCount(1);
+        shoppingCart.GetDomainEvents().Should().Contain(x => x is SeatAddedToShoppingCartDomainEvent);
     }
-    
+
     [Fact]
     public void AddSeats_should_be_exception_when_incorrect_showTimeId()
     {
         // Arrange
         var showTimeId = Guid.NewGuid();
-        var shoppingCart = ShoppingCart.Create(1);
+        var shoppingCart = ShoppingCart.Create(1, dataHasher);
         shoppingCart.SetShowTime(showTimeId);
         var seat = Substitute.For<SeatShoppingCart>((short)1, (short)1, (decimal)100.00, null);
-       
+
 
         // Act
         var result = () => shoppingCart.AddSeats(seat, Guid.NewGuid());
 
         // Assert
-        result.Should().Throw<DomainValidationException>().WithMessage("The Seat does not belong to the cinema hall being processed.");
+        result.Should().Throw<DomainValidationException>()
+            .WithMessage("The Seat does not belong to the cinema hall being processed.");
     }
 
-    
-        
-        [Fact]
+
+    [Fact]
     public void AddSeats_should_be_exception_when_Seat_has_already_been_added()
     {
         // Arrange
         var showTimeId = Guid.NewGuid();
-        var shoppingCart = ShoppingCart.Create(1);
+        var shoppingCart = ShoppingCart.Create(1, dataHasher);
         shoppingCart.SetShowTime(showTimeId);
         var seat = Substitute.For<SeatShoppingCart>((short)1, (short)1, (decimal)100.00, null);
         shoppingCart.AddSeats(seat, showTimeId);
@@ -85,7 +96,7 @@ public class ShoppingCartSpecification
     {
         // Arrange
         var showTimeId = Guid.NewGuid();
-        var shoppingCart = ShoppingCart.Create(1);
+        var shoppingCart = ShoppingCart.Create(1, dataHasher);
         shoppingCart.SetShowTime(showTimeId);
         var seat = Substitute.For<SeatShoppingCart>((short)1, (short)1, (decimal)100.00, null);
         shoppingCart.AddSeats(seat, showTimeId);
@@ -102,7 +113,7 @@ public class ShoppingCartSpecification
     public void SetShowTime_ShouldSetShowTime()
     {
         // Arrange
-        var shoppingCart = ShoppingCart.Create(5);
+        var shoppingCart = ShoppingCart.Create(5, dataHasher);
         var showTimeId = Guid.NewGuid();
 
         // Act
@@ -110,6 +121,7 @@ public class ShoppingCartSpecification
 
         // Assert
         shoppingCart.MovieSessionId.Should().Be(showTimeId);
+        shoppingCart.GetDomainEvents().Should().Contain(x => x is ShoppingCartCreatedDomainEvent);
     }
 
 
@@ -118,7 +130,7 @@ public class ShoppingCartSpecification
     {
         var showTimeId = Guid.NewGuid();
         // Arrange
-        var shoppingCart = ShoppingCart.Create(5);
+        var shoppingCart = ShoppingCart.Create(5, dataHasher);
         shoppingCart.SetShowTime(showTimeId);
         var seat = NSubstitute.Substitute.For<SeatShoppingCart>((short)1, (short)1, (decimal)100.00, null);
         shoppingCart.AddSeats(seat, showTimeId);
@@ -129,13 +141,14 @@ public class ShoppingCartSpecification
         // Assert
         result.Should().Be(true);
         shoppingCart.Seats.Should().NotContain(seat);
+        shoppingCart.GetDomainEvents().Should().Contain(x => x is SeatRemovedFromShoppingCartDomainEvent);
     }
 
     [Fact]
     public void SetShowTime_ShouldThrowArgumentException_WhenClientIdNotAssign()
     {
         // Arrange
-        var shoppingCart = ShoppingCart.Create(5);
+        var shoppingCart = ShoppingCart.Create(5, dataHasher);
         shoppingCart.SetShowTime(Guid.NewGuid());
         shoppingCart.SeatsReserve();
 
@@ -150,7 +163,7 @@ public class ShoppingCartSpecification
     public void AssignClientId_ShouldAssignClientId()
     {
         // Arrange
-        var shoppingCart = ShoppingCart.Create(5);
+        var shoppingCart = ShoppingCart.Create(5, dataHasher);
         var clientId = Guid.NewGuid();
 
         // Act
@@ -158,5 +171,6 @@ public class ShoppingCartSpecification
 
         // Assert
         shoppingCart.ClientId.Should().Be(clientId);
+        shoppingCart.GetDomainEvents().Should().Contain(x => x is ShoppingCartAssignedToClientDomainEvent);
     }
 }

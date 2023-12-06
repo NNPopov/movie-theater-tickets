@@ -66,30 +66,8 @@ public sealed class MovieSession : AggregateRoot
             ticketsForSale
         );
 
-        movieSession.AddDomainEvent(new ShowtimeCreatedDomainEvent(movieSession));
+        movieSession.AddDomainEvent(new MovieSessionCreatedDomainEvent(movieSession));
 
         return movieSession;
-    }
-}
-
-// [method: JsonConstructor]
-// public class SeatMovieSession(short seatRow, short seatNumber) : Seat(seatRow, seatNumber);
-//
-public abstract class Seat : ValueObject
-{
-    protected Seat(short seatRow, short seatNumber)
-    {
-        SeatRow = seatRow;
-        SeatNumber = seatNumber;
-    }
-
-    public short SeatRow { get; private set; }
-    public short SeatNumber { get; private set; }
-
-    public override IEnumerable<object> GetEqualityComponents()
-    {
-        yield return SeatNumber;
-
-        yield return SeatRow;
     }
 }

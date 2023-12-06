@@ -1,6 +1,7 @@
 ﻿using CinemaTicketBooking.Application.Abstractions;
 using CinemaTicketBooking.Application.Common.Events;
 using CinemaTicketBooking.Domain.ShoppingCarts;
+using CinemaTicketBooking.Domain.ShoppingCarts.Events;
 using Serilog;
 
 namespace CinemaTicketBooking.Application.ShoppingCarts.Events.SeatStatusUpdated;

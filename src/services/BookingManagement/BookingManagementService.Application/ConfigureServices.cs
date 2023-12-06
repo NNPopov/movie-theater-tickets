@@ -2,6 +2,8 @@
 using CinemaTicketBooking.Application.Common.Events;
 using CinemaTicketBooking.Application.ShoppingCarts.Events.SeatStatusUpdated;
 using CinemaTicketBooking.Domain.ShoppingCarts;
+using CinemaTicketBooking.Domain.ShoppingCarts.Abstractions;
+using CinemaTicketBooking.Domain.ShoppingCarts.Events;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace CinemaTicketBooking.Application;
@@ -38,6 +40,8 @@ public static class ConfigureServices
             typeof(ShoppingCartUpdatedEventHandler<ShoppingCartCreatedDomainEvent>));
 
 
+        services.AddScoped<IDataHasher,DataHasher>();
+        
         return services;
     }
 }

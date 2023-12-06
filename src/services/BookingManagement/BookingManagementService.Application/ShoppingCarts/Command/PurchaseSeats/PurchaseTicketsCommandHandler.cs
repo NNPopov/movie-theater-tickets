@@ -23,7 +23,9 @@ public class PurchaseTicketsCommandHandler : IRequestHandler<PurchaseTicketsComm
     public PurchaseTicketsCommandHandler(
         IShoppingCartSeatLifecycleManager shoppingCartSeatLifecycleManager,
         IMovieSessionSeatRepository movieSessionSeatRepository,
-        IActiveShoppingCartRepository activeShoppingCartRepository, MovieSessionSeatService movieSessionSeatService, IShoppingCartLifecycleManager shoppingCartLifecycleManager)
+        IActiveShoppingCartRepository activeShoppingCartRepository,
+        MovieSessionSeatService movieSessionSeatService,
+        IShoppingCartLifecycleManager shoppingCartLifecycleManager)
     {
         _shoppingCartSeatLifecycleManager = shoppingCartSeatLifecycleManager;
 
@@ -56,7 +58,7 @@ public class PurchaseTicketsCommandHandler : IRequestHandler<PurchaseTicketsComm
 
         cart.PurchaseComplete();
         await _activeShoppingCartRepository.SaveAsync(cart);
-        await _shoppingCartLifecycleManager.SetAsync(cart.Id);
+        await _shoppingCartLifecycleManager.DeleteAsync(cart.Id);
 
         foreach (var seat in cart.Seats)
         {

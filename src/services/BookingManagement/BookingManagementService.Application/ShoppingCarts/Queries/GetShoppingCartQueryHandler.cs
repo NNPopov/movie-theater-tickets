@@ -36,7 +36,7 @@ public class ShoppingCartDto
 {
     public short MaxNumberOfSeats { get; set; }
 
-    public DateTime CreatedCard { get; set; }
+    public DateTime CreatedAt { get; set; }
     
     public Guid Id { get; set; }
     

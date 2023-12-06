@@ -39,8 +39,6 @@ public class ShoppingCartExpiredCommandHandler : INotificationHandler<ShoppingCa
         await _activeShoppingCartRepository.DeleteAsync(cart);
         
         _logger.Warning( "ShoppingCart Deleted:{@ShoppingCart}", cart);
-
         
-        //await _shoppingCartNotifier.SentShoppingCartState(cart);
     }
 }

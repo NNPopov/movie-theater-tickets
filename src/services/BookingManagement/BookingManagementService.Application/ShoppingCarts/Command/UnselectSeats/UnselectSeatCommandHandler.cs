@@ -21,18 +21,15 @@ public class UnselectSeatCommandHandler : ActiveShoppingCartHandler , IRequestHa
     
     private readonly IShoppingCartSeatLifecycleManager _shoppingCartSeatLifecycleManager;
     
-    private readonly ILogger _logger;
-
     public UnselectSeatCommandHandler(
         IMovieSessionsRepository movieSessionsRepository,
         IShoppingCartSeatLifecycleManager shoppingCartSeatLifecycleManager,
         IShoppingCartLifecycleManager shoppingCartLifecycleManager,
         IActiveShoppingCartRepository activeShoppingCartRepository,
-        ILogger logger):base(activeShoppingCartRepository, shoppingCartLifecycleManager)
+        ILogger logger):base(activeShoppingCartRepository, shoppingCartLifecycleManager,logger)
     {
         _movieSessionsRepository = movieSessionsRepository;
         _shoppingCartSeatLifecycleManager = shoppingCartSeatLifecycleManager;
-        _logger = logger;
     }
 
     public async Task<bool> Handle(UnselectSeatCommand request,
@@ -78,7 +75,7 @@ public class UnselectSeatCommandHandler : ActiveShoppingCartHandler , IRequestHa
         //Step 3: return seat back to store 
 
 
-        _logger.Information("Cart was updated {@Cart}", cart);
+        Logger.Information("Cart was updated {@Cart}", cart);
         return true;
     }
 }

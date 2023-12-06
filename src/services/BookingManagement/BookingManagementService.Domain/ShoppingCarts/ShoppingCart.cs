@@ -61,7 +61,7 @@ public class ShoppingCart : AggregateRoot
     {
         Ensure.NotEmpty(clientId, "The clientId is required.", nameof(clientId));
 
-        CheckIfPurchaseIsCompleted();
+        EnsurePurchaseIsNotCompleted();
 
         if (ClientId != Guid.Empty)
             throw new ConflictException(nameof(ShoppingCart), Id.ToString());
@@ -91,7 +91,7 @@ public class ShoppingCart : AggregateRoot
     {
         Ensure.NotEmpty(showTimeId, "The movieSessionId is required.", nameof(showTimeId));
 
-        CheckIfPurchaseIsCompleted();
+        EnsurePurchaseIsNotCompleted();
 
         if (MovieSessionId != showTimeId)
         {
@@ -143,7 +143,7 @@ public class ShoppingCart : AggregateRoot
     {
         Ensure.NotEmpty(MovieSessionId, "The MovieSessionId is required.", nameof(MovieSessionId));
 
-        CheckIfPurchaseIsCompleted();
+        EnsurePurchaseIsNotCompleted();
 
         var seat = _seats.FirstOrDefault(t => t.SeatRow == seatRow && t.SeatNumber == seatNumber);
 
@@ -160,7 +160,7 @@ public class ShoppingCart : AggregateRoot
 
     public void ClearCart()
     {
-        CheckIfPurchaseIsCompleted();
+        EnsurePurchaseIsNotCompleted();
 
         Status = ShoppingCartStatus.InWork;
         MovieSessionId = Guid.Empty;
@@ -172,24 +172,30 @@ public class ShoppingCart : AggregateRoot
         }
 
         ClearSeats();
+        
+        _domainEvents.Add(new ShoppingCartCleanedDomainEvent(Id));
     }
 
     public void SeatsReserve()
     {
-        CheckIfPurchaseIsCompleted();
+        EnsurePurchaseIsNotCompleted();
 
         if (Status == ShoppingCartStatus.InWork)
             Status = ShoppingCartStatus.SeatsReserved;
+        
+        _domainEvents.Add(new ShoppingCartReservedDomainEvent(Id));
     }
 
     public void PurchaseComplete()
     {
-        CheckIfPurchaseIsCompleted();
+        EnsurePurchaseIsNotCompleted();
 
         Ensure.NotEmpty(ClientId, "The ClientId is required.", nameof(ClientId));
 
         if (Status == ShoppingCartStatus.SeatsReserved)
             Status = ShoppingCartStatus.PurchaseCompleted;
+        
+        _domainEvents.Add(new ShoppingCartPurchaseDomainEvent(Id));
     }
 
     public PriceCalculationResult CalculateCartAmount(IPriceService priceService)
@@ -199,7 +205,7 @@ public class ShoppingCart : AggregateRoot
             return priceService.GetCartAmount(_seats);
         }
 
-        CheckIfPurchaseIsCompleted();
+        EnsurePurchaseIsNotCompleted();
 
         PriceCalculationResult = priceService.GetCartAmount(_seats);
 
@@ -220,7 +226,7 @@ public class ShoppingCart : AggregateRoot
     }
     
     
-    private void CheckIfPurchaseIsCompleted()
+    private void EnsurePurchaseIsNotCompleted()
     {
         if (Status == ShoppingCartStatus.PurchaseCompleted)
         {

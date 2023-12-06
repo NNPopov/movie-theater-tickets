@@ -4,7 +4,6 @@ using CinemaTicketBooking.Application.Exceptions;
 using CinemaTicketBooking.Application.ShoppingCarts.Base;
 using CinemaTicketBooking.Domain.Error;
 using CinemaTicketBooking.Domain.Exceptions;
-using CinemaTicketBooking.Domain.PriceServices;
 using CinemaTicketBooking.Domain.Services;
 using CinemaTicketBooking.Domain.ShoppingCarts;
 using CinemaTicketBooking.Domain.ShoppingCarts.Abstractions;
@@ -30,14 +29,13 @@ public class SelectSeatCommandHandler(
     {
         var lockKey = $"lock:{request.MovieSessionId}:{request.SeatRow}:{request.SeatNumber}";
 
-        ShoppingCart? cart;
 
         await using (var lockHandler = await distributedLock.TryAcquireAsync(lockKey,
                          cancellationToken: cancellationToken))
         {
             EnsureDistributedLockIsNotLocked(lockHandler, lockKey);
 
-            cart = await GetShoppingCartOrThrow(request);
+            ShoppingCart cart = await GetShoppingCartOrThrow(request);
 
             SetMovieSessionIdIfNullOrChanged(request, cart);
 
@@ -119,7 +117,6 @@ public class SelectSeatCommandHandler(
     {
         return await ActiveShoppingCartRepository.GetByIdAsync(request.ShoppingCartId) ??
                throw new ContentNotFoundException(nameof(ShoppingCart), request.ShoppingCartId.ToString());
-        
     }
 
     private static void EnsureDistributedLockIsNotLocked(ILockHandler lockHandler, string lockKey)

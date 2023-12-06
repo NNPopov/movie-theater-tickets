@@ -56,6 +56,12 @@ public static class ConfigureServices
             typeof(ShoppingCartUpdatedEventHandler<SeatRemovedFromShoppingCartDomainEvent>));
         services.AddTransient(typeof(INotificationHandler<BaseApplicationEvent<ShoppingCartCreatedDomainEvent>>),
             typeof(ShoppingCartUpdatedEventHandler<ShoppingCartCreatedDomainEvent>));
+        services.AddTransient(typeof(INotificationHandler<BaseApplicationEvent<ShoppingCartReservedDomainEvent>>),
+            typeof(ShoppingCartUpdatedEventHandler<ShoppingCartReservedDomainEvent>));
+        services.AddTransient(typeof(INotificationHandler<BaseApplicationEvent<ShoppingCartPurchaseDomainEvent>>),
+            typeof(ShoppingCartUpdatedEventHandler<ShoppingCartPurchaseDomainEvent>));
+        services.AddTransient(typeof(INotificationHandler<BaseApplicationEvent<ShoppingCartCleanedDomainEvent>>),
+            typeof(ShoppingCartUpdatedEventHandler<ShoppingCartCleanedDomainEvent>));
 
 
         services.AddScoped<IDataHasher, DataHasher>();

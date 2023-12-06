@@ -29,6 +29,6 @@ public class ActiveShoppingCartHandler
         await ActiveShoppingCartRepository.SaveAsync(shoppingCart);
         await ShoppingCartLifecycleManager.SetAsync(shoppingCart.Id);
         
-        Logger.Debug("ShoppingCart was saved, ShoppingCartLifecycle was reset, Amount was recalculated {@ShoppingCart}", shoppingCart);
+        Logger.Debug(" Amount was recalculated, ShoppingCart was saved, ShoppingCartLifecycle was reset {@ShoppingCart}", shoppingCart);
     }
 }

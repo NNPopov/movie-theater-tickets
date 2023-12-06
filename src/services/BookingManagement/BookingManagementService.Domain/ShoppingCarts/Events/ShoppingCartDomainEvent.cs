@@ -26,6 +26,18 @@ public sealed record ShoppingCartCreatedDomainEvent(
     Guid ShoppingCartId
 ) : ShoppingCartDomainEvent(ShoppingCartId);
 
+public sealed record ShoppingCartReservedDomainEvent(
+    Guid ShoppingCartId
+) : ShoppingCartDomainEvent(ShoppingCartId);
+
+public sealed record ShoppingCartPurchaseDomainEvent(
+    Guid ShoppingCartId
+) : ShoppingCartDomainEvent(ShoppingCartId);
+
+public sealed record ShoppingCartCleanedDomainEvent(
+    Guid ShoppingCartId
+) : ShoppingCartDomainEvent(ShoppingCartId);
+
 public sealed record ShoppingCartAssignedToClientDomainEvent(
     Guid ShoppingCartId
 ) : ShoppingCartDomainEvent(ShoppingCartId);

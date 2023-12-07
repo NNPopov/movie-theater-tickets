@@ -3,19 +3,22 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:movie_theater_tickets/src/movies/domain/entities/movie.dart';
-import '../../domain/usecases/get_movies.dart';
+import '../../../movies/domain/usecases/get_movies.dart';
+import '../../domain/entities/active_movie.dart';
 
 part 'movie_theater_state.dart';
 
 class MovieTheaterCubit extends Cubit<MovieTheaterState> {
-  MovieTheaterCubit(this._getMovies)
+  MovieTheaterCubit(this._getActiveMovies)
       : super( MovieTheaterState.initial());
 
-  late final GetMovies _getMovies;
+  late final GetActiveMovies _getActiveMovies;
 
-  domain.Future<void> getMovies() async {
+  Future<void> getMovies() async {
     emit(MovieTheaterState.fetching());
-    final result = await _getMovies();
+
+
+    final result = await _getActiveMovies();
 
     result.fold(
       (failure) => emit(state.copyWith(
@@ -24,3 +27,5 @@ class MovieTheaterCubit extends Cubit<MovieTheaterState> {
     );
   }
 }
+
+

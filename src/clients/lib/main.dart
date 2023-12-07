@@ -44,7 +44,7 @@ Future<void> main() async {
   final logger = getLogger(main);
 
   FlutterError.onError = (details) {
-      logger.log(Level.all, details.exceptionAsString(), error: details.exception,
+      logger.log(Level.error, details.exceptionAsString(), error: details.exception,
         stackTrace: details.stack);
   };
 

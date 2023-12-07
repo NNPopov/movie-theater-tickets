@@ -11,15 +11,30 @@ void main() {
 
   final tShoppingCarDto = ShoppingCartDto(
       id: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-      createdCard: DateTime.parse("2023-09-28 19:28:53.299Z"),
+      createdAt: DateTime.parse("2023-09-28 19:28:53.299Z"),
       movieSessionId: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       maxNumberOfSeats: 4,
       status: ShoppingCartStatus.SeatsReserved,
       isAssigned: true,
-      seats:  [
-        ShoppingCartSeatDto(seatNumber: 1, seatRow: 1, selectionExpirationTime: DateTime.parse("2023-09-28 19:28:53.299Z"), price: 15.0),
-        ShoppingCartSeatDto(seatNumber: 2, seatRow: 1, selectionExpirationTime: DateTime.parse("2023-09-28 19:28:53.299Z"), price: 15.0),
-        ShoppingCartSeatDto(seatNumber: 3, seatRow: 1, selectionExpirationTime: DateTime.parse("2023-09-28 19:28:53.299Z"), price: 15.0),
+      seats: [
+        ShoppingCartSeatDto(
+            seatNumber: 1,
+            seatRow: 1,
+            selectionExpirationTime: DateTime.parse("2023-09-28 19:28:53.299Z"),
+            price: 15.0,
+            isDirty: false),
+        ShoppingCartSeatDto(
+            seatNumber: 2,
+            seatRow: 1,
+            selectionExpirationTime: DateTime.parse("2023-09-28 19:28:53.299Z"),
+            price: 15.0,
+            isDirty: false),
+        ShoppingCartSeatDto(
+            seatNumber: 3,
+            seatRow: 1,
+            selectionExpirationTime: DateTime.parse("2023-09-28 19:28:53.299Z"),
+            price: 15.0,
+            isDirty: false),
       ]);
 
   group('ShoppingCart', () {
@@ -28,23 +43,19 @@ void main() {
     });
   });
 
+  test('should return a valid [ShoppingCartDto] when the JSON is not null',
+      () async {
+    final map =
+        jsonDecode(fixture('shopping_cart.json')) as Map<String, dynamic>;
+    final result = ShoppingCartDto.fromJson(map);
+    expect(result, tShoppingCarDto);
+  });
 
-    test('should return a valid [ShoppingCartDto] when the JSON is not null',
-        () async {
-      final map =
-          jsonDecode(fixture('shopping_cart.json')) as Map<String, dynamic>;
-      final result = ShoppingCartDto.fromJson(map);
-      expect(result, tShoppingCarDto);
-    });
-
-
-
-    test('should return a Dart map containing the proper data', () async {
-      final map =
-          jsonDecode(fixture('shopping_cart.json')) as Map<String, dynamic>;
-      final result = tShoppingCarDto.toJson();
-      expect(result, map);
-
+  test('should return a Dart map containing the proper data', () async {
+    final map =
+        jsonDecode(fixture('shopping_cart.json')) as Map<String, dynamic>;
+    final result = tShoppingCarDto.toJson();
+    expect(result, map);
   });
   //
   // group('copyWith', () {

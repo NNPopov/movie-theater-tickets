@@ -6,14 +6,12 @@ import '../../../../core/utils/typedefs.dart';
 import '../../../../core/buses/event_bus.dart';
 
 import 'package:dartz/dartz.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class UpdateServerStateUseCase
     extends FutureUsecaseWithParams<bool, ServerState> {
   UpdateServerStateUseCase(this._eventBus);
 
   late final EventBus _eventBus;
-  final storage = const FlutterSecureStorage();
 
   @override
   ResultFuture<bool> call(ServerState params) async {

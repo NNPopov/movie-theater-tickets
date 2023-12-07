@@ -8,7 +8,7 @@ namespace CinemaTicketBooking.Application.Movies.Queries;
 
 public record GetMovieQuery(Guid Id) : IRequest<MovieDto>;
 
-public class GetMovieQueryHandler : IRequestHandler<GetMovieQuery, MovieDto>
+internal sealed class GetMovieQueryHandler : IRequestHandler<GetMovieQuery, MovieDto>
 {
     private readonly IMoviesRepository _moviesRepository;
     private readonly IMapper _mapper;

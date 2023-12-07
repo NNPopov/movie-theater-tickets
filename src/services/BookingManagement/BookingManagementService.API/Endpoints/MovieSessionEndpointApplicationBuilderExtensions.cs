@@ -21,6 +21,20 @@ public class MovieSessionEndpointApplicationBuilderExtensions : IEndpoints
 
     public static void DefineEndpoints(IEndpointRouteBuilder endpointRouteBuilder)
     {
+        
+        endpointRouteBuilder.MapGet($"{BaseRoute}/activemovies",
+                async (ISender sender, CancellationToken cancellationToken) =>
+                {
+                    var query = new GetActiveMoviesQuery();
+                    return await sender.Send(query, cancellationToken);
+                })
+            .WithName("GetActiveMovies")
+            .WithTags(Tag)
+            .Produces<IReadOnlyCollection<ActiveMovieDto>>(200, "application/json")
+            .Produces(204);
+
+        
+        
         endpointRouteBuilder.MapGet($"{BaseRoute}/{{movieSessionId}}/seats",
                 async (Guid movieSessionId, ISender sender, CancellationToken cancellationToken) =>
                 {

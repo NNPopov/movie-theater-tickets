@@ -2,10 +2,12 @@ import 'dart:convert';
 import 'package:dartz/dartz.dart';
 import 'package:movie_theater_tickets/core/utils/typedefs.dart';
 import 'package:dio/dio.dart';
+import 'package:movie_theater_tickets/src/movie_sessions/domain/entities/active_movie.dart';
 import 'package:movie_theater_tickets/src/movie_sessions/domain/entities/movie_session.dart';
 import '../../../../core/errors/exceptions.dart';
 import '../../../../core/errors/failures.dart';
 import '../../domain/repos/movie_session_repo.dart';
+import '../models/active_movie_dto.dart';
 import '../models/movie_session_dto.dart';
 import 'package:get_it/get_it.dart';
 
@@ -14,17 +16,17 @@ GetIt getIt = GetIt.instance;
 class MovieSessionRepoImpl implements MovieSessionRepo {
   final Dio _client;
 
-  MovieSessionRepoImpl( this._client) ;
+  MovieSessionRepoImpl(this._client);
 
   @override
   ResultFuture<MovieSession> getMovieSession(String movieSessionId) async {
     try {
-      final response = await _client.get('/api/moviesessions/$movieSessionId');
-      var movieSession = json.decode(response.toString());
+      final movieSessionResponse  = await _client.get('/api/moviesessions/$movieSessionId');
+      var movieSessionData  = json.decode(movieSessionResponse .toString());
 
-      var movieSessionDto = MovieSessionDto.fromJson(movieSession);
+      var movieSessionDto  = MovieSessionDto.fromJson(movieSessionData );
 
-      return Right(movieSessionDto);
+      return Right(movieSessionDto );
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message, statusCode: e.statusCode));
     }
@@ -34,13 +36,30 @@ class MovieSessionRepoImpl implements MovieSessionRepo {
   ResultFuture<List<MovieSession>> getMovieSessionByMovieId(
       String movieId) async {
     try {
-      final response = await _client.get('/api/movies/$movieId/moviesessions');
-      var movieSessions = response.data as List;
+      final movieSessionsResponse =
+          await _client.get('/api/movies/$movieId/moviesessions');
+      var movieSessionsData = movieSessionsResponse.data as List;
 
-      var movieSessionDtos = List<MovieSessionDto>.from(
-          movieSessions.map((model) => MovieSessionDto.fromJson(model)));
+      var movieSessionList = List<MovieSessionDto>.from(
+          movieSessionsData.map((model) => MovieSessionDto.fromJson(model)));
 
-      return Right(movieSessionDtos);
+      return Right(movieSessionList);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message, statusCode: e.statusCode));
+    }
+  }
+
+  @override
+  ResultFuture<List<ActiveMovie>> getActiveMovies() async {
+    try {
+      final activeMoviesResponse =
+          await _client.get('/api/moviesessions/activemovies');
+      var activeMoviesData = activeMoviesResponse.data as List;
+
+      var activeMovieList = List<ActiveMovieDto>.from(
+          activeMoviesData.map((model) => ActiveMovieDto.fromJson(model)));
+
+      return Right(activeMovieList);
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message, statusCode: e.statusCode));
     }

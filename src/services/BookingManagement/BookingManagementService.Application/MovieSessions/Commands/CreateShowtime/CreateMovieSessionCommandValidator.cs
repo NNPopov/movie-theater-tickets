@@ -1,6 +1,6 @@
 ﻿namespace CinemaTicketBooking.Application.MovieSessions.Commands.CreateShowtime;
 
-public class CreateMovieSessionCommandValidator: AbstractValidator<CreateMovieSessionCommand>
+internal sealed class CreateMovieSessionCommandValidator: AbstractValidator<CreateMovieSessionCommand>
 {
     public CreateMovieSessionCommandValidator()
     {

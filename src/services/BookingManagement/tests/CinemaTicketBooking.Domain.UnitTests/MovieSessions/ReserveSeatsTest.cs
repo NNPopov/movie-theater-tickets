@@ -1,4 +1,5 @@
 ﻿using CinemaTicketBooking.Domain.MovieSessions;
+using CinemaTicketBooking.Domain.MovieSessions.Events;
 using FluentAssertions;
 using Xunit;
 
@@ -43,6 +44,7 @@ public class MovieSessionSpecification
       movieSession.MovieId.Should().Be(movieId);
       movieSession.CinemaHallId.Should().Be(auditoriumId);
       movieSession.SessionDate.Should().Be(sessionDate);
+      movieSession.GetDomainEvents().Should().Contain(t=>t is MovieSessionCreatedDomainEvent);
       
    }
 

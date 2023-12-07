@@ -6,44 +6,43 @@ using CinemaTicketBooking.Domain.Seats.Abstractions;
 using CinemaTicketBooking.Domain.Services;
 using CinemaTicketBooking.Domain.ShoppingCarts;
 using CinemaTicketBooking.Domain.ShoppingCarts.Abstractions;
+using Serilog;
 
 namespace CinemaTicketBooking.Application.ShoppingCarts.Command.ReserveSeats;
 
 public record ReserveTicketsCommand( Guid ShoppingCartId) : IRequest<Result>;
 
 
-public class ReserveTicketsCommandHandler : IRequestHandler<ReserveTicketsCommand, Result>
+internal sealed  class ReserveTicketsCommandHandler : IRequestHandler<ReserveTicketsCommand, Result>
 {
-    private ISeatStateRepository _seatStateRepository;
+    private IShoppingCartSeatLifecycleManager _shoppingCartSeatLifecycleManager;
 
     private readonly MovieSessionSeatService _movieSessionSeatService;
-    private readonly IShoppingCartRepository _shoppingCartRepository;
-    private readonly IShoppingCartNotifier _shoppingCartNotifier;
+    private readonly IActiveShoppingCartRepository _activeShoppingCartRepository;
+    private readonly IShoppingCartLifecycleManager _shoppingCartLifecycleManager;
+    private readonly ILogger _logger;
     public ReserveTicketsCommandHandler(
-        ISeatStateRepository seatStateRepository,
-        IShoppingCartRepository shoppingCartRepository, 
-        IShoppingCartNotifier shoppingCartNotifier, 
-        MovieSessionSeatService movieSessionSeatService)
+        IShoppingCartSeatLifecycleManager shoppingCartSeatLifecycleManager,
+        IActiveShoppingCartRepository activeShoppingCartRepository, 
+        MovieSessionSeatService movieSessionSeatService, IShoppingCartLifecycleManager shoppingCartLifecycleManager, ILogger logger)
     {
-        _seatStateRepository = seatStateRepository;
+        _shoppingCartSeatLifecycleManager = shoppingCartSeatLifecycleManager;
         
-        _shoppingCartRepository = shoppingCartRepository;
-        _shoppingCartNotifier = shoppingCartNotifier;
+        _activeShoppingCartRepository = activeShoppingCartRepository;
+
         _movieSessionSeatService = movieSessionSeatService;
+        _shoppingCartLifecycleManager = shoppingCartLifecycleManager;
+        _logger = logger;
     }
 
     public async Task<Result> Handle(ReserveTicketsCommand request,
         CancellationToken cancellationToken)
     {
 
-        var cart = await _shoppingCartRepository.GetByIdAsync(request.ShoppingCartId);
+        var cart = await GetShoppingCartOrThrow(request);
+      
+        cart.SeatsReserve();
         
-        if (cart == null)
-        {
-            return DomainErrors<ShoppingCart>.NotFound(request.ShoppingCartId.ToString());
-        }
-
-       
         var result = await   _movieSessionSeatService.ReserveSeats(cart.MovieSessionId, 
              cart.Seats.Select(t=>(t.SeatRow,t.SeatNumber)).ToList(),
                 request.ShoppingCartId,
@@ -51,19 +50,24 @@ public class ReserveTicketsCommandHandler : IRequestHandler<ReserveTicketsComman
         
         if (result.IsFailure)
         {
-            return result;
+            throw new Exception( $"Couldn't Reserve {nameof(ShoppingCart)} ShoppingCartId {request.ShoppingCartId.ToString()}");
         }
-        
-        cart.SeatsReserve();
-        await _shoppingCartRepository.SetAsync(cart);
+
+        await _activeShoppingCartRepository.SaveAsync(cart);
+        await _shoppingCartLifecycleManager.SetAsync(cart.Id);
 
         foreach (var seat in cart.Seats)
         {
-            await _seatStateRepository.DeleteAsync(cart.MovieSessionId,seat.SeatRow,seat.SeatNumber);
+            await _shoppingCartSeatLifecycleManager.DeleteAsync(cart.MovieSessionId,seat.SeatRow,seat.SeatNumber);
         }
         
-        await _shoppingCartNotifier.SentShoppingCartState(cart);
-
+        _logger.Debug("ShoppingCart was reserved {@ShoppingCart}", cart);
         return Result.Success();
+    }
+    
+    private async Task<ShoppingCart> GetShoppingCartOrThrow(ReserveTicketsCommand request)
+    {
+        return await _activeShoppingCartRepository.GetByIdAsync(request.ShoppingCartId) ??
+               throw new ContentNotFoundException(nameof(ShoppingCart), request.ShoppingCartId.ToString());
     }
 }

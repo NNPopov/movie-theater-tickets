@@ -1,34 +1,27 @@
-﻿using CinemaTicketBooking.Application.Abstractions;
-using CinemaTicketBooking.Domain.PriceServices;
+﻿using CinemaTicketBooking.Application.Abstractions.Repositories;
+using CinemaTicketBooking.Application.ShoppingCarts.Base;
 using CinemaTicketBooking.Domain.Seats.Abstractions;
-using CinemaTicketBooking.Domain.ShoppingCarts;
 using CinemaTicketBooking.Domain.ShoppingCarts.Abstractions;
 using Serilog;
 
 namespace CinemaTicketBooking.Application.ShoppingCarts.Command.ExpiredSeatSelection;
 
-public record SeatExpiredSelectionCommand
-    (Guid MovieSessionId, short SeatRow, short SeatNumber, Guid ShoppingKartId) : INotification;
+public record SeatExpiredSelectionCommand(Guid MovieSessionId, short SeatRow, short SeatNumber, Guid ShoppingKartId)
+    : INotification;
 
-public class SeatExpiredReservationEventHandler : INotificationHandler<SeatExpiredSelectionCommand>
+internal sealed  class SeatExpiredReservationEventHandler : ActiveShoppingCartHandler,
+    INotificationHandler<SeatExpiredSelectionCommand>
 {
     private readonly IMovieSessionSeatRepository _movieSessionSeatRepository;
-    private readonly ILogger _logger;
-
-    private readonly IShoppingCartRepository _shoppingCartRepository;
-    
-    private readonly IShoppingCartNotifier _shoppingCartNotifier;
 
     public SeatExpiredReservationEventHandler(
         IMovieSessionSeatRepository movieSessionSeatRepository,
-        IShoppingCartRepository shoppingCartRepository,
+        IActiveShoppingCartRepository activeShoppingCartRepository,
         ILogger logger,
-        IShoppingCartNotifier shoppingCartNotifier)
+        IShoppingCartLifecycleManager shoppingCartLifecycleManager) : base(activeShoppingCartRepository,
+        shoppingCartLifecycleManager, logger)
     {
         _movieSessionSeatRepository = movieSessionSeatRepository;
-        _shoppingCartRepository = shoppingCartRepository;
-        _logger = logger;
-        _shoppingCartNotifier = shoppingCartNotifier;
     }
 
     public async Task Handle(SeatExpiredSelectionCommand request,
@@ -40,40 +33,36 @@ public class SeatExpiredReservationEventHandler : INotificationHandler<SeatExpir
 
         if (movieSessionSeat is null)
         {
-            _logger.Warning("Couldnot find MovieSessionSeat, MovieSession:{@MovieSession)}",
+            Logger.Warning("Couldn't find MovieSessionSeat, MovieSession:{@MovieSession)}",
                 request);
             return;
         }
 
-        var cart = await _shoppingCartRepository.GetByIdAsync(movieSessionSeat.ShoppingCartId);
+        var cart = await ActiveShoppingCartRepository.GetByIdAsync(movieSessionSeat.ShoppingCartId);
 
         if (cart is null)
         {
-            _logger.Warning( "Couldnot find ShoppingCart. " +
-                             " movieSessionSeat:{@movieSessionSeat}, request:{@request}",
+            Logger.Warning("Couldn't find ShoppingCart. " +
+                           " movieSessionSeat:{@MovieSessionSeat}, request:{@Request}",
                 movieSessionSeat,
                 request);
             return;
         }
 
-
         var removeResult = cart.TryRemoveSeats(request.SeatRow, request.SeatNumber);
 
         if (removeResult)
         {
-            cart.CalculateCartAmount(new PriceService());
-            await _shoppingCartRepository.SetAsync(cart);
+            await SaveShoppingCart(cart);
         }
         else
         {
-            _logger.Warning( "Seat could not be removed from the cart ShoppingCart, Id:{@ShoppingCartId}. " +
-                             " MovieSessionId:{@MovieSessionId}, SeatRow:{@SeatRow}, SeatNumber:{@SeatNumber}",
+            Logger.Warning("Seat could not be removed from the cart ShoppingCart, Id:{@ShoppingCartId}. " +
+                           " MovieSessionId:{@MovieSessionId}, SeatRow:{@SeatRow}, SeatNumber:{@SeatNumber}",
                 movieSessionSeat.ShoppingCartId,
                 request.MovieSessionId,
                 request.SeatRow,
                 request.SeatNumber);
         }
-        
-       // await _shoppingCartNotifier.SentShoppingCartState(cart);
     }
 }

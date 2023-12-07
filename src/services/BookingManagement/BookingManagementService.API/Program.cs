@@ -59,7 +59,7 @@ IdentityOptions identityOptions = new IdentityOptions();
 identityOptionsSection.Bind(identityOptions);
 services.Configure<IdentityOptions>(identityOptionsSection);
 
-services.AddApplicationServices()
+services.AddApplicationServices(builder.Configuration)
     .AddInfrastructureServices(builder.Configuration)
     .AddApiServices(builder.Configuration)
     .AddWebSockets(builder.Configuration, logger)
@@ -101,7 +101,7 @@ app.UseHealthChecks("/Health");
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapHub<CinemaHallSeatsHub>("/ws/cinema-hall-seats-hub",
+app.MapHub<BookingManagementServiceHub>("/ws/cinema-hall-seats-hub",
     options =>
     {
         options.Transports =

@@ -1,4 +1,5 @@
-﻿using CinemaTicketBooking.Application.Abstractions;
+﻿using CinemaTicketBooking.Application.Exceptions;
+using CinemaTicketBooking.Domain.ShoppingCarts;
 using CinemaTicketBooking.Domain.ShoppingCarts.Abstractions;
 using Serilog;
 
@@ -7,44 +8,36 @@ namespace CinemaTicketBooking.Application.ShoppingCarts.Command.ShoppingCartExpi
 public record ShoppingCartExpiredCommand
     (Guid ShoppingCartId) : INotification;
 
-public class ShoppingCartExpiredCommandHandler : INotificationHandler<ShoppingCartExpiredCommand>
+internal sealed  class ShoppingCartExpiredCommandHandler : INotificationHandler<ShoppingCartExpiredCommand>
 {
 
     private readonly ILogger _logger;
 
-    private readonly IShoppingCartRepository _shoppingCartRepository;
+    private readonly IActiveShoppingCartRepository _activeShoppingCartRepository;
     
-    private readonly IShoppingCartNotifier _shoppingCartNotifier;
-
     public ShoppingCartExpiredCommandHandler(
-        IShoppingCartRepository shoppingCartRepository,
-        ILogger logger,
-        IShoppingCartNotifier shoppingCartNotifier)
+        IActiveShoppingCartRepository activeShoppingCartRepository,
+        ILogger logger)
     {
-        _shoppingCartRepository = shoppingCartRepository;
+        _activeShoppingCartRepository = activeShoppingCartRepository;
         _logger = logger;
-        _shoppingCartNotifier = shoppingCartNotifier;
     }
 
     public async Task Handle(ShoppingCartExpiredCommand request,
         CancellationToken cancellationToken)
     {
-
-        var cart = await _shoppingCartRepository.GetByIdAsync(request.ShoppingCartId);
-
-        if (cart is null)
-        {
-            _logger.Warning( "Couldnot find ShoppingCartId:{@ShoppingCartId}",
-                request.ShoppingCartId);
-            return;
-        }
-
+        var cart = await GetShoppingCartOrThrow(request);
+        
         cart.Delete();
-        await _shoppingCartRepository.DeleteAsync(cart);
+        await _activeShoppingCartRepository.DeleteAsync(cart);
         
-        _logger.Warning( "ShoppingCart Deleted:{@ShoppingCart}", cart);
-
+        _logger.Warning( "ShoppingCart was Expired and Deleted:{@ShoppingCart}", cart);
         
-        //await _shoppingCartNotifier.SentShoppingCartState(cart);
+    }
+    
+    private async Task<ShoppingCart> GetShoppingCartOrThrow(ShoppingCartExpiredCommand request)
+    {
+        return await _activeShoppingCartRepository.GetByIdAsync(request.ShoppingCartId) ??
+               throw new ContentNotFoundException(nameof(ShoppingCart), request.ShoppingCartId.ToString());
     }
 }

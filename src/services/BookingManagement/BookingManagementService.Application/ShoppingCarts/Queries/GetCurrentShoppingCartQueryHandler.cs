@@ -10,8 +10,8 @@ namespace CinemaTicketBooking.Application.ShoppingCarts.Queries;
 
 public record GetCurrentShoppingCartQuery(Guid ClientId) : IRequest<CreateShoppingCartResponse>;
 
-public class GetCurrentShoppingCartQueryHandler(IMapper mapper,
-        IShoppingCartRepository shoppingCartRepository)
+internal sealed class GetCurrentShoppingCartQueryHandler(IMapper mapper,
+        IActiveShoppingCartRepository activeShoppingCartRepository)
     : IRequestHandler<GetCurrentShoppingCartQuery, CreateShoppingCartResponse>
 {
     private readonly IMapper _mapper = mapper;
@@ -19,7 +19,7 @@ public class GetCurrentShoppingCartQueryHandler(IMapper mapper,
     public async Task<CreateShoppingCartResponse> Handle(GetCurrentShoppingCartQuery request,
         CancellationToken cancellationToken)
     {
-        var existingShoppingCartId = await shoppingCartRepository.GetActiveShoppingCartByClientIdAsync(request.ClientId);
+        var existingShoppingCartId = await activeShoppingCartRepository.GetActiveShoppingCartByClientIdAsync(request.ClientId);
 
         if (existingShoppingCartId == Guid.Empty)
         {
@@ -27,7 +27,7 @@ public class GetCurrentShoppingCartQueryHandler(IMapper mapper,
            
         }
         
-        var shoppingCart = await shoppingCartRepository.GetByIdAsync(existingShoppingCartId);
+        var shoppingCart = await activeShoppingCartRepository.GetByIdAsync(existingShoppingCartId);
         
         if (shoppingCart is null)
             throw new ContentNotFoundException(request.ClientId.ToString(), nameof(ShoppingCart));

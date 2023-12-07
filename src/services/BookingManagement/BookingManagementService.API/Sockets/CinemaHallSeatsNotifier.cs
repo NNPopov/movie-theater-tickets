@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.SignalR;
 namespace CinemaTicketBooking.Api.Sockets;
 
 public class CinemaHallSeatsNotifier
-(IHubContext<CinemaHallSeatsHub, IBookingManagementStateUpdater> context,
+(IHubContext<BookingManagementServiceHub, IBookingManagementStateUpdater> context,
     ICacheService cacheService,
     Serilog.ILogger logger) : ICinemaHallSeatsNotifier
 {

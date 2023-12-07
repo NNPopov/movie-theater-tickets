@@ -1,7 +1,9 @@
 ﻿using CinemaTicketBooking.Application.Abstractions;
 using CinemaTicketBooking.Application.Abstractions.Repositories;
+using CinemaTicketBooking.Application.Exceptions;
+using CinemaTicketBooking.Application.ShoppingCarts.Base;
 using CinemaTicketBooking.Domain.Error;
-using CinemaTicketBooking.Domain.PriceServices;
+using CinemaTicketBooking.Domain.Exceptions;
 using CinemaTicketBooking.Domain.Services;
 using CinemaTicketBooking.Domain.ShoppingCarts;
 using CinemaTicketBooking.Domain.ShoppingCarts.Abstractions;
@@ -9,104 +11,119 @@ using Serilog;
 
 namespace CinemaTicketBooking.Application.ShoppingCarts.Command.SelectSeats;
 
-public record SelectSeatCommand
-    (Guid MovieSessionId, short SeatRow, short SeatNumber, Guid ShoppingCartId) : IRequest<Result>;
+public record SelectSeatCommand(Guid MovieSessionId, short SeatRow, short SeatNumber, Guid ShoppingCartId)
+    : IRequest<Result>;
 
-public class SelectSeatCommandHandler : IRequestHandler<SelectSeatCommand, Result>
+public class SelectSeatCommandHandler(
+    IShoppingCartSeatLifecycleManager shoppingCartSeatLifecycleManager,
+    IActiveShoppingCartRepository activeShoppingCartRepository,
+    IDistributedLock distributedLock,
+    ILogger logger,
+    MovieSessionSeatService movieSessionSeatService,
+    IShoppingCartLifecycleManager shoppingCartLifecycleManager)
+    : ActiveShoppingCartHandler(activeShoppingCartRepository, shoppingCartLifecycleManager, logger),
+        IRequestHandler<SelectSeatCommand, Result>
 {
-    private readonly MovieSessionSeatService _movieSessionSeatService;
-    private IShoppingCartRepository _shoppingCartRepository;
-    private ISeatStateRepository _seatStateRepository;
-    private IDistributedLock _distributedLock;
-    private readonly IShoppingCartNotifier _shoppingCartNotifier;
-    private ILogger _logger;
-
-    public SelectSeatCommandHandler(
-        ISeatStateRepository seatStateRepository,
-        IShoppingCartRepository shoppingCartRepository,
-        IDistributedLock distributedLock,
-        IShoppingCartNotifier shoppingCartNotifier, ILogger logger,
-        MovieSessionSeatService movieSessionSeatService)
-    {
-        _seatStateRepository = seatStateRepository;
-        _shoppingCartRepository = shoppingCartRepository;
-        _distributedLock = distributedLock;
-        _shoppingCartNotifier = shoppingCartNotifier;
-        _logger = logger;
-        _movieSessionSeatService = movieSessionSeatService;
-    }
-
     public async Task<Result> Handle(SelectSeatCommand request,
         CancellationToken cancellationToken)
     {
         var lockKey = $"lock:{request.MovieSessionId}:{request.SeatRow}:{request.SeatNumber}";
 
-        ShoppingCart? cart;
 
-        await using (var lockHandler = await _distributedLock.TryAcquireAsync(lockKey,
+        await using (var lockHandler = await distributedLock.TryAcquireAsync(lockKey,
                          cancellationToken: cancellationToken))
         {
-            if (!lockHandler.IsLocked)
-            {
-                return DomainErrors<ShoppingCart>.ConflictException("Seat already reserved");
-            }
+            EnsureDistributedLockIsNotLocked(lockHandler, lockKey);
 
-            cart = await _shoppingCartRepository.GetByIdAsync(request.ShoppingCartId);
+            ShoppingCart cart = await GetShoppingCartOrThrow(request);
 
-            if (cart == null)
-                return DomainErrors<ShoppingCart>.NotFound(request.ShoppingCartId.ToString());
+            SetMovieSessionIdIfNullOrChanged(request, cart);
 
+            await EnsureSeatNotReserved(request);
 
-            if (cart.MovieSessionId != request.MovieSessionId)
-            {
-                cart.SetShowTime(request.MovieSessionId);
-            }
-
-            //Step 1 Check is seat already reserved
-
-            var reservedInRedis =
-                await _seatStateRepository.GetAsync(request.MovieSessionId, request.SeatRow, request.SeatNumber);
-
-            if (!(reservedInRedis is null))
-            {
-                return DomainErrors<ShoppingCart>.ConflictException("Seat already reserved");
-            }
-
-            var seat = await _movieSessionSeatService.SelectSeat(request.MovieSessionId,
+            var seat = await movieSessionSeatService.GetSeat(request.MovieSessionId,
                 request.SeatRow,
                 request.SeatNumber,
-                request.ShoppingCartId,
-                cart.HashId,
                 cancellationToken
             );
-            
-            DateTime expires
-                = TimeProvider.System.GetUtcNow().DateTime.AddMinutes(2);
-            // Step Add seat to cart
+
+            // Add seat to shoppingCart
+            DateTime expires = TimeProvider.System.GetUtcNow().DateTime.AddMinutes(2);
             var selectSeat = new SeatShoppingCart(request.SeatRow, request.SeatNumber, seat.Price, expires);
             cart.AddSeats(selectSeat, request.MovieSessionId);
-            
-            cart.CalculateCartAmount(new PriceService());
-
-            // Step 2 Select place
-
-            var result =
-                await _seatStateRepository.SetAsync(request.MovieSessionId,
-                    selectSeat);
-
-            if (!result)
-            {
-                return DomainErrors<ShoppingCart>.InvalidOperation("Can't save seat. Try again later");
-            }
 
 
+            await SelectSaveSeatWithTimeoutRollback(request, cancellationToken, cart, expires);
 
-
-            await _shoppingCartRepository.SetAsync(cart);
+            await SaveShoppingCart(cart);
         }
 
-        //await _shoppingCartNotifier.SentShoppingCartState(cart);
-
         return Result.Success();
+    }
+
+    private async Task EnsureSeatNotReserved(SelectSeatCommand request)
+    {
+        var reservedInRedis =
+            await shoppingCartSeatLifecycleManager.IsSeatReservedAsync(request.MovieSessionId, request.SeatRow,
+                request.SeatNumber);
+
+        if (reservedInRedis)
+        {
+            throw new ConflictException($"Sear {request.MovieSessionId}:{request.SeatRow}:{request.SeatNumber}",
+                nameof(SelectSeatCommandHandler));
+        }
+    }
+
+    private async Task SelectSaveSeatWithTimeoutRollback(SelectSeatCommand request, CancellationToken cancellationToken,
+        ShoppingCart cart, DateTime expires)
+    {
+        await movieSessionSeatService.SelectSeat(request.MovieSessionId,
+            request.SeatRow,
+            request.SeatNumber,
+            request.ShoppingCartId,
+            cart.HashId,
+            cancellationToken
+        );
+        var result =
+            await shoppingCartSeatLifecycleManager.SetAsync(request.MovieSessionId,
+                request.MovieSessionId,
+                request.SeatRow,
+                request.SeatNumber, expires);
+
+        if (!result)
+        {
+            Logger.Error("Failed to set ShoppingCartSeat Lifecycle, try return MovieSessionSeat to Available");
+
+            await movieSessionSeatService.ReturnToAvailable(request.MovieSessionId,
+                request.SeatRow,
+                request.SeatNumber,
+                cancellationToken
+            );
+            Logger.Error("MovieSessionSeat returned to Available");
+            throw new InvalidOperationException("Can't set ShoppingCartSeat Lifecycle. Try again later");
+        }
+    }
+
+    private void SetMovieSessionIdIfNullOrChanged(SelectSeatCommand request, ShoppingCart? shoppingCart)
+    {
+        if (shoppingCart.MovieSessionId != request.MovieSessionId)
+        {
+            shoppingCart.SetShowTime(request.MovieSessionId);
+            Logger.Debug("MovieSessionId was updated updated {!ShoppingCart}", shoppingCart);
+        }
+    }
+
+    private async Task<ShoppingCart> GetShoppingCartOrThrow(SelectSeatCommand request)
+    {
+        return await ActiveShoppingCartRepository.GetByIdAsync(request.ShoppingCartId) ??
+               throw new ContentNotFoundException(nameof(ShoppingCart), request.ShoppingCartId.ToString());
+    }
+
+    private static void EnsureDistributedLockIsNotLocked(ILockHandler lockHandler, string lockKey)
+    {
+        if (!lockHandler.IsLocked)
+        {
+            throw new LockedException(lockKey, nameof(SelectSeatCommandHandler));
+        }
     }
 }

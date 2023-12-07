@@ -33,7 +33,9 @@ class _MovieSessionsView extends State<MovieSessionsView> {
   CarouselController buttonCarouselController = CarouselController();
 
   void getMovieSessions() {
-    context.read<MovieSessionBloc>().add( MovieSessionEvent(movieId: widget.movie.id));
+    context
+        .read<MovieSessionBloc>()
+        .add(MovieSessionEvent(movieId: widget.movie.id));
   }
 
   @override
@@ -51,11 +53,12 @@ class _MovieSessionsView extends State<MovieSessionsView> {
         }
       },
       builder: (context, state) {
-        if (state.status == MovieSessionStateStatus.fetching || state.status == MovieSessionStateStatus.initial) {
+        if (state.status == MovieSessionStateStatus.fetching ||
+            state.status == MovieSessionStateStatus.initial) {
           return const LoadingView();
         }
-        if ((state.status == MovieSessionStateStatus.loaded && state.movieSession.isEmpty
-        )) {
+        if ((state.status == MovieSessionStateStatus.loaded &&
+            state.movieSession.isEmpty)) {
           return const NoDataView();
         }
 
@@ -68,24 +71,28 @@ class _MovieSessionsView extends State<MovieSessionsView> {
 
   Widget BuildMovieSessions(
       List<List<List<MovieSession>>> movieSessionResult, BuildContext context) {
+    return Column(
+      children: [
+        const DashboardWidget(route: MovieSessionsView.id),
+        Row(
+          children: [
+            const SizedBox(
+              width: 40,
+            ),
+            BlocProvider(
+                key: const ValueKey('MoviesDetailView'),
+                create: (_) => MovieCubit(getIt.get()),
+                child: MoviesDetailWidget(widget.movie.id)),
+            const SizedBox(
+              width: 40,
+            ),
+            Column(children: [
 
-    return  Column(
-        children: [
-          const DashboardWidget(route: MovieSessionsView.id),
-          Row(
-            children: [
-              BlocProvider(
-                  key: const ValueKey('MoviesDetailView'),
-                  create: (_) => MovieCubit(getIt.get()),
-                  child: MoviesDetailWidget(widget.movie.id)),
-              Column(children: [
-                SizedBox(
-                    height: 40,
-                    width: 100,
-                    child: Text(AppLocalizations.of(context)!.movies)),
-                SizedBox(
-                 //   height: 1950,
-                    width: 1100,
+              SizedBox(
+                  //   height: 1950,
+                  width: 1000,
+                  child: Container(
+                    alignment: Alignment.topLeft,
                     child: ListView.builder(
                         shrinkWrap: true,
                         scrollDirection: Axis.vertical,
@@ -110,7 +117,7 @@ class _MovieSessionsView extends State<MovieSessionsView> {
 
                                       return SizedBox(
                                         width: 800,
-                                       // height: 240,
+                                        // height: 240,
                                         child: Column(
                                           children: [
                                             BlocProvider(
@@ -135,8 +142,8 @@ class _MovieSessionsView extends State<MovieSessionsView> {
                                                             '${movieSession.sessionDate.hour}:${'${movieSession.sessionDate.minute}0'.substring(0, 2)}'),
                                                         TextButton(
                                                             style: ButtonStyle(
-                                                              padding: MaterialStateProperty
-                                                                  .all(const EdgeInsets
+                                                              padding: MaterialStateProperty.all(
+                                                                  const EdgeInsets
                                                                       .symmetric(
                                                                       vertical: 1,
                                                                       horizontal:
@@ -166,16 +173,18 @@ class _MovieSessionsView extends State<MovieSessionsView> {
                               ],
                             ),
                           );
-                        })),
-                ElevatedButton(
-                  onPressed: () => buttonCarouselController.nextPage(
-                      duration: const Duration(milliseconds: 300), curve: Curves.linear),
-                  child: const Text('→'),
-                )
-              ]),
-            ],
-          ),
-        ],
+                        }),
+                  )),
+              ElevatedButton(
+                onPressed: () => buttonCarouselController.nextPage(
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.linear),
+                child: const Text('→'),
+              )
+            ]),
+          ],
+        ),
+      ],
     );
   }
 

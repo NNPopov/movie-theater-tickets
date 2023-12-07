@@ -21,16 +21,16 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
               child:  Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
+                  const Expanded(
                     child: Text(
                       "Come and Watch",
                       style:
                           TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
                     ),
                   ),
-                  GlobalisationWidget(),
+                  const GlobalisationWidget(),
                   ShoppingCartIconWidget(navigatorKey),
-                  AuthWidget(),
+                  const AuthWidget(),
                 ],
               ),
             ),

@@ -30,9 +30,10 @@ public static class ConfigureServices
         //services.AddScoped<ITicketsRepository, TicketsRepository>();
         services.AddScoped<IMoviesRepository, MoviesRepository>();
         services.AddScoped<ICinemaHallRepository, CinemaHallRepository>();
-        services.AddScoped<ISeatStateRepository, SeatStateRepository>();
+        services.AddScoped<IShoppingCartSeatLifecycleManager, ShoppingCartSeatLifecycleManager>();
+        services.AddScoped<IShoppingCartLifecycleManager, ShoppingCartLifecycleManager>();
         services.AddScoped<IMovieSessionSeatRepository, MovieSessionSeatRepository>();
-        services.AddScoped<IShoppingCartRepository, ShoppingCartRepository>();
+        services.AddScoped<IActiveShoppingCartRepository, ActiveShoppingCartRepository>();
         services.AddScoped<IIdempotencyService, IdempotencyService>();
         services.AddScoped<IDistributedLock, DistributedLock>();
         services.AddScoped<IDomainEventTracker, DomainEventTracker>();

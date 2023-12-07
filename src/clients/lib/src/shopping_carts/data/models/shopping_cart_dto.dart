@@ -1,3 +1,6 @@
+import 'package:movie_theater_tickets/src/shopping_carts/data/models/price_calculation_result_dto.dart';
+
+import '../../domain/entities/price_calculation_result.dart';
 import '../../domain/entities/seat.dart';
 import 'seat_dto.dart';
 import '../../domain/entities/shopping_cart.dart';
@@ -5,7 +8,7 @@ import '../../domain/entities/shopping_cart.dart';
 class ShoppingCartDto extends ShoppingCart {
   ShoppingCartDto(
       {super.maxNumberOfSeats,
-      super.createdCard,
+      super.createdAt,
       super.id,
       super.movieSessionId,
       super.status,
@@ -16,7 +19,7 @@ class ShoppingCartDto extends ShoppingCart {
   ShoppingCartDto.fromJson(Map<String, dynamic> json)
       : super(
           maxNumberOfSeats: json['maxNumberOfSeats'],
-          createdCard: DateTime.parse(json['createdCard']),
+          createdAt: DateTime.parse(json['createdAt']),
           id: json['id'],
           movieSessionId: json['movieSessionId'],
           status: ShoppingCartStatus.values[json['status']],
@@ -36,7 +39,7 @@ class ShoppingCartDto extends ShoppingCart {
   ShoppingCartDto.empty()
       : this(
             maxNumberOfSeats: 0,
-            createdCard: null,
+            createdAt: null,
             id: '',
             movieSessionId: '',
             status: ShoppingCartStatus.InWork,
@@ -47,7 +50,7 @@ class ShoppingCartDto extends ShoppingCart {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = {};
     data['maxNumberOfSeats'] = maxNumberOfSeats;
-    data['createdCard'] = createdCard.toString();
+    data['createdAt'] = createdAt.toString();
     data['id'] = id;
     data['movieSessionId'] = movieSessionId;
     data['status'] = status?.index;
@@ -66,7 +69,7 @@ class ShoppingCartDto extends ShoppingCart {
 
   ShoppingCart copyWith(
       {int? maxNumberOfSeats,
-      DateTime? createdCard,
+      DateTime? createdAt,
       String? id,
       String? movieSessionId,
       ShoppingCartStatus? status,
@@ -75,7 +78,7 @@ class ShoppingCartDto extends ShoppingCart {
       PriceCalculationResult? priceCalculationResult}) {
     return ShoppingCart(
         maxNumberOfSeats: maxNumberOfSeats ?? this.maxNumberOfSeats,
-        createdCard: createdCard ?? this.createdCard,
+        createdAt: createdAt ?? this.createdAt,
         id: id ?? this.id,
         movieSessionId: movieSessionId ?? this.movieSessionId,
         status: status ?? this.status,
@@ -91,7 +94,7 @@ extension ShoppingCarMap on ShoppingCart {
     return ShoppingCartDto(
       id: this.id,
       maxNumberOfSeats: this.maxNumberOfSeats,
-      createdCard: this.createdCard,
+      createdAt: this.createdAt,
       movieSessionId: this.movieSessionId,
       status: this.status,
       seats: this.shoppingCartSeat,

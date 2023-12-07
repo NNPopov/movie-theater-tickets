@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using CinemaTicketBooking.Api.Endpoints.Common;
+using CinemaTicketBooking.Api.Models;
 using CinemaTicketBooking.Application.Abstractions;
-using CinemaTicketBooking.Domain.CinemaHalls;
 
 namespace CinemaTicketBooking.Api.Endpoints;
 
@@ -19,59 +19,46 @@ public class CinemaHallEndpointApplicationBuilderExtensions : IEndpoints
                     var auditoriums = await cinemaHallRepository.GetAllAsync(
                         cancellationToken);
 
-                    
-                    return mapper.Map<ICollection<AuditoriumDTO>>(auditoriums);
+
+                    return mapper.Map<ICollection<AuditoriumDto>>(auditoriums);
                 })
-            .Produces<ICollection<AuditoriumDTO>>(200, "application/json")
+            .Produces<ICollection<AuditoriumDto>>(200, "application/json")
             .WithName("GetCinemaHalls")
             .WithTags(Tag)
             .Produces(404);
-        
+
+
         endpointRouteBuilder.MapGet($"{BaseRoute}/{{cinemaHallId}}",
                 async (Guid cinemaHallId,
-                    ICinemaHallRepository cinemaHallRepository, 
+                    ICinemaHallRepository cinemaHallRepository,
                     IMapper mapper,
                     CancellationToken cancellationToken) =>
                 {
                     var auditorium = await cinemaHallRepository.GetAsync(cinemaHallId,
                         cancellationToken);
 
-                    
-                    return mapper.Map<AuditoriumDTO>(auditorium);
+
+                    return mapper.Map<AuditoriumDto>(auditorium);
                 })
-            .Produces<ICollection<AuditoriumDTO>>(200, "application/json")
+            .Produces<ICollection<AuditoriumDto>>(200, "application/json")
             .WithName("GetCinemaHallById")
             .WithTags(Tag)
             .Produces(404);
-    }
-}
 
-public class AuditoriumDTO 
-{
-    public Guid Id { get; init; }
+        endpointRouteBuilder.MapGet($"{BaseRoute}/{{cinemaHallId}}/seats",
+                async (Guid cinemaHallId,
+                    ICinemaHallRepository cinemaHallRepository,
+                    IMapper mapper,
+                    CancellationToken cancellationToken) =>
+                {
+                    var auditorium = await cinemaHallRepository.GetAsync(cinemaHallId,
+                        cancellationToken);
 
-
-    public string Description { get; init; }
-    
-    private class Mapping : Profile
-    {
-        public Mapping()
-        {
-            CreateMap<CinemaHall, AuditoriumDTO>();
-        }
-    }
-}
-
-public class SeatEntityDTO 
-{
-    public short Row { get; set; }
-    public short SeatNumber { get; set; }
-    
-    private class Mapping : Profile
-    {
-        public Mapping()
-        {
-            CreateMap<SeatEntity, SeatEntityDTO>();
-        }
+                    return mapper.Map<AuditoriumInfoDto>(auditorium);
+                })
+            .Produces<ICollection<AuditoriumInfoDto>>(200, "application/json")
+            .WithName("GetCinemaHallInfoById")
+            .WithTags(Tag)
+            .Produces(404);
     }
 }

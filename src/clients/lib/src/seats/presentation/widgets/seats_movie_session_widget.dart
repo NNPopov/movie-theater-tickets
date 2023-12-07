@@ -1,8 +1,13 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:movie_theater_tickets/src/seats/presentation/widgets/seat_widget.dart';
 import '../../../../core/common/views/loading_view.dart';
 import '../../../../core/common/views/no_data_view.dart';
 import '../../../../core/errors/failures.dart';
+import '../../../cinema_halls/domain/entity/cinema_hall_info.dart';
+import '../../../cinema_halls/domain/entity/cinema_seat.dart';
+import '../../../cinema_halls/presentation/cubit/movie_cubit.dart';
 import '../../../movie_sessions/domain/entities/movie_session.dart';
 import '../../../shopping_carts/presentation/cubit/shopping_cart_cubit.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -11,6 +16,9 @@ import '../../domain/usecases/get_cinema_hall_info.dart';
 import '../cubit/seat_cubit.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:dartz/dartz.dart' as t;
+import 'package:get_it/get_it.dart';
+
+final getIt = GetIt.instance;
 
 class SeatsMovieSessionWidget extends StatefulWidget {
   const SeatsMovieSessionWidget(
@@ -24,42 +32,31 @@ class SeatsMovieSessionWidget extends StatefulWidget {
 }
 
 class _SeatsMovieSessionWidget extends State<SeatsMovieSessionWidget> {
+
+
   @override
   void initState() {
     super.initState();
 
-    getSeats();
-  }
-
-  Future<void> getSeats() async {
-    await context.read<SeatCubit>().getSeats(widget.movieSession.id);
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
+    context.read<CinemaHallInfoBloc>().add(
+        CinemaHallInfoEvent(cinemaHallId: widget.movieSession.cinemaHallId));
+    context
+        .read<SeatBloc>()
+        .add(SeatEvent(movieSessionId: widget.movieSession.id));
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<t.Either<Failure, List<List<Seat>>>>(
-        future: widget.getCinemaHallInfo(widget.movieSession.id),
-        initialData: null,
+    return BlocBuilder<CinemaHallInfoBloc, CinemaHallInfoState>(
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting ||
-              snapshot.data == null) {
-            return const LoadingView();
-          }
-
-          return snapshot.data!.fold((l) {
-            return const NoDataView();
-          }, (seatst) {
-            return buildSeats(seatst, context);
-                    });
-        });
+      if (snapshot.status != CinemaHallInfoStatus.completed) {
+        return const LoadingView();
+      }
+      return buildSeats(snapshot.movie.cinemaSeat, context);
+    });
   }
 
-  Widget buildSeats(List<List<Seat>> seats, BuildContext context) {
+  Widget buildSeats(List<List<CinemaSeat>> seats, BuildContext context) {
     var seatsWidth = seats[0].length * 19.0;
     var seatsHeight = seats.length * 22.0;
 
@@ -96,53 +93,61 @@ class _SeatsMovieSessionWidget extends State<SeatsMovieSessionWidget> {
                 itemCount: seats.length,
                 itemBuilder: (context, rowIndex) {
                   var rowSeats = seats[rowIndex];
-                  return SizedBox(
-                      height: 22,
-                      width: 600,
-                      child: Row(children: [
-                        SizedBox(
-                            height: 19,
-                            width: 60,
-                            child: Text(
-                                '${AppLocalizations.of(context)!.row}: ${rowSeats[0].row}')),
-                        ListView.builder(
-                            shrinkWrap: true,
-                            scrollDirection: Axis.horizontal,
-                            itemCount: rowSeats.length,
-                            itemBuilder: (context, index) {
-                              var seatPlace = rowSeats[index];
-
-                              return BlocSelector<SeatCubit, SeatState, Seat?>(
-                                selector: (SeatState state) {
-                                  if (state.status != SeatStateStatus.loaded) {
-                                    return null;
-                                  }
-                                  if (state.seats.isEmpty) {
-                                    return null;
-                                  }
-
-                                  var seat = state.seats.firstWhere((t) =>
-                                      t.seatNumber == seatPlace.seatNumber &&
-                                      t.row == seatPlace.row);
-                                  return seat;
-                                },
-                                builder: (BuildContext context, Seat? state) {
-
-                                  if (state == null) {
-                                    return emptySeat(context);
-                                  }
-                                  return buildSeat(state, context, hashId);
-                                },
-                              );
-                            })
-                      ]));
+                  return buildSeatBox(seatsWidth, context, rowSeats, hashId);
                 })
           ]));
     });
   }
 
+  SizedBox buildSeatBox(double seatsWidth, BuildContext context,
+      List<CinemaSeat> rowSeats, String hashId) {
+    return SizedBox(
+        height: 22,
+        width: seatsWidth + 90,
+        child: Row(children: [
+          SizedBox(
+              height: 19,
+              width: 60,
+              child: Text(
+                  '${AppLocalizations.of(context)!.row}: ${rowSeats[0].row}')),
+          ListView.builder(
+              shrinkWrap: true,
+              scrollDirection: Axis.horizontal,
+              itemCount: rowSeats.length,
+              itemBuilder: (context, index) {
+                var seatPlace = rowSeats[index];
+
+                return BlocSelector<SeatBloc, SeatState, Seat?>(
+                  selector: (SeatState state) {
+                    if (state.status != SeatStateStatus.loaded) {
+                      return null;
+                    }
+                    if (state.seats.isEmpty) {
+                      return null;
+                    }
+                    try {
+                      var seat = state.seats.firstWhere((t) =>
+                          t.seatNumber == seatPlace.seatNumber &&
+                          t.row == seatPlace.row);
+
+                      return seat;
+                    } catch (_) {
+                      return null;
+                    }
+                  },
+                  builder: (BuildContext context, Seat? state) {
+                    if (state == null) {
+                      return emptySeat(context);
+                    }
+                    return buildSeat(state, context, hashId);
+                  },
+                );
+              }),
+        ]));
+  }
+
   Widget emptySeat(BuildContext context) {
-    return const SeatWidget(text: '', backgroundColor: Colors.white);
+    return const SeatWidget(text: '', backgroundColor: Colors.black12);
   }
 
   Widget buildSeat(Seat seat, BuildContext context, String hashId) {
@@ -200,5 +205,10 @@ class _SeatsMovieSessionWidget extends State<SeatsMovieSessionWidget> {
           seatNumber: seat.seatNumber,
           movieSessionId: widget.movieSession.id);
     }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 }

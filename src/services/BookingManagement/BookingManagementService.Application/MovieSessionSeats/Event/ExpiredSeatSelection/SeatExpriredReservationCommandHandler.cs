@@ -1,14 +1,14 @@
 ﻿using CinemaTicketBooking.Application.Common.Events;
-using CinemaTicketBooking.Domain.Seats.Abstractions;
 using CinemaTicketBooking.Domain.Services;
 using CinemaTicketBooking.Domain.ShoppingCarts;
+using CinemaTicketBooking.Domain.ShoppingCarts.Events;
 using Serilog;
 
 namespace CinemaTicketBooking.Application.MovieSessionSeats.Event.ExpiredSeatSelection;
 
-public class
+internal sealed class
     MovieSessionSeatExpiredReservationEventHandler : INotificationHandler<
-        BaseApplicationEvent<SeatRemovedFromShoppingCartDomainEvent>>
+    BaseApplicationEvent<SeatRemovedFromShoppingCartDomainEvent>>
 {
     private readonly MovieSessionSeatService _movieSessionSeatService;
     private readonly ILogger _logger;
@@ -26,7 +26,13 @@ public class
     {
         try
         {
-            var eventBody = (SeatRemovedFromShoppingCartDomainEvent)request.Event;
+            var eventBody = request.Event as SeatRemovedFromShoppingCartDomainEvent;
+            if (eventBody == null)
+            {
+                _logger.Error("Unable to cast event to {@SeatRemovedFromShoppingCartDomainEvent}", request);
+                return;
+            }
+
             await _movieSessionSeatService.ReturnToAvailable(eventBody.MovieSessionId,
                 eventBody.SeatRow,
                 eventBody.SeatNumber,
@@ -37,7 +43,7 @@ public class
         }
         catch (Exception e)
         {
-            _logger.Information(e, "Unable returned to Available:{@SeatRemovedFromShoppingCartDomainEvent}", request);
+            _logger.Error(e, "Error returning seat to Available:{@SeatRemovedFromShoppingCartDomainEvent}", request);
         }
     }
 }

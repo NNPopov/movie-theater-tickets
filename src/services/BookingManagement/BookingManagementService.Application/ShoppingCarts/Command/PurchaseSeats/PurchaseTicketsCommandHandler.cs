@@ -11,30 +11,34 @@ namespace CinemaTicketBooking.Application.ShoppingCarts.Command.PurchaseSeats;
 
 public record PurchaseTicketsCommand(Guid ShoppingCartId) : IRequest<Result>;
 
-public class PurchaseTicketsCommandHandler : IRequestHandler<PurchaseTicketsCommand, Result>
+internal sealed  class PurchaseTicketsCommandHandler : IRequestHandler<PurchaseTicketsCommand, Result>
 {
-    private ISeatStateRepository _seatStateRepository;
+    private IShoppingCartSeatLifecycleManager _shoppingCartSeatLifecycleManager;
 
     private readonly MovieSessionSeatService _movieSessionSeatService;
     private readonly IMovieSessionSeatRepository _movieSessionSeatRepository;
-    private readonly IShoppingCartRepository _shoppingCartRepository;
+    private readonly IActiveShoppingCartRepository _activeShoppingCartRepository;
+    private readonly IShoppingCartLifecycleManager _shoppingCartLifecycleManager;
 
     public PurchaseTicketsCommandHandler(
-        ISeatStateRepository seatStateRepository,
+        IShoppingCartSeatLifecycleManager shoppingCartSeatLifecycleManager,
         IMovieSessionSeatRepository movieSessionSeatRepository,
-        IShoppingCartRepository shoppingCartRepository, MovieSessionSeatService movieSessionSeatService)
+        IActiveShoppingCartRepository activeShoppingCartRepository,
+        MovieSessionSeatService movieSessionSeatService,
+        IShoppingCartLifecycleManager shoppingCartLifecycleManager)
     {
-        _seatStateRepository = seatStateRepository;
+        _shoppingCartSeatLifecycleManager = shoppingCartSeatLifecycleManager;
 
         _movieSessionSeatRepository = movieSessionSeatRepository;
-        _shoppingCartRepository = shoppingCartRepository;
+        _activeShoppingCartRepository = activeShoppingCartRepository;
         _movieSessionSeatService = movieSessionSeatService;
+        _shoppingCartLifecycleManager = shoppingCartLifecycleManager;
     }
 
     public async Task<Result> Handle(PurchaseTicketsCommand request,
         CancellationToken cancellationToken)
     {
-        var cart = await _shoppingCartRepository.GetByIdAsync(request.ShoppingCartId);
+        var cart = await _activeShoppingCartRepository.GetByIdAsync(request.ShoppingCartId);
 
         if (cart == null)
         {
@@ -53,11 +57,12 @@ public class PurchaseTicketsCommandHandler : IRequestHandler<PurchaseTicketsComm
 
 
         cart.PurchaseComplete();
-        await _shoppingCartRepository.SetAsync(cart);
+        await _activeShoppingCartRepository.SaveAsync(cart);
+        await _shoppingCartLifecycleManager.DeleteAsync(cart.Id);
 
         foreach (var seat in cart.Seats)
         {
-            await _seatStateRepository.DeleteAsync(cart.MovieSessionId,seat.SeatRow,seat.SeatNumber);
+            await _shoppingCartSeatLifecycleManager.DeleteAsync(cart.MovieSessionId,seat.SeatRow,seat.SeatNumber);
         }
 
         return Result.Success();

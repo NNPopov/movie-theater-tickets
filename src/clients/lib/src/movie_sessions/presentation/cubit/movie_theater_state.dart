@@ -5,7 +5,7 @@ class MovieTheaterState extends Equatable {
   MovieTheaterState(
       {required this.movies, required this.status, this.errorMessage});
 
-  final List<Movie> movies;
+  final List<ActiveMovie> movies;
   final MoviesStatus status;
   late String? errorMessage;
 
@@ -21,7 +21,7 @@ class MovieTheaterState extends Equatable {
   List<Object> get props => [movies, status];
 
   MovieTheaterState copyWith({
-    List<Movie>? movies,
+    List<ActiveMovie>? movies,
     MoviesStatus? status,
     String? errorMessage,
   }) {

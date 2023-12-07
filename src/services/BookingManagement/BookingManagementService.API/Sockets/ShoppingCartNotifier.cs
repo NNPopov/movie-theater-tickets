@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace CinemaTicketBooking.Api.Sockets;
 
-public class ShoppingCartNotifier(IHubContext<CinemaHallSeatsHub, IBookingManagementStateUpdater> context,
+public class ShoppingCartNotifier(IHubContext<BookingManagementServiceHub, IBookingManagementStateUpdater> context,
     IConnectionManager connectionManager, 
     IMapper mapper,
     Serilog.ILogger logger):IShoppingCartNotifier
@@ -40,7 +40,7 @@ public class ShoppingCartNotifier(IHubContext<CinemaHallSeatsHub, IBookingManage
                     await context.Clients.Client(connection).SentShoppingCartState(shoppingCartDto);
                 } 
                 
-                logger.Debug("Updates have been sent to subscribers of shoppingCartId:{@ShoppingCartId}",
+                logger.Debug("Updates have been sent to subscribers of ShoppingCartId:{@ShoppingCartId}",
                     shoppingCart.Id );
             }
            

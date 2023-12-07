@@ -52,11 +52,11 @@ Route<dynamic> generateRoute(RouteSettings settings) {
     return _pageBuilder(
       (_) => MultiBlocProvider(
         providers: [
-          BlocProvider<SeatCubit>(
-            create: (context) => SeatCubit(getIt.get(), getIt.get()),
+          BlocProvider<SeatBloc>(
+            create: (context) => SeatBloc(getIt.get(), getIt.get()),
           ),
-          BlocProvider<CinemaHallInfoCubit>(
-              create: (context) => CinemaHallInfoCubit(getIt.get()))
+          BlocProvider<CinemaHallInfoBloc>(
+              create: (context) => CinemaHallInfoBloc(getIt.get()))
         ],
         child: SeatsView(settings.arguments! as MovieSession),
       ),

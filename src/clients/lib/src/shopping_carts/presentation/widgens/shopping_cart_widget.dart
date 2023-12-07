@@ -99,7 +99,9 @@ class _ShoppingCartWidget extends State<ShoppingCartWidget> {
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(
-                        color: Colors.blue,
+                        color: rowSeat.isDirty == null || rowSeat.isDirty!
+                            ? Colors.black26
+                            : Colors.blue,
                         width: 2,
                       ),
                     ),
@@ -112,17 +114,28 @@ class _ShoppingCartWidget extends State<ShoppingCartWidget> {
                             Container(
                                 height: 40,
                                 width: 125,
-                                padding: EdgeInsets.symmetric(vertical:10,horizontal: 0),
+                                padding: EdgeInsets.symmetric(
+                                    vertical: 10, horizontal: 0),
                                 child: Text(
                                     "${AppLocalizations.of(context)!.row} ${rowSeat.seatRow}, Number ${rowSeat.seatNumber}")),
                             Container(
                                 height: 40,
                                 width: 25,
-                                padding:  EdgeInsets.symmetric(vertical:10,horizontal: 0),
+                                padding: EdgeInsets.symmetric(
+                                    vertical: 10, horizontal: 0),
                                 child: Text(
-                                    "${rowSeat.price}€")),
+                                  "${rowSeat.price}€",
+                                  style: TextStyle(
+                                      color: rowSeat.isDirty == null ||
+                                              rowSeat.isDirty!
+                                          ? Colors.black26
+                                          : Colors.black),
+                                )),
                             IconButton(
                               icon: const Icon(Icons.delete),
+                              color: rowSeat.isDirty == null || rowSeat.isDirty!
+                                  ? Colors.black26
+                                  : Colors.black,
                               tooltip: AppLocalizations.of(context)!.remove,
                               onPressed: () {
                                 onSeatUnselectPress(
@@ -172,7 +185,8 @@ class _ShoppingCartWidget extends State<ShoppingCartWidget> {
     });
   }
 
-  Container seatExpirationProgressBar(ShoppingCartSeat rowSeat, ServerState state) {
+  Container seatExpirationProgressBar(
+      ShoppingCartSeat rowSeat, ServerState state) {
     if (rowSeat.selectionExpirationTime != null &&
         state != ServerState.initState()) {
       Duration timeBeforeExpiration =

@@ -9,14 +9,16 @@ import '../../domain/entities/active_movie.dart';
 part 'movie_theater_state.dart';
 
 class MovieTheaterCubit extends Cubit<MovieTheaterState> {
-  MovieTheaterCubit(this._getMovies)
+  MovieTheaterCubit(this._getActiveMovies)
       : super( MovieTheaterState.initial());
 
-  late final GetActiveMovies _getMovies;
+  late final GetActiveMovies _getActiveMovies;
 
-  domain.Future<void> getMovies() async {
+  Future<void> getMovies() async {
     emit(MovieTheaterState.fetching());
-    final result = await _getMovies();
+
+
+    final result = await _getActiveMovies();
 
     result.fold(
       (failure) => emit(state.copyWith(
@@ -25,3 +27,5 @@ class MovieTheaterCubit extends Cubit<MovieTheaterState> {
     );
   }
 }
+
+

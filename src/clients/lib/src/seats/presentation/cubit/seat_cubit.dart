@@ -15,7 +15,7 @@ part 'seat_state.dart';
 
 GetIt getIt = GetIt.instance;
 
-class SeatCubit extends Cubit<SeatState> {
+class SeatBloc extends Bloc<SeatEvent, SeatState> {
   final storage = const FlutterSecureStorage();
   final GetSeatsByMovieSessionId _getMovieSessionById;
   final EventBus _eventBus;
@@ -24,8 +24,10 @@ class SeatCubit extends Cubit<SeatState> {
   late int version = 0;
   late String? _movieSessionId = '';
 
-  SeatCubit(this._getMovieSessionById, this._eventBus)
+  SeatBloc(this._getMovieSessionById, this._eventBus)
       : super(SeatState.initState()) {
+    on<SeatEvent>(_getSeats);
+
     _appEventSubscription = _eventBus.stream.listen((event) {
       if (event is SeatsUpdateEvent) {
         var selectingSeat = event;
@@ -36,34 +38,27 @@ class SeatCubit extends Cubit<SeatState> {
 
       if (event is ShoppingCartHashIdUpdated) {
         if (_movieSessionId != null) {
-          _getSeats(_movieSessionId!);
+          _onGetSeats(_movieSessionId!);
         }
       }
     });
   }
 
-  get movies => null;
-
-  void updateSeatsState(ShoppingCart shoppingCard) {}
-
-  Future<void> getSeats(String movieSessionId) async {
-    _movieSessionId = movieSessionId;
-    _getSeats(movieSessionId);
+  Future<FutureOr<void>> _getSeats(
+      SeatEvent event, Emitter<SeatState> emit) async {
+    _movieSessionId = event.movieSessionId;
+    _onGetSeats(event.movieSessionId);
   }
 
-  Future<void> _getSeats(String movieSessionId) async {
-    _movieSessionId = movieSessionId;
-
+  Future<void> _onGetSeats(String movieSessionId) async {
     emit(state.copyWith(status: SeatStateStatus.fetching));
 
     final result = await _getMovieSessionById(movieSessionId);
 
     result.fold(
         (failure) => emit(state.copyWith(
-            status: SeatStateStatus.error,
-            errorMessage: failure.errorMessage)), (seats) async {
-      emit(state.copyWith(seats: seats, status: SeatStateStatus.loaded));
-    });
+            status: SeatStateStatus.error, errorMessage: failure.errorMessage)),
+        (_) => ());
   }
 
   @override
@@ -71,4 +66,14 @@ class SeatCubit extends Cubit<SeatState> {
     await _appEventSubscription.cancel();
     return await super.close();
   }
+}
+
+@immutable
+class SeatEvent extends Equatable {
+  const SeatEvent({required this.movieSessionId});
+
+  final String movieSessionId;
+
+  @override
+  List<Object> get props => [movieSessionId];
 }

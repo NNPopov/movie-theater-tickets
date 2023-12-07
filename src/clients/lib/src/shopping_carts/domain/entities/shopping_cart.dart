@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:movie_theater_tickets/src/shopping_carts/domain/entities/price_calculation_result.dart';
 import 'package:movie_theater_tickets/src/shopping_carts/domain/entities/seat.dart';
 import 'package:dartz/dartz.dart';
 import '../../../../core/errors/failures.dart';

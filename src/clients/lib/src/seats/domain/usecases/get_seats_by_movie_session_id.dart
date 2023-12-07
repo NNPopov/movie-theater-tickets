@@ -22,10 +22,12 @@ class GetSeatsByMovieSessionId
 
     await _eventHub.seatsUpdateSubscribe(params);
 
-    var result = await _repo.getSeatsByMovieSessionId(params);
+    return Right([]);
 
-    return result.fold((failure) => Left(failure), (seats) async {
-      return Right(seats);
-    });
+    // var result = await _repo.getSeatsByMovieSessionId(params);
+    //
+    // return result.fold((failure) => Left(failure), (seats) async {
+    //   return Right(seats);
+    // });
   }
 }

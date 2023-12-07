@@ -83,7 +83,6 @@ class ShoppingCartCubit extends Cubit<ShoppingCartState> {
     final result = await _createShoppingCart(
         CreateShoppingCartCommand(maxNumberOfSeats: maxNumberOfSeats));
 
-
     result.fold((failure) {
       if (failure is ValidationFailure) {
         emit(state.copyWith(status: ShoppingCartStateStatus.createValidationError, errorMessage: failure.message));

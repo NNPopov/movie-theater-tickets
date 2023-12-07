@@ -1,3 +1,6 @@
+import 'package:movie_theater_tickets/src/shopping_carts/data/models/price_calculation_result_dto.dart';
+
+import '../../domain/entities/price_calculation_result.dart';
 import '../../domain/entities/seat.dart';
 import 'seat_dto.dart';
 import '../../domain/entities/shopping_cart.dart';

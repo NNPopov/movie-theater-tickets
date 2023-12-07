@@ -114,7 +114,7 @@ void _initShoppingCart() {
       GetShoppingCartUseCase(
           getIt.get(), getIt.get(), getIt.get(), getIt.get(), getIt.get()));
   getIt.registerLazySingleton<SelectSeatUseCase>(
-      () => SelectSeatUseCase(getIt.get(), getIt.get()));
+      () => SelectSeatUseCase(getIt.get(), getIt.get(), getIt.get()));
   getIt.registerLazySingleton<UnselectSeatUseCase>(
       () => UnselectSeatUseCase(getIt.get(), getIt.get()));
   getIt.registerLazySingleton<ShoppingCartUpdateSubscribeUseCase>(

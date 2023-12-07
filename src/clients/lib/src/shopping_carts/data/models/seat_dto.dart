@@ -1,8 +1,12 @@
 import '../../domain/entities/seat.dart';
 
 class ShoppingCartSeatDto extends ShoppingCartSeat {
-   ShoppingCartSeatDto(
-      {super.seatRow, super.seatNumber, super.selectionExpirationTime, super.price, super.isDirty});
+  ShoppingCartSeatDto(
+      {super.seatRow,
+      super.seatNumber,
+      super.selectionExpirationTime,
+      super.price,
+      super.isDirty});
 
   ShoppingCartSeatDto.fromJson(Map<String, dynamic> json)
       : super(
@@ -21,9 +25,7 @@ class ShoppingCartSeatDto extends ShoppingCartSeat {
     data['seatNumber'] = seatNumber;
     data['selectionExpirationTime'] = selectionExpirationTime.toString();
     data['price'] = price;
-    data['isDirty'] = isDirty;
+    data['isDirty'] = isDirty ?? false;
     return data;
   }
 }
-
-

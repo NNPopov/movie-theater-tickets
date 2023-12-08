@@ -6,21 +6,18 @@ import '../cubit/connectivity_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ConnectivitySafeAreaWidget extends StatelessWidget {
-   ConnectivitySafeAreaWidget(
-      {super.key,
-        required this.child});
+  ConnectivitySafeAreaWidget({super.key, required this.child});
 
   final Widget child;
 
-
- late OverlayEntry? _overlayEntry;
+  late OverlayEntry? _overlayEntry;
 
   late OverlayEntry? _disconnectedOverlayEntry;
 
   @override
   Widget build(BuildContext context) {
-    return               BlocListener<ConnectivityBloc, ConnectivityState>(
-      child: child ,
+    return BlocListener<ConnectivityBloc, ConnectivityState>(
+      child: child,
       listener: (context, state) {
         if (state is ReconnectingState) {
           _overlayEntry = OverlayEntry(
@@ -77,8 +74,7 @@ class ConnectivitySafeAreaWidget extends StatelessWidget {
                               const EdgeInsets.symmetric(
                                   vertical: 1, horizontal: 1)),
                           foregroundColor:
-                          MaterialStateProperty.all<Color>(
-                              Colors.blue),
+                              MaterialStateProperty.all<Color>(Colors.blue),
                         ),
                         onPressed: () {
                           connectivityBloc.connect();

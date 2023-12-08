@@ -1,28 +1,31 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 
 import 'package:equatable/equatable.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:flutter/foundation.dart';
 
-class Movie extends Equatable {
-  final String id;
-  final String title;
-  final String imdbId;
-  final String stars;
-  final DateTime releaseDate;
+part 'movie.freezed.dart';
 
-  const Movie(this.id, this.title, this.imdbId, this.stars, this.releaseDate);
+part 'movie.g.dart';
 
-  Movie.empty()
-      : this(
-      '',
-      '',
-       '',
-      '',
-      DateTime.parse('1900-01-01')
-  );
+@freezed
+class Movie with _$Movie {
+  factory Movie(
+      {required String id,
+      required String title,
+      String? imdbId,
+      String? stars,
+      DateTime? releaseDate}) = _Movie;
 
-  @override
-  List<Object?> get props => [id, title, imdbId, stars, releaseDate];
+  factory Movie.fromJson(Map<String, Object?> json) => _$MovieFromJson(json);
 
-
+  factory Movie.empty() {
+    return _Movie(
+      id: '',
+      title: '',
+      imdbId: '',
+      stars: '',
+      releaseDate: DateTime.parse('1900-01-01'),
+    );
+  }
 }
-

@@ -50,7 +50,7 @@ class _MovieDetailViewView extends State<MovieDetailWidget> {
         final movie = state.movie;
         return Container(
           width: 320,
-          height: 650,
+          height: 450,
           alignment: Alignment.bottomLeft,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10),
@@ -90,11 +90,11 @@ class _MovieDetailViewView extends State<MovieDetailWidget> {
                 Text(
                     '${AppLocalizations.of(context)!.stars}: ${movie.stars}'),
                 Text(
-                    '${AppLocalizations.of(context)!.release_date}: ${movie.releaseDate.year}-${movie.releaseDate.month}-${movie.releaseDate.day} '),
+                    '${AppLocalizations.of(context)!.release_date}: ${movie.releaseDate?.year}-${movie.releaseDate?.month}-${movie.releaseDate?.day} '),
                 Text('imdbId: ${movie.imdbId}'),
-                const Expanded(
-                  child: SizedBox(),
-                ),
+                // const Expanded(
+                //   child: SizedBox(),
+                // ),
                 Align(
                   alignment: Alignment.center,
                   child: TextButton(

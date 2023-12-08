@@ -5,11 +5,11 @@ import 'package:movie_theater_tickets/src/movie_sessions/domain/entities/movie_s
 import '../../../../fixtures/fixture_reader.dart';
 
 void main() {
-  final movieSessionDto = MovieSessionDto(
-       "97207ae2-e5dd-4084-903a-5655966cd101",
-       "e1fde23c-e26d-44d2-88f8-202951255001",
-       DateTime.parse("2023-11-20T00:00:00+00:00"),
-       "97207ae2-e5dd-4084-903a-5655966ca010");
+  final movieSessionDto = MovieSession(
+     id:  "97207ae2-e5dd-4084-903a-5655966cd101",
+      movieId:  "e1fde23c-e26d-44d2-88f8-202951255001",
+      sessionDate: DateTime.parse("2023-11-20T00:00:00+00:00"),
+      cinemaHallId: "97207ae2-e5dd-4084-903a-5655966ca010");
 
   group('MovieSession', () {
     test('should be a subclass of [Movie]', () async {
@@ -22,7 +22,7 @@ void main() {
         () async {
       final map =
           jsonDecode(fixture('movie_session.json')) as Map<String, dynamic>;
-      final result = MovieSessionDto.fromJson(map);
+      final result = MovieSession.fromJson(map);
       expect(result, movieSessionDto);
     });
   });

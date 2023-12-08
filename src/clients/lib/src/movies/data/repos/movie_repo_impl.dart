@@ -24,7 +24,7 @@ class MovieRepoImpl implements MovieRepo {
       List<dynamic> movies = jsonDecode(jsonEncode(response.data));
 
       List<Movie> movieDtos =
-          movies.map((json) => MovieDto.fromJson(json)).toList();
+          movies.map((json) => Movie.fromJson(json)).toList();
 
       return Right(movieDtos);
     } on DioException catch (e) {
@@ -40,7 +40,7 @@ class MovieRepoImpl implements MovieRepo {
       final response = await _client.get('/api/movies/$movieId');
       var movieSession = json.decode(response.toString());
 
-      var movieSessionDto = MovieDto.fromJson(movieSession);
+      var movieSessionDto = Movie.fromJson(movieSession);
 
       return Right(movieSessionDto);
     } on ServerException catch (e) {

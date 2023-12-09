@@ -830,4 +830,6 @@ Temporary Items
 # Used by previous versions of JEnv
 .jenv-version
 
-
+### -------------------------- Dart Freezed -------------------------- ###
+*.freezed.dart
+*.g.dart

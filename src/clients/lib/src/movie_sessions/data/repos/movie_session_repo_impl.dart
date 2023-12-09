@@ -24,7 +24,7 @@ class MovieSessionRepoImpl implements MovieSessionRepo {
       final movieSessionResponse  = await _client.get('/api/moviesessions/$movieSessionId');
       var movieSessionData  = json.decode(movieSessionResponse .toString());
 
-      var movieSessionDto  = MovieSessionDto.fromJson(movieSessionData );
+      var movieSessionDto  = MovieSession.fromJson(movieSessionData );
 
       return Right(movieSessionDto );
     } on ServerException catch (e) {
@@ -40,8 +40,8 @@ class MovieSessionRepoImpl implements MovieSessionRepo {
           await _client.get('/api/movies/$movieId/moviesessions');
       var movieSessionsData = movieSessionsResponse.data as List;
 
-      var movieSessionList = List<MovieSessionDto>.from(
-          movieSessionsData.map((model) => MovieSessionDto.fromJson(model)));
+      var movieSessionList = List<MovieSession>.from(
+          movieSessionsData.map((model) => MovieSession.fromJson(model)));
 
       return Right(movieSessionList);
     } on ServerException catch (e) {

@@ -45,7 +45,7 @@ class _MoviesDetailViewView extends State<MoviesDetailWidget> {
         final movie = state.movie;
         return Container(
           width: 320,
-          height: 550,
+          height: 450,
           alignment: Alignment.bottomLeft,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10),
@@ -84,11 +84,11 @@ class _MoviesDetailViewView extends State<MoviesDetailWidget> {
                 ),
                 Text('${AppLocalizations.of(context)!.stars}: ${movie.stars}'),
                 Text(
-                    '${AppLocalizations.of(context)!.release_date}: ${movie.releaseDate.year}-${movie.releaseDate.month}-${movie.releaseDate.day} '),
+                    '${AppLocalizations.of(context)!.release_date}: ${movie.releaseDate?.year}-${movie.releaseDate?.month}-${movie.releaseDate?.day} '),
                 Text('imdbId: ${movie.imdbId}'),
-                const Expanded(
-                  child: SizedBox(),
-                ),
+                // const Expanded(
+                //   child: SizedBox(),
+                // ),
               ]),
         );
       },

@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using CinemaTicketBooking.Api.Sockets.Abstractions;
+using CinemaTicketBooking.Application.Abstractions;
 using CinemaTicketBooking.Application.Abstractions.Services;
-using CinemaTicketBooking.Application.MovieSessions.Queries;
 using CinemaTicketBooking.Application.ShoppingCarts.Command.SelectSeats;
 using CinemaTicketBooking.Application.ShoppingCarts.Command.UnselectSeats;
 using CinemaTicketBooking.Application.ShoppingCarts.Queries;
@@ -17,20 +17,20 @@ public class BookingManagementServiceHub(
     ILogger logger,
     IMediator mediator,
     ICacheService cacheService,
-    IMapper mapper
+    IMapper mapper,
+    ICinemaHallSeatsNotifier cinemaHallSeatsNotifier
 ) : Hub<IBookingManagementStateUpdater>
 {
-    
     public async Task SeatSelect(Guid shoppingCartId,
-     short row ,
-     short number,
-     Guid showtimeId)
+        short row,
+        short number,
+        Guid showtimeId)
     {
         try
         {
-            var cart = await mediator.Send(new GetShoppingCartQuery(shoppingCartId));
-            
-            await SubscribeToCartUpdatesIfNotSubscribed(cart);
+            var shoppingCart = await GetShoppingCart(shoppingCartId);
+
+            await SubscribeToCartUpdatesIfNotSubscribed(shoppingCart);
 
             var query = new SelectSeatCommand(MovieSessionId: showtimeId,
                 SeatRow: row,
@@ -44,19 +44,16 @@ public class BookingManagementServiceHub(
         }
     }
 
-
-
     public async Task SeatUnselect(Guid shoppingCartId,
-        short row ,
+        short row,
         short number,
         Guid showtimeId)
     {
         try
         {
-            var cart = await mediator.Send(new GetShoppingCartQuery(shoppingCartId));
-            
-            await SubscribeToCartUpdatesIfNotSubscribed(cart);
+            var shoppingCart = await GetShoppingCart(shoppingCartId);
 
+            await SubscribeToCartUpdatesIfNotSubscribed(shoppingCart);
 
             var query = new UnselectSeatCommand(MovieSessionId: showtimeId,
                 SeatRow: row,
@@ -75,28 +72,9 @@ public class BookingManagementServiceHub(
     {
         try
         {
-            await Groups.AddToGroupAsync(Context.ConnectionId, movieSessionId.ToString());
-            logger.Debug("Client {@ConnectionId} was subscribed to MovieSessionSeats update {@MovieSessionId}",
-                Context.ConnectionId,
-                movieSessionId);
+            await SubscribeMovieSessionSeatsUpdateIfNeeded(movieSessionId);
 
-            var movieSessionSeatsKey = $"MovieSessionSeats:{movieSessionId}";
-
-            var movieSessionSeatDto = await cacheService.TryGet<ICollection<MovieSessionSeatDto>>(movieSessionSeatsKey);
-
-            if (movieSessionSeatDto is not null)
-            {
-                await Clients.Client(Context.ConnectionId).SentCinemaHallSeatsState(movieSessionSeatDto);
-            }
-            else
-            {
-                var query = new GetMovieSessionSeatsQuery(movieSessionId);
-                var seats = await mediator.Send(query);
-
-                await cacheService.Set(movieSessionSeatsKey, seats, new TimeSpan(0, 5, 0));
-
-                await Clients.Client(Context.ConnectionId).SentCinemaHallSeatsState(seats);
-            }
+            await cinemaHallSeatsNotifier.SendSeatUpdatesDataToSpecificClient(movieSessionId, Context.ConnectionId);
         }
         catch (Exception e)
         {
@@ -104,15 +82,23 @@ public class BookingManagementServiceHub(
         }
     }
 
+    private async Task SubscribeMovieSessionSeatsUpdateIfNeeded(Guid movieSessionId)
+    {
+        await Groups.AddToGroupAsync(Context.ConnectionId, movieSessionId.ToString());
+        logger.Debug("Client {@ConnectionId} was subscribed to MovieSessionSeats update {@MovieSessionId}",
+            Context.ConnectionId,
+            movieSessionId);
+    }
+
     public async Task RegisterShoppingCart(Guid shoppingCartId)
     {
         try
         {
-            var cart = await mediator.Send(new GetShoppingCartQuery(shoppingCartId));
-            
-             await SubscribeToCartUpdatesIfNotSubscribed(cart);
+            var shoppingCart = await GetShoppingCart(shoppingCartId);
 
-            var shoppingCartDto = mapper.Map<ShoppingCartDto>(cart);
+            await SubscribeToCartUpdatesIfNotSubscribed(shoppingCart);
+
+            var shoppingCartDto = mapper.Map<ShoppingCartDto>(shoppingCart);
 
 
             await Clients.Client(Context.ConnectionId).SentShoppingCartState(shoppingCartDto);
@@ -163,7 +149,12 @@ public class BookingManagementServiceHub(
 
         return base.OnDisconnectedAsync(exception);
     }
-    
+
+    private async Task<ShoppingCart> GetShoppingCart(Guid shoppingCartId)
+    {
+        return await mediator.Send(new GetShoppingCartQuery(shoppingCartId));
+    }
+
     private async Task SubscribeToCartUpdatesIfNotSubscribed(ShoppingCart shoppingCart)
     {
         var shoppingCartIdOrClientId = shoppingCart.ClientId != Guid.Empty ? shoppingCart.ClientId : shoppingCart.Id;

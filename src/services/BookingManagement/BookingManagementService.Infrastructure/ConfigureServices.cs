@@ -1,6 +1,7 @@
 ﻿using CinemaTicketBooking.Application.Abstractions;
 using CinemaTicketBooking.Application.Abstractions.Repositories;
 using CinemaTicketBooking.Application.Abstractions.Services;
+using CinemaTicketBooking.Application.MovieSessionSeats;
 using CinemaTicketBooking.Domain.MovieSessions.Abstractions;
 using CinemaTicketBooking.Domain.Seats.Abstractions;
 using CinemaTicketBooking.Domain.Services;
@@ -39,6 +40,9 @@ public static class ConfigureServices
         services.AddScoped<IDomainEventTracker, DomainEventTracker>();
         services.AddSingleton<ICacheService, RedisCacheService>();
         services.AddScoped<MovieSessionSeatService>();
+        
+        services.AddScoped<IMovieSessionSeatsDataCacheService, ActiveMovieSessionSeatsDataCacheService>();
+        
         
 
         var redisConnectionString = configuration.GetConnectionString("Redis");

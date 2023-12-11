@@ -25,7 +25,9 @@ internal sealed class GetMovieQueryHandler : IRequestHandler<GetMovieQuery, Movi
             cancellationToken);
 
         if (movie == null)
-            throw new ContentNotFoundException( request.Id.ToString(), nameof(Movie));
+        {
+            throw new ContentNotFoundException(request.Id.ToString(), nameof(Movie));
+        }
 
         return _mapper.Map<MovieDto>(movie);
     }

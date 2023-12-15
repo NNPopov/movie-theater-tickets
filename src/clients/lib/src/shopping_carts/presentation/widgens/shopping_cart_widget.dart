@@ -43,9 +43,10 @@ class _ShoppingCartWidget extends State<ShoppingCartWidget> {
   @override
   Widget build(BuildContext context) {
     return Container(
-        width: 230,
+        width: 260,
         height: 500,
-        margin: const EdgeInsets.only(top: 6, left: 10, right: 40.0),
+        alignment: Alignment.topLeft,
+        //margin: const EdgeInsets.only(top: 6, left: 10, right: 40.0),
         padding: const EdgeInsets.all(6.0),
         child: buildShoppingCart());
   }
@@ -79,7 +80,9 @@ class _ShoppingCartWidget extends State<ShoppingCartWidget> {
             shoppingCartState.status != ShoppingCartStateStatus.error) {
           context.read<ShoppingCartCubit>().state;
 
-          return Column(children: [
+          return Column(
+
+              children: [
             Text(shoppingCartState.shoppingCart.status.toString()),
             const SizedBox(
               height: 30,

@@ -6,7 +6,6 @@ import 'package:movie_theater_tickets/src/movies/domain/entities/movie.dart';
 import '../../../../core/errors/exceptions.dart';
 import '../../../../core/errors/failures.dart';
 import '../../domain/repos/movie_repo.dart';
-import '../models/movie_dto.dart';
 import 'package:get_it/get_it.dart';
 
 

@@ -12,13 +12,15 @@ import 'package:get_it/get_it.dart';
 
 import '../models/cinema_hall_info_dto.dart';
 
+import 'package:dio_cache_interceptor/dio_cache_interceptor.dart';
+import 'package:dio_cache_interceptor_hive_store/dio_cache_interceptor_hive_store.dart';
 
 GetIt getIt = GetIt.instance;
 
 class CinemaHallRepoImpl implements CinemaHallRepo {
   final Dio _client;
 
-  CinemaHallRepoImpl(this._client) ;
+  CinemaHallRepoImpl(this._client);
 
   @override
   ResultFuture<CinemaHall> getCinemaHallById(String cinemaHallId) async {
@@ -35,10 +37,14 @@ class CinemaHallRepoImpl implements CinemaHallRepo {
   }
 
   @override
-  ResultFuture<CinemaHallInfo> getCinemaHallInfoById(String cinemaHallId) async {
+  ResultFuture<CinemaHallInfo> getCinemaHallInfoById(
+      String cinemaHallId) async {
     try {
-      final response = await _client.get('/api/cinema-halls/$cinemaHallId/seats');
-      var movieSession = json.decode(response.toString());
+      final response = await _client.get(
+          '/api/cinema-halls/$cinemaHallId/seats');
+
+      var movieSession = json.decode(response.toString()
+      );
 
       var cinemaHallDto = CinemaHallInfoDto.fromJson(movieSession);
 

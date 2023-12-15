@@ -68,7 +68,7 @@ class _SeatsMovieSessionWidget extends State<SeatsMovieSessionWidget> {
           height: seatsHeight + 110,
           width: seatsWidth + 110,
           padding: const EdgeInsets.all(20),
-          alignment: Alignment.centerLeft,
+          alignment: Alignment.topCenter,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10),
             border: Border.all(

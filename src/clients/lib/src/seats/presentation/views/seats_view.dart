@@ -30,6 +30,8 @@ class _SeatsView extends State<SeatsView> {
 
   @override
   Widget build(BuildContext context) {
+    double width = MediaQuery.of(context).size.width;
+
     return Column(
       children: [
         const DashboardWidget(route: SeatsView.id),
@@ -45,60 +47,62 @@ class _SeatsView extends State<SeatsView> {
                 child: SizedBox(
                   height: 700,
                   child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    //mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    // crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const SizedBox(
-                        width: 40,
-                      ),
-                      Column(
-                        children: [
-                          Container(
-                              height: 110,
-                              width: 320,
-                              alignment: Alignment.topLeft,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(10),
-                                border: Border.all(
-                                  color: Colors.blue,
-                                  width: 2,
-                                ),
-                              ),
-                              margin: const EdgeInsets.all(5.0),
-                              padding: const EdgeInsets.all(20.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  BlocProvider(
-                                      key: const ValueKey(
-                                          'AuditoriumDetailView'),
-                                      create: (_) => CinemaHallCubit(),
-                                      child: AuditoriumDetailView(
-                                          widget.movieSession.cinemaHallId)),
-                                  Text(
-                                      '${widget.movieSession.sessionDate.year}-${widget.movieSession.sessionDate.month}-${widget.movieSession.sessionDate.day}'),
-                                  Text(
-                                      '${widget.movieSession.sessionDate.hour}:${'${widget.movieSession.sessionDate.minute}0'.substring(0, 2)}')
-                                ],
-                              )),
-                          BlocProvider(
-                              key: const ValueKey('MoviesDetailView'),
-                              create: (_) => MovieCubit(getIt.get()),
-                              child: MoviesDetailWidget(
-                                  widget.movieSession.movieId)),
-                        ],
-                      ),
-                      const SizedBox(
-                        width: 40,
-                      ),
-                      Expanded(
-                        child: Align(
-                          alignment: Alignment.topCenter,
-                          child: SeatsMovieSessionWidget(
-                              movieSession: widget.movieSession,
-                              getCinemaHallInfo: getIt.get()),
+                      if (width > 1200)
+                        Padding(
+                          padding: EdgeInsets.only(right: 30),
+                          // фиксированный отступ справа
+                          child: Column(
+                            children: [
+                              Container(
+                                  height: 110,
+                                  width: 320,
+                                  alignment: Alignment.topRight,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(
+                                      color: Colors.blue,
+                                      width: 2,
+                                    ),
+                                  ),
+                                  margin: const EdgeInsets.all(5.0),
+                                  padding: const EdgeInsets.all(20.0),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      BlocProvider(
+                                          key: const ValueKey(
+                                              'AuditoriumDetailView'),
+                                          create: (_) => CinemaHallCubit(),
+                                          child: AuditoriumDetailView(widget
+                                              .movieSession.cinemaHallId)),
+                                      Text(
+                                          '${widget.movieSession.sessionDate.year}-${widget.movieSession.sessionDate.month}-${widget.movieSession.sessionDate.day}'),
+                                      Text(
+                                          '${widget.movieSession.sessionDate.hour}:${'${widget.movieSession.sessionDate.minute}0'.substring(0, 2)}')
+                                    ],
+                                  )),
+                              BlocProvider(
+                                  key: const ValueKey('MoviesDetailView'),
+                                  create: (_) => MovieCubit(getIt.get()),
+                                  child: MoviesDetailWidget(
+                                      widget.movieSession.movieId)),
+                            ],
+                          ),
                         ),
-                      ),
-                      const ShoppingCartWidget()
+                      SeatsMovieSessionWidget(
+                          movieSession: widget.movieSession,
+                          getCinemaHallInfo: getIt.get()),
+                      Padding(
+                          padding: EdgeInsets.only(left: 30),
+                          child: Align(
+                            alignment: Alignment.topCenter,
+                            child: ShoppingCartWidget(),
+                          ))
                     ],
                   ),
                 ),

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:movie_theater_tickets/src/globalisations_flutter/cubit/globalisation_cubit.dart';
@@ -21,26 +22,11 @@ import 'package:logger/logger.dart';
 
 import 'src/auth/presentations/bloc/auth_cubit.dart';
 
-// import 'package:logger/logger.dart';
-//
-// var logger = Logger(
-//   printer: PrettyPrinter(),
-// );
 
-// var loggerNoStack = Logger(
-//   printer: PrettyPrinter(methodCount: 0),
-// );
 
 final getIt = GetIt.instance;
 
 Future<void> main() async {
-  // Logger.root.level = Level.ALL;
-  //
-  // Logger.root.onRecord.listen((LogRecord rec) {
-  //   print('${rec.level.name}: ${rec.time}: ${rec.message}');
-  // });
-
- // final log = Logger("App");
   final logger = getLogger(main);
 
   FlutterError.onError = (details) {
@@ -50,11 +36,39 @@ Future<void> main() async {
 
   runZonedGuarded(
     () async {
+      //load environment variable
       await dotenv.load();
 
       await Global.init();
 
       await initializeDependencies();
+
+      if (kReleaseMode) {
+        ErrorWidget.builder = (FlutterErrorDetails errorDetails) {
+          return MaterialApp(
+            home: Scaffold(
+              appBar: AppBar(
+                title: const Text('Error'),
+              ),
+              body: const Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.error_outline_outlined,
+                      color: Colors.red,
+                      size: 100,
+                    ),
+                    Text(
+                      'Oops... something went wrong',
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        };
+      }
 
       runApp(MyApp());
     },

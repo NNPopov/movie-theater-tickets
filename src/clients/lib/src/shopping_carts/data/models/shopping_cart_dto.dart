@@ -14,27 +14,29 @@ class ShoppingCartDto extends ShoppingCart {
       super.status,
       super.seats,
       super.isAssigned,
-      super.priceCalculationResult});
+      super.priceCalculationResult,
+      super.isDirty});
 
   ShoppingCartDto.fromJson(Map<String, dynamic> json)
       : super(
-          maxNumberOfSeats: json['maxNumberOfSeats'],
-          createdAt: DateTime.parse(json['createdAt']),
-          id: json['id'],
-          movieSessionId: json['movieSessionId'],
-          status: ShoppingCartStatus.values[json['status']],
-          seats: List<Map<String, dynamic>>.from(json['seats'] as List<dynamic>)
-              .map((e) =>
-                  ShoppingCartSeatDto.fromJson(e as Map<String, dynamic>)
-                      as ShoppingCartSeat)
-              .toList(),
-          isAssigned: json['isAssigned'] ?? false,
-          priceCalculationResult: json['priceCalculationResult'] != null
-              ? PriceCalculationResultDto.fromJson(
-                      json['priceCalculationResult'] as Map<String, dynamic>)
-                  as PriceCalculationResult
-              : null,
-        );
+            maxNumberOfSeats: json['maxNumberOfSeats'],
+            createdAt: DateTime.parse(json['createdAt']),
+            id: json['id'],
+            movieSessionId: json['movieSessionId'],
+            status: ShoppingCartStatus.values[json['status']],
+            seats:
+                List<Map<String, dynamic>>.from(json['seats'] as List<dynamic>)
+                    .map((e) =>
+                        ShoppingCartSeatDto.fromJson(e as Map<String, dynamic>)
+                            as ShoppingCartSeat)
+                    .toList(),
+            isAssigned: json['isAssigned'] ?? false,
+            priceCalculationResult: json['priceCalculationResult'] != null
+                ? PriceCalculationResultDto.fromJson(
+                        json['priceCalculationResult'] as Map<String, dynamic>)
+                    as PriceCalculationResult
+                : null,
+            isDirty: json['isDirty'] ?? false,);
 
   ShoppingCartDto.empty()
       : this(
@@ -45,7 +47,8 @@ class ShoppingCartDto extends ShoppingCart {
             status: ShoppingCartStatus.InWork,
             seats: null,
             isAssigned: false,
-            priceCalculationResult: null);
+            priceCalculationResult: null,
+            isDirty: true);
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = {};
@@ -63,7 +66,7 @@ class ShoppingCartDto extends ShoppingCart {
     data['priceCalculationResult'] = priceCalculationResult != null
         ? (priceCalculationResult as PriceCalculationResultDto).toJson()
         : null;
-
+    data['isDirty'] = isDirty;
     return data;
   }
 
@@ -75,7 +78,8 @@ class ShoppingCartDto extends ShoppingCart {
       ShoppingCartStatus? status,
       List<ShoppingCartSeatDto>? seats,
       bool? isAssigned,
-      PriceCalculationResult? priceCalculationResult}) {
+      PriceCalculationResult? priceCalculationResult,
+      bool? isDirty}) {
     return ShoppingCart(
         maxNumberOfSeats: maxNumberOfSeats ?? this.maxNumberOfSeats,
         createdAt: createdAt ?? this.createdAt,
@@ -85,21 +89,22 @@ class ShoppingCartDto extends ShoppingCart {
         seats: seats ?? shoppingCartSeat,
         isAssigned: isAssigned ?? this.isAssigned,
         priceCalculationResult:
-            priceCalculationResult ?? this.priceCalculationResult);
+            priceCalculationResult ?? this.priceCalculationResult,
+        isDirty: isDirty ?? this.isDirty);
   }
 }
 
 extension ShoppingCarMap on ShoppingCart {
   ShoppingCartDto map() {
     return ShoppingCartDto(
-      id: this.id,
-      maxNumberOfSeats: this.maxNumberOfSeats,
-      createdAt: this.createdAt,
-      movieSessionId: this.movieSessionId,
-      status: this.status,
-      seats: this.shoppingCartSeat,
-      isAssigned: this.isAssigned,
-      priceCalculationResult: this.priceCalculationResult,
-    );
+        id: this.id,
+        maxNumberOfSeats: this.maxNumberOfSeats,
+        createdAt: this.createdAt,
+        movieSessionId: this.movieSessionId,
+        status: this.status,
+        seats: this.shoppingCartSeat,
+        isAssigned: this.isAssigned,
+        priceCalculationResult: this.priceCalculationResult,
+        isDirty: this.isDirty);
   }
 }

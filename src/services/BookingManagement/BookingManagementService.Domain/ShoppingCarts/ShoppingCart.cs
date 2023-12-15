@@ -236,9 +236,9 @@ public class ShoppingCart : AggregateRoot
 }
 
 [method: JsonConstructor]
-public class SeatShoppingCart(short seatRow, short seatNumber, decimal price, DateTime? SelectionExpirationTime = null)
+public class SeatShoppingCart(short seatRow, short seatNumber, decimal price, DateTime? selectionExpirationTime = null)
     : Seat(seatRow, seatNumber)
 {
     public decimal Price { get; private set; } = price;
-    public DateTime? SelectionExpirationTime { get; private set; } = SelectionExpirationTime;
+    public DateTime? SelectionExpirationTime { get; private set; } = selectionExpirationTime;
 };

@@ -84,24 +84,37 @@ public class SelectSeatCommandHandler(
             cart.HashId,
             cancellationToken
         );
-        var result =
-            await shoppingCartSeatLifecycleManager.SetAsync(request.MovieSessionId,
-                request.MovieSessionId,
-                request.SeatRow,
-                request.SeatNumber, expires);
-
-        if (!result)
+        try
         {
-            Logger.Error("Failed to set ShoppingCartSeat Lifecycle, try return MovieSessionSeat to Available");
+            var result =
+                await shoppingCartSeatLifecycleManager.SetAsync(request.MovieSessionId,
+                    request.MovieSessionId,
+                    request.SeatRow,
+                    request.SeatNumber, expires);
 
-            await movieSessionSeatService.ReturnToAvailable(request.MovieSessionId,
-                request.SeatRow,
-                request.SeatNumber,
-                cancellationToken
-            );
-            Logger.Error("MovieSessionSeat returned to Available");
-            throw new InvalidOperationException("Can't set ShoppingCartSeat Lifecycle. Try again later");
+            if (!result)
+            {
+                await ReturnSeatToAvailable(request, cancellationToken);
+            }
         }
+        catch (Exception e)
+        {
+            await ReturnSeatToAvailable(request, cancellationToken);
+            throw;
+        }
+    }
+
+    private async Task ReturnSeatToAvailable(SelectSeatCommand request, CancellationToken cancellationToken)
+    {
+        Logger.Error("Failed to set ShoppingCartSeat Lifecycle, try return MovieSessionSeat to Available");
+
+        await movieSessionSeatService.ReturnToAvailable(request.MovieSessionId,
+            request.SeatRow,
+            request.SeatNumber,
+            cancellationToken
+        );
+        Logger.Error("MovieSessionSeat returned to Available");
+        throw new InvalidOperationException("Can't set ShoppingCartSeat Lifecycle. Try again later");
     }
 
     private void SetMovieSessionIdIfNullOrChanged(SelectSeatCommand request, ShoppingCart? shoppingCart)

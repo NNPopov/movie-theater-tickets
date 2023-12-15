@@ -6,6 +6,8 @@ namespace CinemaTicketBooking.Api.Sockets;
 public class ConnectionManager : IConnectionManager
 {
     private readonly ICacheService _cacheService;
+    
+    private const string CacheKeyPrefix = "hub";
 
     private ConnectionManager(ICacheService cacheService)
     {
@@ -13,15 +15,15 @@ public class ConnectionManager : IConnectionManager
     }
     
     
-    public void AddConnections(Guid id, IEnumerable<string> connectionIds)
+    public void AddConnections(Guid shoppingCartId, IEnumerable<string> connectionIds)
     {
         
-        _cacheService.Set($"hub:{id}", connectionIds, new TimeSpan(2, 0, 0));
+        _cacheService.Set(GetCacheKey(shoppingCartId), connectionIds, new TimeSpan(2, 0, 0));
     }
     
     public void AddConnection(Guid shoppingCartId, string connectionId)
     {
-        List<string> connectionIds = _cacheService.TryGet<List<string>>($"hub:{shoppingCartId}").Result;
+        List<string> connectionIds = _cacheService.TryGet<List<string>>(GetCacheKey(shoppingCartId)).Result;
 
         if (connectionIds != null)
         {
@@ -36,9 +38,14 @@ public class ConnectionManager : IConnectionManager
             connectionIds= new List<string> { connectionId };
         }
         
-        _cacheService.Set($"hub:{shoppingCartId}", connectionIds, new TimeSpan(2, 0, 0));
+        _cacheService.Set(GetCacheKey(shoppingCartId), connectionIds, new TimeSpan(2, 0, 0));
     }
-    
+
+    private static string GetCacheKey(Guid shoppingCartId)
+    {
+        return $"{CacheKeyPrefix}:{shoppingCartId}";
+    }
+
     public void RemoveByConnectionId(string connectionId)
     {
         
@@ -48,13 +55,13 @@ public class ConnectionManager : IConnectionManager
     
     public void RemoveShoppingCartId(Guid shoppingCartId)
     {
-       _cacheService.Remove($"hub:{shoppingCartId}");
+       _cacheService.Remove(GetCacheKey(shoppingCartId));
        
     }
 
     public void RemoveSubscriptionShoppingCartId(Guid shoppingCartId, string connectionId)
     {
-        List<string> connectionIds = _cacheService.TryGet<List<string>>($"hub:{shoppingCartId}").Result;
+        List<string> connectionIds = _cacheService.TryGet<List<string>>(GetCacheKey(shoppingCartId)).Result;
 
         if (connectionIds != null)
         {
@@ -69,12 +76,12 @@ public class ConnectionManager : IConnectionManager
             connectionIds= new List<string> { connectionId };
         }
         
-        _cacheService.Set($"hub:{shoppingCartId}", connectionIds, new TimeSpan(2, 0, 0));
+        _cacheService.Set(GetCacheKey(shoppingCartId), connectionIds, new TimeSpan(2, 0, 0));
     }
 
     public IEnumerable<string> GetConnectionId(Guid shoppingCartId)
     {
-        List<string> connectionIds = _cacheService.TryGet<List<string>>($"hub:{shoppingCartId}").Result;
+        List<string> connectionIds = _cacheService.TryGet<List<string>>(GetCacheKey(shoppingCartId)).Result;
 
         if (connectionIds != null) return connectionIds;
         return new List<string>();

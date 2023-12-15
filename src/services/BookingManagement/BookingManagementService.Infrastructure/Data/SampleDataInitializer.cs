@@ -191,79 +191,79 @@ public class SampleDataInitializer
 
         await CreateMovieSessionMovieSessionSeats(movie,
             redAuditorium,
-            new DateTime(2023, 12, 20, 12, 00, 0),
+            new DateTime(2024, 12, 20, 12, 00, 0),
             movieSessionId);
 
         await CreateMovieSessionMovieSessionSeats(movie,
             redAuditorium,
-            new DateTime(2023, 12, 21, 15, 30, 0),
+            new DateTime(2024, 12, 21, 15, 30, 0),
             movieSessionId2);
 
         await CreateMovieSessionMovieSessionSeats(movie2,
             whiteAuditorium,
-            new DateTime(2023, 12, 21, 15, 30, 0),
+            new DateTime(2024, 12, 21, 15, 30, 0),
             movieSessionId3);
 
         await CreateMovieSessionMovieSessionSeats(movie2,
             whiteAuditorium,
-            new DateTime(2023, 12, 23, 15, 30, 0),
+            new DateTime(2024, 12, 23, 15, 30, 0),
             movieSessionId4);
 
         await CreateMovieSessionMovieSessionSeats(movie3,
             blackAuditorium,
-            new DateTime(2023, 12, 22, 15, 30, 0),
+            new DateTime(2024, 12, 22, 15, 30, 0),
             movieSessionId5);
 
 
         await CreateMovieSessionMovieSessionSeats(movie3,
             whiteAuditorium,
-            new DateTime(2023, 12, 27, 15, 30, 0),
+            new DateTime(2024, 12, 27, 15, 30, 0),
             movieSessionId6);
 
         await CreateMovieSessionMovieSessionSeats(movie4,
             whiteAuditorium,
-            new DateTime(2023, 12, 27, 19, 00, 0));
+            new DateTime(2024, 12, 27, 19, 00, 0));
 
         await CreateMovieSessionMovieSessionSeats(movie4,
             blackAuditorium,
-            new DateTime(2023, 12, 26, 08, 30, 0));
+            new DateTime(2024, 12, 26, 08, 30, 0));
 
         await CreateMovieSessionMovieSessionSeats(movie4,
             blackAuditorium,
-            new DateTime(2023, 12, 26, 11, 00, 0));
+            new DateTime(2024, 12, 26, 11, 00, 0));
 
         await CreateMovieSessionMovieSessionSeats(movie4,
             blackAuditorium,
-            new DateTime(2023, 12, 26, 13, 30, 0));
+            new DateTime(2024, 12, 26, 13, 30, 0));
 
         await CreateMovieSessionMovieSessionSeats(movie4,
             blackAuditorium,
-            new DateTime(2023, 12, 26, 16, 00, 0));
+            new DateTime(2024, 12, 26, 16, 00, 0));
 
         await CreateMovieSessionMovieSessionSeats(movie4,
             blackAuditorium,
-            new DateTime(2023, 12, 26, 19, 00, 0));
+            new DateTime(2024, 12, 26, 19, 00, 0));
 
         await CreateMovieSessionMovieSessionSeats(movie4,
             blackAuditorium,
-            new DateTime(2023, 12, 26, 22, 30, 0));
+            new DateTime(2024, 12, 26, 22, 30, 0));
 
         await CreateMovieSessionMovieSessionSeats(movie4,
             whiteAuditorium,
-            new DateTime(2023, 12, 27, 19, 00, 0));
+            new DateTime(2024, 12, 27, 19, 00, 0));
 
 
         await CreateMovieSessionMovieSessionSeats(movie4,
             redAuditorium,
-            new DateTime(2023, 12, 26, 09, 00, 0));
+            new DateTime(2024, 12, 26, 09, 00, 0));
 
         await CreateMovieSessionMovieSessionSeats(movie4,
             redAuditorium,
-            new DateTime(2023, 12, 26, 12, 30, 0));
+            new DateTime(2024, 12, 26, 12, 30, 0));
 
         await CreateMovieSessionMovieSessionSeats(movie4,
             redAuditorium,
-            new DateTime(2023, 12, 26, 17, 00, 0));
+            new DateTime(2024, 12, 26, 17, 00, 0));
     }
 
     private async Task CreateMovieSessionMovieSessionSeats(Movie movie, CinemaHall redAuditorium, DateTime sessionDate,

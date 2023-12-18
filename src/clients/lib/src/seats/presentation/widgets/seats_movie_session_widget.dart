@@ -5,6 +5,7 @@ import 'package:movie_theater_tickets/src/seats/presentation/widgets/seat_widget
 import '../../../../core/common/views/loading_view.dart';
 import '../../../../core/common/views/no_data_view.dart';
 import '../../../../core/errors/failures.dart';
+import '../../../../core/res/app_styles.dart';
 import '../../../cinema_halls/domain/entity/cinema_hall_info.dart';
 import '../../../cinema_halls/domain/entity/cinema_seat.dart';
 import '../../../cinema_halls/presentation/cubit/movie_cubit.dart';
@@ -47,13 +48,17 @@ class _SeatsMovieSessionWidget extends State<SeatsMovieSessionWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<CinemaHallInfoBloc, CinemaHallInfoState>(
-        builder: (context, snapshot) {
-      if (snapshot.status != CinemaHallInfoStatus.completed) {
-        return const LoadingView();
-      }
-      return buildSeats(snapshot.movie.cinemaSeat, context);
-    });
+    return Row(
+      children: [
+        BlocBuilder<CinemaHallInfoBloc, CinemaHallInfoState>(
+            builder: (context, snapshot) {
+          if (snapshot.status != CinemaHallInfoStatus.completed) {
+            return const LoadingView();
+          }
+          return buildSeats(snapshot.movie.cinemaSeat, context);
+        }),
+      ],
+    );
   }
 
   Widget buildSeats(List<List<CinemaSeat>> seats, BuildContext context) {
@@ -67,13 +72,15 @@ class _SeatsMovieSessionWidget extends State<SeatsMovieSessionWidget> {
       return Container(
           height: seatsHeight + 110,
           width: seatsWidth + 110,
+          margin: const EdgeInsets.all(10.0),
           padding: const EdgeInsets.all(20),
           alignment: Alignment.topCenter,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
+            color: AppStyles.widgetColor,
+            borderRadius: BorderRadius.circular(AppStyles.defaultRadius),
             border: Border.all(
-              color: Colors.blue,
-              width: 2,
+              color: AppStyles.defaultBorderColor,
+              width: AppStyles.defaultBorderWidth,
             ),
           ),
           child: Column(children: [
@@ -89,7 +96,8 @@ class _SeatsMovieSessionWidget extends State<SeatsMovieSessionWidget> {
             ),
             ListView.builder(
                 shrinkWrap: true,
-                scrollDirection: Axis.vertical,
+                physics: NeverScrollableScrollPhysics(),
+                //scrollDirection: Axis.vertical,
                 itemCount: seats.length,
                 itemBuilder: (context, rowIndex) {
                   var rowSeats = seats[rowIndex];

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/res/app_styles.dart';
 import '../../../../core/utils/utils.dart';
 import '../../../auth/presentations/bloc/auth_cubit.dart';
 import '../../../auth/presentations/bloc/auth_event.dart';
@@ -86,10 +87,11 @@ class _ShoppingCartView extends State<ShoppingCartView> {
                     height: 65,
                     alignment: Alignment.centerLeft,
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
+                      color: AppStyles.widgetColor,
+                      borderRadius: BorderRadius.circular(AppStyles.defaultRadius),
                       border: Border.all(
                         color: Colors.blue,
-                        width: 2,
+                        width: AppStyles.defaultBorderWidth,
                       ),
                     ),
                     margin: const EdgeInsets.all(2.0),

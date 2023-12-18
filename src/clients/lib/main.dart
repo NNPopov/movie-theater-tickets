@@ -11,6 +11,7 @@ import 'package:movie_theater_tickets/src/hub/presentation/widgens/connectivity_
 import 'package:movie_theater_tickets/src/server_state/presentation/cubit/server_state_cubit.dart';
 import 'package:movie_theater_tickets/src/shopping_carts/presentation/cubit/shopping_cart_cubit.dart';
 import 'core/common/app_logger.dart';
+import 'core/res/app_styles.dart';
 import 'core/services/router.main.dart';
 import 'injection_container.dart';
 import 'package:get_it/get_it.dart';
@@ -121,13 +122,14 @@ class MyApp extends StatelessWidget {
               supportedLocales: AppLocalizations.supportedLocales,
               theme: ThemeData(
                 colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+                canvasColor: Colors.black12,
                 useMaterial3: true,
                 textTheme: const TextTheme(
                     bodyLarge: TextStyle(fontSize: 8.0, color: Colors.black)),
               ),
               home: ConnectivitySafeAreaWidget(
                 child: Scaffold(
-                  backgroundColor: Colors.white,
+                  backgroundColor: AppStyles.backgroundColor,
                   appBar: HomeAppBar(navigatorKey),
                   body: Navigator(
                     key: navigatorKey,

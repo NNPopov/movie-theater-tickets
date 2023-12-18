@@ -5,13 +5,15 @@
   "stars":"Stars",
   "release_date":"Release Date",
   "select": "Elegir",
-   "screen":"Pantalla",
-   "remove":"Borrar",
+  "screen":"Pantalla",
+  "remove":"Borrar",
 
-   "row":"Fila",
+  "select_another_session":"Select another session",
 
-   "shopping_cart":"Cesta de la compra",
-   "complete_purchases":"Completar compras",
+  "row":"Fila",
+
+  "shopping_cart":"Cesta de la compra",
+  "complete_purchases":"Completar compras",
 
   "movie_session":"Horario de sesiones",
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 //import 'package:movie_theater_tickets/core/services/router.main.dart';
+import '../../../../core/res/app_styles.dart';
 import '../../../../core/utils/utils.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../auth/presentations/bloc/auth_cubit.dart';
@@ -100,12 +101,13 @@ class _ShoppingCartWidget extends State<ShoppingCartWidget> {
                     height: 70,
                     alignment: Alignment.centerLeft,
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
+                      color: AppStyles.widgetColor,
+                      borderRadius: BorderRadius.circular(AppStyles.defaultRadius),
                       border: Border.all(
                         color: rowSeat.isDirty == null || rowSeat.isDirty!
                             ? Colors.black26
                             : Colors.blue,
-                        width: 2,
+                        width: AppStyles.defaultBorderWidth,
                       ),
                     ),
                     margin: const EdgeInsets.all(2.0),

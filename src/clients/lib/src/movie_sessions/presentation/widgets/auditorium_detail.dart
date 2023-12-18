@@ -1,10 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../core/common/views/loading_view.dart';
-import '../core/common/views/no_data_view.dart';
-import '../core/utils/utils.dart';
-import 'cinema_halls/presentation/cubit/cinema_hall_cubit.dart';
+import '../../../../core/common/views/loading_view.dart';
+import '../../../../core/common/views/no_data_view.dart';
+import '../../../../core/utils/utils.dart';
+import '../../../cinema_halls/presentation/cubit/cinema_hall_cubit.dart';
 
 class AuditoriumDetailView extends StatefulWidget {
   const AuditoriumDetailView(this.auditoriumId, {super.key});

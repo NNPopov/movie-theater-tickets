@@ -27,7 +27,7 @@ class _MoviesView extends State<MoviesView> {
   CarouselController buttonCarouselController = CarouselController();
 
   Future<void> movieSeat(Movie movie) async {
-    Navigator.pushNamed(context, MovieSessionsView.id, arguments: movie);
+    Navigator.pushNamed(context, MovieSessionsView.id, arguments: movie.id);
   }
 
   late ScrollController _controller;

@@ -39,7 +39,7 @@ public class SelectSeatCommandHandler(
 
             SetMovieSessionIdIfNullOrChanged(request, cart);
 
-            await EnsureSeatNotReserved(request);
+            cart.EnsureSeatCanBeAdded(request.SeatRow, request.SeatNumber, request.MovieSessionId);
 
             var seat = await movieSessionSeatService.GetSeat(request.MovieSessionId,
                 request.SeatRow,

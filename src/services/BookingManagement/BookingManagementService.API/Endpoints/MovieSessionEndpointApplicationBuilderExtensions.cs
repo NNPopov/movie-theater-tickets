@@ -4,6 +4,7 @@ using CinemaTicketBooking.Application.Abstractions;
 using CinemaTicketBooking.Application.MovieSessions.Commands.CreateShowtime;
 using CinemaTicketBooking.Application.MovieSessions.DTOs;
 using CinemaTicketBooking.Application.MovieSessions.Queries;
+using CinemaTicketBooking.Application.MovieSessionSeats;
 using CinemaTicketBooking.Application.ShoppingCarts.Command.SelectSeats;
 using CinemaTicketBooking.Domain.MovieSessions;
 using CinemaTicketBooking.Domain.MovieSessions.Abstractions;
@@ -16,12 +17,10 @@ public class MovieSessionEndpointApplicationBuilderExtensions : IEndpoints
 {
     private static readonly string Tag = "MovieSessions";
     private static readonly string BaseRoute = "api/moviesessions";
-    
 
 
     public static void DefineEndpoints(IEndpointRouteBuilder endpointRouteBuilder)
     {
-        
         endpointRouteBuilder.MapGet($"{BaseRoute}/activemovies",
                 async (ISender sender, CancellationToken cancellationToken) =>
                 {
@@ -33,20 +32,16 @@ public class MovieSessionEndpointApplicationBuilderExtensions : IEndpoints
             .Produces<IReadOnlyCollection<ActiveMovieDto>>(200, "application/json")
             .Produces(204);
 
-        
-        
+
         endpointRouteBuilder.MapGet($"{BaseRoute}/{{movieSessionId}}/seats",
-                async (Guid movieSessionId, ISender sender, CancellationToken cancellationToken) =>
-                {
-                    var query = new GetMovieSessionSeatsQuery(movieSessionId);
-                    return await sender.Send(query, cancellationToken);
-                })
+                async (Guid movieSessionId, IMovieSessionSeatsDataCacheService movieSessionSeatsDataCacheService,
+                    CancellationToken cancellationToken) => await movieSessionSeatsDataCacheService.GetMovieSessionSeatsData(movieSessionId))
             .WithName("GetSeats")
             .WithTags(Tag)
             .Produces<IReadOnlyCollection<MovieSessionSeatDto>>(200, "application/json")
             .Produces(204);
-        
-        
+
+
         endpointRouteBuilder.MapPost($"{BaseRoute}", async ([FromBody] CreateMovieSessionCommand request,
                 ISender sender,
                 CancellationToken cancellationToken) =>
@@ -55,7 +50,7 @@ public class MovieSessionEndpointApplicationBuilderExtensions : IEndpoints
 
                 return Results.CreatedAtRoute(
                     routeName: "GetShowtimeById",
-                    routeValues: new { id = result.ToString()  },
+                    routeValues: new { id = result.ToString() },
                     value: result);
             })
             .WithName("CreateMovieSessions")
@@ -69,7 +64,7 @@ public class MovieSessionEndpointApplicationBuilderExtensions : IEndpoints
                     CancellationToken cancellationToken) =>
                 {
                     var query = new GetMovieSessionByIdQuery(movieSessionId);
-                    
+
                     return await sender.Send(query, cancellationToken);
                 }
             )
@@ -77,8 +72,8 @@ public class MovieSessionEndpointApplicationBuilderExtensions : IEndpoints
             .WithTags(Tag)
             .Produces<MovieSessionsDto>(200, "application/json")
             .Produces(204);
-        
-        
+
+
         endpointRouteBuilder.MapGet($"{BaseRoute}", async (
                     [FromServices] IMovieSessionsRepository showtimesRepository,
                     [FromServices] IMapper mapper,
@@ -88,7 +83,7 @@ public class MovieSessionEndpointApplicationBuilderExtensions : IEndpoints
                         null,
                         cancellationToken);
 
-                   var response = mapper.Map<IReadOnlyCollection<MovieSessionsDto>>(showtimes);
+                    var response = mapper.Map<IReadOnlyCollection<MovieSessionsDto>>(showtimes);
 
                     return response;
                 }
@@ -97,9 +92,8 @@ public class MovieSessionEndpointApplicationBuilderExtensions : IEndpoints
             .WithTags(Tag)
             .Produces<IReadOnlyCollection<MovieSessionsDto>>(200, "application/json")
             .Produces(204);
-        
-        
-        
+
+
         endpointRouteBuilder.MapGet("api/movies/{movieId}/moviesessions", async (Guid movieId,
                 ISender sender,
                 CancellationToken cancellationToken) =>

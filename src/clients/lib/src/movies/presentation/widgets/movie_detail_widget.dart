@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/common/views/loading_view.dart';
 import '../../../../core/common/views/no_data_view.dart';
+import '../../../../core/res/app_styles.dart';
 import '../../../../core/utils/utils.dart';
 import '../app/movie_cubit.dart';
 import '../../../movie_sessions/presentation/cubit/movie_theater_cubit.dart';
@@ -48,10 +49,11 @@ class _MoviesDetailViewView extends State<MoviesDetailWidget> {
           height: 450,
           alignment: Alignment.bottomLeft,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
+            color: AppStyles.widgetColor,
+            borderRadius: BorderRadius.circular(AppStyles.defaultRadius),
             border: Border.all(
-              color: Colors.blue,
-              width: 2,
+              color: AppStyles.defaultBorderColor,
+              width: AppStyles.defaultBorderWidth,
             ),
           ),
           margin: const EdgeInsets.all(5.0),
@@ -64,7 +66,7 @@ class _MoviesDetailViewView extends State<MoviesDetailWidget> {
                     child: Text(movie.title,
                         style: const TextStyle(
                             fontWeight: FontWeight.bold,
-                            fontSize: 16,
+                            fontSize: AppStyles.defaultMenuFontSize,
                             color: Colors.grey))),
                 const SizedBox(
                   height: 10,
@@ -73,7 +75,7 @@ class _MoviesDetailViewView extends State<MoviesDetailWidget> {
                   height: 290,
                   width: 290,
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(5.0),
+                    borderRadius: BorderRadius.circular(AppStyles.defaultRadius),
                     color: Colors.white,
                     image: const DecorationImage(
                         fit: BoxFit.fill,

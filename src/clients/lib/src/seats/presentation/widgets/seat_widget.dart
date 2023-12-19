@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/res/app_styles.dart';
+
 class SeatWidget extends StatelessWidget {
   const SeatWidget(
       {super.key,
@@ -29,7 +31,7 @@ class SeatWidget extends StatelessWidget {
             onPressed: onPressed,
             child: Text(
               text,
-              style: const TextStyle(fontSize: 12),
+              style: const TextStyle(fontSize: AppStyles.defaultFontSize),
             )));
   }
 }

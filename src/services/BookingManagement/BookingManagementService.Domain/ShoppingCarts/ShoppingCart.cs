@@ -56,7 +56,6 @@ public class ShoppingCart : AggregateRoot
     }
 
 
-
     public Result AssignClientId(Guid clientId)
     {
         Ensure.NotEmpty(clientId, "The clientId is required.", nameof(clientId));
@@ -107,7 +106,7 @@ public class ShoppingCart : AggregateRoot
     }
 
 
-    public void AddSeats(SeatShoppingCart seat, Guid movieSessionId)
+    public void EnsureSeatCanBeAdded(short seatRow, short seatNumber, Guid movieSessionId)
     {
         Ensure.NotEmpty(MovieSessionId, "The MovieSessionId is required.", nameof(MovieSessionId));
         Ensure.NotEmpty(movieSessionId, "The movieSessionId is required.", nameof(movieSessionId));
@@ -122,16 +121,24 @@ public class ShoppingCart : AggregateRoot
             throw new DomainValidationException($"The Seat does not belong to the cinema hall being processed.");
         }
 
-        if (_seats.Count() >= MaxNumberOfSeats)
-        {
-            throw new DomainValidationException($"Number of seats cannot be greater than {MaxNumberOfSeats}.");
-        }
-
-        if (_seats.Any(t => t.SeatRow == seat.SeatRow && t.SeatNumber == seat.SeatNumber))
+        if (_seats.Any(t => t.SeatRow == seatRow && t.SeatNumber == seatNumber))
         {
             throw new DomainValidationException(
-                $"Seat has already been added to cart movieSessionId:{movieSessionId}, SeatRow:{seat.SeatRow}, SeatNumber:{seat.SeatNumber}.");
+                $"Seat has already been added to cart movieSessionId:{movieSessionId}, SeatRow:{seatRow}, SeatNumber:{seatNumber}.");
         }
+        
+        if (_seats.Count() >= MaxNumberOfSeats)
+        {
+            throw new DomainValidationException(
+                $"Number of seats cannot be greater than {_seats.Count()}.");
+        }
+  
+    }
+
+
+    public void AddSeats(SeatShoppingCart seat, Guid movieSessionId)
+    {
+        EnsureSeatCanBeAdded(seat.SeatRow, seat.SeatNumber, movieSessionId);
 
         _domainEvents.Add(new SeatAddedToShoppingCartDomainEvent(MovieSessionId,
             seat.SeatRow, seat.SeatNumber, Id));
@@ -172,7 +179,7 @@ public class ShoppingCart : AggregateRoot
         }
 
         ClearSeats();
-        
+
         _domainEvents.Add(new ShoppingCartCleanedDomainEvent(Id));
     }
 
@@ -182,7 +189,7 @@ public class ShoppingCart : AggregateRoot
 
         if (Status == ShoppingCartStatus.InWork)
             Status = ShoppingCartStatus.SeatsReserved;
-        
+
         _domainEvents.Add(new ShoppingCartReservedDomainEvent(Id));
     }
 
@@ -194,7 +201,7 @@ public class ShoppingCart : AggregateRoot
 
         if (Status == ShoppingCartStatus.SeatsReserved)
             Status = ShoppingCartStatus.PurchaseCompleted;
-        
+
         _domainEvents.Add(new ShoppingCartPurchaseDomainEvent(Id));
     }
 
@@ -219,13 +226,13 @@ public class ShoppingCart : AggregateRoot
 
         _domainEvents.Add(new ShoppingCartDeletedDomainEvent(this));
     }
-    
+
     private void ClearSeats()
     {
         _seats = new List<SeatShoppingCart>();
     }
-    
-    
+
+
     private void EnsurePurchaseIsNotCompleted()
     {
         if (Status == ShoppingCartStatus.PurchaseCompleted)
@@ -236,9 +243,9 @@ public class ShoppingCart : AggregateRoot
 }
 
 [method: JsonConstructor]
-public class SeatShoppingCart(short seatRow, short seatNumber, decimal price, DateTime? SelectionExpirationTime = null)
+public class SeatShoppingCart(short seatRow, short seatNumber, decimal price, DateTime? selectionExpirationTime = null)
     : Seat(seatRow, seatNumber)
 {
     public decimal Price { get; private set; } = price;
-    public DateTime? SelectionExpirationTime { get; private set; } = SelectionExpirationTime;
+    public DateTime? SelectionExpirationTime { get; private set; } = selectionExpirationTime;
 };

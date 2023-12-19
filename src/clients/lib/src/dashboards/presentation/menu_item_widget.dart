@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/res/app_styles.dart';
+
 class MenuItemWidget extends StatelessWidget {
   const MenuItemWidget(
       {super.key,
@@ -14,9 +16,8 @@ class MenuItemWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(left: 100, right: 100),
       width: 150,
-      height: 50,
+      height: 30,
       child: TextButton(
           style: ButtonStyle(
             padding: MaterialStateProperty.all(
@@ -28,7 +29,7 @@ class MenuItemWidget extends StatelessWidget {
           },
           child: Text(text,
               style: TextStyle(
-                  fontSize: 15,
+                  fontSize: AppStyles.defaultMenuFontSize,
                   fontWeight: route == navigateId
                       ? FontWeight.bold
                       : FontWeight.normal))),

@@ -27,7 +27,7 @@ class _MoviesView extends State<MoviesView> {
   CarouselController buttonCarouselController = CarouselController();
 
   Future<void> movieSeat(Movie movie) async {
-    Navigator.pushNamed(context, MovieSessionsView.id, arguments: movie);
+    Navigator.pushNamed(context, MovieSessionsView.id, arguments: movie.id);
   }
 
   late ScrollController _controller;
@@ -137,38 +137,5 @@ class _MoviesView extends State<MoviesView> {
 
 
 
-      //
-      // Container(
-      //     alignment: Alignment.centerRight,
-      //     height: MediaQuery.of(context).size.height,
-      //     width: 20.0,
-      //     margin: EdgeInsets.only(left: MediaQuery.of(context).size.width - 20.0),
-      //     decoration: BoxDecoration(color: Colors.black12),
-      //     child: Container(
-      //       alignment: Alignment.topCenter,
-      //       child: GestureDetector(
-      //         child: Container(
-      //           height: 40.0,
-      //           width: 15.0,
-      //           margin:
-      //           EdgeInsets.only(left: 5.0, right: 5.0, top: _offset),
-      //           decoration: BoxDecoration(
-      //               color: Colors.grey,
-      //               borderRadius: BorderRadius.all(Radius.circular(3.0))),
-      //         ),
-      //         onVerticalDragUpdate: (dragUpdate) {
-      //           _controller.position.moveTo(dragUpdate.globalPosition.dy * 3.5);
-      //
-      //           setState(() {
-      //             if(dragUpdate.globalPosition.dy >= 0) {
-      //               _offset = dragUpdate.globalPosition.dy;
-      //             }
-      //             print("View offset ${_controller.offset} scroll-bar offset ${_offset}");
-      //           });
-      //         },
-      //       ),
-      //     )
-      // ),
-  //  ]);
   }
 }

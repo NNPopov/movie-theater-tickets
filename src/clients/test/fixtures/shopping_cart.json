@@ -28,5 +28,6 @@
       "isDirty": false
     }
   ],
-  "priceCalculationResult": null
+  "priceCalculationResult": null,
+  "isDirty": false
 }

@@ -13,6 +13,7 @@ class ShoppingCart extends Equatable {
   final ShoppingCartStatus? status;
   late List<ShoppingCartSeat> shoppingCartSeat;
   late PriceCalculationResult? priceCalculationResult;
+  late bool? isDirty;
 
   ShoppingCart(
       {this.maxNumberOfSeats,
@@ -22,7 +23,8 @@ class ShoppingCart extends Equatable {
       this.status,
       List<ShoppingCartSeat>? seats,
       this.isAssigned,
-      this.priceCalculationResult}) {
+      this.priceCalculationResult,
+      this.isDirty}) {
     shoppingCartSeat = seats ?? [];
   }
 
@@ -35,7 +37,8 @@ class ShoppingCart extends Equatable {
             status: null,
             seats: null,
             isAssigned: false,
-            priceCalculationResult: null);
+            priceCalculationResult: null,
+            isDirty: false);
 
   Either<Failure, void> addSeat(ShoppingCartSeat seat) {
     if (status != ShoppingCartStatus.InWork) {
@@ -50,6 +53,7 @@ class ShoppingCart extends Equatable {
             DataFailure(message: "Seat is alredy reserved", statusCode: 500));
       }
       shoppingCartSeat.add(seat);
+      isDirty = true;
       return const Right(null);
     }
     return Left(DataFailure(
@@ -58,7 +62,7 @@ class ShoppingCart extends Equatable {
 
   Either<Failure, void> deleteSeat(ShoppingCartSeat seat) {
     shoppingCartSeat.remove(seat);
-
+    isDirty = true;
     return const Right(null);
   }
 
@@ -70,7 +74,8 @@ class ShoppingCart extends Equatable {
         movieSessionId,
         status,
         shoppingCartSeat,
-        isAssigned
+        isAssigned,
+        isDirty
       ];
 }
 

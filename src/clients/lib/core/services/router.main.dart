@@ -42,7 +42,7 @@ Route<dynamic> generateRoute(RouteSettings settings) {
         providers: [
           BlocProvider(create: (_) => MovieSessionBloc(getIt.get())),
         ],
-        child: MovieSessionsView(settings.arguments! as Movie),
+        child: MovieSessionsView(settings.arguments! as String),
       ),
       settings: settings,
     );

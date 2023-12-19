@@ -12,7 +12,7 @@ public class
     GetMovieSessionsQueryHandler : IRequestHandler<GetMovieSessionsQuery, IReadOnlyCollection<MovieSessionsDto>>
 {
     private readonly IMapper _mapper;
-    private IMovieSessionsRepository _movieSessionsRepository;
+    private readonly IMovieSessionsRepository _movieSessionsRepository;
 
     public GetMovieSessionsQueryHandler(IMapper mapper,
         IMovieSessionsRepository movieSessionsRepository)

@@ -6,7 +6,7 @@ public interface IActiveShoppingCartRepository
     
     Task DeleteAsync(ShoppingCart shoppingCart);
 
-    Task<ShoppingCart> GetByIdAsync(Guid cartId);
+    Task<ShoppingCart> GetByIdAsync(Guid shoppingCartId);
     
     Task<Guid> GetActiveShoppingCartByClientIdAsync(Guid clientId);
 

@@ -27,8 +27,12 @@ public class GetMovieSessionByIdQueryHandler : IRequestHandler<GetMovieSessionBy
             .GetByIdAsync(request.MovieSessionId,
                 cancellationToken);
 
-        if (movieSessions == null )
+
+        if (movieSessions == null)
+        {
             throw new ContentNotFoundException(request.MovieSessionId.ToString(), nameof(MovieSession));
+        }
+
 
         return _mapper.Map<MovieSessionsDto>(movieSessions);
     }

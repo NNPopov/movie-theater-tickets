@@ -2,33 +2,63 @@
 using CinemaTicketBooking.Application.Abstractions;
 using CinemaTicketBooking.Application.Abstractions.Services;
 using CinemaTicketBooking.Application.MovieSessions.Queries;
+using CinemaTicketBooking.Application.MovieSessionSeats;
+using MediatR;
 using Microsoft.AspNetCore.SignalR;
 
 
 namespace CinemaTicketBooking.Api.Sockets;
 
-public class CinemaHallSeatsNotifier
-(IHubContext<BookingManagementServiceHub, IBookingManagementStateUpdater> context,
-    ICacheService cacheService,
+public class MovieSessionSeatsNotifier(
+    IHubContext<BookingManagementServiceHub, IBookingManagementStateUpdater> context,
+    IMovieSessionSeatsDataCacheService movieSessionSeatsDataCacheService,
     Serilog.ILogger logger) : ICinemaHallSeatsNotifier
 {
-    public async Task SentCinemaHallSeatsState(Guid movieSessionId,
-        ICollection<MovieSessionSeatDto> seats)
+    //call when seat status changed
+    public async Task UpdateAndNotifySubscribersAboutSeatUpdates(Guid movieSessionId)
     {
-        try
+        var movieSessionSeatsData =
+            await movieSessionSeatsDataCacheService.GetActualMovieSessionSeatsData(movieSessionId);
+
+        if (movieSessionSeatsData is null)
         {
-            var movieSessionSeatsKey = $"MovieSessionSeats:{movieSessionId}";
-
-            await cacheService.Set(movieSessionSeatsKey, seats, new TimeSpan(0, 5, 0));
-
-            await context.Clients.Group(movieSessionId.ToString()).SentCinemaHallSeatsState(seats);
-
-            logger.Debug("Updates have been sent to subscribers of movieSessionId:{@MovieSessionId}",
-                movieSessionId);
+            logger.Error("Movie session seats not found:{@MovieSessionId}", movieSessionId);
+            return;
         }
-        catch (Exception e)
+
+        await movieSessionSeatsDataCacheService.AddOrUpdateMovieSessionSeatsCache(movieSessionSeatsData);
+
+        await context.Clients.Group(movieSessionId.ToString()).SentCinemaHallSeatsState(movieSessionSeatsData.Seats);
+
+        logger.Debug("Updates have been sent to subscribers of movieSessionId:{@MovieSessionId}",
+            movieSessionId);
+    }
+
+
+    //request last seat status
+    public async Task SendSeatUpdatesDataToSpecificClient(Guid movieSessionId, string connectionId)
+    {
+        var movieSessionSeatsData = await movieSessionSeatsDataCacheService.GetMovieSessionSeatsData(movieSessionId);
+
+        if (movieSessionSeatsData is null)
         {
-            logger.Error(e, "Failed to sent MovieSessionSeatState");
+            movieSessionSeatsData =
+                await movieSessionSeatsDataCacheService.GetActualMovieSessionSeatsData(movieSessionId);
+            
+            if (movieSessionSeatsData is null)
+            {
+                logger.Error("Movie session seats not found:{@MovieSessionId}", movieSessionId);
+                return;
+            }
+            
+            await movieSessionSeatsDataCacheService.AddOrUpdateMovieSessionSeatsCache(movieSessionSeatsData);
         }
+
+
+        await context.Clients.Client(connectionId).SentCinemaHallSeatsState(movieSessionSeatsData.Seats);
+
+        logger.Debug(
+            "Movie session seats MovieSessionId: {@MovieSessionId} sent to specific ConnectionId: {connectionId}",
+            movieSessionId);
     }
 }

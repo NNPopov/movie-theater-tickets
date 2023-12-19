@@ -14,12 +14,17 @@ public class MovieEndpointApplicationBuilderExtensions : IEndpoints
     public static void DefineEndpoints(IEndpointRouteBuilder endpointRouteBuilder)
     {
         endpointRouteBuilder.MapGet($"{BaseRoute}/{{movieId}}",
-                async (Guid movieId,
+                async (HttpContext httpContext,
+                    Guid movieId,
                     ISender sender,
                     CancellationToken cancellationToken) =>
                 {
                     var query = new GetMovieQuery(movieId);
-                    return await sender.Send(query, cancellationToken);
+                    var response =  await sender.Send(query, cancellationToken);
+                    
+                    httpContext.Response.Headers["Cache-Control"] = "public,max-age=3600";
+
+                    return response;
                 })
             .Produces<MovieDto>(200, "application/json")
             .WithName("GetMovieById")

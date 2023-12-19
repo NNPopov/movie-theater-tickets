@@ -35,7 +35,8 @@ void main() {
             selectionExpirationTime: DateTime.parse("2023-09-28 19:28:53.299Z"),
             price: 15.0,
             isDirty: false),
-      ]);
+      ],
+      isDirty: false);
 
   group('ShoppingCart', () {
     test('should be a subclass of [ShoppingCart] entity', () async {

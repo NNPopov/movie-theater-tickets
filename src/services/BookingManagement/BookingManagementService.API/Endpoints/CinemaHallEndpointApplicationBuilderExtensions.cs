@@ -13,12 +13,13 @@ public class CinemaHallEndpointApplicationBuilderExtensions : IEndpoints
     public static void DefineEndpoints(IEndpointRouteBuilder endpointRouteBuilder)
     {
         endpointRouteBuilder.MapGet($"{BaseRoute}",
-                async (ICinemaHallRepository cinemaHallRepository, IMapper mapper,
+                async (HttpContext httpContext, ICinemaHallRepository cinemaHallRepository, IMapper mapper,
                     CancellationToken cancellationToken) =>
                 {
                     var auditoriums = await cinemaHallRepository.GetAllAsync(
                         cancellationToken);
 
+                    httpContext.Response.Headers["Cache-Control"] = "public,max-age=3600";
 
                     return mapper.Map<ICollection<AuditoriumDto>>(auditoriums);
                 })
@@ -29,7 +30,8 @@ public class CinemaHallEndpointApplicationBuilderExtensions : IEndpoints
 
 
         endpointRouteBuilder.MapGet($"{BaseRoute}/{{cinemaHallId}}",
-                async (Guid cinemaHallId,
+                async (HttpContext httpContext,
+                    Guid cinemaHallId,
                     ICinemaHallRepository cinemaHallRepository,
                     IMapper mapper,
                     CancellationToken cancellationToken) =>
@@ -37,7 +39,7 @@ public class CinemaHallEndpointApplicationBuilderExtensions : IEndpoints
                     var auditorium = await cinemaHallRepository.GetAsync(cinemaHallId,
                         cancellationToken);
 
-
+                    httpContext.Response.Headers["Cache-Control"] = "public,max-age=3600";
                     return mapper.Map<AuditoriumDto>(auditorium);
                 })
             .Produces<ICollection<AuditoriumDto>>(200, "application/json")
@@ -46,13 +48,16 @@ public class CinemaHallEndpointApplicationBuilderExtensions : IEndpoints
             .Produces(404);
 
         endpointRouteBuilder.MapGet($"{BaseRoute}/{{cinemaHallId}}/seats",
-                async (Guid cinemaHallId,
+                async (HttpContext httpContext,
+                    Guid cinemaHallId,
                     ICinemaHallRepository cinemaHallRepository,
                     IMapper mapper,
                     CancellationToken cancellationToken) =>
                 {
                     var auditorium = await cinemaHallRepository.GetAsync(cinemaHallId,
                         cancellationToken);
+
+                    httpContext.Response.Headers["Cache-Control"] = "public,max-age=3600";
 
                     return mapper.Map<AuditoriumInfoDto>(auditorium);
                 })

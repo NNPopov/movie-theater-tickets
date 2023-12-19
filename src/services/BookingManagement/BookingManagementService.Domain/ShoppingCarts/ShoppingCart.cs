@@ -126,6 +126,13 @@ public class ShoppingCart : AggregateRoot
             throw new DomainValidationException(
                 $"Seat has already been added to cart movieSessionId:{movieSessionId}, SeatRow:{seatRow}, SeatNumber:{seatNumber}.");
         }
+        
+        if (_seats.Count() >= MaxNumberOfSeats)
+        {
+            throw new DomainValidationException(
+                $"Number of seats cannot be greater than {_seats.Count()}.");
+        }
+  
     }
 
 

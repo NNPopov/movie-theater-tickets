@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:movie_theater_tickets/core/res/app_theme.dart';
+
+import '../../res/app_styles.dart';
 
 class OverlayDialog extends StatelessWidget {
   final Widget body;
@@ -13,11 +16,11 @@ class OverlayDialog extends StatelessWidget {
       alignment: Alignment.center,
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(15),
+          color: Theme.of(context).widgetColor,
+          borderRadius: BorderRadius.circular(AppStyles.defaultRadius),
           border: Border.all(
-            color: Colors.blue,
-            width: 2,
+            color: Theme.of(context).defaultBorderColor,
+            width: AppStyles.defaultBorderWidth,
           ),
         ),
         padding: const EdgeInsets.all(20),

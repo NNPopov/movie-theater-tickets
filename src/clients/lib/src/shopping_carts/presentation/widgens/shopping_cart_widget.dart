@@ -184,7 +184,6 @@ class _ShoppingCartWidget extends State<ShoppingCartWidget> {
   }
 
   Color getConditionColor(BuildContext context, ShoppingCartSeat rowSeat) {
-
     if (Theme.of(context).brightness == Brightness.light) {
       return (rowSeat.isDirty == null || rowSeat.isDirty!)
           ? Colors.black26
@@ -290,6 +289,15 @@ class _ShoppingCartWidget extends State<ShoppingCartWidget> {
           BlocConsumer<ShoppingCartCubit, ShoppingCartState>(
         builder: (BuildContext context, ShoppingCartState state) {
           return AlertDialog(
+            backgroundColor: Theme.of(context).widgetColor,
+            surfaceTintColor: Colors.black12,
+            shape: RoundedRectangleBorder(
+              borderRadius: const BorderRadius.all(
+                  Radius.circular(AppStyles.defaultRadius)),
+              side: BorderSide(
+                  color: Theme.of(context).defaultBorderColor,
+                  width: AppStyles.defaultBorderWidth),
+            ),
             title: Text(AppLocalizations.of(context)!.shopping_cart),
             content:
                 const Text('Select the number of seats you are going to buy'),

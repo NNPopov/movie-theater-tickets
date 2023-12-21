@@ -57,6 +57,7 @@ class ConnectivitySafeAreaWidget extends StatelessWidget {
               maintainState: true,
               builder: (context) {
                 return OverlayDialog(
+
                     header: Text(
                         AppLocalizations.of(context)!
                             .connection_lost_notification_text,

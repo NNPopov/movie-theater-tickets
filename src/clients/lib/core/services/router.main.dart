@@ -90,12 +90,28 @@ PageRouteBuilder<dynamic> _pageBuilder(
   Widget Function(BuildContext) page, {
   required RouteSettings settings,
 }) {
+
   return PageRouteBuilder(
     settings: settings,
-    transitionsBuilder: (_, animation, __, child) => FadeTransition(
-      opacity: animation,
-      child: child,
-    ),
-    pageBuilder: (context, __, ___) => page(context),
+    transitionsBuilder: (_, animation, __, child) {
+
+      var begin = Offset(0.0, 1.0);
+      var end = Offset.zero;
+      var curve = Curves.ease;
+      var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+      var offsetAnimation = animation.drive(tween);
+
+      return SlideTransition(
+        position: offsetAnimation,
+        child: child,
+      );
+
+    // return  FadeTransition(
+    //     opacity: animation,
+    //     child: child,
+    //   );
+    },
+    pageBuilder: (context, __, ___) =>
+  page(context),
   );
 }

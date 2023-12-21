@@ -6,7 +6,6 @@ import 'package:get_it/get_it.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../../hub/app_events.dart';
 import '../../../../core/buses/event_bus.dart';
-import '../../../shopping_carts/domain/entities/shopping_cart.dart';
 import '../../domain/entities/seat.dart';
 import '../../domain/usecases/get_seats_by_movie_session_id.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';

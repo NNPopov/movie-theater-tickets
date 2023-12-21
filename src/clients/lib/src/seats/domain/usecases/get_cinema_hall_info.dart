@@ -3,12 +3,8 @@ import '../../../../core/utils/typedefs.dart';
 import '../../../cinema_halls/domain/entity/cinema_hall_info.dart';
 import '../../../cinema_halls/domain/repo/cinema_hall_repo.dart';
 import '../../../hub/domain/event_hub.dart';
-import '../entities/seat.dart';
 import 'package:get_it/get_it.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:collection/collection.dart';
-import 'package:dartz/dartz.dart';
-import '../repos/seat_repo.dart';
 
 GetIt getIt = GetIt.instance;
 

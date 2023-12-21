@@ -13,6 +13,7 @@
         <RootNamespace>CinemaTicketBooking.Api</RootNamespace>
        </PropertyGroup>
     <ItemGroup>
+        <PackageReference Include="App.Metrics.AspNetCore" />
         <PackageReference Include="AspNet.Security.OAuth.Keycloak"  />
         <PackageReference Include="AspNetCore.HealthChecks.Rabbitmq" />
         <PackageReference Include="AspNetCore.HealthChecks.Redis" />
@@ -30,6 +31,7 @@
         <PackageReference Include="Polly" />
         <PackageReference Include="Serilog.AspNetCore" />
         <PackageReference Include="Serilog.Sinks.Seq"  />
+        <PackageReference Include="SharpAbp.Abp.OpenTelemetry.Exporter.Prometheus.AspNetCore" />
         <PackageReference Include="StackExchange.Redis" />
         <PackageReference Include="Swashbuckle.AspNetCore" />
     </ItemGroup>

@@ -4,7 +4,7 @@ class Seat extends Equatable {
   final int seatNumber;
   final int row;
   final bool blocked;
-  late bool isCurrentReserve;
+  final bool isCurrentReserve;
   final String hashId;
   final SeatStatus seatStatus;
 

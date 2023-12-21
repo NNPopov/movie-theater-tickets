@@ -23,5 +23,8 @@
 
   "reconnecting_notification_text":"The connection to the server has been lost! Reconnecting!",
   "connection_lost_notification_text":"The connection to the server has been lost! Please try reconnecting.",
-  "connection_lost_reconnect_btn":"Reconnect"
+  "connection_lost_reconnect_btn":"Reconnect",
+
+  "light_theme":"Light",
+  "dark_theme":"Dark"
 }

@@ -1,4 +1,5 @@
 {
+  "page_under_construction":"Page Under Construction",
 
   "movies":"Película",
 
@@ -23,4 +24,7 @@
   "reconnecting_notification_text":"¡Se perdió la conexión con el servidor! ¡Reconectando!",
   "connection_lost_notification_text":"¡Se perdió la conexión con el servidor! Intente volver a conectarse.",
   "connection_lost_reconnect_btn":"Reconectar"
+
+    "light_theme":"Light",
+    "dark_theme":"Dark"
 }

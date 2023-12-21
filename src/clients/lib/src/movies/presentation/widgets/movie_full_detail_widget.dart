@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:movie_theater_tickets/core/res/app_theme.dart';
 import '../../../../core/common/views/loading_view.dart';
 import '../../../../core/common/views/no_data_view.dart';
 import '../../../../core/res/app_styles.dart';
@@ -54,10 +55,10 @@ class _MovieDetailViewView extends State<MovieDetailWidget> {
           height: 450,
           alignment: Alignment.bottomLeft,
           decoration: BoxDecoration(
-            color: AppStyles.widgetColor,
+            color: Theme.of(context).widgetColor,
             borderRadius: BorderRadius.circular(AppStyles.defaultRadius),
             border: Border.all(
-              color: AppStyles.defaultBorderColor,
+              color: Theme.of(context).defaultBorderColor,
               width: AppStyles.defaultBorderWidth,
             ),
           ),
@@ -69,10 +70,13 @@ class _MovieDetailViewView extends State<MovieDetailWidget> {
               children: [
                 Align(
                     child: Text(movie.title,
-                        style: const TextStyle(
+                        style:
+              const TextStyle(
                             fontWeight: FontWeight.bold,
-                            fontSize: AppStyles.defaultFontSize,
-                            color: Colors.grey))),
+                          //  fontSize: AppStyles.defaultFontSize,
+                            color: Colors.grey),
+        )
+        ),
                 const SizedBox(
                   height: 10,
                 ),
@@ -100,14 +104,6 @@ class _MovieDetailViewView extends State<MovieDetailWidget> {
                 Align(
                   alignment: Alignment.center,
                   child: TextButton(
-                      style: ButtonStyle(
-                        padding: MaterialStateProperty.all(
-                            const EdgeInsets.symmetric(
-                                vertical: 1, horizontal: 1)),
-                        foregroundColor:
-                        MaterialStateProperty.all<Color>(
-                            Colors.blue),
-                      ),
                       onPressed: () {
                         onMovieSessionPress(movie);
                       },

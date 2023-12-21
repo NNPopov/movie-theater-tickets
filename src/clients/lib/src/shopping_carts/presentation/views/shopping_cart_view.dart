@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:movie_theater_tickets/core/res/app_theme.dart';
 
 import '../../../../core/res/app_styles.dart';
 import '../../../../core/utils/utils.dart';
@@ -87,7 +88,7 @@ class _ShoppingCartView extends State<ShoppingCartView> {
                     height: 65,
                     alignment: Alignment.centerLeft,
                     decoration: BoxDecoration(
-                      color: AppStyles.widgetColor,
+                      color: Theme.of(context).widgetColor,
                       borderRadius: BorderRadius.circular(AppStyles.defaultRadius),
                       border: Border.all(
                         color: Colors.blue,

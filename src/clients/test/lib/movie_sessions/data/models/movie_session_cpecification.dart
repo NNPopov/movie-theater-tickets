@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:movie_theater_tickets/src/movie_sessions/data/models/movie_session_dto.dart';
 import 'package:movie_theater_tickets/src/movie_sessions/domain/entities/movie_session.dart';
 import '../../../../fixtures/fixture_reader.dart';
 

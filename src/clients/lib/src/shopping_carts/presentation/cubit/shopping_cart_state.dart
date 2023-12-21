@@ -11,11 +11,12 @@ class ShoppingCartState extends Equatable {
   final String hashId;
   final ShoppingCart shoppingCart;
   final ShoppingCartStateStatus status;
-
+  final String? errorMessage;
+  
   @override
   List<Object> get props => [shoppingCart, hashId, status];
 
-  late String? errorMessage;
+
 
   ShoppingCartState copyWith({
     String? hashId,

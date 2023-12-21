@@ -1,8 +1,6 @@
-import 'dart:async' as domain;
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:movie_theater_tickets/src/movies/domain/entities/movie.dart';
 import '../../../movies/domain/usecases/get_movies.dart';
 import '../../domain/entities/active_movie.dart';
 

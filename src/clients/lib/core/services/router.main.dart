@@ -8,7 +8,6 @@ import '../../src/shopping_carts/presentation/views/shopping_cart_view.dart';
 import '../../src/movie_sessions/presentation/views/movie_session_view.dart';
 import '../../src/movie_sessions/presentation/cubit/movie_session_bloc.dart';
 import '../../src/movies/presentation/views/movie_view.dart';
-import '../../src/movies/domain/entities/movie.dart';
 import '../../src/movie_sessions/presentation/cubit/movie_theater_cubit.dart';
 import '../../src/seats/presentation/cubit/seat_cubit.dart';
 import '../../src/seats/presentation/views/seats_view.dart';

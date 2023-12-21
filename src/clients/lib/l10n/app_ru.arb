@@ -1,4 +1,6 @@
 {
+  "page_under_construction":"Page Under Construction",
+
   "movies":"Фильмы",
 
   "stars":"Актеры",
@@ -8,6 +10,7 @@
   "remove":"Удалить",
 
   "select_another_session":"Выбрать другой сеанс",
+
   "row":"Ряд",
 
   "shopping_cart":"Корзина покупок",
@@ -21,4 +24,7 @@
   "reconnecting_notification_text":"Подключение к серверу потеряно! Переподключение!",
   "connection_lost_notification_text":"Подключение к серверу потеряно! Попробуйте переподключиться.",
   "connection_lost_reconnect_btn":"Подключиться"
+
+    "light_theme":"Светлая",
+    "dark_theme":"Темная"
 }

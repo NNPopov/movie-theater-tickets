@@ -6,7 +6,7 @@ class SeatState  extends Equatable {
 
 
 final List<Seat> seats;
- late String? errorMessage;
+ final String? errorMessage;
 final SeatStateStatus status;
 
   @override

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:movie_theater_tickets/core/res/app_theme.dart';
 import 'package:movie_theater_tickets/src/seats/presentation/views/seats_view.dart';
 import '../../../../core/common/views/loading_view.dart';
 import '../../../../core/common/views/no_data_view.dart';
@@ -12,7 +13,6 @@ import '../../../movies/presentation/app/movie_cubit.dart';
 import '../../../movies/presentation/widgets/movie_detail_widget.dart';
 import '../../domain/entities/movie_session.dart';
 import '../cubit/movie_session_bloc.dart';
-import '../../../movies/domain/entities/movie.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 
@@ -78,16 +78,19 @@ class _MovieSessionsView extends State<MovieSessionsView> {
     double width = MediaQuery.of(context).size.width;
 
     if (width > 800) {
-      return  SingleChildScrollView(
+      return SingleChildScrollView(
         controller: _controller,
         child: Column(
           children: [
             const DashboardWidget(route: MovieSessionsView.id),
             Container(
-              padding:const EdgeInsets.only(left: 50, right: 50 , top: 15),
+              padding: const EdgeInsets.only(top: 20.0),
               child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   buildMovieDetail(),
+                  const SizedBox(width: 15),
                   buildMovieSessions(width, movieSessionResult),
                 ],
               ),
@@ -96,16 +99,19 @@ class _MovieSessionsView extends State<MovieSessionsView> {
         ),
       );
     } else {
-      return  SingleChildScrollView(
+      return SingleChildScrollView(
         controller: _controller,
         child: Column(
           children: [
             const DashboardWidget(route: MovieSessionsView.id),
-            Column(
-              children: [
-                buildMovieDetail(),
-                buildMovieSessions(width + 700, movieSessionResult),
-              ],
+            Container(
+              padding: const EdgeInsets.only(top: 20.0),
+              child: Column(
+                children: [
+                  buildMovieDetail(),
+                  buildMovieSessions(width + 700, movieSessionResult),
+                ],
+              ),
             ),
           ],
         ),
@@ -115,9 +121,21 @@ class _MovieSessionsView extends State<MovieSessionsView> {
 
   Column buildMovieSessions(
       double width, List<List<List<MovieSession>>> movieSessionResult) {
+    width = width > 1250 ? 1250 : width;
+
     return Column(children: [
-      SizedBox(
-          //   height: 1950,
+      Container(
+          alignment: Alignment.bottomLeft,
+          decoration: BoxDecoration(
+            color: Theme.of(context).widgetColor,
+            borderRadius: BorderRadius.circular(AppStyles.defaultRadius),
+            border: Border.all(
+              color: Theme.of(
+                  context).defaultBorderColor,
+              width: AppStyles.defaultBorderWidth,
+            ),
+          ),
+          padding: EdgeInsets.all(20),
           width: width - 500,
           child: Container(
             alignment: Alignment.topLeft,
@@ -154,8 +172,9 @@ class _MovieSessionsView extends State<MovieSessionsView> {
                                         create: (_) => CinemaHallCubit(),
                                         child: AuditoriumDetailView(
                                             rows[0].cinemaHallId)),
-                                    const Divider(
-                                      color: AppStyles.defaultBorderColor,
+                                     Divider(
+                                      color: Theme.of(
+                                          context).defaultBorderColor,
                                     ),
                                     Wrap(
                                       spacing: 8.0,
@@ -169,19 +188,6 @@ class _MovieSessionsView extends State<MovieSessionsView> {
                                                 Text(
                                                     '${movieSession.sessionDate.hour}:${'${movieSession.sessionDate.minute}0'.substring(0, 2)}'),
                                                 TextButton(
-                                                    style: ButtonStyle(
-                                                      padding:
-                                                          MaterialStateProperty
-                                                              .all(const EdgeInsets
-                                                                  .symmetric(
-                                                                  vertical: 1,
-                                                                  horizontal:
-                                                                      1)),
-                                                      foregroundColor:
-                                                          MaterialStateProperty
-                                                              .all<Color>(
-                                                              AppStyles.primaryMenuColor),
-                                                    ),
                                                     onPressed: () {
                                                       pressMovieSession(
                                                           movieSession);

@@ -8,7 +8,6 @@ import '../../../../core/errors/exceptions.dart';
 import '../../../../core/errors/failures.dart';
 import '../../domain/repos/movie_session_repo.dart';
 import '../models/active_movie_dto.dart';
-import '../models/movie_session_dto.dart';
 import 'package:get_it/get_it.dart';
 
 GetIt getIt = GetIt.instance;

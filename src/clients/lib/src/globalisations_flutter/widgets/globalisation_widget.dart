@@ -21,7 +21,7 @@ class _GlobalisationWidget extends State<GlobalisationWidget> {
 
   @override
   Widget build(BuildContext context) {
-    Locale dropdownValue = list.first;
+ //   Locale dropdownValue = list.first;
   return  BlocBuilder<GlobalisationCubit, LanguagenStatus>(
         builder: (context, lang) {
     return SizedBox(
@@ -30,7 +30,6 @@ class _GlobalisationWidget extends State<GlobalisationWidget> {
       child: DropdownButton<Locale>(
         value: lang.locate,
         elevation: 16,
-        style: const TextStyle(color: Colors.black),
         onChanged: (Locale? value) {
           context.read<GlobalisationCubit>().setLanguage(value!);
         },

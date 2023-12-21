@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
-
-//import 'package:movie_theater_tickets/core/services/router.main.dart';
+import 'package:movie_theater_tickets/core/res/app_theme.dart';
 import '../../../../core/res/app_styles.dart';
 import '../../../../core/utils/utils.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../auth/presentations/bloc/auth_cubit.dart';
-import '../../../auth/presentations/bloc/auth_event.dart';
-import '../../../auth/presentations/widgets/auth_safe_area_widget.dart';
 import '../../../helpers/constants.dart';
 import '../../../server_state/domain/entities/server_state.dart';
 import '../../../server_state/presentation/cubit/server_state_cubit.dart';
@@ -44,11 +40,17 @@ class _ShoppingCartWidget extends State<ShoppingCartWidget> {
   @override
   Widget build(BuildContext context) {
     return Container(
-        width: 260,
-        height: 500,
+        width: 290,
         alignment: Alignment.topLeft,
-        //margin: const EdgeInsets.only(top: 6, left: 10, right: 40.0),
-        padding: const EdgeInsets.all(6.0),
+        decoration: BoxDecoration(
+          color: Theme.of(context).widgetColor,
+          borderRadius: BorderRadius.circular(AppStyles.defaultRadius),
+          border: Border.all(
+            color: Theme.of(context).defaultBorderColor,
+            width: AppStyles.defaultBorderWidth,
+          ),
+        ),
+        padding: const EdgeInsets.all(10.0),
         child: buildShoppingCart());
   }
 
@@ -81,9 +83,7 @@ class _ShoppingCartWidget extends State<ShoppingCartWidget> {
             shoppingCartState.status != ShoppingCartStateStatus.error) {
           context.read<ShoppingCartCubit>().state;
 
-          return Column(
-
-              children: [
+          return Column(children: [
             Text(shoppingCartState.shoppingCart.status.toString()),
             const SizedBox(
               height: 30,
@@ -101,8 +101,9 @@ class _ShoppingCartWidget extends State<ShoppingCartWidget> {
                     height: 70,
                     alignment: Alignment.centerLeft,
                     decoration: BoxDecoration(
-                      color: AppStyles.widgetColor,
-                      borderRadius: BorderRadius.circular(AppStyles.defaultRadius),
+                      color: Theme.of(context).widgetColor,
+                      borderRadius:
+                          BorderRadius.circular(AppStyles.defaultRadius),
                       border: Border.all(
                         color: rowSeat.isDirty == null || rowSeat.isDirty!
                             ? Colors.black26
@@ -131,16 +132,12 @@ class _ShoppingCartWidget extends State<ShoppingCartWidget> {
                                 child: Text(
                                   "${rowSeat.price}€",
                                   style: TextStyle(
-                                      color: rowSeat.isDirty == null ||
-                                              rowSeat.isDirty!
-                                          ? Colors.black26
-                                          : Colors.black),
+                                      color:
+                                          getConditionColor(context, rowSeat)),
                                 )),
                             IconButton(
                               icon: const Icon(Icons.delete),
-                              color: rowSeat.isDirty == null || rowSeat.isDirty!
-                                  ? Colors.black26
-                                  : Colors.black,
+                              color: getConditionColor(context, rowSeat),
                               tooltip: AppLocalizations.of(context)!.remove,
                               onPressed: () {
                                 onSeatUnselectPress(
@@ -168,19 +165,35 @@ class _ShoppingCartWidget extends State<ShoppingCartWidget> {
           ]);
         }
 
-        return Column(
-          children: [
-            Text(AppLocalizations.of(context)!.shopping_cart),
-            TextButton(
-              onPressed: () {
-                onCreateShoppingCart();
-              },
-              child: const Text('Select seats'),
-            ),
-          ],
+        return Container(
+          width: 259,
+          child: Column(
+            children: [
+              Text(AppLocalizations.of(context)!.shopping_cart),
+              TextButton(
+                onPressed: () {
+                  onCreateShoppingCart();
+                },
+                child: const Text('Select seats'),
+              ),
+            ],
+          ),
         );
       },
     );
+  }
+
+  Color getConditionColor(BuildContext context, ShoppingCartSeat rowSeat) {
+
+    if (Theme.of(context).brightness == Brightness.light) {
+      return (rowSeat.isDirty == null || rowSeat.isDirty!)
+          ? Colors.black26
+          : Colors.black;
+    } else {
+      return (rowSeat.isDirty == null || rowSeat.isDirty!)
+          ? Colors.white
+          : Colors.white70;
+    }
   }
 
   Widget expirationProgressBar(ShoppingCartSeat rowSeat) {
@@ -198,34 +211,9 @@ class _ShoppingCartWidget extends State<ShoppingCartWidget> {
           rowSeat.selectionExpirationTime!.difference(state.serverDateTime);
       int timeBeforeExpirationSeconds = timeBeforeExpiration.inSeconds;
 
-      double expirationValue = 0;
+      double expirationValue =
+          calculateExpirationProgressBarValue(timeBeforeExpirationSeconds);
 
-      if (timeBeforeExpirationSeconds < Constants.SEAT_EXPIRATION_SEC + 100) {
-        var expirationPercentage =
-            timeBeforeExpirationSeconds / Constants.SEAT_EXPIRATION_SEC;
-
-        if (expirationPercentage > 0.9) {
-          expirationValue = 100;
-        } else if (expirationPercentage > 0.8) {
-          expirationValue = 90;
-        } else if (expirationPercentage > 0.7) {
-          expirationValue = 80;
-        } else if (expirationPercentage > 0.6) {
-          expirationValue = 70;
-        } else if (expirationPercentage > 0.5) {
-          expirationValue = 60;
-        } else if (expirationPercentage > 0.4) {
-          expirationValue = 50;
-        } else if (expirationPercentage > 0.3) {
-          expirationValue = 40;
-        } else if (expirationPercentage > 0.2) {
-          expirationValue = 30;
-        } else if (expirationPercentage > 0.1) {
-          expirationValue = 20;
-        } else {
-          expirationValue = 10;
-        }
-      }
       var containerColour = expirationValue <= 20
           ? Colors.red
           : expirationValue <= 60
@@ -257,6 +245,38 @@ class _ShoppingCartWidget extends State<ShoppingCartWidget> {
       width: 30,
       padding: const EdgeInsets.all(2.0),
     );
+  }
+
+  double calculateExpirationProgressBarValue(int timeBeforeExpirationSeconds) {
+    double expirationValue = 0;
+
+    if (timeBeforeExpirationSeconds < Constants.SEAT_EXPIRATION_SEC + 100) {
+      var expirationPercentage =
+          timeBeforeExpirationSeconds / Constants.SEAT_EXPIRATION_SEC;
+
+      if (expirationPercentage > 0.9) {
+        expirationValue = 100;
+      } else if (expirationPercentage > 0.8) {
+        expirationValue = 90;
+      } else if (expirationPercentage > 0.7) {
+        expirationValue = 80;
+      } else if (expirationPercentage > 0.6) {
+        expirationValue = 70;
+      } else if (expirationPercentage > 0.5) {
+        expirationValue = 60;
+      } else if (expirationPercentage > 0.4) {
+        expirationValue = 50;
+      } else if (expirationPercentage > 0.3) {
+        expirationValue = 40;
+      } else if (expirationPercentage > 0.2) {
+        expirationValue = 30;
+      } else if (expirationPercentage > 0.1) {
+        expirationValue = 20;
+      } else {
+        expirationValue = 10;
+      }
+    }
+    return expirationValue;
   }
 
   void onCreateShoppingCart() {
@@ -313,10 +333,9 @@ class _ShoppingCartWidget extends State<ShoppingCartWidget> {
 
   Future<void> onSeatUnselectPress(
       ShoppingCartSeat seat, String movieSessionId) async {
-    if (context.read<ShoppingCartCubit>().state.status !=
-            ShoppingCartStateStatus.initial &&
-        context.read<ShoppingCartCubit>().state.status !=
-            ShoppingCartStateStatus.deleted) {
+    var shoppingCartStatus = context.read<ShoppingCartCubit>().state.status;
+    if (shoppingCartStatus != ShoppingCartStateStatus.initial &&
+        shoppingCartStatus != ShoppingCartStateStatus.deleted) {
       await context.read<ShoppingCartCubit>().unSeatSelect(
           row: seat.seatRow!,
           seatNumber: seat.seatNumber!,

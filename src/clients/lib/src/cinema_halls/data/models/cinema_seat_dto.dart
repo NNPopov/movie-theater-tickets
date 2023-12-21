@@ -1,7 +1,4 @@
 import 'dart:convert';
-
-import '../../domain/entity/cinema_hall.dart';
-import '../../domain/entity/cinema_hall_info.dart';
 import '../../domain/entity/cinema_seat.dart';
 
 

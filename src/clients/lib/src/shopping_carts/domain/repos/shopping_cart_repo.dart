@@ -1,7 +1,6 @@
 import '../../../../core/utils/typedefs.dart';
 import '../../data/models/seat_info_dto.dart';
 import '../entities/create_shopping_cart_response.dart';
-import '../entities/seat.dart';
 import '../entities/shopping_cart.dart';
 
 abstract class ShoppingCartRepo {

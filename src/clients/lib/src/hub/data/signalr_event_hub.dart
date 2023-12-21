@@ -10,7 +10,6 @@ import '../../server_state/data/models/server_state_dto.dart';
 import '../../server_state/domain/entities/server_state.dart';
 import '../../server_state/domain/usecases/update_server_state_usecase.dart';
 import '../../shopping_carts/data/models/seat_info_dto.dart';
-import '../../shopping_carts/data/models/select_seat_dto.dart';
 import '../../shopping_carts/data/models/shopping_cart_dto.dart';
 import '../../shopping_carts/domain/entities/shopping_cart.dart';
 import '../../shopping_carts/domain/usecases/update_state_shopping_cart.dart';

@@ -11,13 +11,24 @@ ENV PATH="/usr/local/flutter/bin:/usr/local/flutter/bin/cache/dart-sdk/bin:${PAT
 
 RUN flutter doctor -v
 
-RUN flutter channel master
+RUN flutter channel stable
 RUN flutter upgrade
 RUN flutter config --enable-web
+
+RUN flutter doctor
 
 RUN mkdir /app/
 COPY . /app/
 WORKDIR /app/
+
+
+RUN flutter pub get
+
+RUN flutter gen-l10n
+
+RUN dart run build_runner build
+
+
 RUN flutter build web
 # Stage 2
 

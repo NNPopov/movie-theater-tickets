@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:movie_theater_tickets/core/res/app_theme.dart';
 import '../../../../core/common/views/loading_view.dart';
 import '../../../../core/common/views/no_data_view.dart';
 import '../../../../core/res/app_styles.dart';
@@ -49,14 +50,15 @@ class _MoviesDetailViewView extends State<MoviesDetailWidget> {
           height: 450,
           alignment: Alignment.bottomLeft,
           decoration: BoxDecoration(
-            color: AppStyles.widgetColor,
+            color: Theme.of(context).widgetColor,
             borderRadius: BorderRadius.circular(AppStyles.defaultRadius),
             border: Border.all(
-              color: AppStyles.defaultBorderColor,
+              color: Theme.of(
+                  context).defaultBorderColor,
               width: AppStyles.defaultBorderWidth,
             ),
           ),
-          margin: const EdgeInsets.all(5.0),
+         // margin: const EdgeInsets.all(5.0),
           padding: const EdgeInsets.all(20.0),
           child: Column(
               mainAxisAlignment: MainAxisAlignment.start,

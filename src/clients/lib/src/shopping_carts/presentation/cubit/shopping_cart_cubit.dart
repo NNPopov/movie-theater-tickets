@@ -20,7 +20,6 @@ part 'shopping_cart_state.dart';
 
 part 'shopping_cart_event.dart';
 
-GetIt getIt = GetIt.instance;
 
 class ShoppingCartCubit extends Cubit<ShoppingCartState> {
   ShoppingCartCubit(

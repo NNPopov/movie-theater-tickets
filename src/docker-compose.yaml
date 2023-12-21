@@ -5,6 +5,8 @@ volumes:
     driver: local
   booking-management-postgres-data:
     driver: local
+  prometheus_data:
+    driver: local
     
 services:
   
@@ -91,4 +93,14 @@ services:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: change_me
     depends_on:
-      - sso-postgres    
+      - sso-postgres
+        
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - ./build/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    restart: unless-stopped
+    

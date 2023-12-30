@@ -47,10 +47,12 @@ class ShoppingCartState extends Equatable {
 
 enum ShoppingCartStateStatus {
   initial,
+  initCreating,
   creating,
   created,
-  error,
   createValidationError,
+  createdCancel,
+  error,
   deleted,
   update
 }

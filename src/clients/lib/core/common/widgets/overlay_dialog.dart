@@ -6,8 +6,19 @@ import '../../res/app_styles.dart';
 class OverlayDialog extends StatelessWidget {
   final Widget body;
   final Widget header;
+  final double? width;
+  final double? height;
+  final double? headerHeight;
+  final double? bodyHeight;
 
-  const OverlayDialog({super.key, required this.body, required this.header});
+  const OverlayDialog(
+      {super.key,
+      required this.body,
+      required this.header,
+      this.width = 450,
+      this.height = 250,
+        this.headerHeight = 20,
+        this.bodyHeight = 20});
 
   @override
   Widget build(BuildContext context) {
@@ -24,19 +35,18 @@ class OverlayDialog extends StatelessWidget {
           ),
         ),
         padding: const EdgeInsets.all(20),
-        width: 450,
-        height: 250,
+        width: width,
+        height: height,
         child: Column(
           children: [
-            const SizedBox(
-              height: 20,
+             SizedBox(
+              height: headerHeight,
             ),
             header,
-            const SizedBox(
-              height: 20,
+             SizedBox(
+              height: bodyHeight,
             ),
             body,
-
           ],
         ),
       ),

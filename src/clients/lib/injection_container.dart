@@ -130,7 +130,7 @@ void _initSeats() {
       () => UpdateSeatsStateUseCase(getIt.get()));
   getIt.registerLazySingleton<SeatRepo>(() => SeatRepoImpl());
   getIt.registerLazySingleton<GetSeatsByMovieSessionId>(
-      () => GetSeatsByMovieSessionId(getIt.get(), getIt.get()));
+      () => GetSeatsByMovieSessionId(getIt.get()));
 }
 
 void _initCinemaHall() {

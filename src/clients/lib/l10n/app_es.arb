@@ -8,8 +8,9 @@
   "select": "Elegir",
   "screen":"Pantalla",
   "remove":"Borrar",
+  "select_desired_number_of_seats":"Seleccione el número deseado de lugares para comprar",
 
-  "select_another_session":"Select another session",
+  "select_another_session":"Selecciona otra sesión",
 
   "row":"Fila",
 
@@ -23,8 +24,8 @@
 
   "reconnecting_notification_text":"¡Se perdió la conexión con el servidor! ¡Reconectando!",
   "connection_lost_notification_text":"¡Se perdió la conexión con el servidor! Intente volver a conectarse.",
-  "connection_lost_reconnect_btn":"Reconectar"
+  "connection_lost_reconnect_btn":"Reconectar",
 
-    "light_theme":"Light",
-    "dark_theme":"Dark"
+    "light_theme":"Ligera",
+    "dark_theme":"Oscura"
 }

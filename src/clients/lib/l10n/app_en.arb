@@ -7,7 +7,9 @@
   "release_date":"Release Date",
   "select": "Select",
   "screen":"Screen",
+
   "remove":"Remove",
+  "select_desired_number_of_seats":"Select the number of seats you want to purchase",
 
   "select_another_session":"Select another session",
 

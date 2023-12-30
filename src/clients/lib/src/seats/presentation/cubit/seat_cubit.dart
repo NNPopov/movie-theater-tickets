@@ -25,7 +25,7 @@ class SeatBloc extends Bloc<SeatEvent, SeatState> {
 
   SeatBloc(this._getMovieSessionById, this._eventBus)
       : super(SeatState.initState()) {
-    on<SeatEvent>(_getSeats);
+    on<SeatEvent>(_onGetSeatEvent);
 
     _appEventSubscription = _eventBus.stream.listen((event) {
       if (event is SeatsUpdateEvent) {
@@ -37,19 +37,19 @@ class SeatBloc extends Bloc<SeatEvent, SeatState> {
 
       if (event is ShoppingCartHashIdUpdated) {
         if (_movieSessionId != null) {
-          _onGetSeats(_movieSessionId!);
+          _getSeatsByMobieSessionId(_movieSessionId!);
         }
       }
     });
   }
 
-  Future<FutureOr<void>> _getSeats(
+  Future<FutureOr<void>> _onGetSeatEvent(
       SeatEvent event, Emitter<SeatState> emit) async {
     _movieSessionId = event.movieSessionId;
-    _onGetSeats(event.movieSessionId);
+    _getSeatsByMobieSessionId(event.movieSessionId);
   }
 
-  Future<void> _onGetSeats(String movieSessionId) async {
+  Future<void> _getSeatsByMobieSessionId(String movieSessionId) async {
     emit(state.copyWith(status: SeatStateStatus.fetching));
 
     final result = await _getMovieSessionById(movieSessionId);

@@ -98,6 +98,19 @@ public static class ConfigureApiServices
     }
 
 
+    public static IServiceCollection AddIntegrationEvents(this IServiceCollection services,
+        IConfiguration configuration,
+        Logger logger)
+    {
+        services
+            .AddTransient<IIntegrationEventHandler<SeatExpiredSelectionIntegrationEvent>,
+                SeatExpiredSelectionIntegrationEventHandler>()
+            .AddTransient<IIntegrationEventHandler<ShoppingCartExpiredIntegrationEvent>,
+                ShoppingCartExpiredEventHandler>();
+
+        return services;
+    }
+
     public static IServiceCollection AddWebSockets(this IServiceCollection services,
         IConfiguration configuration,
         Logger logger)
@@ -155,14 +168,6 @@ public static class ConfigureApiServices
             .AddScoped<IShoppingCartNotifier, ShoppingCartNotifier>()
             .AddScoped<IServerStateNotifier, ServerStateNotifier>()
             .AddSingleton<IConnectionManager>(t => ConnectionManager.Factory(t.GetRequiredService<ICacheService>()));
-
-
-        services
-            .AddTransient<IIntegrationEventHandler<SeatExpiredSelectionIntegrationEvent>,
-                SeatExpiredSelectionIntegrationEventHandler>()
-            .AddTransient<IIntegrationEventHandler<ShoppingCartExpiredIntegrationEvent>,
-                ShoppingCartExpiredEventHandler>();
-
 
         return services;
     }

@@ -34,9 +34,10 @@ class _SeatsMovieSessionWidget extends State<SeatsMovieSessionWidget> {
   @override
   void initState() {
     super.initState();
-
+print('movieSessionid ${widget.movieSession.id}');
     context.read<CinemaHallInfoBloc>().add(
         CinemaHallInfoEvent(cinemaHallId: widget.movieSession.cinemaHallId));
+
     context
         .read<SeatBloc>()
         .add(SeatEvent(movieSessionId: widget.movieSession.id));
@@ -68,7 +69,7 @@ class _SeatsMovieSessionWidget extends State<SeatsMovieSessionWidget> {
       return Container(
           height: seatsHeight + 110,
           width: seatsWidth + 110,
-         // margin: const EdgeInsets.all(10.0),
+
           padding: const EdgeInsets.all(10),
           alignment: Alignment.topCenter,
           decoration: BoxDecoration(
@@ -94,7 +95,6 @@ class _SeatsMovieSessionWidget extends State<SeatsMovieSessionWidget> {
             ListView.builder(
                 shrinkWrap: true,
                 physics: NeverScrollableScrollPhysics(),
-                //scrollDirection: Axis.vertical,
                 itemCount: seats.length,
                 itemBuilder: (context, rowIndex) {
                   var rowSeats = seats[rowIndex];

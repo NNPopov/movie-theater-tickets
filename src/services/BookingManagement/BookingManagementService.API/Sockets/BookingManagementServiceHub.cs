@@ -55,11 +55,11 @@ public class BookingManagementServiceHub(
 
             await SubscribeToCartUpdatesIfNotSubscribed(shoppingCart);
 
-            var query = new UnselectSeatCommand(MovieSessionId: showtimeId,
+            var command = new UnselectSeatCommand(MovieSessionId: showtimeId,
                 SeatRow: row,
                 SeatNumber: number,
                 ShoppingCartId: shoppingCartId);
-            var result = await mediator.Send(query);
+            var result = await mediator.Send(command);
         }
         catch (Exception e)
         {

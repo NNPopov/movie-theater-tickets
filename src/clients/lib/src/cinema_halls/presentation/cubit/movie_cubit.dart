@@ -7,10 +7,11 @@ import '../../domain/entity/cinema_hall_info.dart';
 
 part 'movie_state.dart';
 
-class CinemaHallInfoBloc extends Bloc<CinemaHallInfoEvent, CinemaHallInfoState> {
-  CinemaHallInfoBloc(this._getCinemaHallInfo) : super(CinemaHallInfoState.initial())
-  {
-    on<CinemaHallInfoEvent>(getCinemaHallInfo);
+class CinemaHallInfoBloc
+    extends Bloc<CinemaHallInfoEvent, CinemaHallInfoState> {
+  CinemaHallInfoBloc(this._getCinemaHallInfo)
+      : super(CinemaHallInfoState.initial()) {
+    on<CinemaHallInfoEvent>(onGetCinemaHallInfo);
   }
 
   late final GetCinemaHallInfo _getCinemaHallInfo;
@@ -21,35 +22,32 @@ class CinemaHallInfoBloc extends Bloc<CinemaHallInfoEvent, CinemaHallInfoState> 
 
     result.fold(
         (failure) => emit(state.copyWith(
-            status: CinemaHallInfoStatus.error, errorMessage: failure.errorMessage)),
-        (movie) =>
-            emit(state.copyWith(movie: movie, status: CinemaHallInfoStatus.completed)));
+            status: CinemaHallInfoStatus.error,
+            errorMessage: failure.errorMessage)),
+        (movie) => emit(state.copyWith(
+            movie: movie, status: CinemaHallInfoStatus.completed)));
   }
 
- Future<void> getCinemaHallInfo(CinemaHallInfoEvent event, Emitter<CinemaHallInfoState> emit) async {
-
+  Future<void> onGetCinemaHallInfo(
+      CinemaHallInfoEvent event, Emitter<CinemaHallInfoState> emit) async {
     emit(CinemaHallInfoState.fetching());
     final result = await _getCinemaHallInfo(event.cinemaHallId);
 
     result.fold(
-            (failure) => emit(state.copyWith(
-            status: CinemaHallInfoStatus.error, errorMessage: failure.errorMessage)),
-            (movie) =>
-            emit(state.copyWith(movie: movie, status: CinemaHallInfoStatus.completed)));
+        (failure) => emit(state.copyWith(
+            status: CinemaHallInfoStatus.error,
+            errorMessage: failure.errorMessage)),
+        (movie) => emit(state.copyWith(
+            movie: movie, status: CinemaHallInfoStatus.completed)));
   }
 }
 
-
 @immutable
 class CinemaHallInfoEvent extends Equatable {
- const CinemaHallInfoEvent(
-      {required this.cinemaHallId});
+  const CinemaHallInfoEvent({required this.cinemaHallId});
 
   final String cinemaHallId;
 
   @override
   List<Object> get props => [cinemaHallId];
-
-
 }
-

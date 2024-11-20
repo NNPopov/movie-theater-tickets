@@ -10,9 +10,9 @@ class ConnectivitySafeAreaWidget extends StatelessWidget {
 
   final Widget child;
 
-  late OverlayEntry? _overlayEntry;
+  late final OverlayEntry? _overlayEntry;
 
-  late OverlayEntry? _disconnectedOverlayEntry;
+  late  final OverlayEntry? _disconnectedOverlayEntry;
 
   @override
   Widget build(BuildContext context) {
@@ -57,6 +57,7 @@ class ConnectivitySafeAreaWidget extends StatelessWidget {
               maintainState: true,
               builder: (context) {
                 return OverlayDialog(
+
                     header: Text(
                         AppLocalizations.of(context)!
                             .connection_lost_notification_text,
@@ -69,13 +70,6 @@ class ConnectivitySafeAreaWidget extends StatelessWidget {
                       width: 120,
                       height: 50,
                       child: TextButton(
-                        style: ButtonStyle(
-                          padding: MaterialStateProperty.all(
-                              const EdgeInsets.symmetric(
-                                  vertical: 1, horizontal: 1)),
-                          foregroundColor:
-                              MaterialStateProperty.all<Color>(Colors.blue),
-                        ),
                         onPressed: () {
                           connectivityBloc.connect();
                           _disconnectedOverlayEntry?.remove();

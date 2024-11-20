@@ -7,7 +7,7 @@ class MovieTheaterState extends Equatable {
 
   final List<ActiveMovie> movies;
   final MoviesStatus status;
-  late String? errorMessage;
+  final String? errorMessage;
 
   static MovieTheaterState initial() {
     return MovieTheaterState(movies: const [], status: MoviesStatus.initial);

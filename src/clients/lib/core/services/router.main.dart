@@ -8,7 +8,6 @@ import '../../src/shopping_carts/presentation/views/shopping_cart_view.dart';
 import '../../src/movie_sessions/presentation/views/movie_session_view.dart';
 import '../../src/movie_sessions/presentation/cubit/movie_session_bloc.dart';
 import '../../src/movies/presentation/views/movie_view.dart';
-import '../../src/movies/domain/entities/movie.dart';
 import '../../src/movie_sessions/presentation/cubit/movie_theater_cubit.dart';
 import '../../src/seats/presentation/cubit/seat_cubit.dart';
 import '../../src/seats/presentation/views/seats_view.dart';
@@ -91,12 +90,28 @@ PageRouteBuilder<dynamic> _pageBuilder(
   Widget Function(BuildContext) page, {
   required RouteSettings settings,
 }) {
+
   return PageRouteBuilder(
     settings: settings,
-    transitionsBuilder: (_, animation, __, child) => FadeTransition(
-      opacity: animation,
-      child: child,
-    ),
-    pageBuilder: (context, __, ___) => page(context),
+    transitionsBuilder: (_, animation, __, child) {
+
+      var begin = Offset(0.0, 1.0);
+      var end = Offset.zero;
+      var curve = Curves.ease;
+      var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+      var offsetAnimation = animation.drive(tween);
+
+      return SlideTransition(
+        position: offsetAnimation,
+        child: child,
+      );
+
+    // return  FadeTransition(
+    //     opacity: animation,
+    //     child: child,
+    //   );
+    },
+    pageBuilder: (context, __, ___) =>
+  page(context),
   );
 }

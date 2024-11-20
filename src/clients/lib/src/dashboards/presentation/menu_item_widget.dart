@@ -19,11 +19,7 @@ class MenuItemWidget extends StatelessWidget {
       width: 150,
       height: 30,
       child: TextButton(
-          style: ButtonStyle(
-            padding: MaterialStateProperty.all(
-                const EdgeInsets.symmetric(vertical: 1, horizontal: 1)),
-            foregroundColor: MaterialStateProperty.all<Color>(Colors.blue),
-          ),
+
           onPressed: () {
             Navigator.pushNamed(context, navigateId);
           },

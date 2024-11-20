@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:movie_theater_tickets/core/res/app_theme.dart';
 import 'package:movie_theater_tickets/src/seats/presentation/widgets/seats_movie_session_widget.dart';
 import 'package:movie_theater_tickets/src/shopping_carts/presentation/widgens/shopping_cart_widget.dart';
 import '../../../../core/res/app_styles.dart';
@@ -44,81 +45,82 @@ class _SeatsView extends State<SeatsView> {
         children: [
           const DashboardWidget(route: SeatsView.id),
           Container(
-            padding: EdgeInsets.only(top: 10),
+            padding: const EdgeInsets.only(top: 20.0),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 if (width > 1200)
-                  Container(
-                    padding: const EdgeInsets.all(10.0),
-                    child: Column(
-                      children: [
-                        Container(
-                            // height: 150,
-                            width: 320,
-                            alignment: Alignment.topLeft,
-                            decoration: BoxDecoration(
-                              color: AppStyles.widgetColor,
-                              borderRadius: BorderRadius.circular(
-                                  AppStyles.defaultRadius),
-                              border: Border.all(
-                                color: AppStyles.defaultBorderColor,
-                                width: AppStyles.defaultBorderWidth,
-                              ),
-                            ),
-                            padding: const EdgeInsets.all(15.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                BlocProvider(
-                                    key: const ValueKey('AuditoriumDetailView'),
-                                    create: (_) => CinemaHallCubit(),
-                                    child: AuditoriumDetailView(
-                                        widget.movieSession.cinemaHallId)),
-                                Text(
-                                    '${widget.movieSession.sessionDate.year}-${widget.movieSession.sessionDate.month}-${widget.movieSession.sessionDate.day}'),
-                                Text(
-                                    '${widget.movieSession.sessionDate.hour}:${'${widget.movieSession.sessionDate.minute}0'.substring(0, 2)}'),
-                                TextButton(
-                                    style: ButtonStyle(
-                                      padding: MaterialStateProperty.all(
-                                          const EdgeInsets.symmetric(
-                                              vertical: 1, horizontal: 1)),
-                                      foregroundColor:
-                                          MaterialStateProperty.all<Color>(
-                                              AppStyles.primaryMenuColor),
-                                    ),
-                                    onPressed: () {
-                                      movieSeat(widget.movieSession.movieId);
-                                    },
-                                    child: Text(AppLocalizations.of(context)!
-                                        .select_another_session))
-                              ],
-                            )),
-                        BlocProvider(
-                            key: const ValueKey('MoviesDetailView'),
-                            create: (_) => MovieCubit(getIt.get()),
-                            child: MoviesDetailWidget(
-                                widget.movieSession.movieId)),
-                      ],
-                    ),
+                  buildMovieSessionInfo(context),
+                if (width > 1200)
+                  const SizedBox(
+                    width: 15,
                   ),
                 SeatsMovieSessionWidget(
-                    movieSession: widget.movieSession,
-                    getCinemaHallInfo: getIt.get()),
-                const Padding(
-                    padding: EdgeInsets.only(left: 15, top: 15),
-                    child: Align(
-                      alignment: Alignment.topCenter,
-                      child: ShoppingCartWidget(),
-                    ))
+                  movieSession: widget.movieSession,
+                  // getCinemaHallInfo: getIt.get()
+                ),
+
+                if (width > 800)
+                  const SizedBox(
+                    width: 15,
+                  ),
+                if (width > 800) const ShoppingCartWidget()
               ],
             ),
           ),
         ],
       ),
     );
+  }
+
+  Column buildMovieSessionInfo(BuildContext context) {
+    return Column(
+                  children: [
+                    Container(
+                        width: 320,
+                        alignment: Alignment.topLeft,
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).widgetColor,
+                          borderRadius:
+                              BorderRadius.circular(AppStyles.defaultRadius),
+                          border: Border.all(
+                            color: Theme.of(
+                                context).defaultBorderColor,
+                            width: AppStyles.defaultBorderWidth,
+                          ),
+                        ),
+                        padding: const EdgeInsets.all(15.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            BlocProvider(
+                                key: const ValueKey('AuditoriumDetailView'),
+                                create: (_) => CinemaHallCubit(),
+                                child: AuditoriumDetailView(
+                                    widget.movieSession.cinemaHallId)),
+                            Text(
+                                '${widget.movieSession.sessionDate.year}-${widget.movieSession.sessionDate.month}-${widget.movieSession.sessionDate.day}'),
+                            Text(
+                                '${widget.movieSession.sessionDate.hour}:${'${widget.movieSession.sessionDate.minute}0'.substring(0, 2)}'),
+                            TextButton(
+                                onPressed: () {
+                                  movieSeat(widget.movieSession.movieId);
+                                },
+                                child: Text(AppLocalizations.of(context)!
+                                    .select_another_session))
+                          ],
+                        )),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    BlocProvider(
+                        key: const ValueKey('MoviesDetailView'),
+                        create: (_) => MovieCubit(getIt.get()),
+                        child:
+                            MoviesDetailWidget(widget.movieSession.movieId)),
+                  ],
+                );
   }
 
   Future<void> movieSeat(String movieId) async {

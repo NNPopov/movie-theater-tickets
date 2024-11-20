@@ -6,7 +6,7 @@ class CinemaHallInfoState extends Equatable {
 
   final CinemaHallInfo movie;
   final CinemaHallInfoStatus status;
-  late String? errorMessage;
+  final String? errorMessage;
 
   static CinemaHallInfoState initial() {
     return CinemaHallInfoState(movie: CinemaHallInfo.empty(), status: CinemaHallInfoStatus.initial);

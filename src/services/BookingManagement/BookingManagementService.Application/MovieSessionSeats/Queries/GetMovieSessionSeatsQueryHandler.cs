@@ -31,7 +31,7 @@ public class
 
         if (movieSession is null)
         {
-            _logger.Error("Movie session not found:{@MovieSessionId}", request.Id);
+            _logger.Error("{GetMovieSessionSeatsQueryHandler}, Movie session not found:{@MovieSessionId}", nameof(GetMovieSessionSeatsQueryHandler), request.Id);
             return default;
         }
 

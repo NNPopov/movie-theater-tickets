@@ -22,7 +22,7 @@ public class MovieSessionSeatsNotifier(
 
         if (movieSessionSeatsData is null)
         {
-            logger.Error("Movie session seats not found:{@MovieSessionId}", movieSessionId);
+            logger.Error("UpdateAndNotifySubscribersAboutSeatUpdates, Movie session seats not found:{@MovieSessionId}", movieSessionId);
             return;
         }
 

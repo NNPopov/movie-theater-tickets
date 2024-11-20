@@ -5,6 +5,10 @@ volumes:
     driver: local
   booking-management-postgres-data:
     driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
     
 services:
   
@@ -91,4 +95,39 @@ services:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: change_me
     depends_on:
-      - sso-postgres    
+      - sso-postgres
+        
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - ./build/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    restart: unless-stopped
+    
+  grafana:
+    image: grafana/grafana
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./build/grafana/datasources:/etc/grafana/provisioning/datasources
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=secret
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    depends_on:
+      - prometheus    
+        
+  otel-collector:
+    image: otel/opentelemetry-collector
+    command: [ "--config=/etc/otel-collector-config.yaml" ]
+    volumes:
+      - ./build/otel/otel-collector-config.yaml:/etc/otel-collector-config.yaml
+    ports:
+      - "4317:4317" # gRPC
+      - "4318:4318" # HTTP
+      - "8889:8889" # HTTP pprof
+      - "8888:8888" # HTTP pprof
+    

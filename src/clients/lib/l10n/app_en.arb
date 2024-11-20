@@ -7,7 +7,9 @@
   "release_date":"Release Date",
   "select": "Select",
   "screen":"Screen",
+
   "remove":"Remove",
+  "select_desired_number_of_seats":"Select the number of seats you want to purchase",
 
   "select_another_session":"Select another session",
 
@@ -23,5 +25,8 @@
 
   "reconnecting_notification_text":"The connection to the server has been lost! Reconnecting!",
   "connection_lost_notification_text":"The connection to the server has been lost! Please try reconnecting.",
-  "connection_lost_reconnect_btn":"Reconnect"
+  "connection_lost_reconnect_btn":"Reconnect",
+
+  "light_theme":"Light",
+  "dark_theme":"Dark"
 }

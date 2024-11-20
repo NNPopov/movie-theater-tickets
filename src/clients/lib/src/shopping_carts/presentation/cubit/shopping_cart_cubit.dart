@@ -20,7 +20,6 @@ part 'shopping_cart_state.dart';
 
 part 'shopping_cart_event.dart';
 
-GetIt getIt = GetIt.instance;
 
 class ShoppingCartCubit extends Cubit<ShoppingCartState> {
   ShoppingCartCubit(
@@ -78,7 +77,7 @@ class ShoppingCartCubit extends Cubit<ShoppingCartState> {
 
   Future<void> createShoppingCart(int maxNumberOfSeats) async {
 
-    emit(state.copyWith(status:ShoppingCartStateStatus.creating));
+   emit(state.copyWith(status:ShoppingCartStateStatus.creating));
 
     final result = await _createShoppingCart(
         CreateShoppingCartCommand(maxNumberOfSeats: maxNumberOfSeats));
@@ -129,8 +128,8 @@ class ShoppingCartCubit extends Cubit<ShoppingCartState> {
       if (key != null) {
         hashId = key;
       }
-      emit(state.copyWith(shoppingCart: value, status:ShoppingCartStateStatus.created, hashId:hashId));
-
+      //emit(state.copyWith(shoppingCart: value, status:ShoppingCartStateStatus.created, hashId:hashId));
+      emit(state.copyWith(shoppingCart: value, status:ShoppingCartStateStatus.update, hashId:hashId));
     });
   }
 
@@ -186,5 +185,15 @@ class ShoppingCartCubit extends Cubit<ShoppingCartState> {
   Future<void> close() async {
     await _streamSubscription.cancel();
     return await super.close();
+  }
+
+  void initCreateShoppingCart() {
+
+    emit(state.copyWith(status:ShoppingCartStateStatus.initCreating));
+  }
+
+  createShoppingCartCancel() {
+    emit(state.copyWith(status:ShoppingCartStateStatus.createdCancel));
+    emit(state.copyWith(status:ShoppingCartStateStatus.initial));
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:movie_theater_tickets/core/res/app_theme.dart';
 
 import '../../../../core/res/app_styles.dart';
 import '../../../../core/utils/utils.dart';
@@ -9,6 +10,7 @@ import '../../../dashboards/presentation/dashboard_widget.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../domain/entities/shopping_cart.dart';
 import '../cubit/shopping_cart_cubit.dart';
 
 class ShoppingCartView extends StatefulWidget {
@@ -87,8 +89,9 @@ class _ShoppingCartView extends State<ShoppingCartView> {
                     height: 65,
                     alignment: Alignment.centerLeft,
                     decoration: BoxDecoration(
-                      color: AppStyles.widgetColor,
-                      borderRadius: BorderRadius.circular(AppStyles.defaultRadius),
+                      color: Theme.of(context).widgetColor,
+                      borderRadius:
+                          BorderRadius.circular(AppStyles.defaultRadius),
                       border: Border.all(
                         color: Colors.blue,
                         width: AppStyles.defaultBorderWidth,
@@ -141,13 +144,20 @@ class _ShoppingCartView extends State<ShoppingCartView> {
               Container(
                 width: 600,
                 height: 70,
-                child: Text(
-                    'totalCartAmountBeforeDiscounts: ${state.shoppingCart!.priceCalculationResult!.totalCartAmountBeforeDiscounts.toString()}'+
-                    'totalCartDiscounts: ${state.shoppingCart!.priceCalculationResult!.totalCartDiscounts.toString()}'+
-                    'totalCartAmountAfterDiscounts: ${state.shoppingCart!.priceCalculationResult!.totalCartAmountAfterDiscounts.toString()}'),
+                child: Column(
+                  children: [
+                    Text(
+                        'totalCartAmountBeforeDiscounts: ${state.shoppingCart!.priceCalculationResult!.totalCartAmountBeforeDiscounts.toString()}'),
+                    Text(
+                        'totalCartDiscounts: ${state.shoppingCart!.priceCalculationResult!.totalCartDiscounts.toString()}'),
+                    Text(
+                        'totalCartAmountAfterDiscounts: ${state.shoppingCart!.priceCalculationResult!.totalCartAmountAfterDiscounts.toString()}'),
+                  ],
+                ),
               ),
-            if (state.shoppingCart.shoppingCartSeat.isNotEmpty &&
-                state.shoppingCart.isAssigned!)
+            if (state.shoppingCart.status == ShoppingCartStatus.InWork &&
+                state.shoppingCart.shoppingCartSeat.isNotEmpty &&
+                state.shoppingCart.isAssigned == true)
               TextButton(
                 onPressed: () async {
                   await context.read<ShoppingCartCubit>().completePurchase();

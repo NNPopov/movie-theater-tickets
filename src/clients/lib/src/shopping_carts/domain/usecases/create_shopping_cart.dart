@@ -11,7 +11,6 @@ import '../repos/shopping_cart_repo.dart';
 import 'package:get_it/get_it.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:dartz/dartz.dart';
-import '../services/shopping_cart_service.dart';
 
 GetIt getIt = GetIt.instance;
 

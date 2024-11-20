@@ -5,7 +5,6 @@ import 'package:movie_theater_tickets/src/auth/domain/services/auth_service.dart
 import 'package:movie_theater_tickets/src/hub/domain/event_hub.dart';
 import 'package:movie_theater_tickets/src/shopping_carts/domain/entities/create_shopping_cart_response.dart';
 import 'package:movie_theater_tickets/src/shopping_carts/domain/repos/shopping_cart_repo.dart';
-import 'package:movie_theater_tickets/src/shopping_carts/domain/services/shopping_cart_service.dart';
 import 'package:movie_theater_tickets/src/shopping_carts/domain/usecases/create_shopping_cart.dart';
 
 class MocShoppingCartService extends Mock implements ShoppingCartRepo {}

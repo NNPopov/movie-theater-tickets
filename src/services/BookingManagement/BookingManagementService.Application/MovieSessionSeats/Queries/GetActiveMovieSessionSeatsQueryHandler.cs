@@ -28,7 +28,6 @@ public class
     public async Task<ActiveMovieSessionSeatsDTO?> Handle(GetActiveMovieSessionSeatsQuery request,
         CancellationToken cancellationToken)
     {
-        
         var movieSession = await _movieSessionsRepository
             .GetByIdAsync(
                 request.Id, cancellationToken);
@@ -36,13 +35,14 @@ public class
 
         if (movieSession is null)
         {
-            _logger.Error("Movie session not found:{@MovieSessionId}", request.Id);
+            _logger.Error("{GetActiveMovieSessionSeatsQueryHandler}. Movie session not found:{@MovieSessionId}",
+                nameof(GetActiveMovieSessionSeatsQueryHandler), request.Id);
             return default;
         }
 
         if (movieSession.SessionDate < TimeProvider.System.GetUtcNow())
         {
-            _logger.Error("Movie session already started:{@MovieSession}", movieSession);
+            _logger.Error("{GetActiveMovieSessionSeatsQueryHandler}. Movie session already started:{@MovieSession}", nameof(GetActiveMovieSessionSeatsQueryHandler),movieSession);
             return default;
         }
 

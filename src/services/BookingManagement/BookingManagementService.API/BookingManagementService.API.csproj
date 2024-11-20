@@ -13,6 +13,7 @@
         <RootNamespace>CinemaTicketBooking.Api</RootNamespace>
        </PropertyGroup>
     <ItemGroup>
+        <PackageReference Include="App.Metrics.AspNetCore" />
         <PackageReference Include="AspNet.Security.OAuth.Keycloak"  />
         <PackageReference Include="AspNetCore.HealthChecks.Rabbitmq" />
         <PackageReference Include="AspNetCore.HealthChecks.Redis" />
@@ -27,9 +28,17 @@
         <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore"  />
         <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" />
         <PackageReference Include="Newtonsoft.Json"/>
+        <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" />
+        <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" />
+        <PackageReference Include="OpenTelemetry.Instrumentation.Http" />
+        <PackageReference Include="OpenTelemetry.Instrumentation.Runtime" />
+        <PackageReference Include="OpenTelemetry.Instrumentation.StackExchangeRedis" />
         <PackageReference Include="Polly" />
         <PackageReference Include="Serilog.AspNetCore" />
+        <PackageReference Include="Serilog.Enrichers.Context" />
+        <PackageReference Include="Serilog.Sinks.OpenTelemetry" />
         <PackageReference Include="Serilog.Sinks.Seq"  />
+        <PackageReference Include="SharpAbp.Abp.OpenTelemetry.Exporter.Prometheus.AspNetCore" />
         <PackageReference Include="StackExchange.Redis" />
         <PackageReference Include="Swashbuckle.AspNetCore" />
     </ItemGroup>

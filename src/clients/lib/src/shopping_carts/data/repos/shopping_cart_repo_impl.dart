@@ -50,7 +50,7 @@ class ShoppingCartRepoImpl implements ShoppingCartRepo {
         policy: CachePolicy.noCache,
         store: null,
       );
-     var extra = _client.options.extra[CacheResponse.cacheKey];
+     //var extra = _client.options.extra[CacheResponse.cacheKey];
 
      // final cacheOptions = CacheOptions.fromExtra(extra)!;
 

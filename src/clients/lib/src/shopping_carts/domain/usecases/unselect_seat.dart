@@ -1,9 +1,7 @@
 import 'package:movie_theater_tickets/src/shopping_carts/domain/usecases/select_seat.dart';
 import '../../../../core/common/usecase.dart';
 import '../../../../core/utils/typedefs.dart';
-import '../../../hub/domain/event_hub.dart';
 import '../../data/models/seat_info_dto.dart';
-import '../../data/models/select_seat_dto.dart';
 import '../entities/shopping_cart.dart';
 import '../repos/shopping_cart_local_repo.dart';
 import '../repos/shopping_cart_repo.dart';

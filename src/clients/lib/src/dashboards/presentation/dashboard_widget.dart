@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:movie_theater_tickets/core/res/app_theme.dart';
 
 import '../../../core/res/app_styles.dart';
 import '../../about/presentation/views/shopping_cart_view.dart';
@@ -28,8 +29,8 @@ class _DashboardView extends State<DashboardWidget> {
     return Container(
       height: 40,
       padding: const EdgeInsets.only(left: 50, right: 50),
-      decoration: const BoxDecoration(
-        color: AppStyles.widgetColor,
+      decoration:  BoxDecoration(
+        color: Theme.of(context).widgetColor,
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,

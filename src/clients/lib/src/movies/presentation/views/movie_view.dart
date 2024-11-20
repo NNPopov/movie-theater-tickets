@@ -58,7 +58,7 @@ class _MoviesView extends State<MoviesView> {
         }
 
         final movies = state.movies;
-        return BuildMovies(movies, context);
+        return buildMovies(movies, context);
       },
     );
   }
@@ -66,7 +66,7 @@ class _MoviesView extends State<MoviesView> {
   int _itemsCount = 3;
   int _current = 0;
 
-  Widget BuildMovies(List<ActiveMovie> movies, BuildContext context) {
+  Widget buildMovies(List<ActiveMovie> movies, BuildContext context) {
     final Locale locale = Localizations.localeOf(context);
     double width = MediaQuery.of(context).size.width;
     if (width > 1700) {
@@ -91,40 +91,39 @@ class _MoviesView extends State<MoviesView> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   const DashboardWidget(route: MoviesView.id),
-                  SizedBox(
-                      height: 40,
-                      width: 100,
-                      child: Text(AppLocalizations.of(context)!.movies)),
                   Container(
-                    width: width - 10,
-                    height: 700,
-                    // child: Expanded(
-                    child: Align(
-                      alignment: Alignment.topCenter,
-                      child: CarouselSlider(
-                        items: movies.map((rowSeats) {
-                          return BlocProvider(
-                            create: (_) => MovieCubit(getIt.get()),
-                            child: MovieDetailWidget(rowSeats.id),
-                          );
-                        }).toList(),
-                        carouselController: buttonCarouselController,
-                        options: CarouselOptions(
-                          height: 570.0,
-                          enableInfiniteScroll: true,
-                          viewportFraction: 1.0 / _itemsCount,
-                          enlargeCenterPage: false,
-                          aspectRatio: 3.0,
-                          enlargeStrategy: CenterPageEnlargeStrategy.height,
-                          onPageChanged: (index, reason) {
-                            setState(() {
-                              _current = index;
-                            });
-                          },
+                    padding: const EdgeInsets.only(top: 20.0),
+                    child: Container(
+                      width: width - 10,
+                      height: 700,
+                      // child: Expanded(
+                      child: Align(
+                        alignment: Alignment.topCenter,
+                        child: CarouselSlider(
+                          items: movies.map((rowSeats) {
+                            return BlocProvider(
+                              create: (_) => MovieCubit(getIt.get()),
+                              child: MovieDetailWidget(rowSeats.id),
+                            );
+                          }).toList(),
+                          carouselController: buttonCarouselController,
+                          options: CarouselOptions(
+                            height: 570.0,
+                            enableInfiniteScroll: true,
+                            viewportFraction: 1.0 / _itemsCount,
+                            enlargeCenterPage: false,
+                            aspectRatio: 3.0,
+                            enlargeStrategy: CenterPageEnlargeStrategy.height,
+                            onPageChanged: (index, reason) {
+                              setState(() {
+                                _current = index;
+                              });
+                            },
+                          ),
                         ),
                       ),
+                      //),
                     ),
-                    //),
                   ),
                   ElevatedButton(
                     onPressed: () => buttonCarouselController.nextPage(

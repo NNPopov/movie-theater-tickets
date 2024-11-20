@@ -1,12 +1,8 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
+import 'package:movie_theater_tickets/core/res/app_theme.dart';
 import 'package:movie_theater_tickets/src/seats/presentation/widgets/seat_widget.dart';
 import '../../../../core/common/views/loading_view.dart';
-import '../../../../core/common/views/no_data_view.dart';
-import '../../../../core/errors/failures.dart';
 import '../../../../core/res/app_styles.dart';
-import '../../../cinema_halls/domain/entity/cinema_hall_info.dart';
 import '../../../cinema_halls/domain/entity/cinema_seat.dart';
 import '../../../cinema_halls/presentation/cubit/movie_cubit.dart';
 import '../../../movie_sessions/domain/entities/movie_session.dart';
@@ -16,17 +12,17 @@ import '../../domain/entities/seat.dart';
 import '../../domain/usecases/get_cinema_hall_info.dart';
 import '../cubit/seat_cubit.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:dartz/dartz.dart' as t;
 import 'package:get_it/get_it.dart';
 
 final getIt = GetIt.instance;
 
 class SeatsMovieSessionWidget extends StatefulWidget {
   const SeatsMovieSessionWidget(
-      {super.key, required this.movieSession, required this.getCinemaHallInfo});
+      {super.key, required this.movieSession});
+      //  , required this.getCinemaHallInfo});
 
   final MovieSession movieSession;
-  final GetCinemaHallInfo getCinemaHallInfo;
+ // final GetCinemaHallInfo getCinemaHallInfo;
 
   @override
   State<SeatsMovieSessionWidget> createState() => _SeatsMovieSessionWidget();
@@ -38,9 +34,10 @@ class _SeatsMovieSessionWidget extends State<SeatsMovieSessionWidget> {
   @override
   void initState() {
     super.initState();
-
+print('movieSessionid ${widget.movieSession.id}');
     context.read<CinemaHallInfoBloc>().add(
         CinemaHallInfoEvent(cinemaHallId: widget.movieSession.cinemaHallId));
+
     context
         .read<SeatBloc>()
         .add(SeatEvent(movieSessionId: widget.movieSession.id));
@@ -72,14 +69,15 @@ class _SeatsMovieSessionWidget extends State<SeatsMovieSessionWidget> {
       return Container(
           height: seatsHeight + 110,
           width: seatsWidth + 110,
-          margin: const EdgeInsets.all(10.0),
-          padding: const EdgeInsets.all(20),
+
+          padding: const EdgeInsets.all(10),
           alignment: Alignment.topCenter,
           decoration: BoxDecoration(
-            color: AppStyles.widgetColor,
+            color: Theme.of(context).widgetColor,
             borderRadius: BorderRadius.circular(AppStyles.defaultRadius),
             border: Border.all(
-              color: AppStyles.defaultBorderColor,
+              color: Theme.of(
+                  context).defaultBorderColor,
               width: AppStyles.defaultBorderWidth,
             ),
           ),
@@ -97,7 +95,6 @@ class _SeatsMovieSessionWidget extends State<SeatsMovieSessionWidget> {
             ListView.builder(
                 shrinkWrap: true,
                 physics: NeverScrollableScrollPhysics(),
-                //scrollDirection: Axis.vertical,
                 itemCount: seats.length,
                 itemBuilder: (context, rowIndex) {
                   var rowSeats = seats[rowIndex];

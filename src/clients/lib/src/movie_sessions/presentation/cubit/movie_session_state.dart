@@ -18,7 +18,7 @@ class MovieSessionState extends Equatable {
 
   final List<List<List<MovieSession>>> movieSession;
   final MovieSessionStateStatus status;
-  late String? errorMessage;
+  final String? errorMessage;
 
   MovieSessionState copyWith(
       {List<List<List<MovieSession>>>? movieSession,

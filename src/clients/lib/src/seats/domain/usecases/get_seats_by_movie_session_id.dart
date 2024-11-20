@@ -10,24 +10,18 @@ import '../repos/seat_repo.dart';
 GetIt getIt = GetIt.instance;
 
 class GetSeatsByMovieSessionId
-    extends FutureUsecaseWithParams<List<Seat>, String> {
-  GetSeatsByMovieSessionId(this._repo, this._eventHub);
+    extends FutureUsecaseWithParams<void, String> {
+  GetSeatsByMovieSessionId(this._eventHub);
 
-  final SeatRepo _repo;
   final EventHub _eventHub;
   final storage = const FlutterSecureStorage();
 
   @override
-  ResultFuture<List<Seat>> call(String params) async {
+  ResultFuture<void> call(String params) async {
 
     await _eventHub.seatsUpdateSubscribe(params);
 
-    return Right([]);
+    return Right(null);
 
-    // var result = await _repo.getSeatsByMovieSessionId(params);
-    //
-    // return result.fold((failure) => Left(failure), (seats) async {
-    //   return Right(seats);
-    // });
   }
 }

@@ -38,7 +38,7 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.6
   freezed_annotation: ^3.1.0
-  json_annotation: ^4.8.1
+  json_annotation: ^4.11.0
 
   # Runtime packages (moved here from dev_dependencies during the migration).
   equatable: ^2.0.5

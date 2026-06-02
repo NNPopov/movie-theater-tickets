@@ -6,7 +6,7 @@ part 'movie.freezed.dart';
 part 'movie.g.dart';
 
 @freezed
-class Movie with _$Movie {
+abstract class Movie with _$Movie {
   factory Movie(
       {required String id,
       required String title,

@@ -6,7 +6,7 @@ part 'movie_session.freezed.dart';
 part 'movie_session.g.dart';
 
 @freezed
-class MovieSession with _$MovieSession {
+abstract class MovieSession with _$MovieSession {
   // final String id;
   // final String movieId;
   // final DateTime sessionDate;

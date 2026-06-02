@@ -1,14 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
     <PropertyGroup>
-        <TargetFramework>net8.0</TargetFramework>
-        <ContainerBaseImage>mcr.microsoft.com/dotnet/aspnet:8.0.100-preview.7-jammy</ContainerBaseImage>
+        <TargetFramework>net10.0</TargetFramework>
+        <ContainerBaseImage>mcr.microsoft.com/dotnet/aspnet:10.0</ContainerBaseImage>
         <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
         <DockerfileContext>.</DockerfileContext>
         <ImplicitUsings>enable</ImplicitUsings>
-        <LangVersion>preview</LangVersion>
         <Nullable>enable</Nullable>
-        <IncludeOpenAPIAnalyzers>true</IncludeOpenAPIAnalyzers>
         <ServerGarbageCollection>true</ServerGarbageCollection>
         <RootNamespace>CinemaTicketBooking.Api</RootNamespace>
        </PropertyGroup>

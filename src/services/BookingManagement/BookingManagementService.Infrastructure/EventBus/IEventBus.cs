@@ -1,10 +1,10 @@
-﻿namespace CinemaTicketBooking.Infrastructure.EventBus;
+namespace CinemaTicketBooking.Infrastructure.EventBus;
 
 public interface IEventBus
 {
-    void Publish(IntegrationEvent @event, string? deduplicationHeader = null);
+    Task PublishAsync(IntegrationEvent @event, string? deduplicationHeader = null);
 
-    void Subscribe<T, TH>()
+    Task SubscribeAsync<T, TH>()
         where T : IntegrationEvent
         where TH : IIntegrationEventHandler<T>;
 

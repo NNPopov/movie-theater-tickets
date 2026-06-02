@@ -1,7 +1,7 @@
 # Movie Theater Tickets "**Come and Watch**" 
 
 A small demo application for selecting, reserving and ordering cinema tickets.
-It is planned to use DDD, Clean Architecture, SignalR,  ASP.NET 8, Flutter/Dart, NGINX, Redis, PostgreSQL, Keycloak, RabbitMQ. As a payment system Stripe.
+It is planned to use DDD, Clean Architecture, SignalR,  ASP.NET 10, Flutter/Dart, NGINX, Redis, PostgreSQL, Keycloak, RabbitMQ. As a payment system Stripe.
 
 
 General business and custom requirements that we may receive from businesses

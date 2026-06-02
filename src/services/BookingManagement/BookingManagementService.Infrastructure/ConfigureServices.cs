@@ -69,7 +69,8 @@ public static class ConfigureServices
         {
             options.UseNpgsql(cinemaContextConnectionString)
                 .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking)
-                .EnableSensitiveDataLogging();
+                .EnableSensitiveDataLogging()
+                .ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
         });
         services.AddScoped<ICinemaContext>(provider => provider.GetRequiredService<CinemaContext>());
         services.AddScoped<SampleDataInitializer>();
@@ -80,8 +81,7 @@ public static class ConfigureServices
 
             var factory = new ConnectionFactory()
             {
-                HostName = configuration.GetConnectionString("EventBus"),
-                DispatchConsumersAsync = true
+                HostName = configuration.GetConnectionString("EventBus")
             };
 
             // if (!string.IsNullOrEmpty(eventBusSection["UserName"]))

@@ -1,3 +1,7 @@
+import 'dart:convert';
+import 'dart:math';
+
+import 'package:crypto/crypto.dart';
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
@@ -21,11 +25,15 @@ class FlutterWebAuth2Authenticator implements Authenticator {
   ResultFuture<String> logIn() async {
     final callbackUrlScheme = '$_clientBaseUrl/$_callbackPath';
 
+    final codeVerifier = _createCodeVerifier();
+    final codeChallenge = _createCodeChallenge(codeVerifier);
+
     Uri url = createAuthenticateUri(
       _identityHost,
       _identityAuthPath,
       callbackUrlScheme,
       _useHttps,
+      codeChallenge,
     );
 
     final result = await FlutterWebAuth2.authenticate(
@@ -49,6 +57,7 @@ class FlutterWebAuth2Authenticator implements Authenticator {
         'redirect_uri': callbackUrlScheme,
         'grant_type': 'authorization_code',
         'code': code,
+        'code_verifier': codeVerifier,
       },
       headers: {
         "content-type": "application/x-www-form-urlencoded",
@@ -57,6 +66,23 @@ class FlutterWebAuth2Authenticator implements Authenticator {
     );
 
     return Right(response.body);
+  }
+
+  /// Generates a high-entropy PKCE `code_verifier` per RFC 7636 (43–128 chars
+  /// from the unreserved set). Required because the `comeandwatchpkce` client
+  /// enforces `code_challenge_method=S256`.
+  String _createCodeVerifier() {
+    const chars =
+        'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~';
+    final random = Random.secure();
+    return List.generate(64, (_) => chars[random.nextInt(chars.length)]).join();
+  }
+
+  /// Derives the S256 `code_challenge`: base64url(sha256(verifier)) without
+  /// padding, as required by the authorization request.
+  String _createCodeChallenge(String codeVerifier) {
+    final digest = sha256.convert(ascii.encode(codeVerifier));
+    return base64UrlEncode(digest.bytes).replaceAll('=', '');
   }
 
   Uri createCodeExchangeUri(
@@ -76,12 +102,15 @@ class FlutterWebAuth2Authenticator implements Authenticator {
     String identityAuthPath,
     String callbackUrlScheme,
     bool useHttps,
+    String codeChallenge,
   ) {
     var queryParameters = {
       'response_type': 'code',
       'client_id': _clientId,
       'redirect_uri': callbackUrlScheme,
       'scope': 'email openid phone',
+      'code_challenge': codeChallenge,
+      'code_challenge_method': 'S256',
     };
     if (useHttps) {
       return Uri.https(identityHost, identityAuthPath, queryParameters);

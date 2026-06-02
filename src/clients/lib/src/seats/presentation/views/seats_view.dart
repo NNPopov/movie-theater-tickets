@@ -12,7 +12,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../movie_sessions/presentation/views/movie_session_view.dart';
 import '../../../movies/presentation/app/movie_cubit.dart';
 import '../../../movies/presentation/widgets/movie_detail_widget.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:movie_theater_tickets/l10n/gen/app_localizations.dart';
 
 GetIt getIt = GetIt.instance;
 

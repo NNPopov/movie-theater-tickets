@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/common/widgets/overlay_dialog.dart';
 import '../cubit/connectivity_bloc.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:movie_theater_tickets/l10n/gen/app_localizations.dart';
 
 class ConnectivitySafeAreaWidget extends StatelessWidget {
   ConnectivitySafeAreaWidget({super.key, required this.child});

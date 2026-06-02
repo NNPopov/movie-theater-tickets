@@ -4,7 +4,7 @@ import 'package:movie_theater_tickets/src/auth/presentations/bloc/auth_event.dar
 
 import '../../domain/abstraction/auth_statuses.dart';
 import '../bloc/auth_cubit.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:movie_theater_tickets/l10n/gen/app_localizations.dart';
 
 class AuthWidget extends StatefulWidget {
   const AuthWidget({super.key});

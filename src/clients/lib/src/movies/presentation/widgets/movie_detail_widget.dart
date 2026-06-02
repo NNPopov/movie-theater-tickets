@@ -8,7 +8,7 @@ import '../../../../core/res/app_styles.dart';
 import '../../../../core/utils/utils.dart';
 import '../app/movie_cubit.dart';
 import '../../../movie_sessions/presentation/cubit/movie_theater_cubit.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:movie_theater_tickets/l10n/gen/app_localizations.dart';
 
 class MoviesDetailWidget extends StatefulWidget {
   const MoviesDetailWidget(this.movieId, {super.key});

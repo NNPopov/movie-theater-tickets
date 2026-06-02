@@ -7,7 +7,7 @@ import '../../../auth/presentations/bloc/auth_cubit.dart';
 import '../../../auth/presentations/bloc/auth_event.dart';
 import '../../../auth/presentations/widgets/auth_safe_area_widget.dart';
 import '../../../dashboards/presentation/dashboard_widget.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:movie_theater_tickets/l10n/gen/app_localizations.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../domain/entities/shopping_cart.dart';

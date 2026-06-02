@@ -9,7 +9,7 @@ import '../../../movie_sessions/presentation/views/movie_session_view.dart';
 import '../../domain/entities/movie.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import '../../../movie_sessions/presentation/cubit/movie_theater_cubit.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:movie_theater_tickets/l10n/gen/app_localizations.dart';
 
 import '../app/movie_cubit.dart';
 import '../widgets/movie_full_detail_widget.dart';

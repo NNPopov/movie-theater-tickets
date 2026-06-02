@@ -11,7 +11,7 @@ import '../../../server_state/presentation/cubit/server_state_cubit.dart';
 import '../../domain/entities/seat.dart';
 import '../../domain/entities/shopping_cart.dart';
 import '../cubit/shopping_cart_cubit.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:movie_theater_tickets/l10n/gen/app_localizations.dart';
 import 'package:get_it/get_it.dart';
 
 import '../views/shopping_cart_view.dart';

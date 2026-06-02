@@ -11,7 +11,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/entities/seat.dart';
 import '../../domain/usecases/get_cinema_hall_info.dart';
 import '../cubit/seat_cubit.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:movie_theater_tickets/l10n/gen/app_localizations.dart';
 import 'package:get_it/get_it.dart';
 
 final getIt = GetIt.instance;

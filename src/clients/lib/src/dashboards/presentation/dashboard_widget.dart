@@ -4,7 +4,7 @@ import 'package:movie_theater_tickets/core/res/app_theme.dart';
 import '../../../core/res/app_styles.dart';
 import '../../about/presentation/views/shopping_cart_view.dart';
 import '../../movies/presentation/views/movie_view.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:movie_theater_tickets/l10n/gen/app_localizations.dart';
 
 import '../../shopping_carts/presentation/views/shopping_cart_view.dart';
 import 'menu_item_widget.dart';

@@ -31,7 +31,7 @@ class MovieSessionsView extends StatefulWidget {
 }
 
 class _MovieSessionsView extends State<MovieSessionsView> {
-  CarouselController buttonCarouselController = CarouselController();
+  CarouselSliderController buttonCarouselController = CarouselSliderController();
 
   void getMovieSessions() {
     context

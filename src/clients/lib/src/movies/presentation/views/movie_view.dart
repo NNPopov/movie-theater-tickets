@@ -24,7 +24,7 @@ class MoviesView extends StatefulWidget {
 }
 
 class _MoviesView extends State<MoviesView> {
-  CarouselController buttonCarouselController = CarouselController();
+  CarouselSliderController buttonCarouselController = CarouselSliderController();
 
   Future<void> movieSeat(Movie movie) async {
     Navigator.pushNamed(context, MovieSessionsView.id, arguments: movie.id);

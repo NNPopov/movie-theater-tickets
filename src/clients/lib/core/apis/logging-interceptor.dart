@@ -12,7 +12,6 @@ class LoggingInterceptor extends Interceptor {
   void onResponse(Response response, ResponseInterceptorHandler handler) {
     print("Received response from: ${response.requestOptions.uri}");
 
-
     if (response.extra[CacheResponse.cacheKey] != null) {
       print("Response was cached");
     } else {

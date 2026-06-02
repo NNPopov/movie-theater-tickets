@@ -6,7 +6,6 @@ import '../../../hub/domain/event_hub.dart';
 import 'package:get_it/get_it.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-
 class GetCinemaHallInfo
     extends FutureUsecaseWithParams<CinemaHallInfo, String> {
   GetCinemaHallInfo(this._repo, this._eventHub);

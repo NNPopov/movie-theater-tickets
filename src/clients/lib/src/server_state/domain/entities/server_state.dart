@@ -7,7 +7,8 @@ class ServerState extends Equatable {
 
   static ServerState initState() {
     return ServerState(
-        serverDateTime: DateTime.parse('1900-01-01 00:00:00.001Z'));
+      serverDateTime: DateTime.parse('1900-01-01 00:00:00.001Z'),
+    );
   }
 
   @override

@@ -10,7 +10,7 @@ class CinemaHallInfoDto extends CinemaHallInfo {
     return <String, dynamic>{
       'id': id,
       'description': description,
-      'seat': cinemaSeat
+      'seat': cinemaSeat,
     };
   }
 
@@ -29,11 +29,16 @@ class CinemaHallInfoDto extends CinemaHallInfo {
       CinemaHallInfoDto.fromMap(source as Map<String, dynamic>);
 
   static List<List<CinemaSeat>> getSeats(List map) {
-      var seats = List<dynamic>.from(map)
-        .map((e) => List<Map<String, dynamic>>.from(e.toList())
-            .map((t) =>
-                CinemaSeatDto.fromJson(t as Map<String, dynamic>) as CinemaSeat)
-            .toList())
+    var seats = List<dynamic>.from(map)
+        .map(
+          (e) => List<Map<String, dynamic>>.from(e.toList())
+              .map(
+                (t) =>
+                    CinemaSeatDto.fromJson(t as Map<String, dynamic>)
+                        as CinemaSeat,
+              )
+              .toList(),
+        )
         .toList();
     return seats;
   }

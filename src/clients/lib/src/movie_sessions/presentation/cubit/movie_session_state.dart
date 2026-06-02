@@ -11,19 +11,21 @@ class MovieSessionEvent extends Equatable {
 
 @immutable
 class MovieSessionState extends Equatable {
-  MovieSessionState(
-      {this.movieSession = const [],
-      required this.status,
-      this.errorMessage = ''});
+  MovieSessionState({
+    this.movieSession = const [],
+    required this.status,
+    this.errorMessage = '',
+  });
 
   final List<List<List<MovieSession>>> movieSession;
   final MovieSessionStateStatus status;
   final String? errorMessage;
 
-  MovieSessionState copyWith(
-      {List<List<List<MovieSession>>>? movieSession,
-      MovieSessionStateStatus? status,
-      String? errorMessage}) {
+  MovieSessionState copyWith({
+    List<List<List<MovieSession>>>? movieSession,
+    MovieSessionStateStatus? status,
+    String? errorMessage,
+  }) {
     return MovieSessionState(
       movieSession: movieSession ?? this.movieSession,
       status: status ?? this.status,

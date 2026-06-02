@@ -23,8 +23,7 @@ class AssignClientUseCase extends FutureUsecaseWithParams<void, String> {
 
     return userStatus.fold((l) => Left(l), (r) async {
       if (r.status != AuthenticationStatus.authorized) {
-        return const Left(
-            NotAuthorisedException());
+        return const Left(NotAuthorisedException());
       }
 
       var shoppingCartResult = await _localRepo.getShoppingCart();

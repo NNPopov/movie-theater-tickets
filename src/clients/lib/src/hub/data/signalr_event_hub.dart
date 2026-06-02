@@ -20,10 +20,11 @@ import 'package:signalr_netcore/signalr_client.dart';
 import 'package:logging/logging.dart';
 
 class SignalREventHub implements EventHub {
-  SignalREventHub(
-      {required this.updateShoppingCartState,
-      required this.updateSeatsState,
-      required this.updateServerStateUseCase});
+  SignalREventHub({
+    required this.updateShoppingCartState,
+    required this.updateSeatsState,
+    required this.updateServerStateUseCase,
+  });
 
   final logger = getLogger(SignalREventHub);
 
@@ -69,8 +70,10 @@ class SignalREventHub implements EventHub {
     var baseUrl = Constants.BASE_API_URL;
 
     _hubConnection = HubConnectionBuilder()
-        .withUrl('$baseUrl/ws/cinema-hall-seats-hub',
-            options: httpConnectionOptions)
+        .withUrl(
+          '$baseUrl/ws/cinema-hall-seats-hub',
+          options: httpConnectionOptions,
+        )
         .withAutomaticReconnect(retryDelays: Constants.RETRY_POLICY)
         .configureLogging(transportProtLogger)
         .build();
@@ -135,8 +138,9 @@ class SignalREventHub implements EventHub {
 
     var movies = jsonDecode(jsonEncode(args?[0]));
 
-    ServerState serverState =
-        ServerStateDto.fromJson(movies as Map<String, dynamic>);
+    ServerState serverState = ServerStateDto.fromJson(
+      movies as Map<String, dynamic>,
+    );
 
     await updateServerStateUseCase(serverState);
   }
@@ -156,28 +160,36 @@ class SignalREventHub implements EventHub {
   Future _seatsUpdateSubscribe(String movieSessionId) async {
     _movieSessionId = movieSessionId;
 
-    await _hubConnection
-        .invoke('SubscribeToUpdateSeatsGroup', args: <Object>[movieSessionId]);
+    await _hubConnection.invoke(
+      'SubscribeToUpdateSeatsGroup',
+      args: <Object>[movieSessionId],
+    );
   }
 
   @override
   Future seatSelect(SeatInfoDto seatSelectRequestDto) async {
-    await _hubConnection.invoke('SeatSelect', args: <Object>[
-      seatSelectRequestDto.shoppingCartId,
-      seatSelectRequestDto.row,
-      seatSelectRequestDto.number,
-      seatSelectRequestDto.showtimeId
-    ]);
+    await _hubConnection.invoke(
+      'SeatSelect',
+      args: <Object>[
+        seatSelectRequestDto.shoppingCartId,
+        seatSelectRequestDto.row,
+        seatSelectRequestDto.number,
+        seatSelectRequestDto.showtimeId,
+      ],
+    );
   }
 
   @override
   Future seatUnselect(SeatInfoDto seatSelectRequestDto) async {
-    await _hubConnection.invoke('SeatUnselect', args: <Object>[
-      seatSelectRequestDto.shoppingCartId,
-      seatSelectRequestDto.row,
-      seatSelectRequestDto.number,
-      seatSelectRequestDto.showtimeId
-    ]);
+    await _hubConnection.invoke(
+      'SeatUnselect',
+      args: <Object>[
+        seatSelectRequestDto.shoppingCartId,
+        seatSelectRequestDto.row,
+        seatSelectRequestDto.number,
+        seatSelectRequestDto.showtimeId,
+      ],
+    );
   }
 
   @override
@@ -188,8 +200,10 @@ class SignalREventHub implements EventHub {
   }
 
   Future _shoppingCartUpdateSubscribe(String shoppingCartId) async {
-    await _hubConnection
-        .invoke('RegisterShoppingCart', args: <Object>[shoppingCartId]);
+    await _hubConnection.invoke(
+      'RegisterShoppingCart',
+      args: <Object>[shoppingCartId],
+    );
   }
 
   Future<void> _tryStartHub() async {
@@ -227,14 +241,15 @@ class SignalREventHub implements EventHub {
     } on Exception catch (e) {
       logger.e('Unable resubscribe shoppingCartId', error: e);
     }
-
   }
 
   @override
   Future<void> shoppingCartRemoveSubscribe(String shoppingCartId) async {
     _shoppingCartId = null;
     logger.d('shoppingCartRemoveSubscribe');
-    await _hubConnection
-        .invoke('UnsubscribeShoppingCart', args: <Object>[shoppingCartId]);
+    await _hubConnection.invoke(
+      'UnsubscribeShoppingCart',
+      args: <Object>[shoppingCartId],
+    );
   }
 }

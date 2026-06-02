@@ -17,7 +17,8 @@ class BlocEventStateObserver extends BlocObserver {
 
     var message = change.toString();
     logger.d(
-        'onChange ${message.substring(0, message.length > 50 ? 50 : message.length)}');
+      'onChange ${message.substring(0, message.length > 50 ? 50 : message.length)}',
+    );
   }
 
   @override
@@ -41,7 +42,8 @@ class BlocEventStateObserver extends BlocObserver {
 
     var message = transition.toString();
     logger.d(
-        'onTransition ${message.substring(0, message.length > 50 ? 50 : message.length)}');
+      'onTransition ${message.substring(0, message.length > 50 ? 50 : message.length)}',
+    );
   }
 
   @override

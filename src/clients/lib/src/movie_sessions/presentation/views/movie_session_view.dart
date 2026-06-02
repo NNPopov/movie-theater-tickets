@@ -31,12 +31,13 @@ class MovieSessionsView extends StatefulWidget {
 }
 
 class _MovieSessionsView extends State<MovieSessionsView> {
-  CarouselSliderController buttonCarouselController = CarouselSliderController();
+  CarouselSliderController buttonCarouselController =
+      CarouselSliderController();
 
   void getMovieSessions() {
-    context
-        .read<MovieSessionBloc>()
-        .add(MovieSessionEvent(movieId: widget.movieId));
+    context.read<MovieSessionBloc>().add(
+      MovieSessionEvent(movieId: widget.movieId),
+    );
   }
 
   late ScrollController _controller;
@@ -74,7 +75,9 @@ class _MovieSessionsView extends State<MovieSessionsView> {
   }
 
   Widget BuildMovieSessions(
-      List<List<List<MovieSession>>> movieSessionResult, BuildContext context) {
+    List<List<List<MovieSession>>> movieSessionResult,
+    BuildContext context,
+  ) {
     double width = MediaQuery.of(context).size.width;
 
     if (width > 800) {
@@ -120,18 +123,20 @@ class _MovieSessionsView extends State<MovieSessionsView> {
   }
 
   Column buildMovieSessions(
-      double width, List<List<List<MovieSession>>> movieSessionResult) {
+    double width,
+    List<List<List<MovieSession>>> movieSessionResult,
+  ) {
     width = width > 1250 ? 1250 : width;
 
-    return Column(children: [
-      Container(
+    return Column(
+      children: [
+        Container(
           alignment: Alignment.bottomLeft,
           decoration: BoxDecoration(
             color: Theme.of(context).widgetColor,
             borderRadius: BorderRadius.circular(AppStyles.defaultRadius),
             border: Border.all(
-              color: Theme.of(
-                  context).defaultBorderColor,
+              color: Theme.of(context).defaultBorderColor,
               width: AppStyles.defaultBorderWidth,
             ),
           ),
@@ -140,88 +145,99 @@ class _MovieSessionsView extends State<MovieSessionsView> {
           child: Container(
             alignment: Alignment.topLeft,
             child: ListView.builder(
-                shrinkWrap: true,
-                scrollDirection: Axis.vertical,
-                itemCount: movieSessionResult.length,
-                itemBuilder: (context, index) {
-                  var rowSeats = movieSessionResult[index];
-                  var day = rowSeats[0][0];
+              shrinkWrap: true,
+              scrollDirection: Axis.vertical,
+              itemCount: movieSessionResult.length,
+              itemBuilder: (context, index) {
+                var rowSeats = movieSessionResult[index];
+                var day = rowSeats[0][0];
 
-                  return SizedBox(
-                    width: width - 600,
-                    //height: 200,
-                    child: Column(
-                      children: [
-                        Text(
-                            '${day.sessionDate.year}-${day.sessionDate.month}-${day.sessionDate.day}'),
-                        ListView.builder(
-                            shrinkWrap: true,
-                            scrollDirection: Axis.vertical,
-                            itemCount: rowSeats.length,
-                            itemBuilder: (context, index2) {
-                              var rows = rowSeats[index2];
+                return SizedBox(
+                  width: width - 600,
+                  //height: 200,
+                  child: Column(
+                    children: [
+                      Text(
+                        '${day.sessionDate.year}-${day.sessionDate.month}-${day.sessionDate.day}',
+                      ),
+                      ListView.builder(
+                        shrinkWrap: true,
+                        scrollDirection: Axis.vertical,
+                        itemCount: rowSeats.length,
+                        itemBuilder: (context, index2) {
+                          var rows = rowSeats[index2];
 
-                              return SizedBox(
-                                width: width - 700,
-                                // height: 240,
-                                child: Column(
-                                  children: [
-                                    BlocProvider(
-                                        key: const ValueKey(
-                                            'AuditoriumDetailView'),
-                                        create: (_) => CinemaHallCubit(),
-                                        child: AuditoriumDetailView(
-                                            rows[0].cinemaHallId)),
-                                     Divider(
-                                      color: Theme.of(
-                                          context).defaultBorderColor,
-                                    ),
-                                    Wrap(
-                                      spacing: 8.0,
-                                      runSpacing: 4.0,
-                                      children: rows.map((movieSession) {
-                                        return SizedBox(
-                                            height: 110,
-                                            width: 200,
-                                            child: Column(
-                                              children: [
-                                                Text(
-                                                    '${movieSession.sessionDate.hour}:${'${movieSession.sessionDate.minute}0'.substring(0, 2)}'),
-                                                TextButton(
-                                                    onPressed: () {
-                                                      pressMovieSession(
-                                                          movieSession);
-                                                    },
-                                                    child: Text(
-                                                        AppLocalizations.of(
-                                                                context)!
-                                                            .select))
-                                              ],
-                                            ));
-                                      }).toList(),
-                                    ),
-                                  ],
+                          return SizedBox(
+                            width: width - 700,
+                            // height: 240,
+                            child: Column(
+                              children: [
+                                BlocProvider(
+                                  key: const ValueKey('AuditoriumDetailView'),
+                                  create: (_) => CinemaHallCubit(),
+                                  child: AuditoriumDetailView(
+                                    rows[0].cinemaHallId,
+                                  ),
                                 ),
-                              );
-                            }),
-                      ],
-                    ),
-                  );
-                }),
-          )),
-      ElevatedButton(
-        onPressed: () => buttonCarouselController.nextPage(
-            duration: const Duration(milliseconds: 300), curve: Curves.linear),
-        child: const Text('→'),
-      )
-    ]);
+                                Divider(
+                                  color: Theme.of(context).defaultBorderColor,
+                                ),
+                                Wrap(
+                                  spacing: 8.0,
+                                  runSpacing: 4.0,
+                                  children: rows.map((movieSession) {
+                                    return SizedBox(
+                                      height: 110,
+                                      width: 200,
+                                      child: Column(
+                                        children: [
+                                          Text(
+                                            '${movieSession.sessionDate.hour}:${'${movieSession.sessionDate.minute}0'.substring(0, 2)}',
+                                          ),
+                                          TextButton(
+                                            onPressed: () {
+                                              pressMovieSession(movieSession);
+                                            },
+                                            child: Text(
+                                              AppLocalizations.of(
+                                                context,
+                                              )!.select,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  }).toList(),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+        ElevatedButton(
+          onPressed: () => buttonCarouselController.nextPage(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.linear,
+          ),
+          child: const Text('→'),
+        ),
+      ],
+    );
   }
 
   BlocProvider<MovieCubit> buildMovieDetail() {
     return BlocProvider(
-        key: const ValueKey('MoviesDetailView'),
-        create: (_) => MovieCubit(getIt.get()),
-        child: MoviesDetailWidget(widget.movieId));
+      key: const ValueKey('MoviesDetailView'),
+      create: (_) => MovieCubit(getIt.get()),
+      child: MoviesDetailWidget(widget.movieId),
+    );
   }
 
   @override

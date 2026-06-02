@@ -65,52 +65,51 @@ class _MovieDetailViewView extends State<MovieDetailWidget> {
           //margin: const EdgeInsets.all(5.0),
           padding: const EdgeInsets.all(13.0),
           child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Align(
-                    child: Text(movie.title,
-                        style:
-              const TextStyle(
-                            fontWeight: FontWeight.bold,
-                          //  fontSize: AppStyles.defaultFontSize,
-                            color: Colors.grey),
-        )
-        ),
-                const SizedBox(
-                  height: 10,
-                ),
-                Container(
-                  height: 290,
-                  width: 290,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(AppStyles.defaultRadius),
-                   color: Colors.white,
-                    image: const DecorationImage(
-                        fit: BoxFit.fill,
-                        image: NetworkImage(
-                          'https://picsum.photos/250?image=9',
-                        )),
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Align(
+                child: Text(
+                  movie.title,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    //  fontSize: AppStyles.defaultFontSize,
+                    color: Colors.grey,
                   ),
                 ),
-                Text(
-                    '${AppLocalizations.of(context)!.stars}: ${movie.stars}'),
-                Text(
-                    '${AppLocalizations.of(context)!.release_date}: ${movie.releaseDate?.year}-${movie.releaseDate?.month}-${movie.releaseDate?.day} '),
-                Text('imdbId: ${movie.imdbId}'),
-                // const Expanded(
-                //   child: SizedBox(),
-                // ),
-                Align(
-                  alignment: Alignment.center,
-                  child: TextButton(
-                      onPressed: () {
-                        onMovieSessionPress(movie);
-                      },
-                      child:
-                      Text(AppLocalizations.of(context)!.select)),
-                )
-              ]),
+              ),
+              const SizedBox(height: 10),
+              Container(
+                height: 290,
+                width: 290,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(AppStyles.defaultRadius),
+                  color: Colors.white,
+                  image: const DecorationImage(
+                    fit: BoxFit.fill,
+                    image: NetworkImage('https://picsum.photos/250?image=9'),
+                  ),
+                ),
+              ),
+              Text('${AppLocalizations.of(context)!.stars}: ${movie.stars}'),
+              Text(
+                '${AppLocalizations.of(context)!.release_date}: ${movie.releaseDate?.year}-${movie.releaseDate?.month}-${movie.releaseDate?.day} ',
+              ),
+              Text('imdbId: ${movie.imdbId}'),
+              // const Expanded(
+              //   child: SizedBox(),
+              // ),
+              Align(
+                alignment: Alignment.center,
+                child: TextButton(
+                  onPressed: () {
+                    onMovieSessionPress(movie);
+                  },
+                  child: Text(AppLocalizations.of(context)!.select),
+                ),
+              ),
+            ],
+          ),
         );
       },
     );

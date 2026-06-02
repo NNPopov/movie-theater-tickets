@@ -21,27 +21,28 @@ class _GlobalisationWidget extends State<GlobalisationWidget> {
 
   @override
   Widget build(BuildContext context) {
- //   Locale dropdownValue = list.first;
-  return  BlocBuilder<GlobalisationCubit, LanguagenStatus>(
-        builder: (context, lang) {
-    return SizedBox(
-      width: 70,
-      height: 40,
-      child: DropdownButton<Locale>(
-        value: lang.locate,
-        elevation: 16,
-        onChanged: (Locale? value) {
-          context.read<GlobalisationCubit>().setLanguage(value!);
-        },
-        items: list.map<DropdownMenuItem<Locale>>((Locale value) {
-          return DropdownMenuItem<Locale>(
-            value: value,
-            child: Text(value.languageCode),
-          );
-        }).toList(),
-      ),
+    //   Locale dropdownValue = list.first;
+    return BlocBuilder<GlobalisationCubit, LanguagenStatus>(
+      builder: (context, lang) {
+        return SizedBox(
+          width: 70,
+          height: 40,
+          child: DropdownButton<Locale>(
+            value: lang.locate,
+            elevation: 16,
+            onChanged: (Locale? value) {
+              context.read<GlobalisationCubit>().setLanguage(value!);
+            },
+            items: list.map<DropdownMenuItem<Locale>>((Locale value) {
+              return DropdownMenuItem<Locale>(
+                value: value,
+                child: Text(value.languageCode),
+              );
+            }).toList(),
+          ),
+        );
+      },
     );
-    });
   }
 
   @override

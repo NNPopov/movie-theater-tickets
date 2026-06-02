@@ -11,14 +11,15 @@ class OverlayDialog extends StatelessWidget {
   final double? headerHeight;
   final double? bodyHeight;
 
-  const OverlayDialog(
-      {super.key,
-      required this.body,
-      required this.header,
-      this.width = 450,
-      this.height = 250,
-        this.headerHeight = 20,
-        this.bodyHeight = 20});
+  const OverlayDialog({
+    super.key,
+    required this.body,
+    required this.header,
+    this.width = 450,
+    this.height = 250,
+    this.headerHeight = 20,
+    this.bodyHeight = 20,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -39,13 +40,9 @@ class OverlayDialog extends StatelessWidget {
         height: height,
         child: Column(
           children: [
-             SizedBox(
-              height: headerHeight,
-            ),
+            SizedBox(height: headerHeight),
             header,
-             SizedBox(
-              height: bodyHeight,
-            ),
+            SizedBox(height: bodyHeight),
             body,
           ],
         ),

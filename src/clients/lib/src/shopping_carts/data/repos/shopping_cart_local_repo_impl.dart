@@ -25,11 +25,13 @@ class ShoppingCartLocalRepoImpl implements ShoppingCartLocalRepo {
     final raw = storage.getItem(_shoppingCartKey);
     if (raw == null) {
       return const Left(
-          DataFailure(message: 'ShoppingCart not stored', statusCode: 404));
+        DataFailure(message: 'ShoppingCart not stored', statusCode: 404),
+      );
     }
 
-    final shoppingCart =
-        ShoppingCartDto.fromJson(jsonDecode(raw) as Map<String, dynamic>);
+    final shoppingCart = ShoppingCartDto.fromJson(
+      jsonDecode(raw) as Map<String, dynamic>,
+    );
 
     return Right(shoppingCart);
   }

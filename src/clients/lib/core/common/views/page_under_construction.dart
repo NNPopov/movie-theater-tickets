@@ -1,6 +1,4 @@
-
 import 'package:flutter/material.dart';
-
 
 class PageUnderConstruction extends StatelessWidget {
   const PageUnderConstruction({super.key});
@@ -10,11 +8,7 @@ class PageUnderConstruction extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(),
       extendBodyBehindAppBar: true,
-      body:
-        const Center(
-          child: Text("Page Under Construction"),
-
-      ),
+      body: const Center(child: Text("Page Under Construction")),
     );
   }
 }

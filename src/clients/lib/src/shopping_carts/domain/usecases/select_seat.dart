@@ -34,10 +34,11 @@ class SelectSeatUseCase
         _eventBus.send(ShoppingCartUpdateEvent(shoppingCart));
         return _repo.selectSeat(
           SeatInfoDto(
-              row: params.seat.seatRow!,
-              number: params.seat.seatNumber!,
-              showtimeId: params.movieSessionId,
-              shoppingCartId: shoppingCart.id!),
+            row: params.seat.seatRow!,
+            number: params.seat.seatNumber!,
+            showtimeId: params.movieSessionId,
+            shoppingCartId: shoppingCart.id!,
+          ),
         );
       });
     });

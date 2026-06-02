@@ -10,18 +10,10 @@ class CinemaHallInfo extends Equatable {
 
   final List<List<CinemaSeat>> cinemaSeat;
 
-
   const CinemaHallInfo(this.id, this.description, this.cinemaSeat);
 
-
-  CinemaHallInfo.empty()
-      : this(
-      '',
-      '',
-      []
-  );
+  CinemaHallInfo.empty() : this('', '', []);
 
   @override
   List<Object?> get props => [id, description, cinemaSeat];
 }
-

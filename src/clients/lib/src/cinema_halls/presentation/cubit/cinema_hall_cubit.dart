@@ -12,8 +12,8 @@ GetIt getIt = GetIt.instance;
 
 class CinemaHallCubit extends Cubit<CinemaHallState> {
   CinemaHallCubit({GetCinemaHallById? getCinemaHall})
-      : _getCinemaHallById = getCinemaHall ?? getIt.get<GetCinemaHallById>(),
-        super(const InitialState());
+    : _getCinemaHallById = getCinemaHall ?? getIt.get<GetCinemaHallById>(),
+      super(const InitialState());
 
   late final GetCinemaHallById _getCinemaHallById;
 
@@ -21,7 +21,9 @@ class CinemaHallCubit extends Cubit<CinemaHallState> {
     emit(const GettingCinemaHall());
 
     final result = await _getCinemaHallById(auditoriumId);
-    result.fold((failure) => emit(CinemaHallError(failure.errorMessage)),
-        (cinemaSession) => emit(CinemaHallLoaded(cinemaSession)));
+    result.fold(
+      (failure) => emit(CinemaHallError(failure.errorMessage)),
+      (cinemaSession) => emit(CinemaHallLoaded(cinemaSession)),
+    );
   }
 }

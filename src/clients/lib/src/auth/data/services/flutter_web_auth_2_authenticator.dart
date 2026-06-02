@@ -12,8 +12,8 @@ class FlutterWebAuth2Authenticator implements Authenticator {
 
   final String _identityHost = Constants.BASE_SSO_URL;
   final bool _useHttps = Constants.USE_HTTPS;
-  final String _identityTokenPath =
-      dotenv.env["IDENTITY_TOKEN_PATH"].toString();
+  final String _identityTokenPath = dotenv.env["IDENTITY_TOKEN_PATH"]
+      .toString();
   final String _callbackPath = dotenv.env["CALLBACK_PATH"].toString();
   final String _identityAuthPath = dotenv.env["IDENTITY_AUTH_PATH"].toString();
 
@@ -22,32 +22,48 @@ class FlutterWebAuth2Authenticator implements Authenticator {
     final callbackUrlScheme = '$_clientBaseUrl/$_callbackPath';
 
     Uri url = createAuthenticateUri(
-        _identityHost, _identityAuthPath, callbackUrlScheme, _useHttps);
+      _identityHost,
+      _identityAuthPath,
+      callbackUrlScheme,
+      _useHttps,
+    );
 
     final result = await FlutterWebAuth2.authenticate(
-        url: url.toString(),
-        callbackUrlScheme: _callbackPath);
-       // preferEphemeral: true);
+      url: url.toString(),
+      callbackUrlScheme: _callbackPath,
+    );
+    // preferEphemeral: true);
 
     final code = Uri.parse(result).queryParameters['code'];
 
-    final tokenUrl = createCodeExchangeUri(_identityHost, _identityTokenPath, _useHttps);
+    final tokenUrl = createCodeExchangeUri(
+      _identityHost,
+      _identityTokenPath,
+      _useHttps,
+    );
 
-    final response = await http.post(tokenUrl, body: {
-      'client_id': _clientId,
-      'redirect_uri': callbackUrlScheme,
-      'grant_type': 'authorization_code',
-      'code': code
-    }, headers: {
-      "content-type": "application/x-www-form-urlencoded",
-      "Accept": "application/json, text/plain, */*"
-    });
+    final response = await http.post(
+      tokenUrl,
+      body: {
+        'client_id': _clientId,
+        'redirect_uri': callbackUrlScheme,
+        'grant_type': 'authorization_code',
+        'code': code,
+      },
+      headers: {
+        "content-type": "application/x-www-form-urlencoded",
+        "Accept": "application/json, text/plain, */*",
+      },
+    );
 
     return Right(response.body);
   }
 
   Uri createCodeExchangeUri(
-      String identityHost, String identityAuthPath, bool useHttps) {
+    String identityHost,
+    String identityAuthPath,
+    bool useHttps,
+  ) {
     if (useHttps) {
       return Uri.https(identityHost, identityAuthPath);
     } else {
@@ -55,13 +71,17 @@ class FlutterWebAuth2Authenticator implements Authenticator {
     }
   }
 
-  Uri createAuthenticateUri(String identityHost, String identityAuthPath,
-      String callbackUrlScheme, bool useHttps) {
+  Uri createAuthenticateUri(
+    String identityHost,
+    String identityAuthPath,
+    String callbackUrlScheme,
+    bool useHttps,
+  ) {
     var queryParameters = {
       'response_type': 'code',
       'client_id': _clientId,
       'redirect_uri': callbackUrlScheme,
-      'scope': 'email openid phone'
+      'scope': 'email openid phone',
     };
     if (useHttps) {
       return Uri.https(identityHost, identityAuthPath, queryParameters);

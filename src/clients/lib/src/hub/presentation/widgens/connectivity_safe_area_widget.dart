@@ -12,7 +12,7 @@ class ConnectivitySafeAreaWidget extends StatelessWidget {
 
   late final OverlayEntry? _overlayEntry;
 
-  late  final OverlayEntry? _disconnectedOverlayEntry;
+  late final OverlayEntry? _disconnectedOverlayEntry;
 
   @override
   Widget build(BuildContext context) {
@@ -24,13 +24,13 @@ class ConnectivitySafeAreaWidget extends StatelessWidget {
             builder: (context) {
               return OverlayDialog(
                 header: Text(
-                    AppLocalizations.of(context)!
-                        .reconnecting_notification_text,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      color: Colors.black87,
-                      decoration: TextDecoration.none,
-                    )),
+                  AppLocalizations.of(context)!.reconnecting_notification_text,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    color: Colors.black87,
+                    decoration: TextDecoration.none,
+                  ),
+                ),
                 body: const SizedBox(
                   width: 50,
                   height: 50,
@@ -39,9 +39,7 @@ class ConnectivitySafeAreaWidget extends StatelessWidget {
               );
             },
           );
-          Overlay.of(
-            context,
-          ).insert(_overlayEntry!);
+          Overlay.of(context).insert(_overlayEntry!);
         } else {
           _overlayEntry?.remove();
           _overlayEntry = null;
@@ -54,36 +52,40 @@ class ConnectivitySafeAreaWidget extends StatelessWidget {
           _disconnectedOverlayEntry = null;
 
           _disconnectedOverlayEntry = OverlayEntry(
-              maintainState: true,
-              builder: (context) {
-                return OverlayDialog(
+            maintainState: true,
+            builder: (context) {
+              return OverlayDialog(
+                header: Text(
+                  AppLocalizations.of(
+                    context,
+                  )!.connection_lost_notification_text,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    color: Colors.black87,
+                    decoration: TextDecoration.none,
+                  ),
+                ),
+                body: SizedBox(
+                  width: 120,
+                  height: 50,
+                  child: TextButton(
+                    onPressed: () {
+                      connectivityBloc.connect();
+                      _disconnectedOverlayEntry?.remove();
+                      _disconnectedOverlayEntry = null;
+                    },
+                    child: Text(
+                      AppLocalizations.of(
+                        context,
+                      )!.connection_lost_reconnect_btn,
+                    ),
+                  ),
+                ),
+              );
+            },
+          );
 
-                    header: Text(
-                        AppLocalizations.of(context)!
-                            .connection_lost_notification_text,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          color: Colors.black87,
-                          decoration: TextDecoration.none,
-                        )),
-                    body: SizedBox(
-                      width: 120,
-                      height: 50,
-                      child: TextButton(
-                        onPressed: () {
-                          connectivityBloc.connect();
-                          _disconnectedOverlayEntry?.remove();
-                          _disconnectedOverlayEntry = null;
-                        },
-                        child: Text(AppLocalizations.of(context)!
-                            .connection_lost_reconnect_btn),
-                      ),
-                    ));
-              });
-
-          Overlay.of(
-            context,
-          ).insert(_disconnectedOverlayEntry!);
+          Overlay.of(context).insert(_disconnectedOverlayEntry!);
         }
       },
     );

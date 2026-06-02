@@ -29,15 +29,16 @@ class _AuthWidget extends State<AuthWidget> {
           return SizedBox(
             width: 70,
             height: 40,
-            child: TextButton(style: OutlinedButton.styleFrom(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(1),
+            child: TextButton(
+              style: OutlinedButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(1),
+                ),
               ),
-            ),
-              onPressed: ()   {
-                 context.read<AuthBloc>().add(LogOutEvent());
+              onPressed: () {
+                context.read<AuthBloc>().add(LogOutEvent());
               },
-              child:  Text(AppLocalizations.of(context)!.sing_out),
+              child: Text(AppLocalizations.of(context)!.sing_out),
             ),
           );
         }
@@ -45,19 +46,22 @@ class _AuthWidget extends State<AuthWidget> {
         return SizedBox(
           width: 70,
           height: 40,
-          child: TextButton(style: OutlinedButton.styleFrom(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(1),
+          child: TextButton(
+            style: OutlinedButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(1),
+              ),
             ),
-          ),
-            onPressed: ()  {
-               context.read<AuthBloc>().add(LogInEvent());
+            onPressed: () {
+              context.read<AuthBloc>().add(LogInEvent());
             },
-            child:  Text(AppLocalizations.of(context)!.sing_in),
+            child: Text(AppLocalizations.of(context)!.sing_in),
           ),
         );
-      });
+      },
+    );
   }
+
   @override
   void dispose() {
     super.dispose();

@@ -9,8 +9,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:dartz/dartz.dart';
 
 class ReserveSeatsUseCase extends FutureUsecaseWithoutParams<void> {
-  const ReserveSeatsUseCase(
-      this._repo, this._localRepo, this._authService);
+  const ReserveSeatsUseCase(this._repo, this._localRepo, this._authService);
 
   final storage = const FlutterSecureStorage();
   final ShoppingCartRepo _repo;
@@ -23,7 +22,9 @@ class ReserveSeatsUseCase extends FutureUsecaseWithoutParams<void> {
 
     return userStatus.fold((l) => Left(l), (r) async {
       if (r.status != AuthenticationStatus.authorized) {
-        return const Left(NotAuthorisedException(message: 'NotAuthorised', statusCode: 401));
+        return const Left(
+          NotAuthorisedException(message: 'NotAuthorised', statusCode: 401),
+        );
       }
 
       var shoppingCartResult = await _localRepo.getShoppingCart();
@@ -34,11 +35,13 @@ class ReserveSeatsUseCase extends FutureUsecaseWithoutParams<void> {
           return result;
         }
 
-        return const Left(ShoppingCartNotAssignedException(
-            message: 'Shopping cart is not assigned to user', statusCode: 400));
-    });
-
-
+        return const Left(
+          ShoppingCartNotAssignedException(
+            message: 'Shopping cart is not assigned to user',
+            statusCode: 400,
+          ),
+        );
+      });
     });
   }
 }

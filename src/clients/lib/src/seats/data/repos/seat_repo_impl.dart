@@ -18,21 +18,28 @@ class SeatRepoImpl implements SeatRepo {
     _client = client ?? getIt.get<Dio>();
   }
 
-
   @override
-  ResultFuture<List<Seat>> getSeatsByMovieSessionId(String movieSessionId) async {
+  ResultFuture<List<Seat>> getSeatsByMovieSessionId(
+    String movieSessionId,
+  ) async {
     try {
-      Response response = await _client.get('/api/moviesessions/$movieSessionId/seats');
+      Response response = await _client.get(
+        '/api/moviesessions/$movieSessionId/seats',
+      );
       List<dynamic> movies = jsonDecode(jsonEncode(response.data));
 
-      List<Seat> seatDtos =
-      movies.map((json) => SeatDto.fromJson(json)).toList();
+      List<Seat> seatDtos = movies
+          .map((json) => SeatDto.fromJson(json))
+          .toList();
 
       return Right(seatDtos);
     } on DioException catch (e) {
-      return Left(ServerFailure(
+      return Left(
+        ServerFailure(
           message: json.decode(e.response.toString())["errorMessage"],
-          statusCode: e.message));
+          statusCode: e.message,
+        ),
+      );
     }
   }
 }

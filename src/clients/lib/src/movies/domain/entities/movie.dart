@@ -7,12 +7,13 @@ part 'movie.g.dart';
 
 @freezed
 abstract class Movie with _$Movie {
-  factory Movie(
-      {required String id,
-      required String title,
-      String? imdbId,
-      String? stars,
-      DateTime? releaseDate}) = _Movie;
+  factory Movie({
+    required String id,
+    required String title,
+    String? imdbId,
+    String? stars,
+    DateTime? releaseDate,
+  }) = _Movie;
 
   factory Movie.fromJson(Map<String, Object?> json) => _$MovieFromJson(json);
 

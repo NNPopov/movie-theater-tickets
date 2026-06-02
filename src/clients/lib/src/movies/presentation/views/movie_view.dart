@@ -24,7 +24,8 @@ class MoviesView extends StatefulWidget {
 }
 
 class _MoviesView extends State<MoviesView> {
-  CarouselSliderController buttonCarouselController = CarouselSliderController();
+  CarouselSliderController buttonCarouselController =
+      CarouselSliderController();
 
   Future<void> movieSeat(Movie movie) async {
     Navigator.pushNamed(context, MovieSessionsView.id, arguments: movie.id);
@@ -81,60 +82,59 @@ class _MoviesView extends State<MoviesView> {
       _itemsCount = 1;
     }
 
-    return
-      Container(
-        alignment: Alignment.topLeft,
-        child: SingleChildScrollView(
-            controller: _controller,
-            child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  const DashboardWidget(route: MoviesView.id),
-                  Container(
-                    padding: const EdgeInsets.only(top: 20.0),
-                    child: Container(
-                      width: width - 10,
-                      height: 700,
-                      // child: Expanded(
-                      child: Align(
-                        alignment: Alignment.topCenter,
-                        child: CarouselSlider(
-                          items: movies.map((rowSeats) {
-                            return BlocProvider(
-                              create: (_) => MovieCubit(getIt.get()),
-                              child: MovieDetailWidget(rowSeats.id),
-                            );
-                          }).toList(),
-                          carouselController: buttonCarouselController,
-                          options: CarouselOptions(
-                            height: 570.0,
-                            enableInfiniteScroll: true,
-                            viewportFraction: 1.0 / _itemsCount,
-                            enlargeCenterPage: false,
-                            aspectRatio: 3.0,
-                            enlargeStrategy: CenterPageEnlargeStrategy.height,
-                            onPageChanged: (index, reason) {
-                              setState(() {
-                                _current = index;
-                              });
-                            },
-                          ),
-                        ),
-                      ),
-                      //),
+    return Container(
+      alignment: Alignment.topLeft,
+      child: SingleChildScrollView(
+        controller: _controller,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const DashboardWidget(route: MoviesView.id),
+            Container(
+              padding: const EdgeInsets.only(top: 20.0),
+              child: Container(
+                width: width - 10,
+                height: 700,
+                // child: Expanded(
+                child: Align(
+                  alignment: Alignment.topCenter,
+                  child: CarouselSlider(
+                    items: movies.map((rowSeats) {
+                      return BlocProvider(
+                        create: (_) => MovieCubit(getIt.get()),
+                        child: MovieDetailWidget(rowSeats.id),
+                      );
+                    }).toList(),
+                    carouselController: buttonCarouselController,
+                    options: CarouselOptions(
+                      height: 570.0,
+                      enableInfiniteScroll: true,
+                      viewportFraction: 1.0 / _itemsCount,
+                      enlargeCenterPage: false,
+                      aspectRatio: 3.0,
+                      enlargeStrategy: CenterPageEnlargeStrategy.height,
+                      onPageChanged: (index, reason) {
+                        setState(() {
+                          _current = index;
+                        });
+                      },
                     ),
                   ),
-                  ElevatedButton(
-                    onPressed: () => buttonCarouselController.nextPage(
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.linear),
-                    child: const Text('→'),
-                  )
-                ])),
-      );
-
-
-
+                ),
+                //),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () => buttonCarouselController.nextPage(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.linear,
+              ),
+              child: const Text('→'),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

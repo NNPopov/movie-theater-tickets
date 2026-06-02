@@ -20,14 +20,14 @@ class AuthServiceImpl implements AuthService {
 
   final _controller = StreamController<AuthStatus>.broadcast();
 
-  late AuthStatus authStatus =
-      AuthStatus(status: AuthenticationStatus.unauthorized);
+  late AuthStatus authStatus = AuthStatus(
+    status: AuthenticationStatus.unauthorized,
+  );
 
   @override
   Stream<AuthStatus> get status async* {
     yield* _controller.stream;
   }
-
 
   @override
   ResultFuture<String> getJwtToken() async {
@@ -35,11 +35,11 @@ class AuthServiceImpl implements AuthService {
 
     if (token == null) {
       if (authStatus.status != AuthenticationStatus.unauthorized) {
-        authStatus =
-            authStatus.copyWith(status: AuthenticationStatus.unauthorized);
+        authStatus = authStatus.copyWith(
+          status: AuthenticationStatus.unauthorized,
+        );
         _controller.add(authStatus);
       }
-
 
       return const Left(NotAuthorisedException());
     }
@@ -61,7 +61,6 @@ class AuthServiceImpl implements AuthService {
     }
     return Right(token);
   }
-
 
   @override
   ResultFuture<AuthStatus> getCurrentStatus() async {
@@ -88,12 +87,13 @@ class AuthServiceImpl implements AuthService {
 
   @override
   ResultFuture<AuthStatus> logOut() async {
-
-    if(authStatus.status == AuthenticationStatus.authorized || authStatus.status == AuthenticationStatus.expired) {
+    if (authStatus.status == AuthenticationStatus.authorized ||
+        authStatus.status == AuthenticationStatus.expired) {
       await storage.delete(key: Constants.TOKEN_KEY);
 
-      authStatus =
-          authStatus.copyWith(status: AuthenticationStatus.unauthorized);
+      authStatus = authStatus.copyWith(
+        status: AuthenticationStatus.unauthorized,
+      );
 
       _controller.add(authStatus);
 

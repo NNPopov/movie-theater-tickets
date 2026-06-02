@@ -9,10 +9,8 @@ class EventBus {
     _controller.sink.add(event);
   }
 
-
   @override
   void dispose() {
     _controller.close();
   }
 }
-

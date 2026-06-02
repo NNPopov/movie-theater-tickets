@@ -51,7 +51,6 @@ Future<void> initializeDependencies() async {
     ..registerFactory<Dio>(() => Client(getIt.get()).init())
     ..registerLazySingleton<AuthInterceptor>(() => AuthInterceptor());
 
-
   getIt.registerLazySingleton<EventBus>(() => EventBus());
 
   _initServerState();
@@ -65,91 +64,122 @@ Future<void> initializeDependencies() async {
 
   _initWebSockets();
   _initAuth();
-
-
-
 }
 
-void _initWebSockets()
-{
-  getIt.registerLazySingleton<EventHub>(() => SignalREventHub(
+void _initWebSockets() {
+  getIt.registerLazySingleton<EventHub>(
+    () => SignalREventHub(
       updateShoppingCartState: getIt.get(),
       updateSeatsState: getIt.get(),
-      updateServerStateUseCase: getIt.get()));
+      updateServerStateUseCase: getIt.get(),
+    ),
+  );
 
   getIt.get<EventHub>().subscribe();
 }
 
-void _initAuth()
-{
-  getIt.registerLazySingleton<AuthService>(() => AuthServiceImpl(authenticator: getIt()));
+void _initAuth() {
+  getIt.registerLazySingleton<AuthService>(
+    () => AuthServiceImpl(authenticator: getIt()),
+  );
   getIt.registerLazySingleton<Authenticator>(
-          () => FlutterWebAuth2Authenticator());
+    () => FlutterWebAuth2Authenticator(),
+  );
   getIt.get<ShoppingCartAuthListener>().init();
 }
 
-
-void _initServerState()
-{
+void _initServerState() {
   getIt.registerLazySingleton<UpdateServerStateUseCase>(
-          () => UpdateServerStateUseCase(getIt.get()));
+    () => UpdateServerStateUseCase(getIt.get()),
+  );
 }
 
 void _initShoppingCart() {
   getIt.registerLazySingleton<ShoppingCartAuthListener>(
-      () => ShoppingCartAuthListener(getIt.get(), getIt.get(), getIt.get(), getIt.get(), getIt.get(), getIt.get()));
+    () => ShoppingCartAuthListener(
+      getIt.get(),
+      getIt.get(),
+      getIt.get(),
+      getIt.get(),
+      getIt.get(),
+      getIt.get(),
+    ),
+  );
 
   getIt.registerLazySingleton<ShoppingCartLocalRepo>(
-      () => ShoppingCartLocalRepoImpl());
+    () => ShoppingCartLocalRepoImpl(),
+  );
 
   getIt.registerLazySingleton<GetCinemaHallInfo>(
-      () => GetCinemaHallInfo(getIt.get(), getIt.get()));
+    () => GetCinemaHallInfo(getIt.get(), getIt.get()),
+  );
   getIt.registerLazySingleton<ReserveSeatsUseCase>(
-      () => ReserveSeatsUseCase(getIt.get(), getIt.get(), getIt.get()));
-  getIt.registerLazySingleton<ShoppingCartRepo>(() => ShoppingCartRepoImpl(getIt.get(), getIt.get()));
-  getIt.registerLazySingleton<CreateShoppingCartUseCase>(() =>
-      CreateShoppingCartUseCase(
-          getIt.get(), getIt.get(), getIt.get()));
-  getIt.registerLazySingleton<GetShoppingCartUseCase>(() =>
-      GetShoppingCartUseCase(
-          getIt.get(), getIt.get(), getIt.get(), getIt.get(), getIt.get()));
+    () => ReserveSeatsUseCase(getIt.get(), getIt.get(), getIt.get()),
+  );
+  getIt.registerLazySingleton<ShoppingCartRepo>(
+    () => ShoppingCartRepoImpl(getIt.get(), getIt.get()),
+  );
+  getIt.registerLazySingleton<CreateShoppingCartUseCase>(
+    () => CreateShoppingCartUseCase(getIt.get(), getIt.get(), getIt.get()),
+  );
+  getIt.registerLazySingleton<GetShoppingCartUseCase>(
+    () => GetShoppingCartUseCase(
+      getIt.get(),
+      getIt.get(),
+      getIt.get(),
+      getIt.get(),
+      getIt.get(),
+    ),
+  );
   getIt.registerLazySingleton<SelectSeatUseCase>(
-      () => SelectSeatUseCase(getIt.get(), getIt.get(), getIt.get()));
+    () => SelectSeatUseCase(getIt.get(), getIt.get(), getIt.get()),
+  );
   getIt.registerLazySingleton<UnselectSeatUseCase>(
-      () => UnselectSeatUseCase(getIt.get(), getIt.get()));
+    () => UnselectSeatUseCase(getIt.get(), getIt.get()),
+  );
   getIt.registerLazySingleton<ShoppingCartUpdateSubscribeUseCase>(
-      () => ShoppingCartUpdateSubscribeUseCase(eventHub: getIt.get()));
+    () => ShoppingCartUpdateSubscribeUseCase(eventHub: getIt.get()),
+  );
   getIt.registerLazySingleton<ShoppingCartUpdateStateUseCase>(
-      () => ShoppingCartUpdateStateUseCase(getIt.get(), getIt.get()));
+    () => ShoppingCartUpdateStateUseCase(getIt.get(), getIt.get()),
+  );
   getIt.registerLazySingleton<AssignClientUseCase>(
-      () => AssignClientUseCase(getIt.get(), getIt.get(), getIt.get()));
+    () => AssignClientUseCase(getIt.get(), getIt.get(), getIt.get()),
+  );
 }
 
 void _initSeats() {
   getIt.registerLazySingleton<UpdateSeatsStateUseCase>(
-      () => UpdateSeatsStateUseCase(getIt.get()));
+    () => UpdateSeatsStateUseCase(getIt.get()),
+  );
   getIt.registerLazySingleton<SeatRepo>(() => SeatRepoImpl());
   getIt.registerLazySingleton<GetSeatsByMovieSessionId>(
-      () => GetSeatsByMovieSessionId(getIt.get()));
+    () => GetSeatsByMovieSessionId(getIt.get()),
+  );
 }
 
 void _initCinemaHall() {
-
   getIt.registerLazySingleton<CinemaHallRepo>(
-      () => CinemaHallRepoImpl(getIt.get()));
+    () => CinemaHallRepoImpl(getIt.get()),
+  );
   getIt.registerLazySingleton<GetCinemaHallById>(
-      () => GetCinemaHallById(getIt.get()));
+    () => GetCinemaHallById(getIt.get()),
+  );
 }
 
 void _initMovieSession() {
   getIt.registerLazySingleton<GetMovieSessions>(
-      () => GetMovieSessions(getIt.get()));
+    () => GetMovieSessions(getIt.get()),
+  );
   getIt.registerLazySingleton<MovieSessionRepo>(
-      () => MovieSessionRepoImpl(getIt.get()));
+    () => MovieSessionRepoImpl(getIt.get()),
+  );
 }
 
 void _initMovie() {
   getIt.registerLazySingleton<GetMovieById>(() => GetMovieById(getIt.get()));
-  getIt.registerLazySingleton<GetActiveMovies>(() => GetActiveMovies(getIt.get()));
+  getIt.registerLazySingleton<GetActiveMovies>(
+    () => GetActiveMovies(getIt.get()),
+  );
   getIt.registerLazySingleton<MovieRepo>(() => MovieRepoImpl(getIt.get()));
 }

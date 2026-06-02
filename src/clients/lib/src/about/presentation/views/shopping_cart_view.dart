@@ -19,8 +19,6 @@ class _AboutUsView extends State<AboutUsView> {
 
   @override
   Widget build(BuildContext context) {
-    return  const Column(children: [
-          DashboardWidget(route: AboutUsView.id),
-        ]);
+    return const Column(children: [DashboardWidget(route: AboutUsView.id)]);
   }
 }

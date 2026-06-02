@@ -1,11 +1,7 @@
-
-
 import '../../shopping_carts/data/models/seat_info_dto.dart';
 import '../presentation/cubit/connectivity_bloc.dart';
 
-abstract class EventHub
-{
-
+abstract class EventHub {
   Future subscribe();
 
   Future shoppingCartUpdateSubscribe(String shoppingCartId);
@@ -21,5 +17,4 @@ abstract class EventHub
   Future seatSelect(SeatInfoDto seatSelectRequestDto);
 
   Future seatUnselect(SeatInfoDto seatSelectRequestDto);
-
 }

@@ -23,31 +23,37 @@ void main() {
   setUp(() {
     repo = MocShoppingCartService();
     hub = MockEventHub();
-    authService=MockAuthService();
-    usecase = CreateShoppingCartUseCase(  hub, authService, repo);
+    authService = MockAuthService();
+    usecase = CreateShoppingCartUseCase(hub, authService, repo);
   });
 
   group('CreateShoppingCart', () {
     test('should  call the ShoppingCartRepo.createShoppingCartRepo', () async {
       //Arragne
-      createShoppingCartCommand =
-          const CreateShoppingCartCommand(maxNumberOfSeats: 5);
+      createShoppingCartCommand = const CreateShoppingCartCommand(
+        maxNumberOfSeats: 5,
+      );
 
       //Act
 
       final result = await usecase(createShoppingCartCommand);
 
       when(() => repo.createShoppingCart(any())).thenAnswer(
-        (t) async => const Right(CreateShoppingCartResponse(
+        (t) async => const Right(
+          CreateShoppingCartResponse(
             'dcd5d892-4100-400b-b6f3-d4679f5b8db6',
-            'f2a8d6cb31e38a1e5d7fc42e55daf53a')),
+            'f2a8d6cb31e38a1e5d7fc42e55daf53a',
+          ),
+        ),
       );
 
       //Assert
       expect(
-          result,
-          equals(const Right<dynamic, void>(
-              'dcd5d892-4100-400b-b6f3-d4679f5b8db6')));
+        result,
+        equals(
+          const Right<dynamic, void>('dcd5d892-4100-400b-b6f3-d4679f5b8db6'),
+        ),
+      );
 
       verify(() => repo.createShoppingCart(5)).called(1);
 

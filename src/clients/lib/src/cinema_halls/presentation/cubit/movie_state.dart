@@ -2,18 +2,28 @@ part of 'movie_cubit.dart';
 
 @immutable
 class CinemaHallInfoState extends Equatable {
-  CinemaHallInfoState({required this.movie, required this.status, this.errorMessage});
+  CinemaHallInfoState({
+    required this.movie,
+    required this.status,
+    this.errorMessage,
+  });
 
   final CinemaHallInfo movie;
   final CinemaHallInfoStatus status;
   final String? errorMessage;
 
   static CinemaHallInfoState initial() {
-    return CinemaHallInfoState(movie: CinemaHallInfo.empty(), status: CinemaHallInfoStatus.initial);
+    return CinemaHallInfoState(
+      movie: CinemaHallInfo.empty(),
+      status: CinemaHallInfoStatus.initial,
+    );
   }
 
   static CinemaHallInfoState fetching() {
-    return CinemaHallInfoState(movie: CinemaHallInfo.empty(), status: CinemaHallInfoStatus.fetching);
+    return CinemaHallInfoState(
+      movie: CinemaHallInfo.empty(),
+      status: CinemaHallInfoStatus.fetching,
+    );
   }
 
   @override
@@ -32,5 +42,4 @@ class CinemaHallInfoState extends Equatable {
   }
 }
 
-enum CinemaHallInfoStatus {
-fetching, initial, error, completed}
+enum CinemaHallInfoStatus { fetching, initial, error, completed }

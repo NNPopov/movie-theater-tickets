@@ -15,49 +15,61 @@ class ShoppingCart extends Equatable {
   late PriceCalculationResult? priceCalculationResult;
   late bool? isDirty;
 
-  ShoppingCart(
-      {this.maxNumberOfSeats,
-      this.createdAt,
-      this.id,
-      this.movieSessionId,
-      this.status,
-      List<ShoppingCartSeat>? seats,
-      this.isAssigned,
-      this.priceCalculationResult,
-      this.isDirty}) {
+  ShoppingCart({
+    this.maxNumberOfSeats,
+    this.createdAt,
+    this.id,
+    this.movieSessionId,
+    this.status,
+    List<ShoppingCartSeat>? seats,
+    this.isAssigned,
+    this.priceCalculationResult,
+    this.isDirty,
+  }) {
     shoppingCartSeat = seats ?? [];
   }
 
   ShoppingCart.empty()
-      : this(
-            maxNumberOfSeats: 0,
-            createdAt: DateTime.parse('1900-01-01'),
-            id: '',
-            movieSessionId: '',
-            status: null,
-            seats: null,
-            isAssigned: false,
-            priceCalculationResult: null,
-            isDirty: false);
+    : this(
+        maxNumberOfSeats: 0,
+        createdAt: DateTime.parse('1900-01-01'),
+        id: '',
+        movieSessionId: '',
+        status: null,
+        seats: null,
+        isAssigned: false,
+        priceCalculationResult: null,
+        isDirty: false,
+      );
 
   Either<Failure, void> addSeat(ShoppingCartSeat seat) {
     if (status != ShoppingCartStatus.InWork) {
-      return Left(DataFailure(
-          message: "ShoppingCart has status $status", statusCode: 500));
+      return Left(
+        DataFailure(
+          message: "ShoppingCart has status $status",
+          statusCode: 500,
+        ),
+      );
     }
 
     if (shoppingCartSeat.length < maxNumberOfSeats!) {
-      if (shoppingCartSeat.any((e) =>
-          e.seatRow == seat.seatRow && e.seatNumber == seat.seatNumber)) {
+      if (shoppingCartSeat.any(
+        (e) => e.seatRow == seat.seatRow && e.seatNumber == seat.seatNumber,
+      )) {
         return const Left(
-            DataFailure(message: "Seat is alredy reserved", statusCode: 500));
+          DataFailure(message: "Seat is alredy reserved", statusCode: 500),
+        );
       }
       shoppingCartSeat.add(seat);
       isDirty = true;
       return const Right(null);
     }
-    return Left(DataFailure(
-        message: "Max number of Seats is $maxNumberOfSeats", statusCode: 500));
+    return Left(
+      DataFailure(
+        message: "Max number of Seats is $maxNumberOfSeats",
+        statusCode: 500,
+      ),
+    );
   }
 
   Either<Failure, void> deleteSeat(ShoppingCartSeat seat) {
@@ -68,15 +80,15 @@ class ShoppingCart extends Equatable {
 
   @override
   List<Object?> get props => [
-        maxNumberOfSeats,
-        createdAt,
-        id,
-        movieSessionId,
-        status,
-        shoppingCartSeat,
-        isAssigned,
-        isDirty
-      ];
+    maxNumberOfSeats,
+    createdAt,
+    id,
+    movieSessionId,
+    status,
+    shoppingCartSeat,
+    isAssigned,
+    isDirty,
+  ];
 }
 
 enum ShoppingCartStatus { InWork, SeatsReserved, PurchaseCompleted, Deleted }

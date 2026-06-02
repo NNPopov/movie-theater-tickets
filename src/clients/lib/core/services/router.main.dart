@@ -26,9 +26,7 @@ Route<dynamic> generateRoute(RouteSettings settings) {
     return _pageBuilder(
       (_) => MultiBlocProvider(
         providers: [
-          BlocProvider(
-            create: (_) => MovieTheaterCubit(getIt.get()),
-          ),
+          BlocProvider(create: (_) => MovieTheaterCubit(getIt.get())),
         ],
         child: const MoviesView(),
       ),
@@ -38,9 +36,7 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       settings.arguments != null) {
     return _pageBuilder(
       (_) => MultiBlocProvider(
-        providers: [
-          BlocProvider(create: (_) => MovieSessionBloc(getIt.get())),
-        ],
+        providers: [BlocProvider(create: (_) => MovieSessionBloc(getIt.get()))],
         child: MovieSessionsView(settings.arguments! as String),
       ),
       settings: settings,
@@ -55,31 +51,22 @@ Route<dynamic> generateRoute(RouteSettings settings) {
             create: (context) => SeatBloc(getIt.get(), getIt.get()),
           ),
           BlocProvider<CinemaHallInfoBloc>(
-              create: (context) => CinemaHallInfoBloc(getIt.get()))
+            create: (context) => CinemaHallInfoBloc(getIt.get()),
+          ),
         ],
         child: SeatsView(settings.arguments! as MovieSession),
       ),
       settings: settings,
     );
   } else if (settings.name == ShoppingCartView.id) {
-    return _pageBuilder(
-      (_) => const ShoppingCartView(),
-      settings: settings,
-    );
+    return _pageBuilder((_) => const ShoppingCartView(), settings: settings);
   } else if (settings.name == AboutUsView.id) {
-    return _pageBuilder(
-      (_) => const AboutUsView(),
-      settings: settings,
-    );
+    return _pageBuilder((_) => const AboutUsView(), settings: settings);
   }
 
   return _pageBuilder(
     (_) => MultiBlocProvider(
-      providers: [
-        BlocProvider(
-          create: (_) => MovieTheaterCubit(getIt.get()),
-        ),
-      ],
+      providers: [BlocProvider(create: (_) => MovieTheaterCubit(getIt.get()))],
       child: const MoviesView(),
     ),
     settings: settings,
@@ -90,28 +77,22 @@ PageRouteBuilder<dynamic> _pageBuilder(
   Widget Function(BuildContext) page, {
   required RouteSettings settings,
 }) {
-
   return PageRouteBuilder(
     settings: settings,
     transitionsBuilder: (_, animation, __, child) {
-
       var begin = Offset(0.0, 1.0);
       var end = Offset.zero;
       var curve = Curves.ease;
       var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
       var offsetAnimation = animation.drive(tween);
 
-      return SlideTransition(
-        position: offsetAnimation,
-        child: child,
-      );
+      return SlideTransition(position: offsetAnimation, child: child);
 
-    // return  FadeTransition(
-    //     opacity: animation,
-    //     child: child,
-    //   );
+      // return  FadeTransition(
+      //     opacity: animation,
+      //     child: child,
+      //   );
     },
-    pageBuilder: (context, __, ___) =>
-  page(context),
+    pageBuilder: (context, __, ___) => page(context),
   );
 }

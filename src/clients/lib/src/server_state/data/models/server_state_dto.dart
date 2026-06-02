@@ -4,7 +4,7 @@ class ServerStateDto extends ServerState {
   const ServerStateDto({required super.serverDateTime});
 
   ServerStateDto.fromJson(Map<String, dynamic> json)
-      : super(serverDateTime: DateTime.parse(json['serverDateTime']));
+    : super(serverDateTime: DateTime.parse(json['serverDateTime']));
 }
 
 extension ServerStateMap on ServerState {

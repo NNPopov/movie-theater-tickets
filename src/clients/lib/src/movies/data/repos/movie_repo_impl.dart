@@ -8,28 +8,33 @@ import '../../../../core/errors/failures.dart';
 import '../../domain/repos/movie_repo.dart';
 import 'package:get_it/get_it.dart';
 
-
 GetIt getIt = GetIt.instance;
 
 class MovieRepoImpl implements MovieRepo {
   final Dio _client;
 
-  MovieRepoImpl(this._client) ;
+  MovieRepoImpl(this._client);
 
   @override
   ResultFuture<List<Movie>> getMovies() async {
     try {
-      Response response = await _client.get('/api/movies').timeout(const Duration( seconds: 5));
+      Response response = await _client
+          .get('/api/movies')
+          .timeout(const Duration(seconds: 5));
       List<dynamic> movies = jsonDecode(jsonEncode(response.data));
 
-      List<Movie> movieDtos =
-          movies.map((json) => Movie.fromJson(json)).toList();
+      List<Movie> movieDtos = movies
+          .map((json) => Movie.fromJson(json))
+          .toList();
 
       return Right(movieDtos);
     } on DioException catch (e) {
-      return Left(ServerFailure(
+      return Left(
+        ServerFailure(
           message: json.decode(e.response.toString())["errorMessage"],
-          statusCode: e.message));
+          statusCode: e.message,
+        ),
+      );
     }
   }
 

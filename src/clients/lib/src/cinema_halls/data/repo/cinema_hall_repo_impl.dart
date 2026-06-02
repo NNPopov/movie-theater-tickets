@@ -38,13 +38,14 @@ class CinemaHallRepoImpl implements CinemaHallRepo {
 
   @override
   ResultFuture<CinemaHallInfo> getCinemaHallInfoById(
-      String cinemaHallId) async {
+    String cinemaHallId,
+  ) async {
     try {
       final response = await _client.get(
-          '/api/cinema-halls/$cinemaHallId/seats');
-
-      var movieSession = json.decode(response.toString()
+        '/api/cinema-halls/$cinemaHallId/seats',
       );
+
+      var movieSession = json.decode(response.toString());
 
       var cinemaHallDto = CinemaHallInfoDto.fromJson(movieSession);
 

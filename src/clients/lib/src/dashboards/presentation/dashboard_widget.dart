@@ -29,29 +29,30 @@ class _DashboardView extends State<DashboardWidget> {
     return Container(
       height: 40,
       padding: const EdgeInsets.only(left: 50, right: 50),
-      decoration:  BoxDecoration(
-        color: Theme.of(context).widgetColor,
-      ),
+      decoration: BoxDecoration(color: Theme.of(context).widgetColor),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Expanded(
             child: MenuItemWidget(
-                text: AppLocalizations.of(context)!.movies,
-                route: widget.route,
-                navigateId: MoviesView.id),
+              text: AppLocalizations.of(context)!.movies,
+              route: widget.route,
+              navigateId: MoviesView.id,
+            ),
           ),
           Expanded(
             child: MenuItemWidget(
-                text: 'About Us',
-                route: widget.route,
-                navigateId: AboutUsView.id),
+              text: 'About Us',
+              route: widget.route,
+              navigateId: AboutUsView.id,
+            ),
           ),
           Expanded(
             child: MenuItemWidget(
-                text: AppLocalizations.of(context)!.shopping_cart,
-                route: widget.route,
-                navigateId: ShoppingCartView.id),
+              text: AppLocalizations.of(context)!.shopping_cart,
+              route: widget.route,
+              navigateId: ShoppingCartView.id,
+            ),
           ),
         ],
       ),

@@ -10,15 +10,20 @@ class AppTheme {
     cardColor: const Color(0xfff1ece5),
     useMaterial3: true,
     textTheme: const TextTheme(
-        bodyLarge: TextStyle(
-            fontSize: AppStyles.defaultFontSize, color: Colors.black)),
+      bodyLarge: TextStyle(
+        fontSize: AppStyles.defaultFontSize,
+        color: Colors.black,
+      ),
+    ),
 
     textButtonTheme: TextButtonThemeData(
-        style: ButtonStyle(
-      padding: MaterialStateProperty.all(
-          const EdgeInsets.symmetric(vertical: 1, horizontal: 1)),
-      foregroundColor: MaterialStateProperty.all<Color>(Colors.blue),
-    )),
+      style: ButtonStyle(
+        padding: MaterialStateProperty.all(
+          const EdgeInsets.symmetric(vertical: 1, horizontal: 1),
+        ),
+        foregroundColor: MaterialStateProperty.all<Color>(Colors.blue),
+      ),
+    ),
   );
 
   static ThemeData darkTheme = ThemeData(
@@ -28,14 +33,21 @@ class AppTheme {
     cardColor: Colors.black12,
     useMaterial3: true,
     textTheme: const TextTheme(
-        bodyLarge: TextStyle(
-            fontSize: AppStyles.defaultFontSize, color: Colors.white)),
+      bodyLarge: TextStyle(
+        fontSize: AppStyles.defaultFontSize,
+        color: Colors.white,
+      ),
+    ),
     textButtonTheme: TextButtonThemeData(
-        style: ButtonStyle(
-          padding: MaterialStateProperty.all(
-              const EdgeInsets.symmetric(vertical: 1, horizontal: 1)),
-          foregroundColor: MaterialStateProperty.all<Color>(Colors.lightBlueAccent),
-        )),
+      style: ButtonStyle(
+        padding: MaterialStateProperty.all(
+          const EdgeInsets.symmetric(vertical: 1, horizontal: 1),
+        ),
+        foregroundColor: MaterialStateProperty.all<Color>(
+          Colors.lightBlueAccent,
+        ),
+      ),
+    ),
   );
 }
 

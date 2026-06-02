@@ -2,8 +2,11 @@ part of 'movie_theater_cubit.dart';
 
 @immutable
 class MovieTheaterState extends Equatable {
-  MovieTheaterState(
-      {required this.movies, required this.status, this.errorMessage});
+  MovieTheaterState({
+    required this.movies,
+    required this.status,
+    this.errorMessage,
+  });
 
   final List<ActiveMovie> movies;
   final MoviesStatus status;

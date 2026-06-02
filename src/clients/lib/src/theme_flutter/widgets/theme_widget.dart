@@ -19,29 +19,31 @@ class _ThemeWidget extends State<ThemeWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ThemeCubit, ThemeCubitState>(builder: (context, lang) {
-      return SizedBox(
-        width: 80,
-        height: 40,
-        child: DropdownButton<bool>(
-          value: lang.isDark,
-          elevation: 16,
-          onChanged: (bool? value) {
-            context.read<ThemeCubit>().setTheme(value!);
-          },
-          items: [
-            DropdownMenuItem<bool>(
-              value: true,
-              child: Text(AppLocalizations.of(context)!.dark_theme),
-            ),
-            DropdownMenuItem<bool>(
-              value: false,
-              child: Text(AppLocalizations.of(context)!.light_theme),
-            ),
-          ],
-        ),
-      );
-    });
+    return BlocBuilder<ThemeCubit, ThemeCubitState>(
+      builder: (context, lang) {
+        return SizedBox(
+          width: 80,
+          height: 40,
+          child: DropdownButton<bool>(
+            value: lang.isDark,
+            elevation: 16,
+            onChanged: (bool? value) {
+              context.read<ThemeCubit>().setTheme(value!);
+            },
+            items: [
+              DropdownMenuItem<bool>(
+                value: true,
+                child: Text(AppLocalizations.of(context)!.dark_theme),
+              ),
+              DropdownMenuItem<bool>(
+                value: false,
+                child: Text(AppLocalizations.of(context)!.light_theme),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   @override

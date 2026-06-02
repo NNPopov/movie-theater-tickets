@@ -29,55 +29,56 @@ Future<void> main() async {
   final logger = getLogger(main);
 
   FlutterError.onError = (details) {
-    logger.log(Level.error, details.exceptionAsString(),
-        error: details.exception, stackTrace: details.stack);
+    logger.log(
+      Level.error,
+      details.exceptionAsString(),
+      error: details.exception,
+      stackTrace: details.stack,
+    );
   };
 
-  runZonedGuarded(() async {
-    await dotenv.load();
+  runZonedGuarded(
+    () async {
+      await dotenv.load();
 
-    await Global.init();
+      await Global.init();
 
-    await initializeDependencies();
+      await initializeDependencies();
 
-    if (kReleaseMode) {
-      ErrorWidget.builder = (FlutterErrorDetails errorDetails) {
-        return MaterialApp(
-          home: Scaffold(
-            appBar: AppBar(
-              title: const Text('Error'),
-            ),
-            body: const Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.error_outline_outlined,
-                    color: Colors.red,
-                    size: 100,
-                  ),
-                  Text(
-                    'Oops... something went wrong',
-                  ),
-                ],
+      if (kReleaseMode) {
+        ErrorWidget.builder = (FlutterErrorDetails errorDetails) {
+          return MaterialApp(
+            home: Scaffold(
+              appBar: AppBar(title: const Text('Error')),
+              body: const Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.error_outline_outlined,
+                      color: Colors.red,
+                      size: 100,
+                    ),
+                    Text('Oops... something went wrong'),
+                  ],
+                ),
               ),
             ),
-          ),
-        );
-      };
-    }
+          );
+        };
+      }
 
-    runApp(MyApp());
-  },
-      (error, stackTrace) =>
-          logger.w(error.toString(), error: error, stackTrace: stackTrace));
+      runApp(MyApp());
+    },
+    (error, stackTrace) =>
+        logger.w(error.toString(), error: error, stackTrace: stackTrace),
+  );
 }
 
 class MyApp extends StatelessWidget {
   MyApp({super.key});
 
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
-
 
   @override
   Widget build(BuildContext context) {
@@ -89,7 +90,8 @@ class MyApp extends StatelessWidget {
           BlocProvider<AuthBloc>(create: (_) => AuthBloc(getIt.get())),
           BlocProvider<GlobalisationCubit>(create: (_) => GlobalisationCubit()),
           BlocProvider<ServerStateCubit>(
-              create: (_) => ServerStateCubit(getIt.get())),
+            create: (_) => ServerStateCubit(getIt.get()),
+          ),
           BlocProvider<ShoppingCartCubit>(
             create: (context) => ShoppingCartCubit(
               getIt.get(),
@@ -106,8 +108,9 @@ class MyApp extends StatelessWidget {
           builder: (context, lang) {
             return BlocBuilder<ThemeCubit, ThemeCubitState>(
               builder: (context, theme) {
-
-               ThemeData themeData =  theme.isDark ? AppTheme.darkTheme : AppTheme.lightTheme;
+                ThemeData themeData = theme.isDark
+                    ? AppTheme.darkTheme
+                    : AppTheme.lightTheme;
 
                 return MaterialApp(
                   theme: themeData,

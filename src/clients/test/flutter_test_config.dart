@@ -19,8 +19,9 @@ Future<void> testExecutable(FutureOr<void> Function() testMain) async {
 
 class _TempPathProviderPlatform extends PathProviderPlatform
     with MockPlatformInterfaceMixin {
-  final Directory _dir =
-      Directory.systemTemp.createTempSync('movie_theatre_tests');
+  final Directory _dir = Directory.systemTemp.createTempSync(
+    'movie_theatre_tests',
+  );
 
   @override
   Future<String?> getApplicationDocumentsPath() async => _dir.path;

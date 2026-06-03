@@ -87,7 +87,7 @@ class GetShoppingCartUseCase extends FutureUsecaseWithoutParams<ShoppingCart> {
     var result = await _repo.getShoppingCart(shoppingCartId);
 
     result.fold((l) async {
-      if (l.statusCode == 204) {
+      if (l.statusCode == 204 || l.statusCode == 404) {
         await storage.delete(key: Constants.SHOPPING_CARD_ID);
         await storage.delete(key: Constants.SHOPPING_CARD_HASH_ID);
         _eventBus.send(ShoppingCartHashIdUpdated());

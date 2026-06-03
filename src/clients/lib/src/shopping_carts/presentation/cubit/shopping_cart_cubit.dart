@@ -116,7 +116,7 @@ class ShoppingCartCubit extends Cubit<ShoppingCartState> {
 
         resultShoppingCart.fold(
           (failure) {
-            if (failure.statusCode == 204) {
+            if (failure.statusCode == 204 || failure.statusCode == 404) {
               emit(ShoppingCartState.initState());
             } else {
               emit(
@@ -151,7 +151,7 @@ class ShoppingCartCubit extends Cubit<ShoppingCartState> {
 
     result.fold(
       (failure) {
-        if (failure.statusCode == 204) {
+        if (failure.statusCode == 204 || failure.statusCode == 404) {
           emit(ShoppingCartState.initState());
         } else {
           emit(

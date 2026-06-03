@@ -79,6 +79,13 @@ class ShoppingCartRepoImpl implements ShoppingCartRepo {
       var shoppingCartDto = ShoppingCartDto.fromJson(primaryClientAccount);
 
       return Right(shoppingCartDto);
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 404) {
+        return const Left(
+          DataFailure(message: "shoppingCartId doesn't exist", statusCode: 404),
+        );
+      }
+      return Left(ServerFailure(message: e.toString(), statusCode: 500));
     } on Exception catch (e) {
       return Left(ServerFailure(message: e.toString(), statusCode: 500));
     }
@@ -136,7 +143,7 @@ class ShoppingCartRepoImpl implements ShoppingCartRepo {
         return Left(NotFoundFailure(message: e.toString()));
       }
       if (e.response?.statusCode == 404) {
-        return Left(NotFoundFailure(message: e.toString()));
+        return Left(NotFoundFailure(message: e.toString(), statusCode: 404));
       }
       return Left(ServerFailure(message: e.toString(), statusCode: 500));
     } on Exception catch (e) {

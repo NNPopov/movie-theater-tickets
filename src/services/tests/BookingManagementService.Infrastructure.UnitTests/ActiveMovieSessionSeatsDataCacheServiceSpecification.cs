@@ -8,6 +8,7 @@ using FluentAssertions;
 
 
 namespace BookingManagementService.Infrastructure.UnitTests;
+
 public class ActiveMovieSessionSeatsDataCacheServiceSpecification
 {
     [Fact]
@@ -28,13 +29,13 @@ public class ActiveMovieSessionSeatsDataCacheServiceSpecification
         await service.AddOrUpdateMovieSessionSeatsCache(data);
 
         // Assert
-    cacheService.Received(1)
-            .Set(
-            Arg.Is<string>(key => key.Contains(movieSessionId.ToString())),
-            Arg.Is<ActiveMovieSessionSeatsDTO>(s => s.Equals(data)),
-            Arg.Is<TimeSpan>(ts => ts.ToString().Substring(0,8) == expirationTime.Subtract(TimeProvider.System.GetUtcNow().DateTime).ToString().Substring(0,8))
-        )
-           .ConfigureAwait(false);
+        cacheService.Received(1)
+                .Set(
+                Arg.Is<string>(key => key.Contains(movieSessionId.ToString())),
+                Arg.Is<ActiveMovieSessionSeatsDTO>(s => s.Equals(data)),
+                Arg.Is<TimeSpan>(ts => ts.ToString().Substring(0, 8) == expirationTime.Subtract(TimeProvider.System.GetUtcNow().DateTime).ToString().Substring(0, 8))
+            )
+;
     }
 
     [Fact]
@@ -51,13 +52,13 @@ public class ActiveMovieSessionSeatsDataCacheServiceSpecification
         await service.AddOrUpdateMovieSessionSeatsCache(data);
 
         // Assert
-        
-     
+
+
         logger.Received(1).Debug(Arg.Is<string>(str => str.Contains("MovieSessionSeatsCache has been updated")), data.MovieSessionId);
     }
-    
-    
-    
+
+
+
     [Fact]
     public async Task GetMovieSessionSeatsData_ReturnsCorrectData_WhenFoundInCache()
     {
@@ -98,9 +99,9 @@ public class ActiveMovieSessionSeatsDataCacheServiceSpecification
         // Assert
         result.Should().BeNull();
     }
-    
-    
-    
+
+
+
     [Fact]
     public async Task GetActualMovieSessionSeatsData_ReturnsData_WhenQuerySuccessful()
     {

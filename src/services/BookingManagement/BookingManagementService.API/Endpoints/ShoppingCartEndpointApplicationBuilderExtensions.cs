@@ -51,7 +51,7 @@ public class ShoppingCartEndpointApplicationBuilderExtensions : IEndpoints
             .WithTags(Tag)
             .Produces<CreateShoppingCartResponse>(201, "application/json")
             .Produces(204);
-        
+
         endpointRouteBuilder.MapGet($"{BaseRoute}/current", async (
                 ClaimsPrincipal user,
                 ISender sender,
@@ -81,17 +81,17 @@ public class ShoppingCartEndpointApplicationBuilderExtensions : IEndpoints
                 var assignClientCartCommand =
                     new AssignClientCartCommand(shoppingCartId, clientId);
 
-                var result =  await sender.Send(assignClientCartCommand, cancellationToken);
-                
+                var result = await sender.Send(assignClientCartCommand, cancellationToken);
+
                 return result.Match(
                     () => Results.Ok(),
                     failure =>
                     {
                         if (failure is ConflictError)
                             throw new ConflictException(failure.Code, failure.Description);
-                        if (failure is NotFountError)
+                        if (failure is NotFoundError)
                             throw new ContentNotFoundException(failure.Code, failure.Description);
-                        
+
                         throw new Exception(failure.Description);
                     });
             })

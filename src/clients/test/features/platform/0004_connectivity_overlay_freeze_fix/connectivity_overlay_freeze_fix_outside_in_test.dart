@@ -101,16 +101,22 @@ void main() {
     await tester.pump();
   }
 
-  // Push an event and settle. Two pumps are needed: the bloc's stream delivery is async
-  // (sync: false), so the first pump runs the bloc -> BlocListener chain (and any reactive
-  // overlay insertion / setState it triggers) and the second pump renders the resulting
-  // frame. `pumpAndSettle` is unusable here — the reconnecting spinner animates forever
-  // and would time it out.
+  // Push an event and settle. `eventHub` and `bloc` are created in `setUp`, i.e. OUTSIDE
+  // the per-test fake-async zone, so the broadcast `StreamController` and the Cubit's state
+  // stream live in the root zone. The delivery is two async hops (eventHub -> bloc, then
+  // bloc -> BlocListener -> setState); `tester.pump()` alone flushes the fake zone but not
+  // the second root-zone hop, so the overlay would never render. A single `runAsync` turn
+  // of the real event loop flushes that chain; the two pumps then render the frame.
+  // `pumpAndSettle` is unusable here — the reconnecting spinner animates forever and would
+  // time it out.
   Future<void> emitAndSettle(
     WidgetTester tester,
     ConnectivityEvent event,
   ) async {
     eventHub.emit(event);
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 5)),
+    );
     await tester.pump();
     await tester.pump();
   }

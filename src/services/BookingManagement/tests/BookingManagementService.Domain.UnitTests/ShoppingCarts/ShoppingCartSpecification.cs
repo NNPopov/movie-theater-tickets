@@ -210,4 +210,66 @@ public class ShoppingCartSpecification
             .Count(x => x is ShoppingCartAssignedToClientDomainEvent)
             .Should().Be(1);
     }
+
+    // Slice 0005_reserve_tickets_result_http: SeatsReserve() is retyped void -> Result. On a genuine
+    // InWork -> SeatsReserved transition it succeeds and raises exactly one ShoppingCartReservedDomainEvent;
+    // re-reserving an already-SeatsReserved cart is an idempotent success with no second event; reserving a
+    // PurchaseCompleted cart returns a ConflictError (was a thrown ConflictException) and raises no event.
+    [Fact]
+    public void SeatsReserve_ShouldTransitionToSeatsReservedAndRaiseEvent_When_CartIsInWork()
+    {
+        // Arrange
+        var shoppingCart = ShoppingCart.Create(5, dataHasher);
+        shoppingCart.SetShowTime(Guid.NewGuid());
+
+        // Act
+        var result = shoppingCart.SeatsReserve();
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        shoppingCart.Status.Should().Be(ShoppingCartStatus.SeatsReserved);
+        shoppingCart.GetDomainEvents()
+            .Count(x => x is ShoppingCartReservedDomainEvent)
+            .Should().Be(1);
+    }
+
+    [Fact]
+    public void SeatsReserve_ShouldSucceedWithoutASecondEvent_When_CartIsAlreadySeatsReserved()
+    {
+        // Arrange
+        var shoppingCart = ShoppingCart.Create(5, dataHasher);
+        shoppingCart.SetShowTime(Guid.NewGuid());
+        shoppingCart.SeatsReserve();
+
+        // Act — re-reserving an already-reserved cart is an idempotent success, no duplicate event.
+        var result = shoppingCart.SeatsReserve();
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        shoppingCart.Status.Should().Be(ShoppingCartStatus.SeatsReserved);
+        shoppingCart.GetDomainEvents()
+            .Count(x => x is ShoppingCartReservedDomainEvent)
+            .Should().Be(1);
+    }
+
+    [Fact]
+    public void SeatsReserve_ShouldReturnConflictErrorAndRaiseNoEvent_When_CartIsPurchaseCompleted()
+    {
+        // Arrange
+        var shoppingCart = ShoppingCart.Create(5, dataHasher);
+        shoppingCart.AssignClientId(Guid.NewGuid());
+        shoppingCart.SeatsReserve();
+        shoppingCart.PurchaseComplete();
+
+        // Act
+        var result = shoppingCart.SeatsReserve();
+
+        // Assert
+        result.IsFailure.Should().BeTrue();
+        result.Error.Should().BeOfType<ConflictError>();
+        result.Error.Code.Should().Be("ShoppingCart.ConflictException");
+        shoppingCart.GetDomainEvents()
+            .Count(x => x is ShoppingCartReservedDomainEvent)
+            .Should().Be(1);
+    }
 }

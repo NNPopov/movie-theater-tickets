@@ -141,12 +141,15 @@ public class ShoppingCartEndpointApplicationBuilderExtensions : IEndpoints
                 var query = new ReserveTicketsCommand(ShoppingCartId: shoppingCartId);
                 var result = await sender.Send(query, cancellationToken);
 
-                return result;
+                return result.Match(
+                    () => Results.Ok(),
+                    ErrorResults.ToProblem);
             })
             .WithName("ReserveSeats")
             .WithTags(Tag)
-            .Produces<bool>(201, "application/json")
-            .Produces(204);
+            .Produces(200)
+            .Produces(404)
+            .Produces(409);
 
         endpointRouteBuilder.MapDelete($"{BaseRoute}/{{ShoppingCartId}}/unreserve", async (
                 [FromRoute] Guid shoppingCartId,

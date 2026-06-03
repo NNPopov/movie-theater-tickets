@@ -1,6 +1,5 @@
 ﻿using CinemaTicketBooking.Application.Abstractions;
 using CinemaTicketBooking.Application.Abstractions.Repositories;
-using CinemaTicketBooking.Application.Exceptions;
 using CinemaTicketBooking.Domain.Error;
 using CinemaTicketBooking.Domain.Seats.Abstractions;
 using CinemaTicketBooking.Domain.Services;
@@ -38,10 +37,13 @@ internal sealed class ReserveTicketsCommandHandler : IRequestHandler<ReserveTick
     public async Task<Result> Handle(ReserveTicketsCommand request,
         CancellationToken cancellationToken)
     {
+        var cart = await _activeShoppingCartRepository.GetByIdAsync(request.ShoppingCartId);
+        if (cart is null)
+            return DomainErrors<ShoppingCart>.NotFound(request.ShoppingCartId.ToString());
 
-        var cart = await GetShoppingCartOrThrow(request);
-
-        cart.SeatsReserve();
+        var reserveResult = cart.SeatsReserve();
+        if (reserveResult.IsFailure)
+            return reserveResult;
 
         var result = await _movieSessionSeatService.ReserveSeats(cart.MovieSessionId,
              cart.Seats.Select(t => (t.SeatRow, t.SeatNumber)).ToList(),
@@ -49,9 +51,7 @@ internal sealed class ReserveTicketsCommandHandler : IRequestHandler<ReserveTick
                 cancellationToken);
 
         if (result.IsFailure)
-        {
-            throw new Exception($"Couldn't Reserve {nameof(ShoppingCart)} ShoppingCartId {request.ShoppingCartId.ToString()}");
-        }
+            return result;
 
         await _activeShoppingCartRepository.SaveAsync(cart);
         await _shoppingCartLifecycleManager.SetAsync(cart.Id);
@@ -63,11 +63,5 @@ internal sealed class ReserveTicketsCommandHandler : IRequestHandler<ReserveTick
 
         _logger.Debug("ShoppingCart was reserved {@ShoppingCart}", cart);
         return Result.Success();
-    }
-
-    private async Task<ShoppingCart> GetShoppingCartOrThrow(ReserveTicketsCommand request)
-    {
-        return await _activeShoppingCartRepository.GetByIdAsync(request.ShoppingCartId) ??
-               throw new ContentNotFoundException(nameof(ShoppingCart), request.ShoppingCartId.ToString());
     }
 }

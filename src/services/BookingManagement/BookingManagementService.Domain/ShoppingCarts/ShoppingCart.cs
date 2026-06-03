@@ -184,14 +184,23 @@ public class ShoppingCart : AggregateRoot
         _domainEvents.Add(new ShoppingCartCleanedDomainEvent(Id));
     }
 
-    public void SeatsReserve()
+    public Result SeatsReserve()
     {
-        EnsurePurchaseIsNotCompleted();
+        if (Status == ShoppingCartStatus.PurchaseCompleted)
+            return DomainErrors<ShoppingCart>.ConflictException(
+                $"The shopping cart {Id} has already been purchased.");
 
-        if (Status == ShoppingCartStatus.InWork)
-            Status = ShoppingCartStatus.SeatsReserved;
+        if (Status == ShoppingCartStatus.SeatsReserved)
+            return Result.Success();                  // idempotent — no duplicate event
 
+        if (Status != ShoppingCartStatus.InWork)
+            return DomainErrors<ShoppingCart>.ConflictException(
+                $"The shopping cart {Id} cannot be reserved from status {Status}.");
+
+        Status = ShoppingCartStatus.SeatsReserved;    // genuine transition
         _domainEvents.Add(new ShoppingCartReservedDomainEvent(Id));
+
+        return Result.Success();
     }
 
     public void PurchaseComplete()

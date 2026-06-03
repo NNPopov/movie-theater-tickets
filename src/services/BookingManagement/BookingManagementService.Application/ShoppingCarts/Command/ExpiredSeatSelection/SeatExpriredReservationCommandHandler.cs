@@ -9,7 +9,7 @@ namespace CinemaTicketBooking.Application.ShoppingCarts.Command.ExpiredSeatSelec
 public record SeatExpiredSelectionCommand(Guid MovieSessionId, short SeatRow, short SeatNumber, Guid ShoppingKartId)
     : INotification;
 
-internal sealed  class SeatExpiredReservationEventHandler : ActiveShoppingCartHandler,
+internal sealed class SeatExpiredReservationEventHandler : ActiveShoppingCartHandler,
     INotificationHandler<SeatExpiredSelectionCommand>
 {
     private readonly IMovieSessionSeatRepository _movieSessionSeatRepository;

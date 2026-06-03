@@ -44,13 +44,13 @@ public abstract class AggregateRoot : Entity<Guid>, IAggregateRoot
     /// <summary>
     /// Gets the domain events. This collection is readonly.
     /// </summary>
-    public IReadOnlyCollection<IDomainEvent> GetDomainEvents()=> _domainEvents.AsReadOnly();
+    public IReadOnlyCollection<IDomainEvent> GetDomainEvents() => _domainEvents.AsReadOnly();
 
-/// <summary>
+    /// <summary>
     /// Clears all the domain events from the <see cref="AggregateRoot"/>.
     /// </summary>
     public void ClearDomainEvents() => _domainEvents.Clear();
-    
+
     /// <summary>
     /// Adds the specified <see cref="IDomainEvent"/> to the <see cref="AggregateRoot"/>.
     /// </summary>

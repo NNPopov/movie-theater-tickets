@@ -20,7 +20,7 @@ public class AuditoriumInfoDto
                 .ForMember(dst => dst.Seats, opt => opt.MapFrom(src => src
                     .Seats
                     .GroupBy(t => t.Row)
-                    .OrderBy(f=>f.Key)
+                    .OrderBy(f => f.Key)
                     .Select(t => t.Select(d => new SeatEntityDto { Row = d.Row, SeatNumber = d.SeatNumber })
                         .OrderBy(o => o.SeatNumber)
                         .ToList())

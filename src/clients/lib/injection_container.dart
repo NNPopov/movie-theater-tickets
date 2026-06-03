@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
+import 'package:movie_theater_tickets/core/routing/app_router.dart';
 import 'package:movie_theater_tickets/src/auth/data/services/auth_service_impl.dart';
 import 'package:movie_theater_tickets/src/auth/data/services/flutter_web_auth_2_authenticator.dart';
 import 'package:movie_theater_tickets/src/auth/domain/abstraction/authenticator.dart';
@@ -52,6 +53,8 @@ Future<void> initializeDependencies() async {
     ..registerLazySingleton<AuthInterceptor>(() => AuthInterceptor());
 
   getIt.registerLazySingleton<EventBus>(() => EventBus());
+
+  getIt.registerLazySingleton<AppRouter>(() => AppRouter());
 
   _initServerState();
 

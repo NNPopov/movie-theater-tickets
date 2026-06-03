@@ -76,7 +76,7 @@ services.AddOpenTelemetry()
             // .AddPrometheusExporter();
             .AddOtlpExporter((exporterOptions, readerOptions) =>
             {
-                exporterOptions.Endpoint = new Uri("http://otel-collector:4317"); 
+                exporterOptions.Endpoint = new Uri("http://otel-collector:4317");
                 readerOptions.PeriodicExportingMetricReaderOptions.ExportIntervalMilliseconds = 10_000;
             });
 

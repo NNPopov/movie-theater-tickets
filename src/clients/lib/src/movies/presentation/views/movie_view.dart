@@ -1,9 +1,10 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:movie_theater_tickets/core/routing/app_router.gr.dart';
 import '../../../../core/common/views/loading_view.dart';
 import '../../../../core/common/views/no_data_view.dart';
 import '../../../../core/utils/utils.dart';
-import '../../../dashboards/presentation/dashboard_widget.dart';
 import '../../../movie_sessions/domain/entities/active_movie.dart';
 import '../../../movie_sessions/presentation/views/movie_session_view.dart';
 import '../../domain/entities/movie.dart';
@@ -13,6 +14,23 @@ import 'package:movie_theater_tickets/l10n/gen/app_localizations.dart';
 
 import '../app/movie_cubit.dart';
 import '../widgets/movie_full_detail_widget.dart';
+
+/// Route page for the Movies screen.
+///
+/// Reproduces the per-route [MovieTheaterCubit] provider that the legacy
+/// `generateRoute` supplied, so the wrapped [MoviesView] resolves its cubit.
+@RoutePage(name: 'MoviesRoute')
+class MoviesPage extends StatelessWidget {
+  const MoviesPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => MovieTheaterCubit(getIt.get()),
+      child: const MoviesView(),
+    );
+  }
+}
 
 class MoviesView extends StatefulWidget {
   const MoviesView({super.key});
@@ -28,7 +46,7 @@ class _MoviesView extends State<MoviesView> {
       CarouselSliderController();
 
   Future<void> movieSeat(Movie movie) async {
-    Navigator.pushNamed(context, MovieSessionsView.id, arguments: movie.id);
+    context.router.push(MovieSessionsRoute(movieId: movie.id));
   }
 
   late ScrollController _controller;
@@ -90,7 +108,6 @@ class _MoviesView extends State<MoviesView> {
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const DashboardWidget(route: MoviesView.id),
             Container(
               padding: const EdgeInsets.only(top: 20.0),
               child: Container(

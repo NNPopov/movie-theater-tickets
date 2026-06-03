@@ -8,9 +8,9 @@ namespace CinemaTicketBooking.Domain.MovieSessions.Abstractions
 
         Task<IEnumerable<MovieSession>> GetAllAsync(Expression<Func<MovieSession, bool>> filter,
             CancellationToken cancel);
-        
+
         Task<MovieSession> GetByIdAsync(Guid movieSessionId,
             CancellationToken cancel);
-        
+
     }
 }

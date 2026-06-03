@@ -27,5 +27,11 @@
   "connection_lost_reconnect_btn":"Reconectar",
 
     "light_theme":"Ligera",
-    "dark_theme":"Oscura"
+    "dark_theme":"Oscura",
+
+  "about_us":"Sobre nosotros",
+
+  "page_not_found_title":"Página no encontrada",
+  "page_not_found_message":"La página que buscas no existe.",
+  "back_to_home":"Volver al inicio"
 }

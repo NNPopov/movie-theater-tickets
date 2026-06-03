@@ -1,4 +1,5 @@
 ﻿using CinemaTicketBooking.Application.Exceptions;
+using CinemaTicketBooking.Domain.Error;
 using CinemaTicketBooking.Domain.Exceptions;
 using CinemaTicketBooking.Domain.ShoppingCarts;
 using CinemaTicketBooking.Domain.ShoppingCarts.Abstractions;
@@ -167,10 +168,46 @@ public class ShoppingCartSpecification
         var clientId = Guid.NewGuid();
 
         // Act
-        shoppingCart.AssignClientId(clientId);
+        var result = shoppingCart.AssignClientId(clientId);
 
         // Assert
+        result.IsSuccess.Should().BeTrue();
         shoppingCart.ClientId.Should().Be(clientId);
         shoppingCart.GetDomainEvents().Should().Contain(x => x is ShoppingCartAssignedToClientDomainEvent);
+    }
+
+    // Slice 0003_assign_client_cart_result_http: AssignClientId now expresses the already-assigned
+    // case as a returned ConflictError (no longer a thrown ConflictException) and appends the
+    // domain event only on the success branch.
+    [Fact]
+    public void AssignClientId_ShouldReturnConflictError_When_CartAlreadyHasAnOwner()
+    {
+        // Arrange
+        var shoppingCart = ShoppingCart.Create(5, dataHasher);
+        shoppingCart.AssignClientId(Guid.NewGuid());
+
+        // Act
+        var result = shoppingCart.AssignClientId(Guid.NewGuid());
+
+        // Assert
+        result.IsFailure.Should().BeTrue();
+        result.Error.Should().BeOfType<ConflictError>();
+        result.Error.Code.Should().Be("ShoppingCart.ConflictException");
+    }
+
+    [Fact]
+    public void AssignClientId_ShouldNotRaiseASecondEvent_When_CartAlreadyHasAnOwner()
+    {
+        // Arrange
+        var shoppingCart = ShoppingCart.Create(5, dataHasher);
+        shoppingCart.AssignClientId(Guid.NewGuid());
+
+        // Act — the conflicting second assignment must not append another assigned-to-client event.
+        shoppingCart.AssignClientId(Guid.NewGuid());
+
+        // Assert
+        shoppingCart.GetDomainEvents()
+            .Count(x => x is ShoppingCartAssignedToClientDomainEvent)
+            .Should().Be(1);
     }
 }

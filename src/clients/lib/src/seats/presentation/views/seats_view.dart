@@ -1,20 +1,48 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:movie_theater_tickets/core/res/app_theme.dart';
+import 'package:movie_theater_tickets/core/routing/app_router.gr.dart';
+import 'package:movie_theater_tickets/src/cinema_halls/presentation/cubit/movie_cubit.dart';
+import 'package:movie_theater_tickets/src/seats/presentation/cubit/seat_cubit.dart';
 import 'package:movie_theater_tickets/src/seats/presentation/widgets/seats_movie_session_widget.dart';
 import 'package:movie_theater_tickets/src/shopping_carts/presentation/widgens/shopping_cart_widget.dart';
 import '../../../../core/res/app_styles.dart';
 import '../../../movie_sessions/presentation/widgets/auditorium_detail.dart';
 import '../../../cinema_halls/presentation/cubit/cinema_hall_cubit.dart';
-import '../../../dashboards/presentation/dashboard_widget.dart';
 import '../../../movie_sessions/domain/entities/movie_session.dart';
 import 'package:get_it/get_it.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../movie_sessions/presentation/views/movie_session_view.dart';
 import '../../../movies/presentation/app/movie_cubit.dart';
 import '../../../movies/presentation/widgets/movie_detail_widget.dart';
 import 'package:movie_theater_tickets/l10n/gen/app_localizations.dart';
 
 GetIt getIt = GetIt.instance;
+
+/// Route page for the Seats screen.
+///
+/// Reproduces the per-route [SeatBloc] + [CinemaHallInfoBloc] providers from
+/// the legacy `generateRoute`; carries the required typed [movieSession].
+@RoutePage(name: 'SeatsRoute')
+class SeatsPage extends StatelessWidget {
+  const SeatsPage({required this.movieSession, super.key});
+
+  final MovieSession movieSession;
+
+  @override
+  Widget build(BuildContext context) {
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<SeatBloc>(
+          create: (_) => SeatBloc(getIt.get(), getIt.get()),
+        ),
+        BlocProvider<CinemaHallInfoBloc>(
+          create: (_) => CinemaHallInfoBloc(getIt.get()),
+        ),
+      ],
+      child: SeatsView(movieSession),
+    );
+  }
+}
 
 class SeatsView extends StatefulWidget {
   const SeatsView(this.movieSession, {super.key});
@@ -43,7 +71,6 @@ class _SeatsView extends State<SeatsView> {
       controller: _controller,
       child: Column(
         children: [
-          const DashboardWidget(route: SeatsView.id),
           Container(
             padding: const EdgeInsets.only(top: 20.0),
             child: Row(
@@ -118,7 +145,7 @@ class _SeatsView extends State<SeatsView> {
   }
 
   Future<void> movieSeat(String movieId) async {
-    Navigator.pushNamed(context, MovieSessionsView.id, arguments: movieId);
+    context.router.push(MovieSessionsRoute(movieId: movieId));
   }
 
   @override

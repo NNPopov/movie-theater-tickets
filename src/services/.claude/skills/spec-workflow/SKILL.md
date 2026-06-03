@@ -145,6 +145,6 @@ This skill is read-only and advisory.
   may contradict project rules.
 - Advising the wrong entry-point doc — this project uses Minimal APIs
   (`agent_docs/entry_points/minimal-api.md`), not controllers.
-- Confusing `ContentNotFoundException` → 204 with 404. Always consult
+- Misremembering the `ContentNotFoundException` → 404 mapping. Always consult
   `agent_docs/error_handling.md` for the exception→status table before giving
   error-path advice.

@@ -56,7 +56,7 @@ Numbered as F1, F2, F3... Each is a single testable statement.
 - **F2.** The validator `<UseCase>CommandValidator` rejects the command with a
   `ValidationException` (HTTP 400 `ValidationProblemDetails`) when `<field>`
   violates `<constraint>`.
-- **F3.** The handler throws `ContentNotFoundException` (HTTP 204) when the
+- **F3.** The handler throws `ContentNotFoundException` (HTTP 404) when the
   aggregate with id `<X>` does not exist.
 - **F4.** The handler throws `ConflictException` (HTTP 409) when `<business
   conflict condition>`.
@@ -122,7 +122,7 @@ Mapping from requirement ID to where it is verified.
 |---|---|
 | F1 | endpoint integration test |
 | F2 | endpoint integration test (400 response) |
-| F3 | handler unit test + endpoint integration test (204) |
+| F3 | handler unit test + endpoint integration test (404) |
 | F4 | handler unit test + endpoint integration test (409) |
 | F5 | endpoint integration test (403) |
 | F6 | repository unit test |

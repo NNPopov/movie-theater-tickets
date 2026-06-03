@@ -21,5 +21,9 @@
       <ProjectReference Include="..\BookingManagementService.Domain\BookingManagementService.Domain.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <!-- Expose internal use-case handlers (e.g. GetCurrentShoppingCartQueryHandler) to the unit-test assembly. -->
+      <InternalsVisibleTo Include="BookingManagementService.Domain.UnitTests" />
+    </ItemGroup>
 
 </Project>

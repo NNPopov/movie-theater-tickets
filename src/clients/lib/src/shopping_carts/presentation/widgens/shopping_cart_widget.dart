@@ -1,5 +1,7 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:movie_theater_tickets/core/res/app_theme.dart';
+import 'package:movie_theater_tickets/core/routing/app_router.gr.dart';
 import '../../../../core/common/widgets/overlay_dialog.dart';
 import '../../../../core/res/app_styles.dart';
 import '../../../../core/utils/utils.dart';
@@ -13,8 +15,6 @@ import '../../domain/entities/shopping_cart.dart';
 import '../cubit/shopping_cart_cubit.dart';
 import 'package:movie_theater_tickets/l10n/gen/app_localizations.dart';
 import 'package:get_it/get_it.dart';
-
-import '../views/shopping_cart_view.dart';
 
 final getIt = GetIt.instance;
 
@@ -189,7 +189,7 @@ class _ShoppingCartWidget extends State<ShoppingCartWidget> {
               if (shoppingCartState.shoppingCart.shoppingCartSeat.isNotEmpty)
                 TextButton(
                   onPressed: () {
-                    Navigator.pushNamed(context, ShoppingCartView.id);
+                    context.router.navigate(const ShoppingCartRoute());
                   },
                   child: Text(AppLocalizations.of(context)!.complete_purchases),
                 ),

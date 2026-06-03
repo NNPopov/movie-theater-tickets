@@ -42,7 +42,7 @@ public class
 
         if (movieSession.SessionDate < TimeProvider.System.GetUtcNow())
         {
-            _logger.Error("{GetActiveMovieSessionSeatsQueryHandler}. Movie session already started:{@MovieSession}", nameof(GetActiveMovieSessionSeatsQueryHandler),movieSession);
+            _logger.Error("{GetActiveMovieSessionSeatsQueryHandler}. Movie session already started:{@MovieSession}", nameof(GetActiveMovieSessionSeatsQueryHandler), movieSession);
             return default;
         }
 

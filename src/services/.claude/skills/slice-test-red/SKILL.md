@@ -149,7 +149,7 @@ Notes on the code:
   internal ORM details.
 - Error-path assertions use the statuses from the `CustomExceptionHandler`
   table in `agent_docs/error_handling.md`:
-  - `ContentNotFoundException` → 204 No Content
+  - `ContentNotFoundException` → 404 Not Found (`ProblemDetails`)
   - `ConflictException` → 409 Conflict
   - `ValidationException` / `DomainValidationException` → 400 ValidationProblemDetails
   - `NotFoundException` → 404
@@ -297,8 +297,8 @@ implementation against a test that does not represent the contract.
 - Using the wrong factory class name — check sibling tests before inventing one.
 - Asserting on `response.IsSuccessStatusCode` instead of `.StatusCode.Should().Be(HttpStatusCode.X)` — the former hides which code was returned.
 - DB assertion that imports an EF Core entity type — use raw SQL.
-- Asserting on an invented 404 for a missing aggregate: the project maps
-  `ContentNotFoundException` → 204, not 404. Always consult the
+- Asserting the wrong status for a missing aggregate: the project maps
+  `ContentNotFoundException` → 404 with a `ProblemDetails` body. Always consult the
   `CustomExceptionHandler` table in `agent_docs/error_handling.md`.
 - Reporting "test is red" without showing the failure mode. The kind of failure
   (build error vs 404 vs assertion) tells the user where to start implementing.

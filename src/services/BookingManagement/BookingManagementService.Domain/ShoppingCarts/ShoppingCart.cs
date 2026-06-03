@@ -63,7 +63,8 @@ public class ShoppingCart : AggregateRoot
         EnsurePurchaseIsNotCompleted();
 
         if (ClientId != Guid.Empty)
-            throw new ConflictException(nameof(ShoppingCart), Id.ToString());
+            return DomainErrors<ShoppingCart>.ConflictException(
+                $"The shopping cart {Id} already has an assigned client.");
 
         ClientId = clientId;
 
@@ -126,13 +127,13 @@ public class ShoppingCart : AggregateRoot
             throw new DomainValidationException(
                 $"Seat has already been added to cart movieSessionId:{movieSessionId}, SeatRow:{seatRow}, SeatNumber:{seatNumber}.");
         }
-        
+
         if (_seats.Count() >= MaxNumberOfSeats)
         {
             throw new DomainValidationException(
                 $"Number of seats cannot be greater than {_seats.Count()}.");
         }
-  
+
     }
 
 

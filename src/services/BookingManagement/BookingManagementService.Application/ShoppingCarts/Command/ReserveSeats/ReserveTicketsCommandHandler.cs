@@ -10,10 +10,10 @@ using Serilog;
 
 namespace CinemaTicketBooking.Application.ShoppingCarts.Command.ReserveSeats;
 
-public record ReserveTicketsCommand( Guid ShoppingCartId) : IRequest<Result>;
+public record ReserveTicketsCommand(Guid ShoppingCartId) : IRequest<Result>;
 
 
-internal sealed  class ReserveTicketsCommandHandler : IRequestHandler<ReserveTicketsCommand, Result>
+internal sealed class ReserveTicketsCommandHandler : IRequestHandler<ReserveTicketsCommand, Result>
 {
     private IShoppingCartSeatLifecycleManager _shoppingCartSeatLifecycleManager;
 
@@ -23,11 +23,11 @@ internal sealed  class ReserveTicketsCommandHandler : IRequestHandler<ReserveTic
     private readonly ILogger _logger;
     public ReserveTicketsCommandHandler(
         IShoppingCartSeatLifecycleManager shoppingCartSeatLifecycleManager,
-        IActiveShoppingCartRepository activeShoppingCartRepository, 
+        IActiveShoppingCartRepository activeShoppingCartRepository,
         MovieSessionSeatService movieSessionSeatService, IShoppingCartLifecycleManager shoppingCartLifecycleManager, ILogger logger)
     {
         _shoppingCartSeatLifecycleManager = shoppingCartSeatLifecycleManager;
-        
+
         _activeShoppingCartRepository = activeShoppingCartRepository;
 
         _movieSessionSeatService = movieSessionSeatService;
@@ -40,17 +40,17 @@ internal sealed  class ReserveTicketsCommandHandler : IRequestHandler<ReserveTic
     {
 
         var cart = await GetShoppingCartOrThrow(request);
-      
+
         cart.SeatsReserve();
-        
-        var result = await   _movieSessionSeatService.ReserveSeats(cart.MovieSessionId, 
-             cart.Seats.Select(t=>(t.SeatRow,t.SeatNumber)).ToList(),
+
+        var result = await _movieSessionSeatService.ReserveSeats(cart.MovieSessionId,
+             cart.Seats.Select(t => (t.SeatRow, t.SeatNumber)).ToList(),
                 request.ShoppingCartId,
                 cancellationToken);
-        
+
         if (result.IsFailure)
         {
-            throw new Exception( $"Couldn't Reserve {nameof(ShoppingCart)} ShoppingCartId {request.ShoppingCartId.ToString()}");
+            throw new Exception($"Couldn't Reserve {nameof(ShoppingCart)} ShoppingCartId {request.ShoppingCartId.ToString()}");
         }
 
         await _activeShoppingCartRepository.SaveAsync(cart);
@@ -58,13 +58,13 @@ internal sealed  class ReserveTicketsCommandHandler : IRequestHandler<ReserveTic
 
         foreach (var seat in cart.Seats)
         {
-            await _shoppingCartSeatLifecycleManager.DeleteAsync(cart.MovieSessionId,seat.SeatRow,seat.SeatNumber);
+            await _shoppingCartSeatLifecycleManager.DeleteAsync(cart.MovieSessionId, seat.SeatRow, seat.SeatNumber);
         }
-        
+
         _logger.Debug("ShoppingCart was reserved {@ShoppingCart}", cart);
         return Result.Success();
     }
-    
+
     private async Task<ShoppingCart> GetShoppingCartOrThrow(ReserveTicketsCommand request)
     {
         return await _activeShoppingCartRepository.GetByIdAsync(request.ShoppingCartId) ??

@@ -7,8 +7,8 @@ namespace CinemaTicketBooking.Api.Sockets.Abstractions;
 public interface IBookingManagementStateUpdater
 {
     Task SentCinemaHallSeatsState(ICollection<MovieSessionSeatDto> seats);
-    
+
     Task SentShoppingCartState(ShoppingCartDto shoppingCart);
-    
+
     Task SentServerState(ServerState serverState);
 }

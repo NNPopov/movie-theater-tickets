@@ -43,7 +43,7 @@ public class AssignClientCartCommandHandler(
         }
 
 
-        var result = cart.AssignClientId(request.ShoppingCartId);
+        var result = cart.AssignClientId(request.ClientId);
 
         if (result.IsFailure)
         {

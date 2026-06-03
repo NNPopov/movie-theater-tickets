@@ -26,6 +26,7 @@ class _ThemeWidget extends State<ThemeWidget> {
           height: 40,
           child: DropdownButton<bool>(
             value: lang.isDark,
+            isExpanded: true,
             elevation: 16,
             onChanged: (bool? value) {
               context.read<ThemeCubit>().setTheme(value!);

@@ -8,7 +8,7 @@ public class MovieSessionSeatConfiguration : IEntityTypeConfiguration<MovieSessi
 {
     public void Configure(EntityTypeBuilder<MovieSessionSeat> builder)
     {
-        
+
         builder.ToTable("movie_session_seat");
         builder.HasKey(entry => new { Showtime = entry.MovieSessionId, entry.SeatRow, entry.SeatNumber })
             .HasName("pk_movie_session_seat");

@@ -1,13 +1,13 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:movie_theater_tickets/core/routing/app_router.gr.dart';
 import '../cubit/shopping_cart_cubit.dart';
-import '../views/shopping_cart_view.dart';
 import 'package:movie_theater_tickets/l10n/gen/app_localizations.dart';
 
 class ShoppingCartIconWidget extends StatefulWidget {
-  const ShoppingCartIconWidget(this.navigatorKey, {super.key});
+  const ShoppingCartIconWidget({super.key});
 
-  final GlobalKey<NavigatorState> navigatorKey;
   @override
   State<ShoppingCartIconWidget> createState() => _ShoppingCartIconWidget();
 }
@@ -52,10 +52,7 @@ class _ShoppingCartIconWidget extends State<ShoppingCartIconWidget> {
                 icon: const Icon(Icons.shopping_cart),
                 tooltip: AppLocalizations.of(context)!.shopping_cart,
                 onPressed: () {
-                  widget.navigatorKey.currentState?.pushNamed(
-                    ShoppingCartView.id,
-                  );
-                  //  Navigator.pushNamed(context, ShoppingCartView.id);
+                  context.router.navigate(const ShoppingCartRoute());
                 },
               ),
               Text(countSelectedSeats, style: const TextStyle(fontSize: 12)),

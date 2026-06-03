@@ -3,8 +3,8 @@ using CinemaTicketBooking.Domain.Constants;
 
 namespace CinemaTicketBooking.Application.Common.Events;
 
-public class BaseApplicationEvent<T>:  INotification
-where T:IDomainEvent
+public class BaseApplicationEvent<T> : INotification
+where T : IDomainEvent
 {
 
     public BaseApplicationEvent(T appEvent)
@@ -12,7 +12,7 @@ where T:IDomainEvent
         Event = appEvent;
     }
 
-    
+
 
     public T Event { get; set; }
 }

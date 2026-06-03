@@ -14,7 +14,7 @@ public sealed class MovieSession : AggregateRoot
     public int TicketsForSale { get; private set; }
 
     public int SoldTickets { get; private set; }
- //   public ICollection<SeatMovieSession> Seats { get; private set; }
+    //   public ICollection<SeatMovieSession> Seats { get; private set; }
 
     public bool IsEnabled { get; private set; }
 
@@ -24,7 +24,7 @@ public sealed class MovieSession : AggregateRoot
     public void SetSoldTickets(int soldTickets)
     {
         Ensure.NotEmpty(soldTickets, "The soldTickets is required.", nameof(soldTickets));
-        
+
         SoldTickets = soldTickets;
     }
 
@@ -36,14 +36,14 @@ public sealed class MovieSession : AggregateRoot
         Guid movieId,
         Guid cinemaHallId,
         DateTime sessionDate,
-      //  ICollection<SeatMovieSession> seats,
+        //  ICollection<SeatMovieSession> seats,
         bool isEnabled,
         int ticketsForSale) : base(id)
     {
         MovieId = movieId;
         SessionDate = sessionDate;
         CinemaHallId = cinemaHallId;
-       // Seats = seats;
+        // Seats = seats;
         IsEnabled = isEnabled;
         TicketsForSale = ticketsForSale;
         SoldTickets = 0;
@@ -53,7 +53,7 @@ public sealed class MovieSession : AggregateRoot
         Guid movieId,
         Guid auditoriumId,
         DateTime sessionDate,
-       // ICollection<SeatMovieSession> seats,
+        // ICollection<SeatMovieSession> seats,
         int ticketsForSale)
     {
         var movieSession = new MovieSession(

@@ -16,7 +16,7 @@ public sealed class Movie : AggregateRoot
     {
         Ensure.NotEmpty(title, "The title is required.", nameof(title));
         Ensure.NotEmpty(releaseDate, "The releaseDate is required.", nameof(releaseDate));
-        
+
         Title = title;
         ReleaseDate = releaseDate;
         ImdbId = imdbId;
@@ -24,9 +24,9 @@ public sealed class Movie : AggregateRoot
     }
 
     public string Title { get; private set; }
-    public string ImdbId { get; private set;  }
-    public string Stars { get; private set;  }
-    public DateTime ReleaseDate { get; private set;  }
+    public string ImdbId { get; private set; }
+    public string Stars { get; private set; }
+    public DateTime ReleaseDate { get; private set; }
 
 
     public static Movie Create(string title,
@@ -41,11 +41,11 @@ public sealed class Movie : AggregateRoot
             imdbId,
             stars
         );
-        
+
         movie.AddDomainEvent(new MovieCreatedDomainEvent(movie));
         return movie;
     }
-    
+
     /// <summary>
     /// Initializes a new instance of the <see cref="AggregateRoot"/> class.
     /// </summary>
@@ -54,6 +54,6 @@ public sealed class Movie : AggregateRoot
     /// </remarks>
     private Movie()
     {
-        
+
     }
 }

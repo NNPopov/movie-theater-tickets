@@ -19,7 +19,7 @@ public class IdempotentCommandPipelineBehaviour<TRequest, TResponse> : IPipeline
     {
         if (await _idempotencyService.RequestExistsAsync(request.RequestId))
         {
-            throw new DuplicateRequestException(request.GetType().Name, request.RequestId.ToString() );
+            throw new DuplicateRequestException(request.GetType().Name, request.RequestId.ToString());
         }
 
         await _idempotencyService.CreateRequestAsync(request.RequestId, typeof(TRequest).Name);

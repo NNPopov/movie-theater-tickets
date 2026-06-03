@@ -2,7 +2,7 @@
 
 public class ShoppingCartConfiguration
 {
-    
+
     public int ShoppingCartTimeToLiveSec { get; set; }
-    
+
 }

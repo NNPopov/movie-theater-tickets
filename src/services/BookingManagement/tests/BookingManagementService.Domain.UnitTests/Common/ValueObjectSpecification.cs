@@ -8,7 +8,7 @@ public class DerivedObject : ValueObject
 {
     public int Value1 { get; set; }
     public int Value2 { get; set; }
-    
+
     public override IEnumerable<object> GetEqualityComponents()
     {
         yield return Value1;
@@ -23,9 +23,9 @@ public class ValueObjectSpecification
     {
         var derivedObject = new DerivedObject { Value1 = 1, Value2 = 2 };
         var anotherDerivedObject = new DerivedObject { Value1 = 1, Value2 = 2 };
-        
-        
-        (derivedObject.GetHashCode().Equals(anotherDerivedObject.GetHashCode())).Should().BeTrue();;
+
+
+        (derivedObject.GetHashCode().Equals(anotherDerivedObject.GetHashCode())).Should().BeTrue(); ;
     }
 
     [Theory]

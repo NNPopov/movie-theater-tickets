@@ -54,7 +54,8 @@ public class CustomExceptionHandler : IExceptionHandler
 
         await httpContext.Response.WriteAsJsonAsync(new ValidationProblemDetails(errors)
         {
-            Status = StatusCodes.Status400BadRequest, Type = "https://tools.ietf.org/html/rfc7231#section-6.5.1"
+            Status = StatusCodes.Status400BadRequest,
+            Type = "https://tools.ietf.org/html/rfc7231#section-6.5.1"
         });
     }
 
@@ -99,7 +100,8 @@ public class CustomExceptionHandler : IExceptionHandler
 
         await httpContext.Response.WriteAsJsonAsync(new ValidationProblemDetails(exception.Errors)
         {
-            Status = StatusCodes.Status400BadRequest, Type = "https://tools.ietf.org/html/rfc7231#section-6.5.1"
+            Status = StatusCodes.Status400BadRequest,
+            Type = "https://tools.ietf.org/html/rfc7231#section-6.5.1"
         });
     }
 
@@ -122,11 +124,17 @@ public class CustomExceptionHandler : IExceptionHandler
 
     private async Task HandleContentNotFoundException(HttpContext httpContext, Exception ex)
     {
-        _logger.Warning(ex.Message);
+        _logger.Warning(ex, "Not Found");
 
-        httpContext.Response.StatusCode = StatusCodes.Status204NoContent;
+        httpContext.Response.StatusCode = StatusCodes.Status404NotFound;
 
-        await httpContext.Response.CompleteAsync();
+        await httpContext.Response.WriteAsJsonAsync(new ProblemDetails()
+        {
+            Status = StatusCodes.Status404NotFound,
+            Type = "https://tools.ietf.org/html/rfc7231#section-6.5.4",
+            Title = "The specified resource was not found.",
+            Detail = ex.Message
+        });
     }
 
 

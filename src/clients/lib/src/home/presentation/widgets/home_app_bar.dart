@@ -5,8 +5,7 @@ import '../../../shopping_carts/presentation/widgens/shopping_cart_icon_widget.d
 import '../../../theme_flutter/widgets/theme_widget.dart';
 
 class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
-  const HomeAppBar(this.navigatorKey, {super.key});
-  final GlobalKey<NavigatorState> navigatorKey;
+  const HomeAppBar({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +26,7 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
               const SizedBox(width: 20),
               buildTitle(),
               const GlobalisationWidget(),
-              ShoppingCartIconWidget(navigatorKey),
+              const ShoppingCartIconWidget(),
               ThemeWidget(),
               const AuthWidget(),
             ],
@@ -42,9 +41,7 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
         toolbarHeight: 90,
         // titleSpacing: 180,
         title: Container(
-          child: Row(
-            children: [buildTitle(), ShoppingCartIconWidget(navigatorKey)],
-          ),
+          child: Row(children: [buildTitle(), const ShoppingCartIconWidget()]),
         ),
         flexibleSpace: Container(
           // margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 2),

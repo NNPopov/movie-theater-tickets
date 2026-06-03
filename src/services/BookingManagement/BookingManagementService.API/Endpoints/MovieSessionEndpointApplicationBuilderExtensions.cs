@@ -71,7 +71,7 @@ public class MovieSessionEndpointApplicationBuilderExtensions : IEndpoints
             .WithName("GetMovieSessionsById")
             .WithTags(Tag)
             .Produces<MovieSessionsDto>(200, "application/json")
-            .Produces(204);
+            .Produces(404);
 
 
         endpointRouteBuilder.MapGet($"{BaseRoute}", async (
@@ -103,7 +103,6 @@ public class MovieSessionEndpointApplicationBuilderExtensions : IEndpoints
             })
             .WithName("GetActiveMovieSessionsByMovieId")
             .WithTags(Tag)
-            .Produces<IReadOnlyCollection<MovieSessionsDto>>(200, "application/json")
-            .Produces(204);
+            .Produces<IReadOnlyCollection<MovieSessionsDto>>(200, "application/json");
     }
 }

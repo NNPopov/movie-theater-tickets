@@ -191,66 +191,66 @@ public class SampleDataInitializer
 
         await CreateMovieSessionMovieSessionSeats(movie,
             redAuditorium,
-            new DateTime(2026, 06,20, 12, 00, 0),
+            new DateTime(2026, 06, 20, 12, 00, 0),
             movieSessionId);
 
         await CreateMovieSessionMovieSessionSeats(movie,
             redAuditorium,
-            new DateTime(2026, 06,21, 15, 30, 0),
+            new DateTime(2026, 06, 21, 15, 30, 0),
             movieSessionId2);
 
         await CreateMovieSessionMovieSessionSeats(movie2,
             whiteAuditorium,
-            new DateTime(2026, 06,21, 15, 30, 0),
+            new DateTime(2026, 06, 21, 15, 30, 0),
             movieSessionId3);
 
         await CreateMovieSessionMovieSessionSeats(movie2,
             whiteAuditorium,
-            new DateTime(2026, 06,23, 15, 30, 0),
+            new DateTime(2026, 06, 23, 15, 30, 0),
             movieSessionId4);
 
         await CreateMovieSessionMovieSessionSeats(movie3,
             blackAuditorium,
-            new DateTime(2026, 06,22, 15, 30, 0),
+            new DateTime(2026, 06, 22, 15, 30, 0),
             movieSessionId5);
 
 
         await CreateMovieSessionMovieSessionSeats(movie3,
             whiteAuditorium,
-            new DateTime(2026, 06,27, 15, 30, 0),
+            new DateTime(2026, 06, 27, 15, 30, 0),
             movieSessionId6);
 
         await CreateMovieSessionMovieSessionSeats(movie4,
             whiteAuditorium,
-            new DateTime(2026, 06,27, 19, 00, 0));
+            new DateTime(2026, 06, 27, 19, 00, 0));
 
         await CreateMovieSessionMovieSessionSeats(movie4,
             blackAuditorium,
-            new DateTime(2026, 06,26, 08, 30, 0));
+            new DateTime(2026, 06, 26, 08, 30, 0));
 
         await CreateMovieSessionMovieSessionSeats(movie4,
             blackAuditorium,
-            new DateTime(2026, 06,26, 11, 00, 0));
+            new DateTime(2026, 06, 26, 11, 00, 0));
 
         await CreateMovieSessionMovieSessionSeats(movie4,
             blackAuditorium,
-            new DateTime(2026, 06,26, 13, 30, 0));
+            new DateTime(2026, 06, 26, 13, 30, 0));
 
         await CreateMovieSessionMovieSessionSeats(movie4,
             blackAuditorium,
-            new DateTime(2026, 06,26, 16, 00, 0));
+            new DateTime(2026, 06, 26, 16, 00, 0));
 
         await CreateMovieSessionMovieSessionSeats(movie4,
             blackAuditorium,
-            new DateTime(2026, 06,26, 19, 00, 0));
+            new DateTime(2026, 06, 26, 19, 00, 0));
 
         await CreateMovieSessionMovieSessionSeats(movie4,
             blackAuditorium,
-            new DateTime(2026, 06,26, 22, 30, 0));
+            new DateTime(2026, 06, 26, 22, 30, 0));
 
         await CreateMovieSessionMovieSessionSeats(movie4,
             whiteAuditorium,
-            new DateTime(2026, 06,27, 19, 00, 0));
+            new DateTime(2026, 06, 27, 19, 00, 0));
 
 
         await CreateMovieSessionMovieSessionSeats(movie4,
@@ -302,8 +302,8 @@ public class SampleDataInitializer
     {
         var seats = new List<(short Row, short SeatNumber)>();
         for (short r = 1; r <= rows; r++)
-        for (short s = 1; s <= seatsPerRow; s++)
-            seats.Add((Row: r, SeatNumber: s));
+            for (short s = 1; s <= seatsPerRow; s++)
+                seats.Add((Row: r, SeatNumber: s));
 
         return seats;
     }

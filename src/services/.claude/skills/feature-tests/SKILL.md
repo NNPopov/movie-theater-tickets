@@ -161,10 +161,10 @@ for create/reserve operations.)
 
 **Expect:**
 
-- HTTP status: `<e.g. 204 for ContentNotFoundException, 409 for
+- HTTP status: `<e.g. 404 for ContentNotFoundException, 409 for
   ConflictException>`.
 - Response body: `<describe the ProblemDetails shape if one is returned, e.g.
-  no body for 204>`.
+  the 404 ProblemDetails for ContentNotFoundException>`.
 - DB state: `<assert no unintended mutation — e.g. "the seat remains
   Available">`.
 
@@ -230,8 +230,8 @@ the file was created, list the scenarios, and suggest:
   the whole stack.
 - Forgetting to describe auth setup for authenticated endpoints.
 - Deriving status codes from memory instead of consulting `agent_docs/error_handling.md`.
-  For example, `ContentNotFoundException` maps to **204**, not 404 — always check
-  the table.
+  For example, `ContentNotFoundException` maps to **404** with a `ProblemDetails`
+  body — always check the table.
 - Listing `WebApplicationFactory` internals (handler types, repository types)
   in "Wired real" as if mocking them. Only genuine external boundaries belong
   in "Mocked."

@@ -1,12 +1,13 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:movie_theater_tickets/core/res/app_theme.dart';
+import 'package:movie_theater_tickets/core/routing/app_router.gr.dart';
 import '../../../../core/common/views/loading_view.dart';
 import '../../../../core/common/views/no_data_view.dart';
 import '../../../../core/res/app_styles.dart';
 import '../../../../core/utils/utils.dart';
-import '../../../movie_sessions/presentation/views/movie_session_view.dart';
 import '../../domain/entities/movie.dart';
 import '../app/movie_cubit.dart';
 import '../../../movie_sessions/presentation/cubit/movie_theater_cubit.dart';
@@ -29,7 +30,7 @@ class _MovieDetailViewView extends State<MovieDetailWidget> {
   }
 
   Future<void> onMovieSessionPress(Movie movie) async {
-    Navigator.pushNamed(context, MovieSessionsView.id, arguments: movie.id);
+    context.router.push(MovieSessionsRoute(movieId: movie.id));
   }
 
   @override

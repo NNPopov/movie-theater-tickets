@@ -52,7 +52,7 @@ exception type to a writer. Current mapping:
 | Exception | HTTP status |
 |---|---|
 | `ValidationException`, `DomainValidationException` | 400 `ValidationProblemDetails` |
-| `ContentNotFoundException` | 204 No Content |
+| `ContentNotFoundException` | 404 `ProblemDetails` |
 | `NotFoundException` | 404 |
 | `UnauthorizedAccessException` | 401 |
 | `ForbiddenAccessException` | 403 |

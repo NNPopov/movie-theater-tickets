@@ -11,7 +11,7 @@ namespace CinemaTicketBooking.Application.ShoppingCarts.Command.PurchaseSeats;
 
 public record PurchaseTicketsCommand(Guid ShoppingCartId) : IRequest<Result>;
 
-internal sealed  class PurchaseTicketsCommandHandler : IRequestHandler<PurchaseTicketsCommand, Result>
+internal sealed class PurchaseTicketsCommandHandler : IRequestHandler<PurchaseTicketsCommand, Result>
 {
     private IShoppingCartSeatLifecycleManager _shoppingCartSeatLifecycleManager;
 
@@ -62,7 +62,7 @@ internal sealed  class PurchaseTicketsCommandHandler : IRequestHandler<PurchaseT
 
         foreach (var seat in cart.Seats)
         {
-            await _shoppingCartSeatLifecycleManager.DeleteAsync(cart.MovieSessionId,seat.SeatRow,seat.SeatNumber);
+            await _shoppingCartSeatLifecycleManager.DeleteAsync(cart.MovieSessionId, seat.SeatRow, seat.SeatNumber);
         }
 
         return Result.Success();

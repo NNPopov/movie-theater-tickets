@@ -1,3 +1,4 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:movie_theater_tickets/core/res/app_theme.dart';
 
@@ -6,12 +7,23 @@ import '../../../../core/utils/utils.dart';
 import '../../../auth/presentations/bloc/auth_cubit.dart';
 import '../../../auth/presentations/bloc/auth_event.dart';
 import '../../../auth/presentations/widgets/auth_safe_area_widget.dart';
-import '../../../dashboards/presentation/dashboard_widget.dart';
 import 'package:movie_theater_tickets/l10n/gen/app_localizations.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../domain/entities/shopping_cart.dart';
 import '../cubit/shopping_cart_cubit.dart';
+
+/// Route page for the Shopping Cart screen.
+///
+/// No per-route provider: the global [ShoppingCartCubit] is supplied from
+/// `main.dart`, exactly as before the migration.
+@RoutePage(name: 'ShoppingCartRoute')
+class ShoppingCartPage extends StatelessWidget {
+  const ShoppingCartPage({super.key});
+
+  @override
+  Widget build(BuildContext context) => const ShoppingCartView();
+}
 
 class ShoppingCartView extends StatefulWidget {
   const ShoppingCartView({super.key});
@@ -32,7 +44,6 @@ class _ShoppingCartView extends State<ShoppingCartView> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        const DashboardWidget(route: ShoppingCartView.id),
         AuthSafeAreaWidget(
           authenticated: buildShoppingCart(),
           notAuthenticated: TextButton(

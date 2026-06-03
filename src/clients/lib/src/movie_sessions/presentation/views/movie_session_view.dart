@@ -1,14 +1,14 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:movie_theater_tickets/core/res/app_theme.dart';
-import 'package:movie_theater_tickets/src/seats/presentation/views/seats_view.dart';
+import 'package:movie_theater_tickets/core/routing/app_router.gr.dart';
 import '../../../../core/common/views/loading_view.dart';
 import '../../../../core/common/views/no_data_view.dart';
 import '../../../../core/res/app_styles.dart';
 import '../../../../core/utils/utils.dart';
 import '../widgets/auditorium_detail.dart';
 import '../../../cinema_halls/presentation/cubit/cinema_hall_cubit.dart';
-import '../../../dashboards/presentation/dashboard_widget.dart';
 import '../../../movies/presentation/app/movie_cubit.dart';
 import '../../../movies/presentation/widgets/movie_detail_widget.dart';
 import '../../domain/entities/movie_session.dart';
@@ -19,6 +19,25 @@ import 'package:get_it/get_it.dart';
 import 'package:movie_theater_tickets/l10n/gen/app_localizations.dart';
 
 GetIt getIt = GetIt.instance;
+
+/// Route page for the Movie Sessions screen.
+///
+/// Reproduces the per-route [MovieSessionBloc] provider from the legacy
+/// `generateRoute`; carries the required typed [movieId] argument.
+@RoutePage(name: 'MovieSessionsRoute')
+class MovieSessionsPage extends StatelessWidget {
+  const MovieSessionsPage({required this.movieId, super.key});
+
+  final String movieId;
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => MovieSessionBloc(getIt.get()),
+      child: MovieSessionsView(movieId),
+    );
+  }
+}
 
 class MovieSessionsView extends StatefulWidget {
   const MovieSessionsView(this.movieId, {super.key});
@@ -85,7 +104,6 @@ class _MovieSessionsView extends State<MovieSessionsView> {
         controller: _controller,
         child: Column(
           children: [
-            const DashboardWidget(route: MovieSessionsView.id),
             Container(
               padding: const EdgeInsets.only(top: 20.0),
               child: Row(
@@ -106,7 +124,6 @@ class _MovieSessionsView extends State<MovieSessionsView> {
         controller: _controller,
         child: Column(
           children: [
-            const DashboardWidget(route: MovieSessionsView.id),
             Container(
               padding: const EdgeInsets.only(top: 20.0),
               child: Column(
@@ -246,6 +263,6 @@ class _MovieSessionsView extends State<MovieSessionsView> {
   }
 
   void pressMovieSession(MovieSession movieSession) {
-    Navigator.pushNamed(context, SeatsView.id, arguments: movieSession);
+    context.router.push(SeatsRoute(movieSession: movieSession));
   }
 }

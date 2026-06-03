@@ -1,7 +1,6 @@
 ﻿using System.Security.Claims;
 using CinemaTicketBooking.Api.Controllers;
 using CinemaTicketBooking.Api.Endpoints.Common;
-using CinemaTicketBooking.Application.Exceptions;
 using CinemaTicketBooking.Application.ShoppingCarts.Command.AssingClientCart;
 using CinemaTicketBooking.Application.ShoppingCarts.Command.CreateCart;
 using CinemaTicketBooking.Application.ShoppingCarts.Command.PurchaseSeats;
@@ -11,7 +10,6 @@ using CinemaTicketBooking.Application.ShoppingCarts.Command.UnreserveSeats;
 using CinemaTicketBooking.Application.ShoppingCarts.Command.UnselectSeats;
 using CinemaTicketBooking.Application.ShoppingCarts.Queries;
 using CinemaTicketBooking.Domain.Error;
-using CinemaTicketBooking.Domain.Exceptions;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -61,14 +59,16 @@ public class ShoppingCartEndpointApplicationBuilderExtensions : IEndpoints
 
                 var command = new GetCurrentShoppingCartQuery(clientId);
 
-                return await sender.Send(command, cancellationToken);
+                var result = await sender.Send(command, cancellationToken);
+
+                return result is null ? Results.NoContent() : Results.Ok(result);
             })
             .WithName("current")
             .RequireAuthorization()
             .WithTags(Tag)
-            .Produces(201)
+            .Produces<CreateShoppingCartResponse>(200, "application/json")
             .Produces(204)
-            .Produces(409);
+            .Produces(404);
 
         endpointRouteBuilder.MapPut($"{BaseRoute}/{{ShoppingCartId}}/assignclient", async (
                 [FromRoute] Guid shoppingCartId,
@@ -85,21 +85,13 @@ public class ShoppingCartEndpointApplicationBuilderExtensions : IEndpoints
 
                 return result.Match(
                     () => Results.Ok(),
-                    failure =>
-                    {
-                        if (failure is ConflictError)
-                            throw new ConflictException(failure.Code, failure.Description);
-                        if (failure is NotFoundError)
-                            throw new ContentNotFoundException(failure.Code, failure.Description);
-
-                        throw new Exception(failure.Description);
-                    });
+                    ErrorResults.ToProblem);
             })
             .WithName("AssignUser")
             .RequireAuthorization()
             .WithTags(Tag)
-            .Produces(201)
-            .Produces(204)
+            .Produces(200)
+            .Produces(404)
             .Produces(409);
 
         endpointRouteBuilder.MapPost($"{BaseRoute}/{{ShoppingCartId}}/seats/select", async (
@@ -204,7 +196,7 @@ public class ShoppingCartEndpointApplicationBuilderExtensions : IEndpoints
             .WithName("GetShoppingCartById")
             .WithTags(Tag)
             .Produces<ShoppingCartDto>(200, "application/json")
-            .Produces(204);
+            .Produces(404);
     }
 
     private static Guid GetClientId(ClaimsPrincipal user)

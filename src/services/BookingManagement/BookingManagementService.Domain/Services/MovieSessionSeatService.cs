@@ -42,7 +42,7 @@ public sealed class MovieSessionSeatService
             {
                 return result;
             }
-            
+
             movieSessionSeats.Add(movieSessionSeat);
         }
 
@@ -65,12 +65,12 @@ public sealed class MovieSessionSeatService
                 await GetMovieSessionSeat(movieSessionId, seat.seatRow, seat.seatNumber, cancellationToken);
 
             var result = movieSessionSeat.Reserve(shoppingCartId);
-            
+
             if (result.IsFailure)
             {
                 return result;
             }
-            
+
             movieSessionSeats.Add(movieSessionSeat);
 
         }

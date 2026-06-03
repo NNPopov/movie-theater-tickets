@@ -116,8 +116,8 @@ it covers.
 
 **Expected:**
 
-- HTTP 204 (No Content) — `ContentNotFoundException` mapped by
-  `CustomExceptionHandler`.
+- HTTP 404 (Not Found) with a `ProblemDetails` body — `ContentNotFoundException`
+  mapped by `CustomExceptionHandler`.
 
 **Covers:** F3.
 

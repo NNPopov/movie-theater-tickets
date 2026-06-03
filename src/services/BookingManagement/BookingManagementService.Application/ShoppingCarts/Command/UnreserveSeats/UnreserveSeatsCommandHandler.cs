@@ -4,9 +4,10 @@ using CinemaTicketBooking.Application.Common;
 using CinemaTicketBooking.Domain.ShoppingCarts.Abstractions;
 
 namespace CinemaTicketBooking.Application.ShoppingCarts.Command.UnreserveSeats;
+
 public record UnreserveSeatsCommand(Guid ShoppingCartId, Guid RequestId) : IdempotentRequest(RequestId), IRequest;
 
-internal sealed  class UnreserveSeatsCommandHandler : IRequestHandler<UnreserveSeatsCommand>
+internal sealed class UnreserveSeatsCommandHandler : IRequestHandler<UnreserveSeatsCommand>
 {
     private readonly IShoppingCartSeatLifecycleManager _shoppingCartSeatLifecycleManager;
     private readonly IShoppingCartLifecycleManager _shoppingCartLifecycleManager;
@@ -14,7 +15,7 @@ internal sealed  class UnreserveSeatsCommandHandler : IRequestHandler<UnreserveS
 
     public UnreserveSeatsCommandHandler(
         IActiveShoppingCartRepository activeShoppingCartRepository,
-        IShoppingCartSeatLifecycleManager shoppingCartSeatLifecycleManager, 
+        IShoppingCartSeatLifecycleManager shoppingCartSeatLifecycleManager,
         IShoppingCartLifecycleManager shoppingCartLifecycleManager)
     {
         _activeShoppingCartRepository = activeShoppingCartRepository;
@@ -28,7 +29,7 @@ internal sealed  class UnreserveSeatsCommandHandler : IRequestHandler<UnreserveS
         var cart = await _activeShoppingCartRepository.GetByIdAsync(request.ShoppingCartId);
 
         cart.ClearCart();
-        
+
         foreach (var seat in cart.Seats)
         {
             await _shoppingCartSeatLifecycleManager.DeleteAsync(cart.MovieSessionId, seat.SeatRow, seat.SeatNumber);

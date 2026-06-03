@@ -108,12 +108,13 @@ public class ShoppingCartEndpointApplicationBuilderExtensions : IEndpoints
 
                 return result.Match(
                     () => Results.Ok(),
-                    failure => Results.BadRequest(failure.Description));
+                    ErrorResults.ToProblem);
             })
             .WithName("SelectSeat")
             .WithTags(Tag)
-            .Produces(201)
-            .Produces(204);
+            .Produces(200)
+            .Produces(404)
+            .Produces(409);
 
         endpointRouteBuilder.MapDelete($"{BaseRoute}/{{ShoppingCartId}}/seats/unselect", async (
                 [FromRoute] Guid shoppingCartId,

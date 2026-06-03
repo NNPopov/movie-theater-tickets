@@ -78,7 +78,7 @@ public sealed class MovieSessionSeat : ValueObject, IAggregateRoot
 
         if (shoppingCartId != ShoppingCartId && ShoppingCartId != Guid.Empty)
         {
-            return DomainErrors<MovieSessionSeat>.InvalidOperation(
+            return DomainErrors<MovieSessionSeat>.ConflictException(
                 "The place is already being processed by another shopping cart");
         }
 

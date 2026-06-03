@@ -91,7 +91,7 @@ public sealed class MovieSessionSeatService
         await _movieSessionSeatRepository.UpdateAsync(movieSessionSeat, cancellationToken);
     }
 
-    public async Task<MovieSessionSeat> SelectSeat(Guid movieSessionId,
+    public async Task<Result> SelectSeat(Guid movieSessionId,
         short seatRow,
         short seatNumber,
         Guid shoppingCartId,
@@ -104,16 +104,14 @@ public sealed class MovieSessionSeatService
 
         var result = movieSessionSeat.Select(shoppingCartId, hashId);
 
-        if (result.IsSuccess)
+        if (result.IsFailure)
         {
-            await _movieSessionSeatRepository.UpdateAsync(movieSessionSeat, cancellationToken);
-        }
-        else
-        {
-            throw new ConflictException(nameof(MovieSessionSeat), this.ToString());
+            return result;
         }
 
-        return movieSessionSeat;
+        await _movieSessionSeatRepository.UpdateAsync(movieSessionSeat, cancellationToken);
+
+        return Result.Success();
     }
 
     private async Task<MovieSessionSeat> GetMovieSessionSeat(Guid movieSessionId,

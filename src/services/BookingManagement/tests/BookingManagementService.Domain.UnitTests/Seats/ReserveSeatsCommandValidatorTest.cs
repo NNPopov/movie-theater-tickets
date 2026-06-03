@@ -1,7 +1,10 @@
-﻿using System.Security.Cryptography;
+﻿using System.Reflection;
+using System.Security.Cryptography;
 using System.Text;
+using CinemaTicketBooking.Domain.Error;
 using CinemaTicketBooking.Domain.Exceptions;
 using CinemaTicketBooking.Domain.Seats;
+using CinemaTicketBooking.Domain.Seats.Events;
 using FluentAssertions;
 using Xunit;
 
@@ -182,5 +185,76 @@ public class MovieSessionSeatSpecification
         movieSessionSeat.Status.Should().Be(SeatStatus.Reserved);
 
         return movieSessionSeat;
+    }
+
+    // Slice 0004_select_seats_result_http: Select expresses both seat conflicts as a returned
+    // ConflictError (the "another shopping cart" case changed from a base Error via InvalidOperation
+    // to a ConflictError so it maps to 409, not 500) and appends the status-updated domain event only
+    // on the success branch.
+
+    [Fact]
+    public void Select_Should_ReturnConflictError_And_RaiseNoEvent_When_StatusIsNotAvailable()
+    {
+        // Arrange — the seat is already Selected (status is not Available).
+        var seat = SeatInState(SeatStatus.Selected, Guid.NewGuid());
+
+        // Act
+        var result = seat.Select(Guid.NewGuid(), "hash");
+
+        // Assert
+        result.IsFailure.Should().BeTrue();
+        result.Error.Should().BeOfType<ConflictError>();
+        seat.GetDomainEvents().Should().NotContain(x => x is MovieSessionSeatStatusUpdatedDomainEvent);
+    }
+
+    [Fact]
+    public void Select_Should_ReturnConflictError_And_RaiseNoEvent_When_HeldByAnotherShoppingCart()
+    {
+        // Arrange — Available, but already owned by a different, non-empty cart.
+        var seat = SeatInState(SeatStatus.Available, Guid.NewGuid());
+
+        // Act
+        var result = seat.Select(Guid.NewGuid(), "hash");
+
+        // Assert — was a base Error via InvalidOperation before this slice; must be a ConflictError now.
+        result.IsFailure.Should().BeTrue();
+        result.Error.Should().BeOfType<ConflictError>();
+        seat.GetDomainEvents().Should().NotContain(x => x is MovieSessionSeatStatusUpdatedDomainEvent);
+    }
+
+    [Fact]
+    public void Select_Should_RaiseStatusUpdatedEvent_When_SeatIsAvailableAndUnclaimed()
+    {
+        // Arrange — a freshly created, Available, unclaimed seat (no prior domain events).
+        var seat = MovieSessionSeat.Create(Guid.NewGuid(), seatNumber: 1, seatRow: 1, price: 20);
+
+        // Act
+        var result = seat.Select(Guid.NewGuid(), "hash");
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        seat.Status.Should().Be(SeatStatus.Selected);
+        seat.GetDomainEvents().Should().ContainSingle(x => x is MovieSessionSeatStatusUpdatedDomainEvent);
+    }
+
+    // Build a materialized seat state via the private [JsonConstructor] — the aggregate's own
+    // transitions never leave an Available seat owned by another cart (Select also flips the status),
+    // so this state can only be constructed as if deserialized from storage.
+    private static MovieSessionSeat SeatInState(SeatStatus status, Guid shoppingCartId)
+    {
+        var ctor = typeof(MovieSessionSeat).GetConstructor(
+            BindingFlags.Instance | BindingFlags.NonPublic,
+            binder: null,
+            new[]
+            {
+                typeof(Guid), typeof(short), typeof(short), typeof(decimal),
+                typeof(SeatStatus), typeof(Guid), typeof(string)
+            },
+            modifiers: null);
+
+        return (MovieSessionSeat)ctor!.Invoke(new object[]
+        {
+            Guid.NewGuid(), (short)1, (short)1, 20m, status, shoppingCartId, "owner-hash"
+        });
     }
 }

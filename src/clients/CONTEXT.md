@@ -98,6 +98,11 @@ _Avoid_: section, category; when you mean the drawn region say "zone polygon".
   seat drawn outside the VIP polygon) — this is the designer's responsibility, optionally
   surfaced by a per-seat zone tint. The editor may warn but never auto-assigns zone from
   geometry (that would let geometry drive price — the forbidden coupling).
+- **"Row" is identity, not a shape.** A row groups seats by identity
+  (`SeatId.row`); it is **not** necessarily a straight visual line — seats of one row may
+  be staggered or split by an aisle. So a **row caption is optional** (the per-seat number
+  is the primary label); the contract can anchor a row label anywhere but never requires
+  one, and the client may derive one for simple rectangular halls.
 - **Pricing boundary.** The hall-layout contract carries **no money**. Price is
   **per-seat**, owned by BookingManagement, computed from a per-hall template modulated by
   per-session / day-type / premiere / dynamic (sold-ratio) coefficients a manager can

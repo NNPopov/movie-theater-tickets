@@ -53,32 +53,37 @@ void main() {
       }
     });
 
-    test('bounds equals (-m, -2m, C+2m, R+3m) — explicit, not the seat bbox',
-        () {
-      const rows = 3;
-      const cols = 4;
-      final hall = CinemaHallInfo('hall-x', 'X', buildGrid(rows, cols));
+    test(
+      'bounds equals (-m, -2m, C+2m, R+3m) — explicit, not the seat bbox',
+      () {
+        const rows = 3;
+        const cols = 4;
+        final hall = CinemaHallInfo('hall-x', 'X', buildGrid(rows, cols));
 
-      final bounds = synthesizeLegacyLayout(hall).bounds;
+        final bounds = synthesizeLegacyLayout(hall).bounds;
 
-      expect(bounds.x, -m);
-      expect(bounds.y, -2 * m);
-      expect(bounds.width, cols + 2 * m);
-      expect(bounds.height, rows + 3 * m);
-    });
+        expect(bounds.x, -m);
+        expect(bounds.y, -2 * m);
+        expect(bounds.width, cols + 2 * m);
+        expect(bounds.height, rows + 3 * m);
+      },
+    );
 
-    test('screen is top, spanning the seat width: start (0,-m), end (C,-m)', () {
-      const cols = 4;
-      final hall = CinemaHallInfo('hall-x', 'X', buildGrid(3, cols));
+    test(
+      'screen is top, spanning the seat width: start (0,-m), end (C,-m)',
+      () {
+        const cols = 4;
+        final hall = CinemaHallInfo('hall-x', 'X', buildGrid(3, cols));
 
-      final screen = synthesizeLegacyLayout(hall).screen;
+        final screen = synthesizeLegacyLayout(hall).screen;
 
-      expect(screen.side, ScreenSide.top);
-      expect(screen.start.x, 0.0);
-      expect(screen.start.y, -m);
-      expect(screen.end.x, cols.toDouble());
-      expect(screen.end.y, -m);
-    });
+        expect(screen.side, ScreenSide.top);
+        expect(screen.start.x, 0.0);
+        expect(screen.start.y, -m);
+        expect(screen.end.x, cols.toDouble());
+        expect(screen.end.y, -m);
+      },
+    );
 
     test('an empty hall maps to seats: [] with C=0, R=0, no throw', () {
       final hall = CinemaHallInfo('hall-empty', 'Empty', const []);
@@ -96,31 +101,33 @@ void main() {
       expect(layout.screen.end.x, 0.0);
     });
 
-    test('a ragged inner list maps each seat by its own indices, no padding',
-        () {
-      // Row 1 has 3 seats, row 2 has 1 seat → C = max(3, 1) = 3, R = 2.
-      final grid = [
-        [
-          const CinemaSeat(row: 1, seatNumber: 1),
-          const CinemaSeat(row: 1, seatNumber: 2),
-          const CinemaSeat(row: 1, seatNumber: 3),
-        ],
-        [const CinemaSeat(row: 2, seatNumber: 1)],
-      ];
-      final hall = CinemaHallInfo('hall-ragged', 'Ragged', grid);
+    test(
+      'a ragged inner list maps each seat by its own indices, no padding',
+      () {
+        // Row 1 has 3 seats, row 2 has 1 seat → C = max(3, 1) = 3, R = 2.
+        final grid = [
+          [
+            const CinemaSeat(row: 1, seatNumber: 1),
+            const CinemaSeat(row: 1, seatNumber: 2),
+            const CinemaSeat(row: 1, seatNumber: 3),
+          ],
+          [const CinemaSeat(row: 2, seatNumber: 1)],
+        ];
+        final hall = CinemaHallInfo('hall-ragged', 'Ragged', grid);
 
-      final layout = synthesizeLegacyLayout(hall);
+        final layout = synthesizeLegacyLayout(hall);
 
-      expect(layout.seats.length, 4);
-      // The lone seat in row 2 sits at columnIndex 0, rowIndex 1.
-      final lone = layout.seats.firstWhere((p) => p.row == 2);
-      expect(lone.x, 0.0);
-      expect(lone.y, 1.0);
-      // C = 3, R = 2.
-      expect(layout.bounds.width, 3 + 2 * m);
-      expect(layout.bounds.height, 2 + 3 * m);
-      expect(layout.screen.end.x, 3.0);
-    });
+        expect(layout.seats.length, 4);
+        // The lone seat in row 2 sits at columnIndex 0, rowIndex 1.
+        final lone = layout.seats.firstWhere((p) => p.row == 2);
+        expect(lone.x, 0.0);
+        expect(lone.y, 1.0);
+        // C = 3, R = 2.
+        expect(layout.bounds.width, 3 + 2 * m);
+        expect(layout.bounds.height, 2 + 3 * m);
+        expect(layout.screen.end.x, 3.0);
+      },
+    );
 
     group('the three seeded shapes lock seat counts and extents', () {
       // Orientation confirmed against the outside-in fixture: Red is 28 rows ×

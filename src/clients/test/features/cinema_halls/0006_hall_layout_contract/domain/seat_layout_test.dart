@@ -56,7 +56,13 @@ void main() {
       // The seat is authored into 'vip' even though the only zone's polygon
       // does not enclose it, and a polygon that would enclose it belongs to a
       // different zone. Membership follows zoneId, never the polygon.
-      final seat = SeatPlacement(row: 1, number: 1, x: 100, y: 100, zoneId: 'vip');
+      final seat = SeatPlacement(
+        row: 1,
+        number: 1,
+        x: 100,
+        y: 100,
+        zoneId: 'vip',
+      );
       final vip = Zone(
         id: 'vip',
         label: 'VIP',

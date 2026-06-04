@@ -37,60 +37,71 @@ void main() {
     source = BootstrapSeatLayoutSource(repo, logger: logger);
   });
 
-  test('returns Right(SeatLayout) matching the synthesizer (delegation)', () async {
-    final hall = CinemaHallInfo(hallId, 'Red', _buildGrid(3, 4));
-    when(() => repo.getCinemaHallInfoById(hallId)).thenAnswer(
-      (_) async => Right<Failure, CinemaHallInfo>(hall),
-    );
+  test(
+    'returns Right(SeatLayout) matching the synthesizer (delegation)',
+    () async {
+      final hall = CinemaHallInfo(hallId, 'Red', _buildGrid(3, 4));
+      when(
+        () => repo.getCinemaHallInfoById(hallId),
+      ).thenAnswer((_) async => Right<Failure, CinemaHallInfo>(hall));
 
-    final result = await source.getLayout(hallId);
+      final result = await source.getLayout(hallId);
 
-    final layout = result.getOrElse(() => throw StateError('expected Right'));
-    expect(layout, synthesizeLegacyLayout(hall));
-    verify(() => repo.getCinemaHallInfoById(hallId)).called(1);
-    verifyNever(
-      () => logger.e(
-        any<dynamic>(),
-        error: any(named: 'error'),
-        stackTrace: any(named: 'stackTrace'),
-      ),
-    );
-  });
+      final layout = result.getOrElse(() => throw StateError('expected Right'));
+      expect(layout, synthesizeLegacyLayout(hall));
+      verify(() => repo.getCinemaHallInfoById(hallId)).called(1);
+      verifyNever(
+        () => logger.e(
+          any<dynamic>(),
+          error: any(named: 'error'),
+          stackTrace: any(named: 'stackTrace'),
+        ),
+      );
+    },
+  );
 
-  test('passes a known Left(Failure) through unchanged, no synthesis', () async {
-    const failure = ServerFailure(message: 'down', statusCode: 503);
-    when(() => repo.getCinemaHallInfoById(hallId)).thenAnswer(
-      (_) async => const Left<Failure, CinemaHallInfo>(failure),
-    );
+  test(
+    'passes a known Left(Failure) through unchanged, no synthesis',
+    () async {
+      const failure = ServerFailure(message: 'down', statusCode: 503);
+      when(
+        () => repo.getCinemaHallInfoById(hallId),
+      ).thenAnswer((_) async => const Left<Failure, CinemaHallInfo>(failure));
 
-    final result = await source.getLayout(hallId);
+      final result = await source.getLayout(hallId);
 
-    expect(result, const Left<Failure, dynamic>(failure));
-    verify(() => repo.getCinemaHallInfoById(hallId)).called(1);
-    verifyNever(
-      () => logger.e(
-        any<dynamic>(),
-        error: any(named: 'error'),
-        stackTrace: any(named: 'stackTrace'),
-      ),
-    );
-  });
+      expect(result, const Left<Failure, dynamic>(failure));
+      verify(() => repo.getCinemaHallInfoById(hallId)).called(1);
+      verifyNever(
+        () => logger.e(
+          any<dynamic>(),
+          error: any(named: 'error'),
+          stackTrace: any(named: 'stackTrace'),
+        ),
+      );
+    },
+  );
 
-  test('on an unexpected exception, logs and returns Left(ServerFailure)', () async {
-    when(() => repo.getCinemaHallInfoById(hallId)).thenThrow(Exception('boom'));
+  test(
+    'on an unexpected exception, logs and returns Left(ServerFailure)',
+    () async {
+      when(
+        () => repo.getCinemaHallInfoById(hallId),
+      ).thenThrow(Exception('boom'));
 
-    final result = await source.getLayout(hallId);
+      final result = await source.getLayout(hallId);
 
-    expect(result.isLeft(), isTrue);
-    final failure = result.fold<Failure?>((f) => f, (_) => null);
-    expect(failure, isA<ServerFailure>());
-    verify(
-      () => logger.e(
-        any<dynamic>(),
-        error: any(named: 'error'),
-        stackTrace: any(named: 'stackTrace'),
-      ),
-    ).called(1);
-    verify(() => repo.getCinemaHallInfoById(hallId)).called(1);
-  });
+      expect(result.isLeft(), isTrue);
+      final failure = result.fold<Failure?>((f) => f, (_) => null);
+      expect(failure, isA<ServerFailure>());
+      verify(
+        () => logger.e(
+          any<dynamic>(),
+          error: any(named: 'error'),
+          stackTrace: any(named: 'stackTrace'),
+        ),
+      ).called(1);
+      verify(() => repo.getCinemaHallInfoById(hallId)).called(1);
+    },
+  );
 }

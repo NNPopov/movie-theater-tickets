@@ -26,7 +26,6 @@ import 'package:movie_theater_tickets/src/cinema_halls/data/layout/bootstrap_sea
 import 'package:movie_theater_tickets/src/cinema_halls/domain/entity/cinema_hall_info.dart';
 import 'package:movie_theater_tickets/src/cinema_halls/domain/entity/cinema_seat.dart';
 import 'package:movie_theater_tickets/src/cinema_halls/domain/layout/layout_screen.dart';
-import 'package:movie_theater_tickets/src/cinema_halls/domain/layout/seat_layout.dart';
 import 'package:movie_theater_tickets/src/cinema_halls/domain/ports/seat_layout_source.dart';
 import 'package:movie_theater_tickets/src/cinema_halls/domain/repo/cinema_hall_repo.dart';
 
@@ -54,76 +53,82 @@ void main() {
     source = BootstrapSeatLayoutSource(repo, logger: logger);
   });
 
-  test('Scenario 1: synthesizing a legacy hall reproduces the grid 1:1',
-      () async {
-    // Red 28 rows × 22 seats = 616.
-    const rows = 28;
-    const cols = 22;
-    when(() => repo.getCinemaHallInfoById(hallId)).thenAnswer(
-      (_) async => Right<Failure, CinemaHallInfo>(
-        CinemaHallInfo(hallId, 'Red', buildGrid(rows, cols)),
-      ),
-    );
+  test(
+    'Scenario 1: synthesizing a legacy hall reproduces the grid 1:1',
+    () async {
+      // Red 28 rows × 22 seats = 616.
+      const rows = 28;
+      const cols = 22;
+      when(() => repo.getCinemaHallInfoById(hallId)).thenAnswer(
+        (_) async => Right<Failure, CinemaHallInfo>(
+          CinemaHallInfo(hallId, 'Red', buildGrid(rows, cols)),
+        ),
+      );
 
-    final result = await source.getLayout(hallId);
+      final result = await source.getLayout(hallId);
 
-    expect(result.isRight(), isTrue);
-    final layout = result.getOrElse(() => throw StateError('expected Right'));
+      expect(result.isRight(), isTrue);
+      final layout = result.getOrElse(() => throw StateError('expected Right'));
 
-    expect(layout.hallId, hallId);
-    expect(layout.seats.length, 616);
+      expect(layout.hallId, hallId);
+      expect(layout.seats.length, 616);
 
-    for (final p in layout.seats) {
-      expect(p.x, (p.number - 1).toDouble(), reason: 'x = columnIndex');
-      expect(p.y, (p.row - 1).toDouble(), reason: 'y = rowIndex');
-      expect(p.w, 1.0);
-      expect(p.h, 1.0);
-      expect(p.rotation, 0.0);
-      expect(p.zoneId, isNull);
-      expect(p.seatId, (p.row, p.number));
-    }
+      for (final p in layout.seats) {
+        expect(p.x, (p.number - 1).toDouble(), reason: 'x = columnIndex');
+        expect(p.y, (p.row - 1).toDouble(), reason: 'y = rowIndex');
+        expect(p.w, 1.0);
+        expect(p.h, 1.0);
+        expect(p.rotation, 0.0);
+        expect(p.zoneId, isNull);
+        expect(p.seatId, (p.row, p.number));
+      }
 
-    expect(layout.zones, isEmpty);
+      expect(layout.zones, isEmpty);
 
-    expect(layout.screen.side, ScreenSide.top);
-    expect(layout.screen.start.x, 0.0);
-    expect(layout.screen.start.y, -1.0);
-    expect(layout.screen.end.x, cols.toDouble());
-    expect(layout.screen.end.y, -1.0);
+      expect(layout.screen.side, ScreenSide.top);
+      expect(layout.screen.start.x, 0.0);
+      expect(layout.screen.start.y, -1.0);
+      expect(layout.screen.end.x, cols.toDouble());
+      expect(layout.screen.end.y, -1.0);
 
-    // bounds = (-m, -2m, C+2m, R+3m) with m = 1, C = 22, R = 28.
-    expect(layout.bounds.x, -1.0);
-    expect(layout.bounds.y, -2.0);
-    expect(layout.bounds.width, 24.0);
-    expect(layout.bounds.height, 31.0);
+      // bounds = (-m, -2m, C+2m, R+3m) with m = 1, C = 22, R = 28.
+      expect(layout.bounds.x, -1.0);
+      expect(layout.bounds.y, -2.0);
+      expect(layout.bounds.width, 24.0);
+      expect(layout.bounds.height, 31.0);
 
-    verify(() => repo.getCinemaHallInfoById(hallId)).called(1);
-    verifyNever(
-      () => logger.e(
-        any<dynamic>(),
-        error: any(named: 'error'),
-        stackTrace: any(named: 'stackTrace'),
-      ),
-    );
-  });
+      verify(() => repo.getCinemaHallInfoById(hallId)).called(1);
+      verifyNever(
+        () => logger.e(
+          any<dynamic>(),
+          error: any(named: 'error'),
+          stackTrace: any(named: 'stackTrace'),
+        ),
+      );
+    },
+  );
 
-  test('Scenario 2: an unexpected repo failure is logged and returned as Left',
-      () async {
-    when(() => repo.getCinemaHallInfoById(hallId)).thenThrow(Exception('boom'));
+  test(
+    'Scenario 2: an unexpected repo failure is logged and returned as Left',
+    () async {
+      when(
+        () => repo.getCinemaHallInfoById(hallId),
+      ).thenThrow(Exception('boom'));
 
-    final result = await source.getLayout(hallId);
+      final result = await source.getLayout(hallId);
 
-    expect(result.isLeft(), isTrue);
-    final failure = result.fold<Failure?>((f) => f, (_) => null);
-    expect(failure, isA<ServerFailure>());
+      expect(result.isLeft(), isTrue);
+      final failure = result.fold<Failure?>((f) => f, (_) => null);
+      expect(failure, isA<ServerFailure>());
 
-    verify(
-      () => logger.e(
-        any<dynamic>(),
-        error: any(named: 'error'),
-        stackTrace: any(named: 'stackTrace'),
-      ),
-    ).called(1);
-    verify(() => repo.getCinemaHallInfoById(hallId)).called(1);
-  });
+      verify(
+        () => logger.e(
+          any<dynamic>(),
+          error: any(named: 'error'),
+          stackTrace: any(named: 'stackTrace'),
+        ),
+      ).called(1);
+      verify(() => repo.getCinemaHallInfoById(hallId)).called(1);
+    },
+  );
 }

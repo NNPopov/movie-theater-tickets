@@ -48,6 +48,10 @@
     </ItemGroup>
 
     <ItemGroup>
+        <InternalsVisibleTo Include="BookingManagementService.API.UnitTests" />
+    </ItemGroup>
+
+    <ItemGroup>
         <Content Include="..\.dockerignore">
             <Link>.dockerignore</Link>
         </Content>

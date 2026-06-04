@@ -10,6 +10,7 @@ using CinemaTicketBooking.Application.ShoppingCarts.Command.UnreserveSeats;
 using CinemaTicketBooking.Application.ShoppingCarts.Command.UnselectSeats;
 using CinemaTicketBooking.Application.ShoppingCarts.Queries;
 using CinemaTicketBooking.Domain.Error;
+using CinemaTicketBooking.Domain.Exceptions;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -30,10 +31,7 @@ public class ShoppingCartEndpointApplicationBuilderExtensions : IEndpoints
                 ISender sender,
                 CancellationToken cancellationToken) =>
             {
-                if (!Guid.TryParse(requestId, out Guid parsedRequestId))
-                {
-                    throw new Exception($"Incorrect requestId:{requestId} {nameof(CreateShoppingCartRequest)}");
-                }
+                var parsedRequestId = ParseIdempotencyKey(requestId);
 
                 var command = new CreateShoppingCartCommand(request.MaxNumberOfSeats, parsedRequestId);
 
@@ -48,7 +46,8 @@ public class ShoppingCartEndpointApplicationBuilderExtensions : IEndpoints
             .WithName("CreateShoppingCart")
             .WithTags(Tag)
             .Produces<CreateShoppingCartResponse>(201, "application/json")
-            .Produces(204);
+            .Produces(204)
+            .Produces(400);
 
         endpointRouteBuilder.MapGet($"{BaseRoute}/current", async (
                 ClaimsPrincipal user,
@@ -68,6 +67,7 @@ public class ShoppingCartEndpointApplicationBuilderExtensions : IEndpoints
             .WithTags(Tag)
             .Produces<CreateShoppingCartResponse>(200, "application/json")
             .Produces(204)
+            .Produces(401)
             .Produces(404);
 
         endpointRouteBuilder.MapPut($"{BaseRoute}/{{ShoppingCartId}}/assignclient", async (
@@ -91,6 +91,7 @@ public class ShoppingCartEndpointApplicationBuilderExtensions : IEndpoints
             .RequireAuthorization()
             .WithTags(Tag)
             .Produces(200)
+            .Produces(401)
             .Produces(404)
             .Produces(409);
 
@@ -158,10 +159,7 @@ public class ShoppingCartEndpointApplicationBuilderExtensions : IEndpoints
                 [FromServices] ISender sender,
                 CancellationToken cancellationToken) =>
             {
-                if (!Guid.TryParse(requestId, out Guid parsedRequestId))
-                {
-                    return Results.BadRequest();
-                }
+                var parsedRequestId = ParseIdempotencyKey(requestId);
 
                 var query = new UnreserveSeatsCommand(ShoppingCartId: shoppingCartId, RequestId: parsedRequestId);
                 await sender.Send(query, cancellationToken);
@@ -171,7 +169,8 @@ public class ShoppingCartEndpointApplicationBuilderExtensions : IEndpoints
             .WithName("UnreserveSeats")
             .WithTags(Tag)
             .Produces<bool>(200, "application/json")
-            .Produces(204);
+            .Produces(204)
+            .Produces(400);
 
         endpointRouteBuilder.MapPost($"{BaseRoute}/{{ShoppingCartId}}/purchase", async ([FromRoute] Guid shoppingCartId,
                 [FromServices] ISender sender,
@@ -206,14 +205,24 @@ public class ShoppingCartEndpointApplicationBuilderExtensions : IEndpoints
             .Produces(404);
     }
 
-    private static Guid GetClientId(ClaimsPrincipal user)
+    internal static Guid ParseIdempotencyKey(string requestId)
+    {
+        if (!Guid.TryParse(requestId, out var parsedRequestId))
+        {
+            throw new DomainValidationException($"Invalid idempotency key: {requestId}");
+        }
+
+        return parsedRequestId;
+    }
+
+    internal static Guid GetClientId(ClaimsPrincipal user)
     {
         var id = user.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier")
             ?.Value;
 
         if (!Guid.TryParse(id, out Guid clientId))
         {
-            throw new Exception($"Incorrect clientId:{clientId} {nameof(CreateShoppingCartRequest)}");
+            throw new UnauthorizedAccessException($"Invalid nameidentifier claim: {id}");
         }
 
         return clientId;

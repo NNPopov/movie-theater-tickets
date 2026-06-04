@@ -203,16 +203,21 @@ public class ShoppingCart : AggregateRoot
         return Result.Success();
     }
 
-    public void PurchaseComplete()
+    public Result PurchaseComplete()
     {
-        EnsurePurchaseIsNotCompleted();
+        Ensure.NotEmpty(ClientId, "The ClientId is required.", nameof(ClientId));   // stays a throw (invariant)
 
-        Ensure.NotEmpty(ClientId, "The ClientId is required.", nameof(ClientId));
+        if (Status == ShoppingCartStatus.PurchaseCompleted)
+            return Result.Success();                  // idempotent — no duplicate event
 
-        if (Status == ShoppingCartStatus.SeatsReserved)
-            Status = ShoppingCartStatus.PurchaseCompleted;
+        if (Status != ShoppingCartStatus.SeatsReserved)
+            return DomainErrors<ShoppingCart>.ConflictException(
+                $"The shopping cart {Id} cannot be purchased from status {Status}.");
 
+        Status = ShoppingCartStatus.PurchaseCompleted;     // genuine transition
         _domainEvents.Add(new ShoppingCartPurchaseDomainEvent(Id));
+
+        return Result.Success();
     }
 
     public PriceCalculationResult CalculateCartAmount(IPriceService priceService)

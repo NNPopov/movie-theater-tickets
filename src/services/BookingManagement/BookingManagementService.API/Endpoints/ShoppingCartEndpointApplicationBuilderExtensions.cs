@@ -180,12 +180,15 @@ public class ShoppingCartEndpointApplicationBuilderExtensions : IEndpoints
                 var query = new PurchaseTicketsCommand(ShoppingCartId: shoppingCartId);
                 var result = await sender.Send(query, cancellationToken);
 
-                return result;
+                return result.Match(
+                    () => Results.Ok(),
+                    ErrorResults.ToProblem);
             })
             .WithName("PurchaseSeats")
             .WithTags(Tag)
-            .Produces<bool>(201, "application/json")
-            .Produces(204);
+            .Produces(200)
+            .Produces(404)
+            .Produces(409);
 
 
         endpointRouteBuilder.MapGet($"{BaseRoute}/{{ShoppingCartId}}",

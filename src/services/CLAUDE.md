@@ -33,9 +33,10 @@ Reusable procedures live in `.claude/skills/` and are invoked by name.
   `DomainValidationException`, `LockedException`, …); the global
   `CustomExceptionHandler : IExceptionHandler` maps each to an HTTP `ProblemDetails`.
   A `Result`/`Error` monad (`Domain/Error/`) is **also** used for some expected
-  business outcomes. Both styles currently coexist — see
-  `agent_docs/error_handling.md`. **Do not unify them on your own; the canonical
-  choice is not yet decided.**
+  business outcomes. Both styles coexist **by design** — the split is **decided**
+  (ADR-002, Accepted 2026-06-04): expected business outcomes ⇒ `Result`, the
+  unexpected ⇒ exception. See `agent_docs/error_handling.md`. **Do not unify them on
+  your own.**
 - **Persistence:** PostgreSQL via EF Core (async), repositories in
   `*.Infrastructure/Repositories/`, configurations in
   `*.Infrastructure/Data/Configurations/`, migrations in
@@ -126,10 +127,13 @@ These apply to every change, every file, every PR. Violations are non-negotiable
    `DuplicateRequestException`). They do **not** wrap work in
    `try/catch (Exception)`. Unknown failures propagate to `CustomExceptionHandler`,
    which logs and returns 500. See `agent_docs/error_handling.md`.
-9. **The error model is not yet unified.** `Result`/`Error` and `*Exception` both
-   exist on purpose. Follow the pattern already used by the surrounding code in the
-   aggregate you are touching; do not refactor one into the other without explicit
-   approval.
+9. **The error model is decided — see ADR-002 (Accepted 2026-06-04).** `Result`/`Error`
+   and `*Exception` both exist on purpose, split by the *nature* of the outcome:
+   expected business outcomes (and in-aggregate transitions that raise a domain event)
+   ⇒ `Result`; structural validation ⇒ `ValidationBehaviour`/`ValidationException`;
+   the unexpected/infrastructure ⇒ exception ⇒ `CustomExceptionHandler`. Follow the
+   pattern that split dictates for the aggregate you are touching; do not refactor one
+   into the other without an ADR.
 10. **Stable infrastructure is not changed casually.** Composition roots
     (`Program.cs`, `ConfigureServices`, DI registration), `CustomExceptionHandler`,
     base types (`AggregateRoot`, `Entity`, `ValueObject`, `Result`), and the

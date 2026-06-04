@@ -237,6 +237,45 @@ public class MovieSessionSeatSpecification
         seat.GetDomainEvents().Should().ContainSingle(x => x is MovieSessionSeatStatusUpdatedDomainEvent);
     }
 
+    // Slice 0006_purchase_tickets_result_http: Sell()'s "another shopping cart" case is retyped from a
+    // base Error via InvalidOperation (which the shared mapper sends to 500) to a ConflictError (=> 409),
+    // matching the sibling Select/Reserve transitions. The already-Sold case already returned a
+    // ConflictError and is pinned here as a regression so the retype cannot silently drift back to 500.
+
+    [Fact]
+    public void Sell_Should_ReturnConflictError_When_SeatIsHeldByAnotherShoppingCart()
+    {
+        // Arrange — the seat is selected by one cart, then a different cart tries to sell it.
+        var seat = MovieSessionSeat.Create(Guid.NewGuid(), seatNumber: 1, seatRow: 1, price: 20);
+        seat.Select(Guid.NewGuid(), "hash");
+
+        // Act
+        var result = seat.Sell(Guid.NewGuid()); // a DIFFERENT shopping cart
+
+        // Assert — was a base Error via InvalidOperation before this slice; must be a ConflictError now.
+        result.IsFailure.Should().BeTrue();
+        result.Error.Should().BeOfType<ConflictError>();
+        result.Error.Code.Should().Be("MovieSessionSeat.ConflictException");
+    }
+
+    [Fact]
+    public void Sell_Should_ReturnConflictError_When_SeatIsAlreadySold()
+    {
+        // Arrange — the owning cart sells the seat, then tries to sell it again.
+        var cartId = Guid.NewGuid();
+        var seat = MovieSessionSeat.Create(Guid.NewGuid(), seatNumber: 1, seatRow: 1, price: 20);
+        seat.Select(cartId, "hash");
+        seat.Sell(cartId);
+
+        // Act
+        var result = seat.Sell(cartId);
+
+        // Assert
+        result.IsFailure.Should().BeTrue();
+        result.Error.Should().BeOfType<ConflictError>();
+        result.Error.Code.Should().Be("MovieSessionSeat.ConflictException");
+    }
+
     // Build a materialized seat state via the private [JsonConstructor] — the aggregate's own
     // transitions never leave an Available seat owned by another cart (Select also flips the status),
     // so this state can only be constructed as if deserialized from storage.

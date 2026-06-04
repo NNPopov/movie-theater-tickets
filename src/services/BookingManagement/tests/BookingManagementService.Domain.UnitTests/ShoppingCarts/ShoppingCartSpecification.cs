@@ -272,4 +272,70 @@ public class ShoppingCartSpecification
             .Count(x => x is ShoppingCartReservedDomainEvent)
             .Should().Be(1);
     }
+
+    // Slice 0006_purchase_tickets_result_http: PurchaseComplete() is retyped void -> Result. On a
+    // genuine SeatsReserved -> PurchaseCompleted transition it succeeds and raises exactly one
+    // ShoppingCartPurchaseDomainEvent; re-completing an already-PurchaseCompleted cart is an idempotent
+    // success with no second event; completing from any other status (e.g. InWork) returns a
+    // ConflictError (was a thrown ConflictException) and raises no event. The ClientId-empty invariant
+    // stays a throw (see SetShowTime_ShouldThrowArgumentException_WhenClientIdNotAssign).
+    [Fact]
+    public void PurchaseComplete_ShouldTransitionToPurchaseCompletedAndRaiseEvent_When_CartIsSeatsReserved()
+    {
+        // Arrange
+        var shoppingCart = ShoppingCart.Create(5, dataHasher);
+        shoppingCart.AssignClientId(Guid.NewGuid());
+        shoppingCart.SeatsReserve();
+
+        // Act
+        var result = shoppingCart.PurchaseComplete();
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        shoppingCart.Status.Should().Be(ShoppingCartStatus.PurchaseCompleted);
+        shoppingCart.GetDomainEvents()
+            .Count(x => x is ShoppingCartPurchaseDomainEvent)
+            .Should().Be(1);
+    }
+
+    [Fact]
+    public void PurchaseComplete_ShouldSucceedWithoutASecondEvent_When_CartIsAlreadyPurchaseCompleted()
+    {
+        // Arrange
+        var shoppingCart = ShoppingCart.Create(5, dataHasher);
+        shoppingCart.AssignClientId(Guid.NewGuid());
+        shoppingCart.SeatsReserve();
+        shoppingCart.PurchaseComplete();
+
+        // Act — re-completing an already-completed cart is an idempotent success, no duplicate event.
+        var result = shoppingCart.PurchaseComplete();
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        shoppingCart.Status.Should().Be(ShoppingCartStatus.PurchaseCompleted);
+        shoppingCart.GetDomainEvents()
+            .Count(x => x is ShoppingCartPurchaseDomainEvent)
+            .Should().Be(1);
+    }
+
+    [Fact]
+    public void PurchaseComplete_ShouldReturnConflictErrorAndRaiseNoEvent_When_CartIsInWork()
+    {
+        // Arrange — a client is assigned (so the ClientId invariant passes) but the seats were never
+        // reserved, so the cart is still InWork: purchasing without a prior reservation is illegal.
+        var shoppingCart = ShoppingCart.Create(5, dataHasher);
+        shoppingCart.AssignClientId(Guid.NewGuid());
+
+        // Act
+        var result = shoppingCart.PurchaseComplete();
+
+        // Assert
+        result.IsFailure.Should().BeTrue();
+        result.Error.Should().BeOfType<ConflictError>();
+        result.Error.Code.Should().Be("ShoppingCart.ConflictException");
+        shoppingCart.Status.Should().Be(ShoppingCartStatus.InWork);
+        shoppingCart.GetDomainEvents()
+            .Count(x => x is ShoppingCartPurchaseDomainEvent)
+            .Should().Be(0);
+    }
 }

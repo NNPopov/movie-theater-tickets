@@ -56,7 +56,12 @@ internal sealed class PurchaseTicketsCommandHandler : IRequestHandler<PurchaseTi
         }
 
 
-        cart.PurchaseComplete();
+        var purchaseResult = cart.PurchaseComplete();
+        if (purchaseResult.IsFailure)
+        {
+            return purchaseResult;                  // BEFORE SaveAsync / lifecycle deletes (atomicity)
+        }
+
         await _activeShoppingCartRepository.SaveAsync(cart);
         await _shoppingCartLifecycleManager.DeleteAsync(cart.Id);
 

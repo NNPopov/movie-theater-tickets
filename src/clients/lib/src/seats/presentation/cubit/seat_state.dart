@@ -2,11 +2,18 @@ part of 'seat_cubit.dart';
 
 @immutable
 class SeatState extends Equatable {
-  SeatState({required this.seats, required this.status, this.errorMessage});
+  SeatState({required this.seats, required this.status, this.errorMessage})
+    : byId = buildSeatIndex(seats);
 
   final List<Seat> seats;
   final String? errorMessage;
   final SeatStateStatus status;
+
+  /// Derived O(1) status index keyed by (row, seatNumber), built once per
+  /// instance from [seats]. Excluded from equality on purpose: it is a pure
+  /// function of [seats], so it never changes equality semantics. `copyWith`
+  /// recomputes it for free on every new instance.
+  final Map<SeatId, Seat> byId;
 
   @override
   List<Object> get props => [seats, status];

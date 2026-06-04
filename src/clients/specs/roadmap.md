@@ -8,3 +8,4 @@ Global, project-wide slice numbering. Status legend: 📋 planned · 🚧 in pro
 | 0002 | platform | Navigation: auto_route shell migration (Audit Part 1) | 📋 |
 | 0003 | shopping_carts | Shopping cart by-id not-found: 204 → 404 client adaptation | 📋 |
 | 0004 | platform | Connectivity overlay freeze fix (Audit Part 2) | 📋 |
+| 0005 | seats | Seat grid performance fix (ADR 0005 / Phase 1) | 📋 |

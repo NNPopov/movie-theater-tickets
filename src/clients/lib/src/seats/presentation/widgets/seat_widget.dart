@@ -21,17 +21,22 @@ class SeatWidget extends StatelessWidget {
     return SizedBox(
       height: 19,
       width: 19,
-      child: TextButton(
-        style: OutlinedButton.styleFrom(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(0)),
-          foregroundColor: foregroundColor,
-          padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 2),
-          backgroundColor: backgroundColor,
-        ),
-        onPressed: onPressed,
-        child: Text(
-          text,
-          style: const TextStyle(fontSize: AppStyles.defaultFontSize),
+      child: GestureDetector(
+        // Whole cell tappable, like the old button. A null [onPressed] renders
+        // a non-interactive seat (sold / empty).
+        behavior: HitTestBehavior.opaque,
+        onTap: onPressed,
+        child: DecoratedBox(
+          decoration: BoxDecoration(color: backgroundColor),
+          child: Center(
+            child: Text(
+              text,
+              style: TextStyle(
+                color: foregroundColor,
+                fontSize: AppStyles.defaultFontSize,
+              ),
+            ),
+          ),
         ),
       ),
     );

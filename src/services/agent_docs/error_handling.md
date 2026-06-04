@@ -2,24 +2,43 @@
 
 Read this before writing or modifying any handler or repository/adapter.
 
-## Two models coexist (on purpose, not yet unified)
+## The decided hybrid (ADR-002, Accepted 2026-06-04)
 
-This service uses **both** of the following, and the canonical choice has **not**
-been decided. Do not refactor one into the other without explicit user approval.
+The error model is **decided** — see
+`docs/adr/ADR-002-error-handling-model-result-vs-exceptions.md`. The two mechanisms
+both exist **by design**, split by the *nature* of the outcome, not by aggregate or
+by per-slice habit:
 
-1. **Exceptions translated centrally.** Domain and application code raise typed
-   `*Exception`s; a single `IExceptionHandler` maps each to an HTTP `ProblemDetails`.
-2. **The `Result`/`Error` monad** (`Domain/Error/Result.cs`, `Error.cs`,
-   `DomainErrors.cs`, `ResultExtensions.cs`) for expected business outcomes. A
-   handler may return `Result` / `Result<T>`, and the endpoint resolves it with
-   `.Match(onSuccess, onFailure)`.
+| Situation | Mechanism |
+|---|---|
+| Expected business outcome (seat taken, cart not found, wrong status, cannot purchase) | **`Result` / `Result<T>`** carrying an `Error` |
+| In-aggregate state transition that also raises a domain event | **`Result`** (event appended on the success branch only) |
+| Structural input validation | **`ValidationBehaviour` + `ValidationException`** (unchanged) |
+| Invariant violation / infrastructure fault / "don't know how to handle" | **exception** → `CustomExceptionHandler` → 500 |
+| Repository/adapter translating a business-meaningful infra exception (e.g. unique-violation `DbUpdateException`) | **throw** a specific `*Exception` (unchanged) |
 
-The same handler may use both (e.g. `return Result.Success();` for the happy path
-while `throw new ContentNotFoundException(...)` for a missing aggregate). **When you
-touch existing code, match the style already used by that aggregate's handlers.**
-When you genuinely have a free choice on new code, prefer the dominant style of the
-nearest sibling use-case, and leave a note in `plan.md` rather than introducing a
-third pattern.
+Endpoints resolve a `Result` **straight to HTTP** with
+`result.Match(onSuccess, ErrorResults.ToProblem)`. The old endpoint **bridge** that
+re-threw a failing `Result` as a `*Exception` so `CustomExceptionHandler` could
+produce the response **is gone** — a request pays for one error pass, not two.
+
+### Intentional exception tails (not debt)
+
+Some paths deliberately stay exception-based and must **not** be "converted" to
+`Result` on sight — they are the right-hand side of the table above, not leftovers:
+
+- **Read/query handlers** that raise `ContentNotFoundException` for a missing
+  aggregate (a `GET` returning 404). Queries return a value or throw; they do not
+  carry a `Result` failure channel.
+- **The shared `MovieSessionSeatService.GetMovieSessionSeat` seat-not-found** helper —
+  a missing seat row is a `ContentNotFoundException` (404), not a business outcome of
+  the calling command.
+- **The `ClientId`-empty invariant** in `ShoppingCart.PurchaseComplete()` — a cart
+  reaching completion without a client is a bug (500-class `Ensure.NotEmpty` throw),
+  evaluated before the status guards, not an expected `Result` failure.
+
+When you touch existing code, follow the table; do not refactor an intentional tail
+into a `Result` (or vice versa) without an ADR.
 
 ## The exception hierarchy
 
@@ -115,11 +134,11 @@ Consequences for your code:
 - Return `Result.Success()` / `Result.Success(value)` for the happy path and a
   failing `Result` carrying an `Error` (see `Domain/Error/DomainErrors.cs`) for an
   expected business failure.
-- The endpoint resolves it: `result.Match(onSuccess, onFailure)`. In existing code
-  the failure branch sometimes **re-raises** a typed exception
-  (`if (failure is ConflictError) throw new ConflictException(...)`) so the central
-  handler still produces the response — that bridge between the two models is
-  current reality, not an ideal; keep it consistent with siblings.
+- The endpoint resolves it with `result.Match(() => Results.Ok(), ErrorResults.ToProblem)`
+  (the shared mapper in `API/Endpoints/Common/ErrorResults.cs`: `NotFoundError ⇒ 404`,
+  `ConflictError ⇒ 409`, any other `Error ⇒ 500`). The failure branch returns an HTTP
+  result directly — it must **not** re-throw a typed exception to be re-caught by
+  `CustomExceptionHandler` (ADR-002; the old bridge is removed).
 - Do not invent new `Error` codes inside a feature folder. New `Error` definitions
   live in `Domain/Error/DomainErrors.cs` and are an ADR-level decision.
 

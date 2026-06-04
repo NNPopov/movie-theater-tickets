@@ -5,7 +5,9 @@ import 'package:movie_theater_tickets/src/auth/data/services/auth_service_impl.d
 import 'package:movie_theater_tickets/src/auth/data/services/flutter_web_auth_2_authenticator.dart';
 import 'package:movie_theater_tickets/src/auth/domain/abstraction/authenticator.dart';
 import 'package:movie_theater_tickets/src/auth/domain/services/auth_service.dart';
+import 'package:movie_theater_tickets/src/cinema_halls/data/layout/bootstrap_seat_layout_source.dart';
 import 'package:movie_theater_tickets/src/cinema_halls/data/repo/cinema_hall_repo_impl.dart';
+import 'package:movie_theater_tickets/src/cinema_halls/domain/ports/seat_layout_source.dart';
 import 'package:movie_theater_tickets/src/cinema_halls/domain/repo/cinema_hall_repo.dart';
 import 'package:movie_theater_tickets/src/cinema_halls/domain/usecases/get_cinema_hall.dart';
 import 'package:movie_theater_tickets/src/hub/data/signalr_event_hub.dart';
@@ -167,6 +169,9 @@ void _initCinemaHall() {
   );
   getIt.registerLazySingleton<GetCinemaHallById>(
     () => GetCinemaHallById(getIt.get()),
+  );
+  getIt.registerLazySingleton<SeatLayoutSource>(
+    () => BootstrapSeatLayoutSource(getIt.get<CinemaHallRepo>()),
   );
 }
 

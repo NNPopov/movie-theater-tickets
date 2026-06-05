@@ -8,13 +8,14 @@ class Seat extends Equatable {
   final String hashId;
   final SeatStatus seatStatus;
 
-  Seat(
-      {required this.row,
-      required this.seatNumber,
-      required this.blocked,
-      required this.hashId,
-      required this.seatStatus,
-      this.isCurrentReserve = false});
+  Seat({
+    required this.row,
+    required this.seatNumber,
+    required this.blocked,
+    required this.hashId,
+    required this.seatStatus,
+    this.isCurrentReserve = false,
+  });
 
   Seat.temp({
     required this.row,
@@ -26,7 +27,13 @@ class Seat extends Equatable {
   });
 
   @override
-  List<Object?> get props => [seatNumber, row, blocked, isCurrentReserve, seatStatus];
+  List<Object?> get props => [
+    seatNumber,
+    row,
+    blocked,
+    isCurrentReserve,
+    seatStatus,
+  ];
 }
 
 enum SeatStatus { blocked, available, selected, reserved, sold }

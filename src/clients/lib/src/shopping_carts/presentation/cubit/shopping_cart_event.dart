@@ -23,7 +23,4 @@ class ShoppingCartUpdateEvent extends ShoppingCartEvent {
   List<Object> get props => [shoppingCart];
 }
 
-class ShoppingCartDeleteEvent extends ShoppingCartEvent {
-
-}
-
+class ShoppingCartDeleteEvent extends ShoppingCartEvent {}

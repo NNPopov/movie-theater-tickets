@@ -6,7 +6,7 @@ import 'auth_event.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthStatus> {
   AuthBloc(this._authService)
-      : super(AuthStatus(status: AuthenticationStatus.unauthorized)) {
+    : super(AuthStatus(status: AuthenticationStatus.unauthorized)) {
     init();
     on<LogInEvent>(_onAuthenticationLogInRequested);
     on<LogOutEvent>(_onAuthenticationLogoutRequested);
@@ -19,8 +19,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthStatus> {
   final AuthService _authService;
 
   Future<void> init() async {
-    _authenticationStatusSubscription =
-        _authService.status.listen((status) async {
+    _authenticationStatusSubscription = _authService.status.listen((
+      status,
+    ) async {
       emit(status);
     });
 
@@ -30,9 +31,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthStatus> {
   Future<void> _getAuthStatus() async {
     var statusResult = await _authService.getCurrentStatus();
 
-    statusResult.fold((l) => null, (status) => {}
-        //emit(status)
-        );
+    statusResult.fold(
+      (l) => null,
+      (status) => {},
+      //emit(status)
+    );
   }
 
   @override
@@ -42,22 +45,28 @@ class AuthBloc extends Bloc<AuthEvent, AuthStatus> {
   }
 
   Future<void> _onAuthenticationLogInRequested(
-      LogInEvent event, Emitter<AuthStatus> emit) async {
+    LogInEvent event,
+    Emitter<AuthStatus> emit,
+  ) async {
     emit(AuthStatus(status: AuthenticationStatus.inProgress));
 
     var result = await _authService.logIn();
     result.fold(
-        (l) => emit(AuthStatus(status: AuthenticationStatus.unauthorized)),
-        (r) => emit(r));
+      (l) => emit(AuthStatus(status: AuthenticationStatus.unauthorized)),
+      (r) => emit(r),
+    );
   }
 
   Future<void> _onAuthenticationLogoutRequested(
-      LogOutEvent event, Emitter<AuthStatus> emit) async {
+    LogOutEvent event,
+    Emitter<AuthStatus> emit,
+  ) async {
     emit(AuthStatus(status: AuthenticationStatus.inProgress));
 
     var result = await _authService.logOut();
     result.fold(
-        (l) => emit(AuthStatus(status: AuthenticationStatus.unauthorized)),
-        (r) => emit(r));
+      (l) => emit(AuthStatus(status: AuthenticationStatus.unauthorized)),
+      (r) => emit(r),
+    );
   }
 }

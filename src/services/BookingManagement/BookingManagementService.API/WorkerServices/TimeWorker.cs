@@ -15,7 +15,7 @@ public sealed class TimeWorker : BackgroundService
         IServiceScopeFactory serviceScopeFactory)
     {
         using var serviceScope = serviceScopeFactory.CreateScope();
-        
+
         _serverStateNotifier = serviceScope.ServiceProvider.GetRequiredService<IServerStateNotifier>();
         _logger = logger;
     }
@@ -25,7 +25,7 @@ public sealed class TimeWorker : BackgroundService
 
         while (!cancellationToken.IsCancellationRequested)
         {
-            
+
             await _serverStateNotifier.SentServerState(new ServerState(TimeProvider.System.GetUtcNow().DateTime));
             await Task.Delay(5000, cancellationToken);
         }

@@ -98,6 +98,6 @@ public static class Ensure
             throw new ArgumentNullException(argumentName, message);
         }
     }
-    
+
 
 }

@@ -2,7 +2,7 @@
 
 namespace CinemaTicketBooking.Domain.MovieSessions.Events;
 
-public sealed class MovieSessionCreatedDomainEvent:IDomainEvent
+public sealed class MovieSessionCreatedDomainEvent : IDomainEvent
 {
     internal MovieSessionCreatedDomainEvent(MovieSession movieSession) => MovieSession = movieSession;
 

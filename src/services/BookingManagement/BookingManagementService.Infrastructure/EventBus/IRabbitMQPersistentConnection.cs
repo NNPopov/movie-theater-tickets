@@ -1,13 +1,13 @@
-﻿using RabbitMQ.Client;
+using RabbitMQ.Client;
 
 namespace CinemaTicketBooking.Infrastructure.EventBus;
 
 public interface IRabbitMQPersistentConnection
-    : IDisposable
+    : IAsyncDisposable
 {
     bool IsConnected { get; }
 
-    bool TryConnect();
+    Task<bool> TryConnectAsync();
 
-    IModel CreateModel();
+    Task<IChannel> CreateChannelAsync();
 }

@@ -9,11 +9,11 @@ namespace CinemaTicketBooking.Infrastructure.Services;
 public class ActiveShoppingCartRepository : IActiveShoppingCartRepository
 {
     private readonly IConnectionMultiplexer _redis;
-    
+
     private const string ShoppingCartKeyPrefix = "cart";
-    
+
     private const string ClientKeyPrefix = "client_session";
-    
+
     private readonly IDomainEventTracker _domainEventTracker;
 
     public ActiveShoppingCartRepository(IConnectionMultiplexer redis,
@@ -41,15 +41,15 @@ public class ActiveShoppingCartRepository : IActiveShoppingCartRepository
     public async Task DeleteAsync(ShoppingCart shoppingCart)
     {
         var db = _redis.GetDatabase();
-        
+
         var kartKey = GetShoppingCartKey(shoppingCart.Id.ToString());
 
         await db.KeyDeleteAsync(kartKey);
-        
+
 
         await _domainEventTracker.PublishDomainEvents(shoppingCart);
     }
-    
+
     public async Task<ShoppingCart> GetByIdAsync(Guid shoppingCartId)
     {
         var db = _redis.GetDatabase();
@@ -77,7 +77,7 @@ public class ActiveShoppingCartRepository : IActiveShoppingCartRepository
 
         return JsonConvert.DeserializeObject<Guid>(jsonValue);
     }
-    
+
     public async Task SetClientActiveShoppingCartAsync(Guid clientId, Guid shoppingCartId)
     {
         var db = _redis.GetDatabase();

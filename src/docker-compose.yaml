@@ -27,7 +27,7 @@ services:
       - "80"
       
   booking-management-postgres:
-    image: postgres
+    image: postgres:16
     volumes:
       - booking-management-postgres-data:/var/lib/postgresql/data
     environment:
@@ -66,7 +66,7 @@ services:
       ACCEPT_EULA: Y
   
   sso-postgres:
-    image: postgres
+    image: postgres:16
     volumes:
       - sso-postgres-data:/var/lib/postgresql/data
     environment:
@@ -82,7 +82,7 @@ services:
     command:
       - start-dev
       - --http-port=80
-      - --proxy edge
+      - --proxy-headers=xforwarded
     environment:
       DB: postgres
       KC_DB_URL: 'jdbc:postgresql://sso-postgres:5432/keycloak'

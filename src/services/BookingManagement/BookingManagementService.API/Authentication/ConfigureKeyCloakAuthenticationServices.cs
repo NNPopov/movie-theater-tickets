@@ -11,17 +11,17 @@ namespace CinemaTicketBooking.Api.Authentication;
 
 public static class ConfigureKeyCloakAuthenticationServices
 {
-    
+
     static AsyncRetryPolicy retryPolicy = Policy
-        .Handle<HttpRequestException>() 
-        .WaitAndRetryAsync(3, 
-            retryAttempt => TimeSpan.FromSeconds(Math.Pow(1, retryAttempt)), 
+        .Handle<HttpRequestException>()
+        .WaitAndRetryAsync(3,
+            retryAttempt => TimeSpan.FromSeconds(Math.Pow(1, retryAttempt)),
             (exception, delay, retryCount, context) =>
             {
                 Console.WriteLine(
                     $"Attemp {retryCount}: Delay {delay}: {exception.Message}");
             });
-    
+
     public static IServiceCollection AddKeyCloakAuthentication(this IServiceCollection serviceCollection)
     {
         serviceCollection.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -34,7 +34,7 @@ public static class ConfigureKeyCloakAuthenticationServices
 
 
                 o.RequireHttpsMetadata = false;
-         
+
                 o.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidIssuer = identityOptions.ValidIssuer,

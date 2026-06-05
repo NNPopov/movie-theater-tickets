@@ -1,7 +1,6 @@
 ﻿using System.Security.Claims;
 using CinemaTicketBooking.Api.Controllers;
 using CinemaTicketBooking.Api.Endpoints.Common;
-using CinemaTicketBooking.Application.Exceptions;
 using CinemaTicketBooking.Application.ShoppingCarts.Command.AssingClientCart;
 using CinemaTicketBooking.Application.ShoppingCarts.Command.CreateCart;
 using CinemaTicketBooking.Application.ShoppingCarts.Command.PurchaseSeats;
@@ -32,10 +31,7 @@ public class ShoppingCartEndpointApplicationBuilderExtensions : IEndpoints
                 ISender sender,
                 CancellationToken cancellationToken) =>
             {
-                if (!Guid.TryParse(requestId, out Guid parsedRequestId))
-                {
-                    throw new Exception($"Incorrect requestId:{requestId} {nameof(CreateShoppingCartRequest)}");
-                }
+                var parsedRequestId = ParseIdempotencyKey(requestId);
 
                 var command = new CreateShoppingCartCommand(request.MaxNumberOfSeats, parsedRequestId);
 
@@ -50,8 +46,9 @@ public class ShoppingCartEndpointApplicationBuilderExtensions : IEndpoints
             .WithName("CreateShoppingCart")
             .WithTags(Tag)
             .Produces<CreateShoppingCartResponse>(201, "application/json")
-            .Produces(204);
-        
+            .Produces(204)
+            .Produces(400);
+
         endpointRouteBuilder.MapGet($"{BaseRoute}/current", async (
                 ClaimsPrincipal user,
                 ISender sender,
@@ -61,14 +58,17 @@ public class ShoppingCartEndpointApplicationBuilderExtensions : IEndpoints
 
                 var command = new GetCurrentShoppingCartQuery(clientId);
 
-                return await sender.Send(command, cancellationToken);
+                var result = await sender.Send(command, cancellationToken);
+
+                return result is null ? Results.NoContent() : Results.Ok(result);
             })
             .WithName("current")
             .RequireAuthorization()
             .WithTags(Tag)
-            .Produces(201)
+            .Produces<CreateShoppingCartResponse>(200, "application/json")
             .Produces(204)
-            .Produces(409);
+            .Produces(401)
+            .Produces(404);
 
         endpointRouteBuilder.MapPut($"{BaseRoute}/{{ShoppingCartId}}/assignclient", async (
                 [FromRoute] Guid shoppingCartId,
@@ -81,25 +81,18 @@ public class ShoppingCartEndpointApplicationBuilderExtensions : IEndpoints
                 var assignClientCartCommand =
                     new AssignClientCartCommand(shoppingCartId, clientId);
 
-                var result =  await sender.Send(assignClientCartCommand, cancellationToken);
-                
+                var result = await sender.Send(assignClientCartCommand, cancellationToken);
+
                 return result.Match(
                     () => Results.Ok(),
-                    failure =>
-                    {
-                        if (failure is ConflictError)
-                            throw new ConflictException(failure.Code, failure.Description);
-                        if (failure is NotFountError)
-                            throw new ContentNotFoundException(failure.Code, failure.Description);
-                        
-                        throw new Exception(failure.Description);
-                    });
+                    ErrorResults.ToProblem);
             })
             .WithName("AssignUser")
             .RequireAuthorization()
             .WithTags(Tag)
-            .Produces(201)
-            .Produces(204)
+            .Produces(200)
+            .Produces(401)
+            .Produces(404)
             .Produces(409);
 
         endpointRouteBuilder.MapPost($"{BaseRoute}/{{ShoppingCartId}}/seats/select", async (
@@ -116,12 +109,13 @@ public class ShoppingCartEndpointApplicationBuilderExtensions : IEndpoints
 
                 return result.Match(
                     () => Results.Ok(),
-                    failure => Results.BadRequest(failure.Description));
+                    ErrorResults.ToProblem);
             })
             .WithName("SelectSeat")
             .WithTags(Tag)
-            .Produces(201)
-            .Produces(204);
+            .Produces(200)
+            .Produces(404)
+            .Produces(409);
 
         endpointRouteBuilder.MapDelete($"{BaseRoute}/{{ShoppingCartId}}/seats/unselect", async (
                 [FromRoute] Guid shoppingCartId,
@@ -148,12 +142,15 @@ public class ShoppingCartEndpointApplicationBuilderExtensions : IEndpoints
                 var query = new ReserveTicketsCommand(ShoppingCartId: shoppingCartId);
                 var result = await sender.Send(query, cancellationToken);
 
-                return result;
+                return result.Match(
+                    () => Results.Ok(),
+                    ErrorResults.ToProblem);
             })
             .WithName("ReserveSeats")
             .WithTags(Tag)
-            .Produces<bool>(201, "application/json")
-            .Produces(204);
+            .Produces(200)
+            .Produces(404)
+            .Produces(409);
 
         endpointRouteBuilder.MapDelete($"{BaseRoute}/{{ShoppingCartId}}/unreserve", async (
                 [FromRoute] Guid shoppingCartId,
@@ -162,10 +159,7 @@ public class ShoppingCartEndpointApplicationBuilderExtensions : IEndpoints
                 [FromServices] ISender sender,
                 CancellationToken cancellationToken) =>
             {
-                if (!Guid.TryParse(requestId, out Guid parsedRequestId))
-                {
-                    return Results.BadRequest();
-                }
+                var parsedRequestId = ParseIdempotencyKey(requestId);
 
                 var query = new UnreserveSeatsCommand(ShoppingCartId: shoppingCartId, RequestId: parsedRequestId);
                 await sender.Send(query, cancellationToken);
@@ -175,7 +169,8 @@ public class ShoppingCartEndpointApplicationBuilderExtensions : IEndpoints
             .WithName("UnreserveSeats")
             .WithTags(Tag)
             .Produces<bool>(200, "application/json")
-            .Produces(204);
+            .Produces(204)
+            .Produces(400);
 
         endpointRouteBuilder.MapPost($"{BaseRoute}/{{ShoppingCartId}}/purchase", async ([FromRoute] Guid shoppingCartId,
                 [FromServices] ISender sender,
@@ -184,12 +179,16 @@ public class ShoppingCartEndpointApplicationBuilderExtensions : IEndpoints
                 var query = new PurchaseTicketsCommand(ShoppingCartId: shoppingCartId);
                 var result = await sender.Send(query, cancellationToken);
 
-                return result;
+                return result.Match(
+                    () => Results.Ok(),
+                    ErrorResults.ToProblem);
             })
             .WithName("PurchaseSeats")
             .WithTags(Tag)
-            .Produces<bool>(201, "application/json")
-            .Produces(204);
+            .Produces(200)
+            .Produces(403)
+            .Produces(404)
+            .Produces(409);
 
 
         endpointRouteBuilder.MapGet($"{BaseRoute}/{{ShoppingCartId}}",
@@ -204,17 +203,28 @@ public class ShoppingCartEndpointApplicationBuilderExtensions : IEndpoints
             .WithName("GetShoppingCartById")
             .WithTags(Tag)
             .Produces<ShoppingCartDto>(200, "application/json")
-            .Produces(204);
+            .Produces(403)
+            .Produces(404);
     }
 
-    private static Guid GetClientId(ClaimsPrincipal user)
+    internal static Guid ParseIdempotencyKey(string requestId)
+    {
+        if (!Guid.TryParse(requestId, out var parsedRequestId))
+        {
+            throw new DomainValidationException($"Invalid idempotency key: {requestId}");
+        }
+
+        return parsedRequestId;
+    }
+
+    internal static Guid GetClientId(ClaimsPrincipal user)
     {
         var id = user.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier")
             ?.Value;
 
         if (!Guid.TryParse(id, out Guid clientId))
         {
-            throw new Exception($"Incorrect clientId:{clientId} {nameof(CreateShoppingCartRequest)}");
+            throw new UnauthorizedAccessException($"Invalid nameidentifier claim: {id}");
         }
 
         return clientId;

@@ -63,7 +63,8 @@ public class ShoppingCart : AggregateRoot
         EnsurePurchaseIsNotCompleted();
 
         if (ClientId != Guid.Empty)
-            throw new ConflictException(nameof(ShoppingCart), Id.ToString());
+            return DomainErrors<ShoppingCart>.ConflictException(
+                $"The shopping cart {Id} already has an assigned client.");
 
         ClientId = clientId;
 
@@ -126,13 +127,13 @@ public class ShoppingCart : AggregateRoot
             throw new DomainValidationException(
                 $"Seat has already been added to cart movieSessionId:{movieSessionId}, SeatRow:{seatRow}, SeatNumber:{seatNumber}.");
         }
-        
+
         if (_seats.Count() >= MaxNumberOfSeats)
         {
             throw new DomainValidationException(
                 $"Number of seats cannot be greater than {_seats.Count()}.");
         }
-  
+
     }
 
 
@@ -183,26 +184,40 @@ public class ShoppingCart : AggregateRoot
         _domainEvents.Add(new ShoppingCartCleanedDomainEvent(Id));
     }
 
-    public void SeatsReserve()
+    public Result SeatsReserve()
     {
-        EnsurePurchaseIsNotCompleted();
-
-        if (Status == ShoppingCartStatus.InWork)
-            Status = ShoppingCartStatus.SeatsReserved;
-
-        _domainEvents.Add(new ShoppingCartReservedDomainEvent(Id));
-    }
-
-    public void PurchaseComplete()
-    {
-        EnsurePurchaseIsNotCompleted();
-
-        Ensure.NotEmpty(ClientId, "The ClientId is required.", nameof(ClientId));
+        if (Status == ShoppingCartStatus.PurchaseCompleted)
+            return DomainErrors<ShoppingCart>.ConflictException(
+                $"The shopping cart {Id} has already been purchased.");
 
         if (Status == ShoppingCartStatus.SeatsReserved)
-            Status = ShoppingCartStatus.PurchaseCompleted;
+            return Result.Success();                  // idempotent — no duplicate event
 
+        if (Status != ShoppingCartStatus.InWork)
+            return DomainErrors<ShoppingCart>.ConflictException(
+                $"The shopping cart {Id} cannot be reserved from status {Status}.");
+
+        Status = ShoppingCartStatus.SeatsReserved;    // genuine transition
+        _domainEvents.Add(new ShoppingCartReservedDomainEvent(Id));
+
+        return Result.Success();
+    }
+
+    public Result PurchaseComplete()
+    {
+        Ensure.NotEmpty(ClientId, "The ClientId is required.", nameof(ClientId));   // stays a throw (invariant)
+
+        if (Status == ShoppingCartStatus.PurchaseCompleted)
+            return Result.Success();                  // idempotent — no duplicate event
+
+        if (Status != ShoppingCartStatus.SeatsReserved)
+            return DomainErrors<ShoppingCart>.ConflictException(
+                $"The shopping cart {Id} cannot be purchased from status {Status}.");
+
+        Status = ShoppingCartStatus.PurchaseCompleted;     // genuine transition
         _domainEvents.Add(new ShoppingCartPurchaseDomainEvent(Id));
+
+        return Result.Success();
     }
 
     public PriceCalculationResult CalculateCartAmount(IPriceService priceService)

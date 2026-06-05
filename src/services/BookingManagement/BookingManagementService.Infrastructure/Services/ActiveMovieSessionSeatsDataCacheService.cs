@@ -30,15 +30,15 @@ public class ActiveMovieSessionSeatsDataCacheService : IMovieSessionSeatsDataCac
         var movieSessionSeatsKey = MovieSessionSeatsKey(data.MovieSessionId);
 
         await _cacheService.Set(movieSessionSeatsKey, data, movieSessionSeatsCacheLifetime);
-        
+
         _logger.Debug("MovieSessionSeatsCache has been updated for movieSessionId:{@MovieSessionId}",
             data.MovieSessionId);
     }
-    
+
     public async Task<ActiveMovieSessionSeatsDTO?> GetMovieSessionSeatsData(Guid movieSessionId)
     {
         Ensure.NotEmpty(movieSessionId, "The MovieSessionId is required.", nameof(movieSessionId));
-        
+
         var movieSessionSeatsKey = MovieSessionSeatsKey(movieSessionId);
 
         var movieSessionSeats = await _cacheService.TryGet<ActiveMovieSessionSeatsDTO>(movieSessionSeatsKey);
@@ -57,7 +57,7 @@ public class ActiveMovieSessionSeatsDataCacheService : IMovieSessionSeatsDataCac
         }
         return movieSessionSeats;
     }
-    
+
 
     private static string MovieSessionSeatsKey(Guid movieSessionId)
     {

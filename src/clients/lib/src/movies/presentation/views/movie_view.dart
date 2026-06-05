@@ -1,18 +1,36 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:movie_theater_tickets/core/routing/app_router.gr.dart';
 import '../../../../core/common/views/loading_view.dart';
 import '../../../../core/common/views/no_data_view.dart';
 import '../../../../core/utils/utils.dart';
-import '../../../dashboards/presentation/dashboard_widget.dart';
 import '../../../movie_sessions/domain/entities/active_movie.dart';
 import '../../../movie_sessions/presentation/views/movie_session_view.dart';
 import '../../domain/entities/movie.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import '../../../movie_sessions/presentation/cubit/movie_theater_cubit.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:movie_theater_tickets/l10n/gen/app_localizations.dart';
 
 import '../app/movie_cubit.dart';
 import '../widgets/movie_full_detail_widget.dart';
+
+/// Route page for the Movies screen.
+///
+/// Reproduces the per-route [MovieTheaterCubit] provider that the legacy
+/// `generateRoute` supplied, so the wrapped [MoviesView] resolves its cubit.
+@RoutePage(name: 'MoviesRoute')
+class MoviesPage extends StatelessWidget {
+  const MoviesPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => MovieTheaterCubit(getIt.get()),
+      child: const MoviesView(),
+    );
+  }
+}
 
 class MoviesView extends StatefulWidget {
   const MoviesView({super.key});
@@ -24,10 +42,11 @@ class MoviesView extends StatefulWidget {
 }
 
 class _MoviesView extends State<MoviesView> {
-  CarouselController buttonCarouselController = CarouselController();
+  CarouselSliderController buttonCarouselController =
+      CarouselSliderController();
 
   Future<void> movieSeat(Movie movie) async {
-    Navigator.pushNamed(context, MovieSessionsView.id, arguments: movie.id);
+    context.router.push(MovieSessionsRoute(movieId: movie.id));
   }
 
   late ScrollController _controller;
@@ -81,60 +100,58 @@ class _MoviesView extends State<MoviesView> {
       _itemsCount = 1;
     }
 
-    return
-      Container(
-        alignment: Alignment.topLeft,
-        child: SingleChildScrollView(
-            controller: _controller,
-            child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  const DashboardWidget(route: MoviesView.id),
-                  Container(
-                    padding: const EdgeInsets.only(top: 20.0),
-                    child: Container(
-                      width: width - 10,
-                      height: 700,
-                      // child: Expanded(
-                      child: Align(
-                        alignment: Alignment.topCenter,
-                        child: CarouselSlider(
-                          items: movies.map((rowSeats) {
-                            return BlocProvider(
-                              create: (_) => MovieCubit(getIt.get()),
-                              child: MovieDetailWidget(rowSeats.id),
-                            );
-                          }).toList(),
-                          carouselController: buttonCarouselController,
-                          options: CarouselOptions(
-                            height: 570.0,
-                            enableInfiniteScroll: true,
-                            viewportFraction: 1.0 / _itemsCount,
-                            enlargeCenterPage: false,
-                            aspectRatio: 3.0,
-                            enlargeStrategy: CenterPageEnlargeStrategy.height,
-                            onPageChanged: (index, reason) {
-                              setState(() {
-                                _current = index;
-                              });
-                            },
-                          ),
-                        ),
-                      ),
-                      //),
+    return Container(
+      alignment: Alignment.topLeft,
+      child: SingleChildScrollView(
+        controller: _controller,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.only(top: 20.0),
+              child: Container(
+                width: width - 10,
+                height: 700,
+                // child: Expanded(
+                child: Align(
+                  alignment: Alignment.topCenter,
+                  child: CarouselSlider(
+                    items: movies.map((rowSeats) {
+                      return BlocProvider(
+                        create: (_) => MovieCubit(getIt.get()),
+                        child: MovieDetailWidget(rowSeats.id),
+                      );
+                    }).toList(),
+                    carouselController: buttonCarouselController,
+                    options: CarouselOptions(
+                      height: 570.0,
+                      enableInfiniteScroll: true,
+                      viewportFraction: 1.0 / _itemsCount,
+                      enlargeCenterPage: false,
+                      aspectRatio: 3.0,
+                      enlargeStrategy: CenterPageEnlargeStrategy.height,
+                      onPageChanged: (index, reason) {
+                        setState(() {
+                          _current = index;
+                        });
+                      },
                     ),
                   ),
-                  ElevatedButton(
-                    onPressed: () => buttonCarouselController.nextPage(
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.linear),
-                    child: const Text('→'),
-                  )
-                ])),
-      );
-
-
-
+                ),
+                //),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () => buttonCarouselController.nextPage(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.linear,
+              ),
+              child: const Text('→'),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

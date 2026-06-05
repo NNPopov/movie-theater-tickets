@@ -26,7 +26,9 @@ public sealed class MovieSessionSeatService
         Guid shoppingCartId,
         CancellationToken cancellationToken)
     {
-        await CheckSeatSaleAvailability(movieSessionId, cancellationToken);
+        var availability = await CheckSeatSaleAvailability(movieSessionId, cancellationToken);
+        if (availability.IsFailure)
+            return availability;
 
         var movieSessionSeats = new List<MovieSessionSeat>();
 
@@ -42,7 +44,7 @@ public sealed class MovieSessionSeatService
             {
                 return result;
             }
-            
+
             movieSessionSeats.Add(movieSessionSeat);
         }
 
@@ -57,7 +59,10 @@ public sealed class MovieSessionSeatService
         Guid shoppingCartId,
         CancellationToken cancellationToken)
     {
-        await CheckSeatSaleAvailability(movieSessionId, cancellationToken);
+        var availability = await CheckSeatSaleAvailability(movieSessionId, cancellationToken);
+        if (availability.IsFailure)
+            return availability;
+
         var movieSessionSeats = new List<MovieSessionSeat>();
         foreach (var seat in seats)
         {
@@ -65,12 +70,12 @@ public sealed class MovieSessionSeatService
                 await GetMovieSessionSeat(movieSessionId, seat.seatRow, seat.seatNumber, cancellationToken);
 
             var result = movieSessionSeat.Reserve(shoppingCartId);
-            
+
             if (result.IsFailure)
             {
                 return result;
             }
-            
+
             movieSessionSeats.Add(movieSessionSeat);
 
         }
@@ -91,29 +96,29 @@ public sealed class MovieSessionSeatService
         await _movieSessionSeatRepository.UpdateAsync(movieSessionSeat, cancellationToken);
     }
 
-    public async Task<MovieSessionSeat> SelectSeat(Guid movieSessionId,
+    public async Task<Result> SelectSeat(Guid movieSessionId,
         short seatRow,
         short seatNumber,
         Guid shoppingCartId,
         string hashId,
         CancellationToken cancellationToken)
     {
-        await CheckSeatSaleAvailability(movieSessionId, cancellationToken);
+        var availability = await CheckSeatSaleAvailability(movieSessionId, cancellationToken);
+        if (availability.IsFailure)
+            return availability;
 
         var movieSessionSeat = await GetMovieSessionSeat(movieSessionId, seatRow, seatNumber, cancellationToken);
 
         var result = movieSessionSeat.Select(shoppingCartId, hashId);
 
-        if (result.IsSuccess)
+        if (result.IsFailure)
         {
-            await _movieSessionSeatRepository.UpdateAsync(movieSessionSeat, cancellationToken);
-        }
-        else
-        {
-            throw new ConflictException(nameof(MovieSessionSeat), this.ToString());
+            return result;
         }
 
-        return movieSessionSeat;
+        await _movieSessionSeatRepository.UpdateAsync(movieSessionSeat, cancellationToken);
+
+        return Result.Success();
     }
 
     private async Task<MovieSessionSeat> GetMovieSessionSeat(Guid movieSessionId,
@@ -130,18 +135,19 @@ public sealed class MovieSessionSeatService
                 nameof(MovieSessionSeat));
     }
 
-    private async Task CheckSeatSaleAvailability(Guid movieSessionId,
+    private async Task<Result> CheckSeatSaleAvailability(Guid movieSessionId,
         CancellationToken cancellationToken)
     {
-        var movieSession = await _movieSessionsRepository
-                               .GetByIdAsync(
-                                   movieSessionId, cancellationToken) ??
-                           throw new ContentNotFoundException(movieSessionId.ToString(), nameof(MovieSession));
+        var movieSession = await _movieSessionsRepository.GetByIdAsync(movieSessionId, cancellationToken);
+
+        if (movieSession is null)
+            return DomainErrors<MovieSession>.NotFound(movieSessionId.ToString());
 
         if (movieSession.SalesTerminated)
-        {
-            throw new Exception($"{nameof(MovieSession)} has been terminated.");
-        }
+            return DomainErrors<MovieSession>.ConflictException(
+                $"{nameof(MovieSession)} has been terminated.");
+
+        return Result.Success();
     }
 
     public Task<MovieSessionSeat> GetSeat(Guid movieSessionId, short seatRow, short seatNumber, CancellationToken cancellationToken)

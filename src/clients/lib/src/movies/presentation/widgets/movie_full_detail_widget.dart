@@ -1,16 +1,17 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:movie_theater_tickets/core/res/app_theme.dart';
+import 'package:movie_theater_tickets/core/routing/app_router.gr.dart';
 import '../../../../core/common/views/loading_view.dart';
 import '../../../../core/common/views/no_data_view.dart';
 import '../../../../core/res/app_styles.dart';
 import '../../../../core/utils/utils.dart';
-import '../../../movie_sessions/presentation/views/movie_session_view.dart';
 import '../../domain/entities/movie.dart';
 import '../app/movie_cubit.dart';
 import '../../../movie_sessions/presentation/cubit/movie_theater_cubit.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:movie_theater_tickets/l10n/gen/app_localizations.dart';
 
 class MovieDetailWidget extends StatefulWidget {
   const MovieDetailWidget(this.movieId, {super.key});
@@ -29,7 +30,7 @@ class _MovieDetailViewView extends State<MovieDetailWidget> {
   }
 
   Future<void> onMovieSessionPress(Movie movie) async {
-    Navigator.pushNamed(context, MovieSessionsView.id, arguments: movie.id);
+    context.router.push(MovieSessionsRoute(movieId: movie.id));
   }
 
   @override
@@ -65,52 +66,51 @@ class _MovieDetailViewView extends State<MovieDetailWidget> {
           //margin: const EdgeInsets.all(5.0),
           padding: const EdgeInsets.all(13.0),
           child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Align(
-                    child: Text(movie.title,
-                        style:
-              const TextStyle(
-                            fontWeight: FontWeight.bold,
-                          //  fontSize: AppStyles.defaultFontSize,
-                            color: Colors.grey),
-        )
-        ),
-                const SizedBox(
-                  height: 10,
-                ),
-                Container(
-                  height: 290,
-                  width: 290,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(AppStyles.defaultRadius),
-                   color: Colors.white,
-                    image: const DecorationImage(
-                        fit: BoxFit.fill,
-                        image: NetworkImage(
-                          'https://picsum.photos/250?image=9',
-                        )),
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Align(
+                child: Text(
+                  movie.title,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    //  fontSize: AppStyles.defaultFontSize,
+                    color: Colors.grey,
                   ),
                 ),
-                Text(
-                    '${AppLocalizations.of(context)!.stars}: ${movie.stars}'),
-                Text(
-                    '${AppLocalizations.of(context)!.release_date}: ${movie.releaseDate?.year}-${movie.releaseDate?.month}-${movie.releaseDate?.day} '),
-                Text('imdbId: ${movie.imdbId}'),
-                // const Expanded(
-                //   child: SizedBox(),
-                // ),
-                Align(
-                  alignment: Alignment.center,
-                  child: TextButton(
-                      onPressed: () {
-                        onMovieSessionPress(movie);
-                      },
-                      child:
-                      Text(AppLocalizations.of(context)!.select)),
-                )
-              ]),
+              ),
+              const SizedBox(height: 10),
+              Container(
+                height: 290,
+                width: 290,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(AppStyles.defaultRadius),
+                  color: Colors.white,
+                  image: const DecorationImage(
+                    fit: BoxFit.fill,
+                    image: NetworkImage('https://picsum.photos/250?image=9'),
+                  ),
+                ),
+              ),
+              Text('${AppLocalizations.of(context)!.stars}: ${movie.stars}'),
+              Text(
+                '${AppLocalizations.of(context)!.release_date}: ${movie.releaseDate?.year}-${movie.releaseDate?.month}-${movie.releaseDate?.day} ',
+              ),
+              Text('imdbId: ${movie.imdbId}'),
+              // const Expanded(
+              //   child: SizedBox(),
+              // ),
+              Align(
+                alignment: Alignment.center,
+                child: TextButton(
+                  onPressed: () {
+                    onMovieSessionPress(movie);
+                  },
+                  child: Text(AppLocalizations.of(context)!.select),
+                ),
+              ),
+            ],
+          ),
         );
       },
     );

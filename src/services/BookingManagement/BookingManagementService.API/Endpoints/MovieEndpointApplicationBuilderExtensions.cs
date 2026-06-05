@@ -20,8 +20,8 @@ public class MovieEndpointApplicationBuilderExtensions : IEndpoints
                     CancellationToken cancellationToken) =>
                 {
                     var query = new GetMovieQuery(movieId);
-                    var response =  await sender.Send(query, cancellationToken);
-                    
+                    var response = await sender.Send(query, cancellationToken);
+
                     httpContext.Response.Headers["Cache-Control"] = "public,max-age=3600";
 
                     return response;
@@ -37,7 +37,7 @@ public class MovieEndpointApplicationBuilderExtensions : IEndpoints
                 {
                     var movie = await moviesRepository.GetAllAsync(
                         cancellationToken);
-                    
+
                     return mapper.Map<ICollection<MovieDto>>(movie);
                 })
             .Produces<ICollection<MovieDto>>(200, "application/json")

@@ -35,7 +35,13 @@ public class SelectSeatCommandHandler(
         {
             EnsureDistributedLockIsNotLocked(lockHandler, lockKey);
 
-            ShoppingCart cart = await GetShoppingCartOrThrow(request);
+            ShoppingCart? cart = await ActiveShoppingCartRepository.GetByIdAsync(request.ShoppingCartId);
+
+            if (cart is null)
+            {
+                return DomainErrors<ShoppingCart>.NotFound(
+                    $"The shopping cart {request.ShoppingCartId} was not found.");
+            }
 
             SetMovieSessionIdIfNullOrChanged(request, cart);
 
@@ -53,7 +59,13 @@ public class SelectSeatCommandHandler(
             cart.AddSeats(selectSeat, request.MovieSessionId);
 
 
-            await SelectSaveSeatWithTimeoutRollback(request, cancellationToken, cart, expires);
+            var claimResult = await SelectSaveSeatWithTimeoutRollback(request, cancellationToken, cart, expires);
+
+            // Atomicity: a failed seat claim must not persist the cart holding that seat.
+            if (claimResult.IsFailure)
+            {
+                return claimResult;
+            }
 
             await SaveShoppingCart(cart);
         }
@@ -74,16 +86,24 @@ public class SelectSeatCommandHandler(
         }
     }
 
-    private async Task SelectSaveSeatWithTimeoutRollback(SelectSeatCommand request, CancellationToken cancellationToken,
+    private async Task<Result> SelectSaveSeatWithTimeoutRollback(SelectSeatCommand request,
+        CancellationToken cancellationToken,
         ShoppingCart cart, DateTime expires)
     {
-        await movieSessionSeatService.SelectSeat(request.MovieSessionId,
+        var selectResult = await movieSessionSeatService.SelectSeat(request.MovieSessionId,
             request.SeatRow,
             request.SeatNumber,
             request.ShoppingCartId,
             cart.HashId,
             cancellationToken
         );
+
+        // Propagate the expected seat-claim conflict; the Redis lifecycle below is reached only on success.
+        if (selectResult.IsFailure)
+        {
+            return selectResult;
+        }
+
         try
         {
             var result =
@@ -102,6 +122,8 @@ public class SelectSeatCommandHandler(
             await ReturnSeatToAvailable(request, cancellationToken);
             throw;
         }
+
+        return Result.Success();
     }
 
     private async Task ReturnSeatToAvailable(SelectSeatCommand request, CancellationToken cancellationToken)
@@ -124,12 +146,6 @@ public class SelectSeatCommandHandler(
             shoppingCart.SetShowTime(request.MovieSessionId);
             Logger.Debug("MovieSessionId was updated updated {!ShoppingCart}", shoppingCart);
         }
-    }
-
-    private async Task<ShoppingCart> GetShoppingCartOrThrow(SelectSeatCommand request)
-    {
-        return await ActiveShoppingCartRepository.GetByIdAsync(request.ShoppingCartId) ??
-               throw new ContentNotFoundException(nameof(ShoppingCart), request.ShoppingCartId.ToString());
     }
 
     private static void EnsureDistributedLockIsNotLocked(ILockHandler lockHandler, string lockKey)

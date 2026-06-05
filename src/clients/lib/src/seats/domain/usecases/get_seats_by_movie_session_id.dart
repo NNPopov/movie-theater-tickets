@@ -9,8 +9,7 @@ import '../repos/seat_repo.dart';
 
 GetIt getIt = GetIt.instance;
 
-class GetSeatsByMovieSessionId
-    extends FutureUsecaseWithParams<void, String> {
+class GetSeatsByMovieSessionId extends FutureUsecaseWithParams<void, String> {
   GetSeatsByMovieSessionId(this._eventHub);
 
   final EventHub _eventHub;
@@ -18,10 +17,8 @@ class GetSeatsByMovieSessionId
 
   @override
   ResultFuture<void> call(String params) async {
-
     await _eventHub.seatsUpdateSubscribe(params);
 
     return Right(null);
-
   }
 }

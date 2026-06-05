@@ -20,17 +20,16 @@ part 'shopping_cart_state.dart';
 
 part 'shopping_cart_event.dart';
 
-
 class ShoppingCartCubit extends Cubit<ShoppingCartState> {
   ShoppingCartCubit(
-      this._createShoppingCart,
-      this._selectSeatUseCase,
-      this._unselectSeatUseCase,
-      this._getShoppingCart,
-      this._shoppingCartUpdateSubscribeUseCase,
-      this._reserveSeatsUseCase,
-      this._eventBus)
-      : super(ShoppingCartState.initState()) {
+    this._createShoppingCart,
+    this._selectSeatUseCase,
+    this._unselectSeatUseCase,
+    this._getShoppingCart,
+    this._shoppingCartUpdateSubscribeUseCase,
+    this._reserveSeatsUseCase,
+    this._eventBus,
+  ) : super(ShoppingCartState.initState()) {
     getShoppingCartIfExits();
 
     _streamSubscription = _eventBus.stream.listen((event) async {
@@ -40,13 +39,18 @@ class ShoppingCartCubit extends Cubit<ShoppingCartState> {
       }
 
       if (event is ShoppingCartUpdateEvent) {
-        emit(state.copyWith(shoppingCart: event.shoppingCart, status: ShoppingCartStateStatus.update));
+        emit(
+          state.copyWith(
+            shoppingCart: event.shoppingCart,
+            status: ShoppingCartStateStatus.update,
+          ),
+        );
       }
 
       if (event is ShoppingCartHashIdIdUpdateEvent) {
         var key = await storage.read(key: Constants.SHOPPING_CARD_HASH_ID);
         if (key != null) {
-          emit(state.copyWith(hashId:key));
+          emit(state.copyWith(hashId: key));
         }
       }
     });
@@ -63,121 +67,184 @@ class ShoppingCartCubit extends Cubit<ShoppingCartState> {
   late final UnselectSeatUseCase _unselectSeatUseCase;
   late final GetShoppingCartUseCase _getShoppingCart;
   late final ShoppingCartUpdateSubscribeUseCase
-      _shoppingCartUpdateSubscribeUseCase;
+  _shoppingCartUpdateSubscribeUseCase;
   late final ReserveSeatsUseCase _reserveSeatsUseCase;
 
   String hashId = '';
 
-
   Future<void> updateShoppingCartState(
-      ShoppingCartUpdateEvent event, Emitter<ShoppingCartState> emit) async {
-
-    emit(state.copyWith(shoppingCart: event.shoppingCart, status:ShoppingCartStateStatus.update));
+    ShoppingCartUpdateEvent event,
+    Emitter<ShoppingCartState> emit,
+  ) async {
+    emit(
+      state.copyWith(
+        shoppingCart: event.shoppingCart,
+        status: ShoppingCartStateStatus.update,
+      ),
+    );
   }
 
   Future<void> createShoppingCart(int maxNumberOfSeats) async {
-
-   emit(state.copyWith(status:ShoppingCartStateStatus.creating));
+    emit(state.copyWith(status: ShoppingCartStateStatus.creating));
 
     final result = await _createShoppingCart(
-        CreateShoppingCartCommand(maxNumberOfSeats: maxNumberOfSeats));
+      CreateShoppingCartCommand(maxNumberOfSeats: maxNumberOfSeats),
+    );
 
-    result.fold((failure) {
-      if (failure is ValidationFailure) {
-        emit(state.copyWith(status: ShoppingCartStateStatus.createValidationError, errorMessage: failure.message));
-        return;
-      }
-      emit(state.copyWith(status: ShoppingCartStateStatus.error, errorMessage: failure.message));
-
-      return;
-    }, (value) async {
-      final resultShoppingCart = await _getShoppingCart();
-
-      resultShoppingCart.fold((failure) {
-        if (failure.statusCode == 204) {
-          emit(ShoppingCartState.initState());
-        } else {
-          emit(state.copyWith(status: ShoppingCartStateStatus.error, errorMessage: failure.message));
+    result.fold(
+      (failure) {
+        if (failure is ValidationFailure) {
+          emit(
+            state.copyWith(
+              status: ShoppingCartStateStatus.createValidationError,
+              errorMessage: failure.message,
+            ),
+          );
+          return;
         }
-      }, (shoppingCartValue) async {
-        hashId = value;
+        emit(
+          state.copyWith(
+            status: ShoppingCartStateStatus.error,
+            errorMessage: failure.message,
+          ),
+        );
 
-        emit(state.copyWith(shoppingCart: shoppingCartValue, status:ShoppingCartStateStatus.created, hashId:hashId));
-        emit(state.copyWith( status:ShoppingCartStateStatus.update));
+        return;
+      },
+      (value) async {
+        final resultShoppingCart = await _getShoppingCart();
 
-      });
-    });
+        resultShoppingCart.fold(
+          (failure) {
+            if (failure.statusCode == 204 || failure.statusCode == 404) {
+              emit(ShoppingCartState.initState());
+            } else {
+              emit(
+                state.copyWith(
+                  status: ShoppingCartStateStatus.error,
+                  errorMessage: failure.message,
+                ),
+              );
+            }
+          },
+          (shoppingCartValue) async {
+            hashId = value;
+
+            emit(
+              state.copyWith(
+                shoppingCart: shoppingCartValue,
+                status: ShoppingCartStateStatus.created,
+                hashId: hashId,
+              ),
+            );
+            emit(state.copyWith(status: ShoppingCartStateStatus.update));
+          },
+        );
+      },
+    );
   }
 
   Future<void> getShoppingCart() async {
-
-    emit(state.copyWith(status:ShoppingCartStateStatus.creating));
+    emit(state.copyWith(status: ShoppingCartStateStatus.creating));
 
     final result = await _getShoppingCart();
 
-    result.fold((failure) {
-      if (failure.statusCode == 204) {
-        emit(ShoppingCartState.initState());
-      } else {
-        emit(ShoppingCartState
-            .initState()
-            .copyWith(status: ShoppingCartStateStatus.error, errorMessage: failure.message));
-      }
-    }, (value) async {
-      var key = await storage.read(key: Constants.SHOPPING_CARD_HASH_ID);
-      if (key != null) {
-        hashId = key;
-      }
-      //emit(state.copyWith(shoppingCart: value, status:ShoppingCartStateStatus.created, hashId:hashId));
-      emit(state.copyWith(shoppingCart: value, status:ShoppingCartStateStatus.update, hashId:hashId));
-    });
+    result.fold(
+      (failure) {
+        if (failure.statusCode == 204 || failure.statusCode == 404) {
+          emit(ShoppingCartState.initState());
+        } else {
+          emit(
+            ShoppingCartState.initState().copyWith(
+              status: ShoppingCartStateStatus.error,
+              errorMessage: failure.message,
+            ),
+          );
+        }
+      },
+      (value) async {
+        var key = await storage.read(key: Constants.SHOPPING_CARD_HASH_ID);
+        if (key != null) {
+          hashId = key;
+        }
+        //emit(state.copyWith(shoppingCart: value, status:ShoppingCartStateStatus.created, hashId:hashId));
+        emit(
+          state.copyWith(
+            shoppingCart: value,
+            status: ShoppingCartStateStatus.update,
+            hashId: hashId,
+          ),
+        );
+      },
+    );
   }
 
-  Future<void> seatSelect(
-      {required int row,
-      required int seatNumber,
-      required String movieSessionId}) async {
-    final shoppingCartSeat =
-        ShoppingCartSeat(seatRow: row, seatNumber: seatNumber);
+  Future<void> seatSelect({
+    required int row,
+    required int seatNumber,
+    required String movieSessionId,
+  }) async {
+    final shoppingCartSeat = ShoppingCartSeat(
+      seatRow: row,
+      seatNumber: seatNumber,
+    );
 
-    var command = SelectSeatCommand(seat: shoppingCartSeat, movieSessionId: movieSessionId);
+    var command = SelectSeatCommand(
+      seat: shoppingCartSeat,
+      movieSessionId: movieSessionId,
+    );
 
     var result = await _selectSeatUseCase(command);
 
     result.fold((l) {
-
-      emit(state.copyWith(status: ShoppingCartStateStatus.error, errorMessage: l.errorMessage));
-      emit(state.copyWith(status:ShoppingCartStateStatus.update));
+      emit(
+        state.copyWith(
+          status: ShoppingCartStateStatus.error,
+          errorMessage: l.errorMessage,
+        ),
+      );
+      emit(state.copyWith(status: ShoppingCartStateStatus.update));
     }, (r) async {});
   }
 
-  Future<void> unSeatSelect(
-      {required int row,
-      required int seatNumber,
-      required String movieSessionId}) async {
-    final shoppingCartSeat =
-        ShoppingCartSeat(seatRow: row, seatNumber: seatNumber);
+  Future<void> unSeatSelect({
+    required int row,
+    required int seatNumber,
+    required String movieSessionId,
+  }) async {
+    final shoppingCartSeat = ShoppingCartSeat(
+      seatRow: row,
+      seatNumber: seatNumber,
+    );
 
     var command = SelectSeatCommand(
-        seat: shoppingCartSeat, movieSessionId: movieSessionId);
+      seat: shoppingCartSeat,
+      movieSessionId: movieSessionId,
+    );
 
     var result = await _unselectSeatUseCase(command);
-    result.fold(
-        (l) {
-
-          emit(state.copyWith(status: ShoppingCartStateStatus.error, errorMessage: l.errorMessage));
-          emit(state.copyWith(status:ShoppingCartStateStatus.update));
-
-        },
-        (r) async {});
+    result.fold((l) {
+      emit(
+        state.copyWith(
+          status: ShoppingCartStateStatus.error,
+          errorMessage: l.errorMessage,
+        ),
+      );
+      emit(state.copyWith(status: ShoppingCartStateStatus.update));
+    }, (r) async {});
   }
 
   Future<void> completePurchase() async {
     var result = await _reserveSeatsUseCase();
 
     result.fold((l) {
-      emit(state.copyWith(status: ShoppingCartStateStatus.error, errorMessage: l.errorMessage));
-      emit(state.copyWith(status:ShoppingCartStateStatus.update));
+      emit(
+        state.copyWith(
+          status: ShoppingCartStateStatus.error,
+          errorMessage: l.errorMessage,
+        ),
+      );
+      emit(state.copyWith(status: ShoppingCartStateStatus.update));
     }, (r) async {});
   }
 
@@ -188,12 +255,11 @@ class ShoppingCartCubit extends Cubit<ShoppingCartState> {
   }
 
   void initCreateShoppingCart() {
-
-    emit(state.copyWith(status:ShoppingCartStateStatus.initCreating));
+    emit(state.copyWith(status: ShoppingCartStateStatus.initCreating));
   }
 
   createShoppingCartCancel() {
-    emit(state.copyWith(status:ShoppingCartStateStatus.createdCancel));
-    emit(state.copyWith(status:ShoppingCartStateStatus.initial));
+    emit(state.copyWith(status: ShoppingCartStateStatus.createdCancel));
+    emit(state.copyWith(status: ShoppingCartStateStatus.initial));
   }
 }

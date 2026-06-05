@@ -13,7 +13,7 @@ class Client {
   late final DioCacheInterceptor dioCacheInterceptor;
 
   Client(AuthInterceptor? authInterceptor)
-      : _authInterceptor = authInterceptor ?? getIt.get<AuthInterceptor>();
+    : _authInterceptor = authInterceptor ?? getIt.get<AuthInterceptor>();
 
   late final AuthInterceptor _authInterceptor;
 

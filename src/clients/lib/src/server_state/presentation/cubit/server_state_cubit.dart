@@ -4,15 +4,11 @@ import '../../../../core/buses/event_bus.dart';
 import '../../domain/entities/server_state.dart';
 
 class ServerStateCubit extends Cubit<ServerState> {
-  ServerStateCubit(
-      this._eventBus)
-      : super(ServerState.initState()) {
-
+  ServerStateCubit(this._eventBus) : super(ServerState.initState()) {
     _streamSubscription = _eventBus.stream.listen((event) async {
       if (event is ServerState) {
         emit(event);
       }
-
     });
   }
 

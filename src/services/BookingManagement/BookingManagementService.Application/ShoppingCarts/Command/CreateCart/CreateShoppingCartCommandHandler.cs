@@ -26,7 +26,7 @@ internal sealed class CreateShoppingCartCommandHandler(IDataHasher dataHasher,
     {
         var shoppingCart = ShoppingCart.Create(request.MaxNumberOfSeats, dataHasher);
         await SaveShoppingCart(shoppingCart);
-        
+
         Logger.Information("ShoppingCart created: {@ShoppingCart}", shoppingCart);
         return new CreateShoppingCartResponse(shoppingCart.Id, shoppingCart.HashId);
     }

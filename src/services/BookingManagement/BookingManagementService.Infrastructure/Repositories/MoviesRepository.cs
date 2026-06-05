@@ -11,14 +11,14 @@ public class MoviesRepository : IMoviesRepository
     private readonly CinemaContext _context;
     private readonly ICacheService _cacheService;
 
-    public MoviesRepository(CinemaContext context, 
+    public MoviesRepository(CinemaContext context,
         ICacheService cacheService)
     {
         _context = context;
         _cacheService = cacheService;
     }
 
-    
+
     //Cache strategy Read Through
     public async Task<Movie> GetByIdAsync(Guid movieId, CancellationToken cancel)
     {
@@ -31,7 +31,7 @@ public class MoviesRepository : IMoviesRepository
             movie = await _context.Movies
                 .FirstOrDefaultAsync(x => x.Id == movieId, cancel);
 
-            if (movie is null )
+            if (movie is null)
                 return default;
 
 
@@ -43,7 +43,7 @@ public class MoviesRepository : IMoviesRepository
 
     public async Task<IReadOnlyCollection<Movie>> GetAllAsync(CancellationToken cancel)
     {
-        
+
         return await _context.Movies.ToListAsync(cancel);
     }
 }

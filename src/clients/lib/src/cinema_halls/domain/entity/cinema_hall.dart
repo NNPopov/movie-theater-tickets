@@ -11,4 +11,3 @@ class CinemaHall extends Equatable {
   @override
   List<Object?> get props => [id, description];
 }
-

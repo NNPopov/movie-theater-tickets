@@ -1,5 +1,4 @@
 ﻿using CinemaTicketBooking.Application.Abstractions;
-using CinemaTicketBooking.Application.Exceptions;
 using CinemaTicketBooking.Application.MovieSessions.DTOs;
 using CinemaTicketBooking.Domain.MovieSessions;
 using CinemaTicketBooking.Domain.MovieSessions.Abstractions;
@@ -31,8 +30,9 @@ public class
                      t.TicketsForSale > t.SoldTickets,
                 cancellationToken);
 
-        if (movieSessions == null || !movieSessions.Any())
-            throw new ContentNotFoundException(request.MovieId.ToString(), nameof(MovieSession));
+        // No upcoming sessions is a normal empty state, not a not-found error: return [] (200).
+        if (movieSessions == null)
+            return Array.Empty<MovieSessionsDto>();
 
         return movieSessions.Select(t => _mapper.Map<MovieSessionsDto>(t)).ToList();
     }

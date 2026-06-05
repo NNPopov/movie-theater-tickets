@@ -7,8 +7,8 @@ public interface IConnectionManager
     void AddConnections(Guid shoppingCartId, IEnumerable<string> connectionIds);
     void RemoveByConnectionId(string connectionId);
     void RemoveShoppingCartId(Guid shoppingCartId);
-    
-    void RemoveSubscriptionShoppingCartId(Guid shoppingCartId, string  connectionId);
+
+    void RemoveSubscriptionShoppingCartId(Guid shoppingCartId, string connectionId);
     IEnumerable<string> GetConnectionId(Guid shoppingCartId);
-    
+
 }

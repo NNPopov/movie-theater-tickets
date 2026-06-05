@@ -4,7 +4,7 @@ public interface IMovieSessionSeatRepository
 {
     Task AddAsync(MovieSessionSeat movieSessionSeat,
         CancellationToken cancellationToken);
-    
+
     Task UpdateAsync(MovieSessionSeat movieSessionSeat,
         CancellationToken cancellationToken);
 

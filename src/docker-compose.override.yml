@@ -63,7 +63,7 @@ services:
     command:
       - start-dev
       - --http-port=80
-      - --proxy edge
+      - --proxy-headers=xforwarded
       - --import-realm
     ports:
       - "8080:80"

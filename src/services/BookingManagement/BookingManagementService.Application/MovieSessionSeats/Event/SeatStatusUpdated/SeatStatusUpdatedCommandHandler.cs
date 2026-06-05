@@ -15,7 +15,7 @@ internal sealed class
     private readonly ILogger _logger;
 
     public SeatStatusUpdatedCommandHandler(
-        ICinemaHallSeatsNotifier cinemaHallSeatsNotifier, 
+        ICinemaHallSeatsNotifier cinemaHallSeatsNotifier,
         ILogger logger)
     {
         _cinemaHallSeatsNotifier = cinemaHallSeatsNotifier;
@@ -39,7 +39,7 @@ internal sealed class
             if (isStatusChanged && (eventBody.CurrentStatus == SeatStatus.Selected ||
                                     eventBody.CurrentStatus == SeatStatus.Available))
             {
-              
+
                 await _cinemaHallSeatsNotifier.UpdateAndNotifySubscribersAboutSeatUpdates(eventBody.MovieSessionId);
             }
         }

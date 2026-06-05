@@ -20,20 +20,34 @@ class GetMovieSessions
     var movieSessionsResponse = await _repo.getMovieSessionByMovieId(movieId);
 
     return movieSessionsResponse.fold((l) => Left(l), (movieSessions) {
-      final movieSessionResult = groupBy(
-              movieSessions,
-              (movieSession) =>
-                  '${movieSession.sessionDate.year}${movieSession.sessionDate.month}${movieSession.sessionDate.day}')
-          .values
-          .map((seatsByDate) => groupBy(
-                  seatsByDate.toList(), (seatByDate) => seatByDate.cinemaHallId)
-              .values
-              .map((seatsBycinemaHallId) => seatsBycinemaHallId.toList()
-                ..sort((a, b) => a.sessionDate.compareTo(b.sessionDate)))
+      final movieSessionResult =
+          groupBy(
+                movieSessions,
+                (movieSession) =>
+                    '${movieSession.sessionDate.year}${movieSession.sessionDate.month}${movieSession.sessionDate.day}',
+              ).values
+              .map(
+                (seatsByDate) =>
+                    groupBy(
+                          seatsByDate.toList(),
+                          (seatByDate) => seatByDate.cinemaHallId,
+                        ).values
+                        .map(
+                          (seatsBycinemaHallId) => seatsBycinemaHallId.toList()
+                            ..sort(
+                              (a, b) => a.sessionDate.compareTo(b.sessionDate),
+                            ),
+                        )
+                        .toList()
+                      ..sort(
+                        (a, b) =>
+                            -a[0].cinemaHallId.compareTo(b[0].cinemaHallId),
+                      ),
+              )
               .toList()
-            ..sort((a, b) => -a[0].cinemaHallId.compareTo(b[0].cinemaHallId)))
-          .toList()
-        ..sort((a, b) => a[0][0].sessionDate.compareTo(b[0][0].sessionDate));
+            ..sort(
+              (a, b) => a[0][0].sessionDate.compareTo(b[0][0].sessionDate),
+            );
 
       return Right(movieSessionResult);
     });

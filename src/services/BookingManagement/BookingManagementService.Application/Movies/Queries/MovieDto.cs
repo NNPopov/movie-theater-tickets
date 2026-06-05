@@ -15,7 +15,7 @@ public class MovieDto
         public Mapping()
         {
             CreateMap<Movie, MovieDto>()
-                .ForMember(dst=>dst.Id, opt=>opt.MapFrom(src=>src.Id));
+                .ForMember(dst => dst.Id, opt => opt.MapFrom(src => src.Id));
         }
     }
 }

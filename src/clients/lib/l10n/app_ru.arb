@@ -27,5 +27,11 @@
   "connection_lost_reconnect_btn":"Подключиться",
 
     "light_theme":"Светлая",
-    "dark_theme":"Темная"
+    "dark_theme":"Темная",
+
+  "about_us":"О нас",
+
+  "page_not_found_title":"Страница не найдена",
+  "page_not_found_message":"Запрашиваемая страница не существует.",
+  "back_to_home":"На главную"
 }

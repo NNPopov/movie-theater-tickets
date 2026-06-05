@@ -6,9 +6,7 @@ import 'package:get_it/get_it.dart';
 
 GetIt getIt = GetIt.instance;
 
-class GetCinemaHallById
-    extends FutureUsecaseWithParams<CinemaHall, String> {
-
+class GetCinemaHallById extends FutureUsecaseWithParams<CinemaHall, String> {
   GetCinemaHallById(this._repo);
 
   final CinemaHallRepo _repo;

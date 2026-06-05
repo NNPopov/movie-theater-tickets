@@ -7,7 +7,7 @@ namespace CinemaTicketBooking.Domain.Entities
     {
         public TicketEntity()
         {
-            CreatedTime =  TimeProvider.System.GetUtcNow().DateTime;
+            CreatedTime = TimeProvider.System.GetUtcNow().DateTime;
             Paid = false;
         }
 

@@ -5,14 +5,10 @@ import 'package:logger/logger.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
 
-
 import '../utils/platform.dart';
 
-
 final _loggerFactory = AppLogger();
-final logEnv = {
-  if (!kIsWeb) ...Platform.environment,
-};
+final logEnv = {if (!kIsWeb) ...Platform.environment};
 
 AppLogger getLogger<T>(T owner) {
   _loggerFactory.owner = owner is String ? owner : owner.toString();
@@ -40,8 +36,13 @@ class AppLogger extends Logger {
   AppLogger([this.owner]) : super(filter: _SpotubeLogFilter());
 
   @override
-  void log(Level level, dynamic message,
-      {Object? error, StackTrace? stackTrace, DateTime? time}) async {
+  void log(
+    Level level,
+    dynamic message, {
+    Object? error,
+    StackTrace? stackTrace,
+    DateTime? time,
+  }) async {
     if (!kIsWeb) {
       if (level == Level.error) {
         String dir = (await getApplicationDocumentsDirectory()).path;
@@ -55,8 +56,9 @@ class AppLogger extends Logger {
         }
 
         await File(path.join(dir, ".movie_theater_logs")).writeAsString(
-            "[${DateTime.now()}]\n$message\n$stackTrace",
-            mode: FileMode.writeOnlyAppend);
+          "[${DateTime.now()}]\n$message\n$stackTrace",
+          mode: FileMode.writeOnlyAppend,
+        );
       }
     }
 

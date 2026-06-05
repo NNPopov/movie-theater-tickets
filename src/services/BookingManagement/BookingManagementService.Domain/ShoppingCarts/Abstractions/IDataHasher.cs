@@ -8,7 +8,7 @@ public interface IDataHasher
     string ComputeHash(string input);
 }
 
-public class DataHasher:IDataHasher
+public class DataHasher : IDataHasher
 {
     public string ComputeHash(string input)
     {

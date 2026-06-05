@@ -24,48 +24,54 @@ class ShoppingCartRepoImpl implements ShoppingCartRepo {
 
   @override
   ResultFuture<CreateShoppingCartResponse> createShoppingCart(
-      int maxNumberOfSeats) async {
+    int maxNumberOfSeats,
+  ) async {
     try {
       CreateShoppingCartDto request = CreateShoppingCartDto(maxNumberOfSeats);
 
-      final response = await _client.post('/api/shoppingcarts',
-          data: request.toJson(),
-          options:
-              Options(headers: {'X-Idempotency-Key': Guid.newGuid.toString()}));
+      final response = await _client.post(
+        '/api/shoppingcarts',
+        data: request.toJson(),
+        options: Options(
+          headers: {'X-Idempotency-Key': Guid.newGuid.toString()},
+        ),
+      );
 
       var shoppingCart = CreateShoppingCartResponse.fromJson(
-          response.data as Map<String, dynamic>);
+        response.data as Map<String, dynamic>,
+      );
 
       return Right(shoppingCart);
     } on Exception catch (e) {
       return Left(
-          ServerFailure(message: e.toString(), statusCode: e.toString()));
+        ServerFailure(message: e.toString(), statusCode: e.toString()),
+      );
     }
   }
 
   @override
   ResultFuture<ShoppingCart> getShoppingCart(String shoppingCartId) async {
     try {
-      const options = CacheOptions(
-        policy: CachePolicy.noCache,
-        store: null,
-      );
-     //var extra = _client.options.extra[CacheResponse.cacheKey];
+      const options = CacheOptions(policy: CachePolicy.noCache, store: null);
+      //var extra = _client.options.extra[CacheResponse.cacheKey];
 
-     // final cacheOptions = CacheOptions.fromExtra(extra)!;
+      // final cacheOptions = CacheOptions.fromExtra(extra)!;
 
       final response = await _client.get(
         '/api/shoppingcarts/$shoppingCartId',
         options: Options(
-            extra: {
-              CacheResponse.cacheKey:
-              options.copyWith(policy: CachePolicy.noCache).toOptions(),
-            })
+          extra: {
+            CacheResponse.cacheKey: options
+                .copyWith(policy: CachePolicy.noCache)
+                .toOptions(),
+          },
+        ),
       );
 
       if (response.statusCode == 204) {
-        return const Left(DataFailure(
-            message: "shoppingCartId doesn't exist", statusCode: 204));
+        return const Left(
+          DataFailure(message: "shoppingCartId doesn't exist", statusCode: 204),
+        );
       }
 
       var primaryClientAccount = json.decode(response.toString());
@@ -73,6 +79,13 @@ class ShoppingCartRepoImpl implements ShoppingCartRepo {
       var shoppingCartDto = ShoppingCartDto.fromJson(primaryClientAccount);
 
       return Right(shoppingCartDto);
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 404) {
+        return const Left(
+          DataFailure(message: "shoppingCartId doesn't exist", statusCode: 404),
+        );
+      }
+      return Left(ServerFailure(message: e.toString(), statusCode: 500));
     } on Exception catch (e) {
       return Left(ServerFailure(message: e.toString(), statusCode: 500));
     }
@@ -106,16 +119,20 @@ class ShoppingCartRepoImpl implements ShoppingCartRepo {
   @override
   ResultFuture<CreateShoppingCartResponse> getCurrentUserShoppingCart() async {
     try {
-      final response = await _client.get('/api/shoppingcarts/current',
-          options:
-              Options(headers: {'X-Idempotency-Key': Guid.newGuid.toString()}));
+      final response = await _client.get(
+        '/api/shoppingcarts/current',
+        options: Options(
+          headers: {'X-Idempotency-Key': Guid.newGuid.toString()},
+        ),
+      );
 
       if (response.statusCode == 204) {
         return const Left(NotFoundFailure(statusCode: 204));
       }
 
       var shoppingCart = CreateShoppingCartResponse.fromJson(
-          response.data as Map<String, dynamic>);
+        response.data as Map<String, dynamic>,
+      );
 
       return Right(shoppingCart);
     } on DioException catch (e) {
@@ -126,7 +143,7 @@ class ShoppingCartRepoImpl implements ShoppingCartRepo {
         return Left(NotFoundFailure(message: e.toString()));
       }
       if (e.response?.statusCode == 404) {
-        return Left(NotFoundFailure(message: e.toString()));
+        return Left(NotFoundFailure(message: e.toString(), statusCode: 404));
       }
       return Left(ServerFailure(message: e.toString(), statusCode: 500));
     } on Exception catch (e) {
@@ -138,9 +155,11 @@ class ShoppingCartRepoImpl implements ShoppingCartRepo {
   ResultFuture<void> assignClient(String shoppingCartId) async {
     try {
       final response = await _client.put(
-          '/api/shoppingcarts/$shoppingCartId/assignclient',
-          options:
-              Options(headers: {'X-Idempotency-Key': Guid.newGuid.toString()}));
+        '/api/shoppingcarts/$shoppingCartId/assignclient',
+        options: Options(
+          headers: {'X-Idempotency-Key': Guid.newGuid.toString()},
+        ),
+      );
 
       return const Right(null);
     } on DioException catch (e) {
@@ -166,9 +185,11 @@ class ShoppingCartRepoImpl implements ShoppingCartRepo {
   ResultFuture<void> reserveSeats(String shoppingCartId) async {
     try {
       final response = await _client.post(
-          '/api/shoppingcarts/$shoppingCartId/reservations',
-          options:
-              Options(headers: {'X-Idempotency-Key': Guid.newGuid.toString()}));
+        '/api/shoppingcarts/$shoppingCartId/reservations',
+        options: Options(
+          headers: {'X-Idempotency-Key': Guid.newGuid.toString()},
+        ),
+      );
 
       return const Right(null);
     } on Exception catch (e) {

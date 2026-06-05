@@ -33,7 +33,7 @@ public class MappingSpecification
     [Theory]
     [InlineData(typeof(Movie), typeof(MovieDto))]
     [InlineData(typeof(MovieSession), typeof(MovieSessionsDto))]
-    
+
     public void ShouldMappingFromSourceToDestination(Type source, Type destination)
     {
         var instance = GetInstanceOf(source);

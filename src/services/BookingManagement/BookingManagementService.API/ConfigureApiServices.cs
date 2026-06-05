@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using CinemaTicketBooking.Api.Authentication;
 using CinemaTicketBooking.Api.Infrastructure;
 using CinemaTicketBooking.Api.IntegrationEvents.EventHandling;
 using CinemaTicketBooking.Api.IntegrationEvents.Events;
@@ -44,6 +45,9 @@ public static class ConfigureApiServices
         services.AddAutoMapper(Assembly.GetExecutingAssembly());
         services.AddDatabaseDeveloperPageExceptionFilter();
         services.AddExceptionHandler<CustomExceptionHandler>();
+
+        services.AddHttpContextAccessor();
+        services.AddScoped<ICurrentUser, CurrentUser>();
 
         services.AddSwaggerExtensions(configuration);
 

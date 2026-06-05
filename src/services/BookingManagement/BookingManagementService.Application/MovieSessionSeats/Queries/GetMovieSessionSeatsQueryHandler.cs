@@ -14,9 +14,9 @@ public class
     private readonly IMovieSessionSeatRepository _movieSessionSeatRepository;
     private readonly IMediator _mediator;
     private readonly ILogger _logger;
-    
+
     public GetMovieSessionSeatsQueryHandler(
-        IMovieSessionSeatRepository movieSessionSeatRepository, 
+        IMovieSessionSeatRepository movieSessionSeatRepository,
         IMediator mediator, ILogger logger)
     {
         _movieSessionSeatRepository = movieSessionSeatRepository;

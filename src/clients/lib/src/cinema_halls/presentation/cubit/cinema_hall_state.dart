@@ -1,13 +1,11 @@
 part of 'cinema_hall_cubit.dart';
 
-abstract class CinemaHallState  extends Equatable {
-const CinemaHallState();
+abstract class CinemaHallState extends Equatable {
+  const CinemaHallState();
 
   @override
   List<Object> get props => [];
-
 }
-
 
 class GettingCinemaHall extends CinemaHallState {
   const GettingCinemaHall();
@@ -21,8 +19,6 @@ class CinemaHallLoaded extends CinemaHallState {
   @override
   List<Object> get props => [auditorium];
 }
-
-
 
 class CinemaHallError extends CinemaHallState {
   const CinemaHallError(this.message);

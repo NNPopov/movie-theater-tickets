@@ -10,7 +10,7 @@ part 'movie_state.dart';
 class CinemaHallInfoBloc
     extends Bloc<CinemaHallInfoEvent, CinemaHallInfoState> {
   CinemaHallInfoBloc(this._getCinemaHallInfo)
-      : super(CinemaHallInfoState.initial()) {
+    : super(CinemaHallInfoState.initial()) {
     on<CinemaHallInfoEvent>(onGetCinemaHallInfo);
   }
 
@@ -21,24 +21,36 @@ class CinemaHallInfoBloc
     final result = await _getCinemaHallInfo(cinemaHallId);
 
     result.fold(
-        (failure) => emit(state.copyWith(
-            status: CinemaHallInfoStatus.error,
-            errorMessage: failure.errorMessage)),
-        (movie) => emit(state.copyWith(
-            movie: movie, status: CinemaHallInfoStatus.completed)));
+      (failure) => emit(
+        state.copyWith(
+          status: CinemaHallInfoStatus.error,
+          errorMessage: failure.errorMessage,
+        ),
+      ),
+      (movie) => emit(
+        state.copyWith(movie: movie, status: CinemaHallInfoStatus.completed),
+      ),
+    );
   }
 
   Future<void> onGetCinemaHallInfo(
-      CinemaHallInfoEvent event, Emitter<CinemaHallInfoState> emit) async {
+    CinemaHallInfoEvent event,
+    Emitter<CinemaHallInfoState> emit,
+  ) async {
     emit(CinemaHallInfoState.fetching());
     final result = await _getCinemaHallInfo(event.cinemaHallId);
 
     result.fold(
-        (failure) => emit(state.copyWith(
-            status: CinemaHallInfoStatus.error,
-            errorMessage: failure.errorMessage)),
-        (movie) => emit(state.copyWith(
-            movie: movie, status: CinemaHallInfoStatus.completed)));
+      (failure) => emit(
+        state.copyWith(
+          status: CinemaHallInfoStatus.error,
+          errorMessage: failure.errorMessage,
+        ),
+      ),
+      (movie) => emit(
+        state.copyWith(movie: movie, status: CinemaHallInfoStatus.completed),
+      ),
+    );
   }
 }
 

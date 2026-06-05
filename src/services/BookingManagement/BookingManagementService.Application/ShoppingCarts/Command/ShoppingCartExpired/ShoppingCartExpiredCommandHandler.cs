@@ -8,13 +8,13 @@ namespace CinemaTicketBooking.Application.ShoppingCarts.Command.ShoppingCartExpi
 public record ShoppingCartExpiredCommand
     (Guid ShoppingCartId) : INotification;
 
-internal sealed  class ShoppingCartExpiredCommandHandler : INotificationHandler<ShoppingCartExpiredCommand>
+internal sealed class ShoppingCartExpiredCommandHandler : INotificationHandler<ShoppingCartExpiredCommand>
 {
 
     private readonly ILogger _logger;
 
     private readonly IActiveShoppingCartRepository _activeShoppingCartRepository;
-    
+
     public ShoppingCartExpiredCommandHandler(
         IActiveShoppingCartRepository activeShoppingCartRepository,
         ILogger logger)
@@ -27,14 +27,14 @@ internal sealed  class ShoppingCartExpiredCommandHandler : INotificationHandler<
         CancellationToken cancellationToken)
     {
         var cart = await GetShoppingCartOrThrow(request);
-        
+
         cart.Delete();
         await _activeShoppingCartRepository.DeleteAsync(cart);
-        
-        _logger.Warning( "ShoppingCart was Expired and Deleted:{@ShoppingCart}", cart);
-        
+
+        _logger.Warning("ShoppingCart was Expired and Deleted:{@ShoppingCart}", cart);
+
     }
-    
+
     private async Task<ShoppingCart> GetShoppingCartOrThrow(ShoppingCartExpiredCommand request)
     {
         return await _activeShoppingCartRepository.GetByIdAsync(request.ShoppingCartId) ??

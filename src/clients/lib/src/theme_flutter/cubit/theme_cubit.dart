@@ -2,7 +2,6 @@ import 'dart:async' as domain;
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 
-
 class ThemeCubit extends Cubit<ThemeCubitState> {
   ThemeCubit() : super(const ThemeCubitState(false));
 
@@ -19,4 +18,3 @@ class ThemeCubitState extends Equatable {
   @override
   List<Object> get props => [isDark];
 }
-

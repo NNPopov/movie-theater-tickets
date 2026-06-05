@@ -7,6 +7,8 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../../../hub/app_events.dart';
 import '../../../../core/buses/event_bus.dart';
 import '../../domain/entities/seat.dart';
+import '../../domain/entities/seat_id.dart';
+import '../../domain/seat_index.dart';
 import '../../domain/usecases/get_seats_by_movie_session_id.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -24,15 +26,19 @@ class SeatBloc extends Bloc<SeatEvent, SeatState> {
   late String? _movieSessionId = '';
 
   SeatBloc(this._getMovieSessionById, this._eventBus)
-      : super(SeatState.initState()) {
+    : super(SeatState.initState()) {
     on<SeatEvent>(_onGetSeatEvent);
 
     _appEventSubscription = _eventBus.stream.listen((event) {
       if (event is SeatsUpdateEvent) {
         var selectingSeat = event;
 
-        emit(state.copyWith(
-            seats: selectingSeat.seats, status: SeatStateStatus.loaded));
+        emit(
+          state.copyWith(
+            seats: selectingSeat.seats,
+            status: SeatStateStatus.loaded,
+          ),
+        );
       }
 
       if (event is ShoppingCartHashIdUpdated) {
@@ -44,7 +50,9 @@ class SeatBloc extends Bloc<SeatEvent, SeatState> {
   }
 
   Future<FutureOr<void>> _onGetSeatEvent(
-      SeatEvent event, Emitter<SeatState> emit) async {
+    SeatEvent event,
+    Emitter<SeatState> emit,
+  ) async {
     _movieSessionId = event.movieSessionId;
     _getSeatsByMobieSessionId(event.movieSessionId);
   }
@@ -55,9 +63,14 @@ class SeatBloc extends Bloc<SeatEvent, SeatState> {
     final result = await _getMovieSessionById(movieSessionId);
 
     result.fold(
-        (failure) => emit(state.copyWith(
-            status: SeatStateStatus.error, errorMessage: failure.errorMessage)),
-        (_) => ());
+      (failure) => emit(
+        state.copyWith(
+          status: SeatStateStatus.error,
+          errorMessage: failure.errorMessage,
+        ),
+      ),
+      (_) => (),
+    );
   }
 
   @override

@@ -8,15 +8,8 @@ class ActiveMovie extends Equatable {
 
   const ActiveMovie(this.id, this.title);
 
-  ActiveMovie.empty()
-      : this(
-      '',
-      '',
-  );
+  ActiveMovie.empty() : this('', '');
 
   @override
   List<Object?> get props => [id, title];
-
-
 }
-

@@ -8,10 +8,7 @@ class AuthStatus extends Equatable {
   final AuthenticationStatus status;
   final String? errorMessage;
 
-  AuthStatus copyWith({
-    AuthenticationStatus? status,
-    String? errorMessage,
-  }) {
+  AuthStatus copyWith({AuthenticationStatus? status, String? errorMessage}) {
     return AuthStatus(
       status: status ?? this.status,
       errorMessage: errorMessage,

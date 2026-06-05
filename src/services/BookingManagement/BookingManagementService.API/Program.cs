@@ -76,7 +76,7 @@ services.AddOpenTelemetry()
             // .AddPrometheusExporter();
             .AddOtlpExporter((exporterOptions, readerOptions) =>
             {
-                exporterOptions.Endpoint = new Uri("http://otel-collector:4317"); 
+                exporterOptions.Endpoint = new Uri("http://otel-collector:4317");
                 readerOptions.PeriodicExportingMetricReaderOptions.ExportIntervalMilliseconds = 10_000;
             });
 
@@ -170,7 +170,15 @@ services.AddHealthChecks()
     .AddNpgSql(builder.Configuration.GetConnectionString("BookingDbContext"))
     .AddDbContextCheck<CinemaContext>("CinemaContext", HealthStatus.Unhealthy)
     .AddRedis(builder.Configuration.GetConnectionString("Redis"), "Redis", HealthStatus.Unhealthy)
-    .AddRabbitMQ(rabbitConnectionString: $"{builder.Configuration.GetConnectionString("EventBus")}:5672",
+    .AddRabbitMQ(
+        async sp =>
+        {
+            var factory = new RabbitMQ.Client.ConnectionFactory
+            {
+                HostName = builder.Configuration.GetConnectionString("EventBus")
+            };
+            return await factory.CreateConnectionAsync();
+        },
         name: "RabbitMQ",
         failureStatus: HealthStatus.Unhealthy);
 
@@ -230,15 +238,24 @@ app.UseEndpoints(typeof(Program));
 
 
 app.UseMigrationsEndPoint();
-await app.InitialiseDatabaseAsync();
 
+// The integration-test harness (BookingApiFactory) boots this real Program with the "Test"
+// environment and replaces external boundaries (Redis, RabbitMQ, idempotency) with in-memory
+// doubles — a real database and broker are intentionally not provisioned. Running the database
+// migration/seed or subscribing to the broker here would force those boundaries back in and crash
+// the WAF host on a machine (e.g. CI) without Postgres, so the post-build startup I/O is skipped
+// under Test. See tests/BookingManagementService.API.IntegrationTests/Infrastructure/BookingApiFactory.cs.
+if (!app.Environment.IsEnvironment("Test"))
+{
+    await app.InitialiseDatabaseAsync();
 
-var eventBus = app.Services.GetRequiredService<IEventBus>();
+    var eventBus = app.Services.GetRequiredService<IEventBus>();
 
-eventBus
-    .Subscribe<SeatExpiredSelectionIntegrationEvent, IIntegrationEventHandler<SeatExpiredSelectionIntegrationEvent>>();
-eventBus
-    .Subscribe<ShoppingCartExpiredIntegrationEvent, IIntegrationEventHandler<ShoppingCartExpiredIntegrationEvent>>();
+    await eventBus
+        .SubscribeAsync<SeatExpiredSelectionIntegrationEvent, IIntegrationEventHandler<SeatExpiredSelectionIntegrationEvent>>();
+    await eventBus
+        .SubscribeAsync<ShoppingCartExpiredIntegrationEvent, IIntegrationEventHandler<ShoppingCartExpiredIntegrationEvent>>();
+}
 
 
 app.Run();

@@ -18,9 +18,14 @@ class MovieCubit extends Cubit<MovieState> {
     final result = await _getMovieById(movieId);
 
     result.fold(
-        (failure) => emit(state.copyWith(
-            status: MoviesStatus.error, errorMessage: failure.errorMessage)),
-        (movie) =>
-            emit(state.copyWith(movie: movie, status: MoviesStatus.completed)));
+      (failure) => emit(
+        state.copyWith(
+          status: MoviesStatus.error,
+          errorMessage: failure.errorMessage,
+        ),
+      ),
+      (movie) =>
+          emit(state.copyWith(movie: movie, status: MoviesStatus.completed)),
+    );
   }
 }

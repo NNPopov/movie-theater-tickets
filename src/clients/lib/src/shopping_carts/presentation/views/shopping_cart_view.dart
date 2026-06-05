@@ -1,3 +1,4 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:movie_theater_tickets/core/res/app_theme.dart';
 
@@ -6,12 +7,23 @@ import '../../../../core/utils/utils.dart';
 import '../../../auth/presentations/bloc/auth_cubit.dart';
 import '../../../auth/presentations/bloc/auth_event.dart';
 import '../../../auth/presentations/widgets/auth_safe_area_widget.dart';
-import '../../../dashboards/presentation/dashboard_widget.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:movie_theater_tickets/l10n/gen/app_localizations.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../domain/entities/shopping_cart.dart';
 import '../cubit/shopping_cart_cubit.dart';
+
+/// Route page for the Shopping Cart screen.
+///
+/// No per-route provider: the global [ShoppingCartCubit] is supplied from
+/// `main.dart`, exactly as before the migration.
+@RoutePage(name: 'ShoppingCartRoute')
+class ShoppingCartPage extends StatelessWidget {
+  const ShoppingCartPage({super.key});
+
+  @override
+  Widget build(BuildContext context) => const ShoppingCartView();
+}
 
 class ShoppingCartView extends StatefulWidget {
   const ShoppingCartView({super.key});
@@ -30,18 +42,19 @@ class _ShoppingCartView extends State<ShoppingCartView> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(children: [
-      const DashboardWidget(route: ShoppingCartView.id),
-      AuthSafeAreaWidget(
-        authenticated: buildShoppingCart(),
-        notAuthenticated: TextButton(
-          onPressed: () {
-            context.read<AuthBloc>().add(LogInEvent());
-          },
-          child: const Text('Please log in to continue'),
+    return Column(
+      children: [
+        AuthSafeAreaWidget(
+          authenticated: buildShoppingCart(),
+          notAuthenticated: TextButton(
+            onPressed: () {
+              context.read<AuthBloc>().add(LogInEvent());
+            },
+            child: const Text('Please log in to continue'),
+          ),
         ),
-      ),
-    ]);
+      ],
+    );
   }
 
   BlocConsumer<ShoppingCartCubit, ShoppingCartState> buildShoppingCart() {
@@ -65,20 +78,17 @@ class _ShoppingCartView extends State<ShoppingCartView> {
       },
       builder: (BuildContext context, ShoppingCartState state) {
         if (state.status == ShoppingCartStateStatus.creating) {
-          return const Column(
-            children: [Text("Shopping Cart")],
-          );
+          return const Column(children: [Text("Shopping Cart")]);
         }
         if (state.status != ShoppingCartStateStatus.initial &&
             state.status != ShoppingCartStateStatus.error) {
           context.read<ShoppingCartCubit>().state;
 
-          return Column(children: [
-            Text(state.shoppingCart.status.toString()),
-            const SizedBox(
-              height: 30,
-            ),
-            ListView.builder(
+          return Column(
+            children: [
+              Text(state.shoppingCart.status.toString()),
+              const SizedBox(height: 30),
+              ListView.builder(
                 shrinkWrap: true,
                 scrollDirection: Axis.vertical,
                 itemCount: state.shoppingCart.shoppingCartSeat.length,
@@ -90,8 +100,9 @@ class _ShoppingCartView extends State<ShoppingCartView> {
                     alignment: Alignment.centerLeft,
                     decoration: BoxDecoration(
                       color: Theme.of(context).widgetColor,
-                      borderRadius:
-                          BorderRadius.circular(AppStyles.defaultRadius),
+                      borderRadius: BorderRadius.circular(
+                        AppStyles.defaultRadius,
+                      ),
                       border: Border.all(
                         color: Colors.blue,
                         width: AppStyles.defaultBorderWidth,
@@ -102,11 +113,13 @@ class _ShoppingCartView extends State<ShoppingCartView> {
                     child: Row(
                       children: [
                         Container(
-                            height: 40,
-                            width: 140,
-                            padding: const EdgeInsets.all(10.0),
-                            child: Text(
-                                "${AppLocalizations.of(context)!.row} ${rowSeat.seatRow}, Number ${rowSeat.seatNumber}")),
+                          height: 40,
+                          width: 140,
+                          padding: const EdgeInsets.all(10.0),
+                          child: Text(
+                            "${AppLocalizations.of(context)!.row} ${rowSeat.seatRow}, Number ${rowSeat.seatNumber}",
+                          ),
+                        ),
                         IconButton(
                           icon: const Icon(Icons.delete),
                           tooltip: AppLocalizations.of(context)!.remove,
@@ -124,47 +137,55 @@ class _ShoppingCartView extends State<ShoppingCartView> {
                               await context
                                   .read<ShoppingCartCubit>()
                                   .unSeatSelect(
-                                      row: rowSeat.seatRow!,
-                                      seatNumber: rowSeat.seatNumber!,
-                                      movieSessionId:
-                                          state.shoppingCart.movieSessionId!);
+                                    row: rowSeat.seatRow!,
+                                    seatNumber: rowSeat.seatNumber!,
+                                    movieSessionId:
+                                        state.shoppingCart.movieSessionId!,
+                                  );
                             }
                           },
                         ),
                       ],
                     ),
                   );
-                }),
-            if (state.status != ShoppingCartStateStatus.initial &&
-                state.shoppingCart != null &&
-                state.shoppingCart.priceCalculationResult != null &&
-                state.shoppingCart.priceCalculationResult
-                        ?.totalCartAmountAfterDiscounts !=
-                    null)
-              Container(
-                width: 600,
-                height: 70,
-                child: Column(
-                  children: [
-                    Text(
-                        'totalCartAmountBeforeDiscounts: ${state.shoppingCart!.priceCalculationResult!.totalCartAmountBeforeDiscounts.toString()}'),
-                    Text(
-                        'totalCartDiscounts: ${state.shoppingCart!.priceCalculationResult!.totalCartDiscounts.toString()}'),
-                    Text(
-                        'totalCartAmountAfterDiscounts: ${state.shoppingCart!.priceCalculationResult!.totalCartAmountAfterDiscounts.toString()}'),
-                  ],
-                ),
-              ),
-            if (state.shoppingCart.status == ShoppingCartStatus.InWork &&
-                state.shoppingCart.shoppingCartSeat.isNotEmpty &&
-                state.shoppingCart.isAssigned == true)
-              TextButton(
-                onPressed: () async {
-                  await context.read<ShoppingCartCubit>().completePurchase();
                 },
-                child: Text(AppLocalizations.of(context)!.complete_purchases),
               ),
-          ]);
+              if (state.status != ShoppingCartStateStatus.initial &&
+                  state.shoppingCart != null &&
+                  state.shoppingCart.priceCalculationResult != null &&
+                  state
+                          .shoppingCart
+                          .priceCalculationResult
+                          ?.totalCartAmountAfterDiscounts !=
+                      null)
+                Container(
+                  width: 600,
+                  height: 70,
+                  child: Column(
+                    children: [
+                      Text(
+                        'totalCartAmountBeforeDiscounts: ${state.shoppingCart!.priceCalculationResult!.totalCartAmountBeforeDiscounts.toString()}',
+                      ),
+                      Text(
+                        'totalCartDiscounts: ${state.shoppingCart!.priceCalculationResult!.totalCartDiscounts.toString()}',
+                      ),
+                      Text(
+                        'totalCartAmountAfterDiscounts: ${state.shoppingCart!.priceCalculationResult!.totalCartAmountAfterDiscounts.toString()}',
+                      ),
+                    ],
+                  ),
+                ),
+              if (state.shoppingCart.status == ShoppingCartStatus.InWork &&
+                  state.shoppingCart.shoppingCartSeat.isNotEmpty &&
+                  state.shoppingCart.isAssigned == true)
+                TextButton(
+                  onPressed: () async {
+                    await context.read<ShoppingCartCubit>().completePurchase();
+                  },
+                  child: Text(AppLocalizations.of(context)!.complete_purchases),
+                ),
+            ],
+          );
         }
 
         return Column(

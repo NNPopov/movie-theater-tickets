@@ -16,7 +16,7 @@ public sealed class MovieSessionSeat : ValueObject, IAggregateRoot
 
     [JsonConstructor]
     private MovieSessionSeat(Guid movieSessionId,
-        short seatNumber, 
+        short seatNumber,
         short seatRow,
         decimal price,
         SeatStatus status,
@@ -31,8 +31,8 @@ public sealed class MovieSessionSeat : ValueObject, IAggregateRoot
         ShoppingCartId = shoppingCartId;
         ShoppingCartHashId = shoppingCartHashId;
     }
-    
-    public static MovieSessionSeat Create(Guid movieSessionId, 
+
+    public static MovieSessionSeat Create(Guid movieSessionId,
         short seatNumber,
         short seatRow,
         decimal price)
@@ -61,27 +61,27 @@ public sealed class MovieSessionSeat : ValueObject, IAggregateRoot
     public decimal Price { get; private set; }
 
     public SeatStatus Status { get; private set; }
-    
+
     public Guid ShoppingCartId { get; private set; }
-    
+
     public string ShoppingCartHashId { get; private set; }
 
     internal Result Select(Guid shoppingCartId, string hashId)
     {
         Ensure.NotEmpty(shoppingCartId, "The shoppingCartId is required.", nameof(shoppingCartId));
         Ensure.NotEmpty(hashId, "The shoppingCartHashId is required.", nameof(hashId));
-        
+
         if (Status != SeatStatus.Available)
         {
             return DomainErrors<MovieSessionSeat>.ConflictException("Status should be Available");
         }
-        
+
         if (shoppingCartId != ShoppingCartId && ShoppingCartId != Guid.Empty)
         {
-            return DomainErrors<MovieSessionSeat>.InvalidOperation(
+            return DomainErrors<MovieSessionSeat>.ConflictException(
                 "The place is already being processed by another shopping cart");
         }
-        
+
         if (ShoppingCartId == Guid.Empty)
         {
             ShoppingCartId = shoppingCartId;
@@ -91,9 +91,9 @@ public sealed class MovieSessionSeat : ValueObject, IAggregateRoot
         var currentStatus = Status;
 
         Status = SeatStatus.Selected;
-        
+
         var domainEvent = new MovieSessionSeatStatusUpdatedDomainEvent(this, currentStatus);
-        
+
         AddDomainEvent(domainEvent);
 
         return Result.Success();
@@ -105,17 +105,17 @@ public sealed class MovieSessionSeat : ValueObject, IAggregateRoot
 
         if (Status != SeatStatus.Selected && Status != SeatStatus.Available)
         {
-           return DomainErrors<MovieSessionSeat>.ConflictException("Status should be selected or available.");
+            return DomainErrors<MovieSessionSeat>.ConflictException("Status should be selected or available.");
         }
-        
+
         var currentStatus = Status;
 
         Status = SeatStatus.Reserved;
-        
+
         var domainEvent = new MovieSessionSeatStatusUpdatedDomainEvent(this, currentStatus);
-        
+
         AddDomainEvent(domainEvent);
-        
+
         return Result.Success();
     }
 
@@ -125,23 +125,23 @@ public sealed class MovieSessionSeat : ValueObject, IAggregateRoot
 
         if (ShoppingCartId != shoppingCartId)
         {
-            return DomainErrors<MovieSessionSeat>.InvalidOperation(
+            return DomainErrors<MovieSessionSeat>.ConflictException(
                 "The place is already being processed by another shopping cart");
         }
-        
+
         if (Status == SeatStatus.Sold)
         {
             return DomainErrors<MovieSessionSeat>.ConflictException("Status should not be Sold.");
         }
-        
+
         var currentStatus = Status;
 
         Status = SeatStatus.Sold;
-        
+
         var domainEvent = new MovieSessionSeatStatusUpdatedDomainEvent(this, currentStatus);
-        
+
         AddDomainEvent(domainEvent);
-        
+
         return Result.Success();
     }
 
@@ -151,17 +151,17 @@ public sealed class MovieSessionSeat : ValueObject, IAggregateRoot
         {
             return DomainErrors<MovieSessionSeat>.ConflictException("Status should not be Sold.");
         }
-        
+
         var currentStatus = Status;
 
         Status = SeatStatus.Available;
         ShoppingCartId = Guid.Empty;
         ShoppingCartHashId = string.Empty;
-        
+
         var domainEvent = new MovieSessionSeatStatusUpdatedDomainEvent(this, currentStatus);
-        
+
         AddDomainEvent(domainEvent);
-        
+
         return Result.Success();
     }
 
@@ -188,7 +188,7 @@ public sealed class MovieSessionSeat : ValueObject, IAggregateRoot
     /// Clears all the domain events from the <see cref="AggregateRoot"/>.
     /// </summary>
     public void ClearDomainEvents() => _domainEvents.Clear();
-    
+
     /// <summary>
     /// Adds the specified <see cref="IDomainEvent"/> to the <see cref="AggregateRoot"/>.
     /// </summary>

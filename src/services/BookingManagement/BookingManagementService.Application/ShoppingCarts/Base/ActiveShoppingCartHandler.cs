@@ -11,7 +11,7 @@ public class ActiveShoppingCartHandler
     protected readonly IActiveShoppingCartRepository ActiveShoppingCartRepository;
 
     protected readonly IShoppingCartLifecycleManager ShoppingCartLifecycleManager;
-    
+
     protected readonly ILogger Logger;
 
     public ActiveShoppingCartHandler(IActiveShoppingCartRepository activeShoppingCartRepository,
@@ -28,7 +28,7 @@ public class ActiveShoppingCartHandler
         shoppingCart.CalculateCartAmount(new PriceService());
         await ActiveShoppingCartRepository.SaveAsync(shoppingCart);
         await ShoppingCartLifecycleManager.SetAsync(shoppingCart.Id);
-        
+
         Logger.Debug(" Amount was recalculated, ShoppingCart was saved, ShoppingCartLifecycle was reset {@ShoppingCart}", shoppingCart);
     }
 }

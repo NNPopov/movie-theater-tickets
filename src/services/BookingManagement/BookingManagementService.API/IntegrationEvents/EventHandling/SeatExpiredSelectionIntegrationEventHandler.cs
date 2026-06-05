@@ -21,14 +21,14 @@ public class SeatExpiredSelectionIntegrationEventHandler(IMediator mediator,
     public async Task Handle(SeatExpiredSelectionIntegrationEvent @event)
     {
         _logger.Information("Handling integration event: {IntegrationEventId} - ({@IntegrationEvent})", @event.Id, @event);
-            
-            
+
+
         var command = new SeatExpiredSelectionCommand(
             MovieSessionId: @event.MovieSessionId,
             SeatRow: @event.SeatRow,
             SeatNumber: @event.SeatNumber,
             ShoppingKartId: Guid.Empty);
-            
+
         _logger.Debug(
             "Sending command: {@SeatExpiredSelectionCommand})", command);
 

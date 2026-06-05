@@ -7,11 +7,12 @@ class SeatInfoDto extends Equatable {
   final String showtimeId;
   final String shoppingCartId;
 
-  const SeatInfoDto(
-      {required this.row,
-        required this.number,
-        required this.showtimeId,
-        required this.shoppingCartId});
+  const SeatInfoDto({
+    required this.row,
+    required this.number,
+    required this.showtimeId,
+    required this.shoppingCartId,
+  });
 
   @override
   List<Object> get props => [row, number, showtimeId];
@@ -21,7 +22,7 @@ class SeatInfoDto extends Equatable {
       'row': row,
       'number': number,
       'showtimeId': showtimeId,
-      'shoppingCartId': shoppingCartId
+      'shoppingCartId': shoppingCartId,
     };
   }
 

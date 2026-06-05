@@ -51,7 +51,7 @@ public sealed class RedisSubscriber : BackgroundService
                             SeatNumber: seat,
                             ShoppingKartId: Guid.Empty);
 
-                        _eventBus.Publish(seatExpiredReservationIntegrationEvent, key.ToString());
+                        await _eventBus.PublishAsync(seatExpiredReservationIntegrationEvent, key.ToString());
 
 
                         _logger.Information(
@@ -65,7 +65,7 @@ public sealed class RedisSubscriber : BackgroundService
                         var shoppingCartExpiredIntegrationEvent = new ShoppingCartExpiredIntegrationEvent(
                             ShoppingCartId: shoppingCartId);
 
-                        _eventBus.Publish(shoppingCartExpiredIntegrationEvent, key.ToString());
+                        await _eventBus.PublishAsync(shoppingCartExpiredIntegrationEvent, key.ToString());
 
 
                         _logger.Information(

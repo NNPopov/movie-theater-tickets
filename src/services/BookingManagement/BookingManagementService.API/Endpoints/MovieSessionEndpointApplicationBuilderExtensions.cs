@@ -6,6 +6,7 @@ using CinemaTicketBooking.Application.MovieSessions.DTOs;
 using CinemaTicketBooking.Application.MovieSessions.Queries;
 using CinemaTicketBooking.Application.MovieSessionSeats;
 using CinemaTicketBooking.Application.ShoppingCarts.Command.SelectSeats;
+using CinemaTicketBooking.Domain.Error;
 using CinemaTicketBooking.Domain.MovieSessions;
 using CinemaTicketBooking.Domain.MovieSessions.Abstractions;
 using MediatR;
@@ -48,15 +49,14 @@ public class MovieSessionEndpointApplicationBuilderExtensions : IEndpoints
             {
                 var result = await sender.Send(request, cancellationToken);
 
-                return Results.CreatedAtRoute(
-                    routeName: "GetShowtimeById",
-                    routeValues: new { id = result.ToString() },
-                    value: result);
+                return result.Match(
+                    id => Results.CreatedAtRoute("GetShowtimeById", new { id }, id),
+                    ErrorResults.ToProblem);
             })
             .WithName("CreateMovieSessions")
             .WithTags(Tag)
             .Produces<Guid>(201, "application/json")
-            .Produces(204);
+            .Produces(404);
 
 
         endpointRouteBuilder.MapGet($"{BaseRoute}/{{movieSessionId}}", async ([FromRoute] Guid movieSessionId,
@@ -71,7 +71,7 @@ public class MovieSessionEndpointApplicationBuilderExtensions : IEndpoints
             .WithName("GetMovieSessionsById")
             .WithTags(Tag)
             .Produces<MovieSessionsDto>(200, "application/json")
-            .Produces(204);
+            .Produces(404);
 
 
         endpointRouteBuilder.MapGet($"{BaseRoute}", async (
@@ -103,7 +103,6 @@ public class MovieSessionEndpointApplicationBuilderExtensions : IEndpoints
             })
             .WithName("GetActiveMovieSessionsByMovieId")
             .WithTags(Tag)
-            .Produces<IReadOnlyCollection<MovieSessionsDto>>(200, "application/json")
-            .Produces(204);
+            .Produces<IReadOnlyCollection<MovieSessionsDto>>(200, "application/json");
     }
 }

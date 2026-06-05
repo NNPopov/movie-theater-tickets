@@ -7,11 +7,21 @@ class ShoppingCartSeat extends Equatable {
   final double? price;
   late bool? isDirty;
 
-   ShoppingCartSeat({this.seatRow, this.seatNumber, this.selectionExpirationTime, this.price, this.isDirty});
+  ShoppingCartSeat({
+    this.seatRow,
+    this.seatNumber,
+    this.selectionExpirationTime,
+    this.price,
+    this.isDirty,
+  });
 
   @override
   // TODO: implement props
-  List<Object?> get props => [seatRow, seatNumber, selectionExpirationTime, price, this.isDirty];
+  List<Object?> get props => [
+    seatRow,
+    seatNumber,
+    selectionExpirationTime,
+    price,
+    this.isDirty,
+  ];
 }
-
-

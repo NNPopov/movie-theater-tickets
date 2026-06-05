@@ -17,7 +17,6 @@ class AuditoriumDetailView extends StatefulWidget {
 }
 
 class _auditoriumDetailView extends State<AuditoriumDetailView> {
-
   @override
   void initState() {
     context.read<CinemaHallCubit>().getAuditorium(widget.auditoriumId);
@@ -36,16 +35,16 @@ class _auditoriumDetailView extends State<AuditoriumDetailView> {
         if (state is! CinemaHallLoaded && state is! CinemaHallError) {
           return const LoadingView();
         }
-        if ((state is CinemaHallLoaded && state.auditorium == null) ) {
+        if ((state is CinemaHallLoaded && state.auditorium == null)) {
           return const NoDataView();
         }
 
         state as CinemaHallLoaded;
 
         final cinemaHall = state.auditorium;
-        return Column(children: [
-          Text("Auditorium name :${cinemaHall.description}")
-        ]);
+        return Column(
+          children: [Text("Auditorium name :${cinemaHall.description}")],
+        );
       },
     );
   }

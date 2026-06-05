@@ -16,7 +16,7 @@ GetIt getIt = GetIt.instance;
 
 class CreateShoppingCartUseCase
     extends FutureUsecaseWithParams<String, CreateShoppingCartCommand> {
-  CreateShoppingCartUseCase( this._eventHub, this._authService, this._repo);
+  CreateShoppingCartUseCase(this._eventHub, this._authService, this._repo);
 
   final storage = const FlutterSecureStorage();
 
@@ -28,72 +28,92 @@ class CreateShoppingCartUseCase
   ResultFuture<String> call(CreateShoppingCartCommand params) async {
     var userStatus = await _authService.getCurrentStatus();
 
-    return userStatus
-        .fold((l) async => await createShoppingCartForAnonymousUser(params),
-            (r) async {
-      if (r.status == AuthenticationStatus.authorized) {
-        return await createShoppingCartForNotAnonymousUser(params);
-      }
+    return userStatus.fold(
+      (l) async => await createShoppingCartForAnonymousUser(params),
+      (r) async {
+        if (r.status == AuthenticationStatus.authorized) {
+          return await createShoppingCartForNotAnonymousUser(params);
+        }
 
-      return await createShoppingCartForAnonymousUser(params);
-    });
+        return await createShoppingCartForAnonymousUser(params);
+      },
+    );
   }
 
   ResultFuture<String> createShoppingCartForNotAnonymousUser(
-      CreateShoppingCartCommand params) async {
-    var result =
-        await createShoppingCartForAnonymousUser1(params.maxNumberOfSeats);
+    CreateShoppingCartCommand params,
+  ) async {
+    var result = await createShoppingCartForAnonymousUser1(
+      params.maxNumberOfSeats,
+    );
 
-    return result.fold((l) {
-      return Left(l);
-    }, (value) async {
-      await storage.write(
-          key: Constants.SHOPPING_CARD_ID, value: value.shoppingCartId);
-      await storage.write(
-          key: Constants.SHOPPING_CARD_HASH_ID, value: value.hashId);
+    return result.fold(
+      (l) {
+        return Left(l);
+      },
+      (value) async {
+        await storage.write(
+          key: Constants.SHOPPING_CARD_ID,
+          value: value.shoppingCartId,
+        );
+        await storage.write(
+          key: Constants.SHOPPING_CARD_HASH_ID,
+          value: value.hashId,
+        );
 
-      await _eventHub.shoppingCartUpdateSubscribe(value.shoppingCartId);
+        await _eventHub.shoppingCartUpdateSubscribe(value.shoppingCartId);
 
-      var shoppingCartResult =
-          await _repo.getShoppingCart(value.shoppingCartId);
+        var shoppingCartResult = await _repo.getShoppingCart(
+          value.shoppingCartId,
+        );
 
-      return shoppingCartResult.fold((l) => Left(l), (r) async {
-        await _repo.assignClient(value.shoppingCartId);
+        return shoppingCartResult.fold((l) => Left(l), (r) async {
+          await _repo.assignClient(value.shoppingCartId);
 
-
-
-        return Right(value.hashId);
-      });
-    });
+          return Right(value.hashId);
+        });
+      },
+    );
   }
 
   ResultFuture<String> createShoppingCartForAnonymousUser(
-      CreateShoppingCartCommand params) async {
-    var result =
-        await createShoppingCartForAnonymousUser1(params.maxNumberOfSeats);
+    CreateShoppingCartCommand params,
+  ) async {
+    var result = await createShoppingCartForAnonymousUser1(
+      params.maxNumberOfSeats,
+    );
 
-    return result.fold((l) {
-      return Left(l);
-    }, (value) async {
-      await storage.write(
-          key: Constants.SHOPPING_CARD_ID, value: value.shoppingCartId);
-      await storage.write(
-          key: Constants.SHOPPING_CARD_HASH_ID, value: value.hashId);
+    return result.fold(
+      (l) {
+        return Left(l);
+      },
+      (value) async {
+        await storage.write(
+          key: Constants.SHOPPING_CARD_ID,
+          value: value.shoppingCartId,
+        );
+        await storage.write(
+          key: Constants.SHOPPING_CARD_HASH_ID,
+          value: value.hashId,
+        );
 
-      await _eventHub.shoppingCartUpdateSubscribe(value.shoppingCartId);
+        await _eventHub.shoppingCartUpdateSubscribe(value.shoppingCartId);
 
-      // var shoppingCartResult =
-      //     await _repo.getShoppingCart(value.shoppingCartId);
+        // var shoppingCartResult =
+        //     await _repo.getShoppingCart(value.shoppingCartId);
 
-      return Right(value.hashId);
-    });
+        return Right(value.hashId);
+      },
+    );
   }
 
   ResultFuture<CreateShoppingCartResponse> createShoppingCartForAnonymousUser1(
-      int maxNumberOfSeats) async {
+    int maxNumberOfSeats,
+  ) async {
     if (maxNumberOfSeats > 4 || maxNumberOfSeats < 1) {
       return const Left(
-          ValidationFailure(message: 'Number of places should be from 1 to 4'));
+        ValidationFailure(message: 'Number of places should be from 1 to 4'),
+      );
     }
 
     return await _repo.createShoppingCart(maxNumberOfSeats);

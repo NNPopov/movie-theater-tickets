@@ -1,5 +1,7 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:movie_theater_tickets/core/res/app_theme.dart';
+import 'package:movie_theater_tickets/core/routing/app_router.gr.dart';
 import '../../../../core/common/widgets/overlay_dialog.dart';
 import '../../../../core/res/app_styles.dart';
 import '../../../../core/utils/utils.dart';
@@ -11,10 +13,8 @@ import '../../../server_state/presentation/cubit/server_state_cubit.dart';
 import '../../domain/entities/seat.dart';
 import '../../domain/entities/shopping_cart.dart';
 import '../cubit/shopping_cart_cubit.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:movie_theater_tickets/l10n/gen/app_localizations.dart';
 import 'package:get_it/get_it.dart';
-
-import '../views/shopping_cart_view.dart';
 
 final getIt = GetIt.instance;
 
@@ -42,18 +42,19 @@ class _ShoppingCartWidget extends State<ShoppingCartWidget> {
   @override
   Widget build(BuildContext context) {
     return Container(
-        width: 290,
-        alignment: Alignment.topLeft,
-        decoration: BoxDecoration(
-          color: Theme.of(context).widgetColor,
-          borderRadius: BorderRadius.circular(AppStyles.defaultRadius),
-          border: Border.all(
-            color: Theme.of(context).defaultBorderColor,
-            width: AppStyles.defaultBorderWidth,
-          ),
+      width: 290,
+      alignment: Alignment.topLeft,
+      decoration: BoxDecoration(
+        color: Theme.of(context).widgetColor,
+        borderRadius: BorderRadius.circular(AppStyles.defaultRadius),
+        border: Border.all(
+          color: Theme.of(context).defaultBorderColor,
+          width: AppStyles.defaultBorderWidth,
         ),
-        padding: const EdgeInsets.all(10.0),
-        child: buildShoppingCart());
+      ),
+      padding: const EdgeInsets.all(10.0),
+      child: buildShoppingCart(),
+    );
   }
 
   BlocConsumer<ShoppingCartCubit, ShoppingCartState> buildShoppingCart() {
@@ -97,20 +98,17 @@ class _ShoppingCartWidget extends State<ShoppingCartWidget> {
       },
       builder: (BuildContext context, ShoppingCartState shoppingCartState) {
         if (shoppingCartState.status == ShoppingCartStateStatus.creating) {
-          return const Column(
-            children: [Text("Shopping Cart")],
-          );
+          return const Column(children: [Text("Shopping Cart")]);
         }
         if (shoppingCartState.status != ShoppingCartStateStatus.initial &&
             shoppingCartState.status != ShoppingCartStateStatus.error) {
           context.read<ShoppingCartCubit>().state;
 
-          return Column(children: [
-            Text(shoppingCartState.shoppingCart.status.toString()),
-            const SizedBox(
-              height: 30,
-            ),
-            ListView.builder(
+          return Column(
+            children: [
+              Text(shoppingCartState.shoppingCart.status.toString()),
+              const SizedBox(height: 30),
+              ListView.builder(
                 shrinkWrap: true,
                 scrollDirection: Axis.vertical,
                 itemCount:
@@ -124,8 +122,9 @@ class _ShoppingCartWidget extends State<ShoppingCartWidget> {
                     alignment: Alignment.centerLeft,
                     decoration: BoxDecoration(
                       color: Theme.of(context).widgetColor,
-                      borderRadius:
-                          BorderRadius.circular(AppStyles.defaultRadius),
+                      borderRadius: BorderRadius.circular(
+                        AppStyles.defaultRadius,
+                      ),
                       border: Border.all(
                         color: rowSeat.isDirty == null || rowSeat.isDirty!
                             ? Colors.black26
@@ -140,32 +139,41 @@ class _ShoppingCartWidget extends State<ShoppingCartWidget> {
                         Row(
                           children: [
                             Container(
-                                height: 40,
-                                width: 125,
-                                padding: EdgeInsets.symmetric(
-                                    vertical: 10, horizontal: 0),
-                                child: Text(
-                                    "${AppLocalizations.of(context)!.row} ${rowSeat.seatRow}, Number ${rowSeat.seatNumber}")),
+                              height: 40,
+                              width: 125,
+                              padding: EdgeInsets.symmetric(
+                                vertical: 10,
+                                horizontal: 0,
+                              ),
+                              child: Text(
+                                "${AppLocalizations.of(context)!.row} ${rowSeat.seatRow}, Number ${rowSeat.seatNumber}",
+                              ),
+                            ),
                             Container(
-                                height: 40,
-                                width: 25,
-                                padding: EdgeInsets.symmetric(
-                                    vertical: 10, horizontal: 0),
-                                child: Text(
-                                  "${rowSeat.price}€",
-                                  style: TextStyle(
-                                      color:
-                                          _getConditionColor(context, rowSeat)),
-                                )),
+                              height: 40,
+                              width: 25,
+                              padding: EdgeInsets.symmetric(
+                                vertical: 10,
+                                horizontal: 0,
+                              ),
+                              child: Text(
+                                "${rowSeat.price}€",
+                                style: TextStyle(
+                                  color: _getConditionColor(context, rowSeat),
+                                ),
+                              ),
+                            ),
                             IconButton(
                               icon: const Icon(Icons.delete),
                               color: _getConditionColor(context, rowSeat),
                               tooltip: AppLocalizations.of(context)!.remove,
                               onPressed: () {
                                 onSeatUnselectPress(
-                                    rowSeat,
-                                    shoppingCartState
-                                        .shoppingCart.movieSessionId!);
+                                  rowSeat,
+                                  shoppingCartState
+                                      .shoppingCart
+                                      .movieSessionId!,
+                                );
                               },
                             ),
                           ],
@@ -176,15 +184,17 @@ class _ShoppingCartWidget extends State<ShoppingCartWidget> {
                       ],
                     ),
                   );
-                }),
-            if (shoppingCartState.shoppingCart.shoppingCartSeat.isNotEmpty)
-              TextButton(
-                onPressed: () {
-                  Navigator.pushNamed(context, ShoppingCartView.id);
                 },
-                child: Text(AppLocalizations.of(context)!.complete_purchases),
               ),
-          ]);
+              if (shoppingCartState.shoppingCart.shoppingCartSeat.isNotEmpty)
+                TextButton(
+                  onPressed: () {
+                    context.router.navigate(const ShoppingCartRoute());
+                  },
+                  child: Text(AppLocalizations.of(context)!.complete_purchases),
+                ),
+            ],
+          );
         }
 
         return Container(
@@ -196,8 +206,9 @@ class _ShoppingCartWidget extends State<ShoppingCartWidget> {
                 onPressed: () {
                   onCreateShoppingCart();
                 },
-                child: Text(AppLocalizations.of(context)!
-                    .select_desired_number_of_seats),
+                child: Text(
+                  AppLocalizations.of(context)!.select_desired_number_of_seats,
+                ),
               ),
             ],
           ),
@@ -208,27 +219,31 @@ class _ShoppingCartWidget extends State<ShoppingCartWidget> {
 
   Widget expirationProgressBar(ShoppingCartSeat rowSeat) {
     return BlocBuilder<ServerStateCubit, ServerState>(
-        builder: (BuildContext context, ServerState state) {
-      return seatExpirationProgressBar(rowSeat, state);
-    });
+      builder: (BuildContext context, ServerState state) {
+        return seatExpirationProgressBar(rowSeat, state);
+      },
+    );
   }
 
   Container seatExpirationProgressBar(
-      ShoppingCartSeat rowSeat, ServerState state) {
+    ShoppingCartSeat rowSeat,
+    ServerState state,
+  ) {
     if (rowSeat.selectionExpirationTime != null &&
         state != ServerState.initState()) {
-      Duration timeBeforeExpiration =
-          rowSeat.selectionExpirationTime!.difference(state.serverDateTime);
+      Duration timeBeforeExpiration = rowSeat.selectionExpirationTime!
+          .difference(state.serverDateTime);
       int timeBeforeExpirationSeconds = timeBeforeExpiration.inSeconds;
 
-      double expirationValue =
-          _calculateExpirationProgressBarValue(timeBeforeExpirationSeconds);
+      double expirationValue = _calculateExpirationProgressBarValue(
+        timeBeforeExpirationSeconds,
+      );
 
       var containerColour = expirationValue <= 20
           ? Colors.red
           : expirationValue <= 60
-              ? Colors.blue
-              : Colors.green;
+          ? Colors.blue
+          : Colors.green;
 
       return Container(
         alignment: Alignment.centerLeft,
@@ -241,20 +256,13 @@ class _ShoppingCartWidget extends State<ShoppingCartWidget> {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(1),
             color: containerColour,
-            border: Border.all(
-              color: containerColour,
-              width: 2,
-            ),
+            border: Border.all(color: containerColour, width: 2),
           ),
         ),
       );
     }
 
-    return Container(
-      height: 3,
-      width: 30,
-      padding: const EdgeInsets.all(2.0),
-    );
+    return Container(height: 3, width: 30, padding: const EdgeInsets.all(2.0));
   }
 
   double _calculateExpirationProgressBarValue(int timeBeforeExpirationSeconds) {
@@ -311,14 +319,17 @@ class _ShoppingCartWidget extends State<ShoppingCartWidget> {
   }
 
   Future<void> onSeatUnselectPress(
-      ShoppingCartSeat seat, String movieSessionId) async {
+    ShoppingCartSeat seat,
+    String movieSessionId,
+  ) async {
     var shoppingCartStatus = context.read<ShoppingCartCubit>().state.status;
     if (shoppingCartStatus != ShoppingCartStateStatus.initial &&
         shoppingCartStatus != ShoppingCartStateStatus.deleted) {
       await context.read<ShoppingCartCubit>().unSeatSelect(
-          row: seat.seatRow!,
-          seatNumber: seat.seatNumber!,
-          movieSessionId: movieSessionId);
+        row: seat.seatRow!,
+        seatNumber: seat.seatNumber!,
+        movieSessionId: movieSessionId,
+      );
     }
   }
 
@@ -330,63 +341,72 @@ class _ShoppingCartWidget extends State<ShoppingCartWidget> {
   late bool dialogInitialized = false;
 
   void _createShoppingCardDialog(
-      BuildContext context, ShoppingCartState state) {
-
+    BuildContext context,
+    ShoppingCartState state,
+  ) {
     if (dialogInitialized != true) {
       showDialog(
-          context: context,
-          builder: (BuildContext dialogContext) {
-            _dialogContext = dialogContext;
-            return StatefulBuilder(
-                builder: (BuildContext context, StateSetter setState) {
+        context: context,
+        builder: (BuildContext dialogContext) {
+          _dialogContext = dialogContext;
+          return StatefulBuilder(
+            builder: (BuildContext context, StateSetter setState) {
               dialogInitialized = true;
               return AlertDialog(
                 backgroundColor: Theme.of(context).widgetColor,
                 surfaceTintColor: Colors.black12,
                 shape: RoundedRectangleBorder(
                   borderRadius: const BorderRadius.all(
-                      Radius.circular(AppStyles.defaultRadius)),
+                    Radius.circular(AppStyles.defaultRadius),
+                  ),
                   side: BorderSide(
-                      color: Theme.of(context).defaultBorderColor,
-                      width: AppStyles.defaultBorderWidth),
+                    color: Theme.of(context).defaultBorderColor,
+                    width: AppStyles.defaultBorderWidth,
+                  ),
                 ),
                 title: Text(AppLocalizations.of(context)!.shopping_cart),
                 content: const Text(
-                    'Select the number of seats you are going to buy'),
+                  'Select the number of seats you are going to buy',
+                ),
                 actions: <Widget>[
                   BlocBuilder<ShoppingCartCubit, ShoppingCartState>(
-                      builder: (context, state) {
-                    return Column(children: [
-                      TextFormField(
-                        controller: _maxSeatsController,
-                        decoration: InputDecoration(
-                          hintText: 'Введите значение',
-                          errorText: state.errorMessage,
-                        ),
-                      ),
-                      TextButton(
-                        onPressed: () => context
-                            .read<ShoppingCartCubit>()
-                            .createShoppingCartCancel(),
-                        child: const Text('Cancel'),
-                      ),
-                      TextButton(
-                        onPressed: () async {
-                          var maxNumberOfSeats =
-                              int.parse(_maxSeatsController.text);
-                          await context
-                              .read<ShoppingCartCubit>()
-                              .createShoppingCart(maxNumberOfSeats);
-                        },
-                        child: const Text('Create a shopping card'),
-                      ),
-                    ]);
-                  })
+                    builder: (context, state) {
+                      return Column(
+                        children: [
+                          TextFormField(
+                            controller: _maxSeatsController,
+                            decoration: InputDecoration(
+                              hintText: 'Введите значение',
+                              errorText: state.errorMessage,
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () => context
+                                .read<ShoppingCartCubit>()
+                                .createShoppingCartCancel(),
+                            child: const Text('Cancel'),
+                          ),
+                          TextButton(
+                            onPressed: () async {
+                              var maxNumberOfSeats = int.parse(
+                                _maxSeatsController.text,
+                              );
+                              await context
+                                  .read<ShoppingCartCubit>()
+                                  .createShoppingCart(maxNumberOfSeats);
+                            },
+                            child: const Text('Create a shopping card'),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
                 ],
               );
-            });
-          });
+            },
+          );
+        },
+      );
     }
-
   }
 }

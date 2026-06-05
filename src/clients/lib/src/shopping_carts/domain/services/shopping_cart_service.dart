@@ -15,7 +15,13 @@ import '../usecases/get_shopping_cart.dart';
 
 class ShoppingCartAuthListener {
   ShoppingCartAuthListener(
-      this._localRepo, this._assignClientUseCase, this._authService, this._eventHub, this._eventBus, this._getShoppingCartUseCase);
+    this._localRepo,
+    this._assignClientUseCase,
+    this._authService,
+    this._eventHub,
+    this._eventBus,
+    this._getShoppingCartUseCase,
+  );
 
   final storage = const FlutterSecureStorage();
 
@@ -31,30 +37,26 @@ class ShoppingCartAuthListener {
   final AuthService _authService;
 
   Future<void> init() async {
-    _authenticationStatusSubscription =
-        _authService.status.listen((event) async {
+    _authenticationStatusSubscription = _authService.status.listen((
+      event,
+    ) async {
       if (event.status == AuthenticationStatus.authorized) {
         var shoppingCartResult = await _localRepo.getShoppingCart();
 
-        shoppingCartResult.fold((l) async {
+        shoppingCartResult.fold(
+          (l) async {
+            await _getShoppingCartUseCase();
 
-        await  _getShoppingCartUseCase();
+            _eventBus.send(const ShoppingCartHashIdIdUpdateEvent());
+          },
+          (r) async {
+            var assignClientResult = await _assignClientUseCase(r.id!);
 
-
-
-        _eventBus.send(const ShoppingCartHashIdIdUpdateEvent());
-
-        }, (r) async {
-          var assignClientResult = await _assignClientUseCase(r.id!);
-
-
-
-          assignClientResult.fold((l) => null, (r) async {
-
-
-            return const Right(null);
-          });
-        });
+            assignClientResult.fold((l) => null, (r) async {
+              return const Right(null);
+            });
+          },
+        );
       }
 
       if (event.status == AuthenticationStatus.unauthorized) {

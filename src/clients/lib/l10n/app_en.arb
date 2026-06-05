@@ -28,5 +28,11 @@
   "connection_lost_reconnect_btn":"Reconnect",
 
   "light_theme":"Light",
-  "dark_theme":"Dark"
+  "dark_theme":"Dark",
+
+  "about_us":"About Us",
+
+  "page_not_found_title":"Page Not Found",
+  "page_not_found_message":"The page you are looking for does not exist.",
+  "back_to_home":"Back to Home"
 }

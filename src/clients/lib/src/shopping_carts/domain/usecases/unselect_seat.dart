@@ -10,7 +10,7 @@ import 'package:dartz/dartz.dart';
 
 class UnselectSeatUseCase
     extends FutureUsecaseWithParams<void, SelectSeatCommand> {
-  const UnselectSeatUseCase(this._repo, this._localRepo,);
+  const UnselectSeatUseCase(this._repo, this._localRepo);
 
   final storage = const FlutterSecureStorage();
   final ShoppingCartRepo _repo;
@@ -30,10 +30,11 @@ class UnselectSeatUseCase
         (l) => Left(l),
         (r) => _repo.unselectSeat(
           SeatInfoDto(
-              row: params.seat.seatRow!,
-              number: params.seat.seatNumber!,
-              showtimeId: params.movieSessionId,
-              shoppingCartId: shoppingCart.id!),
+            row: params.seat.seatRow!,
+            number: params.seat.seatNumber!,
+            showtimeId: params.movieSessionId,
+            shoppingCartId: shoppingCart.id!,
+          ),
         ),
       );
     });

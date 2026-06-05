@@ -17,7 +17,7 @@ public class DomainEventTracker : IDomainEventTracker
         _logger = logger;
     }
 
-    public async Task PublishDomainEvents( IAggregateRoot  aggregateRoot,CancellationToken cancellationToken = default)
+    public async Task PublishDomainEvents(IAggregateRoot aggregateRoot, CancellationToken cancellationToken = default)
     {
         try
         {

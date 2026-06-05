@@ -26,42 +26,48 @@ class ConflictFailure extends Failure {
   const ConflictFailure({required super.message, super.statusCode = 409});
 
   ConflictFailure.fromException(ServerException exception)
-      : this(message: exception.message);
+    : this(message: exception.message);
 }
 
 class NotFoundFailure extends Failure {
-  const NotFoundFailure(
-      {super.message = 'ContentNotFound', super.statusCode = 204});
+  const NotFoundFailure({
+    super.message = 'ContentNotFound',
+    super.statusCode = 204,
+  });
 
   NotFoundFailure.fromException(ServerException exception)
-      : this(message: exception.message);
+    : this(message: exception.message);
 }
 
 class ServerFailure extends Failure {
   const ServerFailure({required super.message, required super.statusCode});
 
   ServerFailure.fromException(ServerException exception)
-      : this(message: exception.message, statusCode: exception.statusCode);
+    : this(message: exception.message, statusCode: exception.statusCode);
 }
 
 class ValidationFailure extends Failure {
   const ValidationFailure({required super.message, super.statusCode = 400});
 
   ValidationFailure.fromException(ServerException exception)
-      : this(message: exception.message, statusCode: exception.statusCode);
+    : this(message: exception.message, statusCode: exception.statusCode);
 }
 
 class NotAuthorisedException extends Failure {
-  const NotAuthorisedException(
-      {super.message = 'Use is not authorized', super.statusCode = 401});
+  const NotAuthorisedException({
+    super.message = 'Use is not authorized',
+    super.statusCode = 401,
+  });
 
   @override
   List<dynamic> get props => [message, statusCode];
 }
 
 class ShoppingCartNotAssignedException extends Failure {
-  const ShoppingCartNotAssignedException(
-      {required super.message, required super.statusCode});
+  const ShoppingCartNotAssignedException({
+    required super.message,
+    required super.statusCode,
+  });
 
   @override
   List<dynamic> get props => [message, statusCode];

@@ -40,10 +40,10 @@ public static class ConfigureServices
         services.AddScoped<IDomainEventTracker, DomainEventTracker>();
         services.AddSingleton<ICacheService, RedisCacheService>();
         services.AddScoped<MovieSessionSeatService>();
-        
+
         services.AddScoped<IMovieSessionSeatsDataCacheService, ActiveMovieSessionSeatsDataCacheService>();
-        
-        
+
+
 
         var redisConnectionString = configuration.GetConnectionString("Redis");
         var multiplexer = ConnectionMultiplexer.Connect(
@@ -53,9 +53,9 @@ public static class ConfigureServices
                 AbortOnConnectFail = false
             }
         );
-        
+
         multiplexer.ConnectionFailed += (_, e) => { Console.WriteLine("Connection to Redis failed."); };
-            
+
         if (!multiplexer.IsConnected)
         {
             Console.WriteLine("Did not connect to Redis.");
@@ -64,24 +64,24 @@ public static class ConfigureServices
 
 
         var cinemaContextConnectionString = configuration.GetConnectionString("BookingDbContext");
-        
+
         services.AddDbContextPool<CinemaContext>(options =>
         {
             options.UseNpgsql(cinemaContextConnectionString)
                 .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking)
-                .EnableSensitiveDataLogging();
+                .EnableSensitiveDataLogging()
+                .ConfigureWarnings(w => w.Ignore(RelationalEventId.PendingModelChangesWarning));
         });
         services.AddScoped<ICinemaContext>(provider => provider.GetRequiredService<CinemaContext>());
         services.AddScoped<SampleDataInitializer>();
-        
+
         services.AddSingleton<IRabbitMQPersistentConnection>(sp =>
         {
             var logger = sp.GetRequiredService<ILogger>();
 
             var factory = new ConnectionFactory()
             {
-                HostName = configuration.GetConnectionString("EventBus"),
-                DispatchConsumersAsync = true
+                HostName = configuration.GetConnectionString("EventBus")
             };
 
             // if (!string.IsNullOrEmpty(eventBusSection["UserName"]))
@@ -107,14 +107,14 @@ public static class ConfigureServices
             var eventBusSubscriptionsManager = sp.GetRequiredService<IEventBusSubscriptionsManager>();
             var retryCount = 5;// eventBusSection.GetValue("RetryCount", 5);
 
-            return new EventBusRabbitMQ(rabbitMQPersistentConnection, 
-                logger, 
-                sp, 
-                eventBusSubscriptionsManager, 
-                subscriptionClientName, 
+            return new EventBusRabbitMQ(rabbitMQPersistentConnection,
+                logger,
+                sp,
+                eventBusSubscriptionsManager,
+                subscriptionClientName,
                 retryCount);
         });
-        
+
         services.AddSingleton<IEventBusSubscriptionsManager, InMemoryEventBusSubscriptionsManager>();
         return services;
     }
@@ -123,11 +123,11 @@ public static class ConfigureServices
     {
         var options = new DbContextOptionsBuilder<CinemaContext>()
             .UseNpgsql(app.Configuration.GetConnectionString("BookingDbContext")).Options;
-        
+
         using var dbContext = new CinemaContext(options);
-    
+
         dbContext.Database.Migrate();
-    
+
         return app;
     }
 }

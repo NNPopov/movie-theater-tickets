@@ -8,20 +8,16 @@ import '../../domain/event_hub.dart';
 GetIt getIt = GetIt.instance;
 
 class ConnectivityBloc extends Cubit<ConnectivityState> {
-  ConnectivityBloc(this._eventHub):
-  super(DisconnectedState()) {
+  ConnectivityBloc(this._eventHub) : super(DisconnectedState()) {
     _streamSubscription = _eventHub.status.listen((event) {
-
       if (event is ReconnectingEvent) {
         emit(ReconnectingState());
         print("emit ReconnectingState");
-
       }
 
       if (event is DisconnectedEvent) {
         emit(DisconnectedState());
         print("emit DisconnectedState");
-
       }
 
       if (event is ConnectedEvent) {
@@ -43,7 +39,7 @@ class ConnectivityBloc extends Cubit<ConnectivityState> {
 
   @override
   Future<void> connect() async {
-   await _eventHub.subscribe();
+    await _eventHub.subscribe();
   }
 }
 

@@ -8,5 +8,4 @@ extension ContextExt on BuildContext {
   double get height => size.height;
 
   ThemeData get theme => Theme.of(this);
-
 }

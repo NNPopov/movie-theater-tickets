@@ -48,13 +48,13 @@ public class ShoppingCartSeatLifecycleManager : IShoppingCartSeatLifecycleManage
 
 
     public async Task<bool> SetAsync(Guid movieSessionId, SeatShoppingCart seatShoppingCart)
-   
+
     {
         var db = _redis.GetDatabase();
         var key = GetKey(movieSessionId, seatShoppingCart.SeatRow, seatShoppingCart.SeatNumber);
 
         var expiryTimeSpan = seatShoppingCart.SelectionExpirationTime.Value.Subtract(TimeProvider.System.GetUtcNow().DateTime);
-        
+
         string jsonValue = JsonConvert.SerializeObject(seatShoppingCart);
 
         return await db.StringSetAsync(key, jsonValue, expiryTimeSpan);
@@ -67,7 +67,7 @@ public class ShoppingCartSeatLifecycleManager : IShoppingCartSeatLifecycleManage
         var key = GetKey(movieSessionId, seatRow, seatNumber);
 
         var expiryTimeSpan = expires.Subtract(TimeProvider.System.GetUtcNow().DateTime);
-        
+
         string jsonValue = JsonConvert.SerializeObject(shoppingCartId);
 
         return await db.StringSetAsync(key, jsonValue, expiryTimeSpan);

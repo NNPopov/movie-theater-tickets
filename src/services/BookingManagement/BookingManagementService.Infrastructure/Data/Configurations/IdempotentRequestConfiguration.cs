@@ -8,7 +8,7 @@ public class IdempotentRequestConfiguration : IEntityTypeConfiguration<Idempoten
 {
     public void Configure(EntityTypeBuilder<IdempotentRequest> builder)
     {
-      
+
         builder.ToTable("idempotent_request");
 
         builder.HasKey(entry => entry.Id)

@@ -12,9 +12,9 @@ public class ShoppingCartLifecycleManager : IShoppingCartLifecycleManager
     private readonly IConnectionMultiplexer _redis;
 
     private const string KeyPrefixTimeToLive = "shopping_cart_ttl";
-    
+
     private readonly ShoppingCartConfiguration _shoppingCartConfiguration;
-    
+
     public ShoppingCartLifecycleManager(IConnectionMultiplexer redis, IOptionsSnapshot<ShoppingCartConfiguration> config)
     {
         _redis = redis;
@@ -24,7 +24,7 @@ public class ShoppingCartLifecycleManager : IShoppingCartLifecycleManager
     public async Task<SeatShoppingCart> GetAsync(Guid shoppingCartId)
     {
         var db = _redis.GetDatabase();
-        var timeToLiveKey = GetKey(shoppingCartId);   
+        var timeToLiveKey = GetKey(shoppingCartId);
 
         string jsonValue = await db.StringGetAsync(timeToLiveKey);
 
@@ -37,22 +37,22 @@ public class ShoppingCartLifecycleManager : IShoppingCartLifecycleManager
     public async Task DeleteAsync(Guid shoppingCartId)
     {
         var db = _redis.GetDatabase();
-        var timeToLiveKey = GetKey(shoppingCartId);   
+        var timeToLiveKey = GetKey(shoppingCartId);
         await db.KeyDeleteAsync(timeToLiveKey);
     }
 
     private static string GetKey(Guid shoppingCartId)
     {
-        return $"{KeyPrefixTimeToLive}:{shoppingCartId.ToString()}"; 
+        return $"{KeyPrefixTimeToLive}:{shoppingCartId.ToString()}";
     }
 
     public async Task SetAsync(Guid shoppingCartId)
     {
-        var expiry =TimeSpan.FromSeconds(_shoppingCartConfiguration.ShoppingCartTimeToLiveSec);
-        
+        var expiry = TimeSpan.FromSeconds(_shoppingCartConfiguration.ShoppingCartTimeToLiveSec);
+
         var db = _redis.GetDatabase();
-        var timeToLiveKey = GetKey(shoppingCartId);   
+        var timeToLiveKey = GetKey(shoppingCartId);
         await db.StringSetAsync(timeToLiveKey, timeToLiveKey, expiry);
     }
-    
+
 }

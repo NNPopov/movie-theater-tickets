@@ -7,45 +7,45 @@ namespace CinemaTicketBooking.Application.UnitTests.MovieSessions;
 
 public class MovieSessionSpecification
 {
-   private const int ALLOTTED_TICKETS = 100;
-    
-   [Fact]
-   public void SetSoldTickets_UpdatesValue()
-   {
-      // Arrange
-      var movieSession = MovieSession.Create(Guid.NewGuid(), Guid.NewGuid(), DateTime.Now, 
-       //  new List<SeatMovieSession>(),
-         ALLOTTED_TICKETS);
+    private const int ALLOTTED_TICKETS = 100;
 
-      // Act
-      movieSession.SetSoldTickets(10);
+    [Fact]
+    public void SetSoldTickets_UpdatesValue()
+    {
+        // Arrange
+        var movieSession = MovieSession.Create(Guid.NewGuid(), Guid.NewGuid(), DateTime.Now,
+           //  new List<SeatMovieSession>(),
+           ALLOTTED_TICKETS);
 
-      // Assert
-      movieSession.SoldTickets.Should().Be(10);
-   }
+        // Act
+        movieSession.SetSoldTickets(10);
 
-   [Fact]
-   public void Create_ReturnsNewMovieSession()
-   {
-      // Arrange
-      Guid movieId = Guid.NewGuid();
-      Guid auditoriumId = Guid.NewGuid();
-      DateTime sessionDate = DateTime.Now;
+        // Assert
+        movieSession.SoldTickets.Should().Be(10);
+    }
 
-      // Act
-      var movieSession = MovieSession.Create(movieId, auditoriumId, 
-         sessionDate,
-         //new List<SeatMovieSession>(),
-         ALLOTTED_TICKETS);
+    [Fact]
+    public void Create_ReturnsNewMovieSession()
+    {
+        // Arrange
+        Guid movieId = Guid.NewGuid();
+        Guid auditoriumId = Guid.NewGuid();
+        DateTime sessionDate = DateTime.Now;
 
-      // Assert
-      
-      movieSession.Should().NotBeNull();
-      movieSession.MovieId.Should().Be(movieId);
-      movieSession.CinemaHallId.Should().Be(auditoriumId);
-      movieSession.SessionDate.Should().Be(sessionDate);
-      movieSession.GetDomainEvents().Should().Contain(t=>t is MovieSessionCreatedDomainEvent);
-      
-   }
+        // Act
+        var movieSession = MovieSession.Create(movieId, auditoriumId,
+           sessionDate,
+           //new List<SeatMovieSession>(),
+           ALLOTTED_TICKETS);
+
+        // Assert
+
+        movieSession.Should().NotBeNull();
+        movieSession.MovieId.Should().Be(movieId);
+        movieSession.CinemaHallId.Should().Be(auditoriumId);
+        movieSession.SessionDate.Should().Be(sessionDate);
+        movieSession.GetDomainEvents().Should().Contain(t => t is MovieSessionCreatedDomainEvent);
+
+    }
 
 }

@@ -44,13 +44,13 @@ public class MovieSessionSeatsNotifier(
         {
             movieSessionSeatsData =
                 await movieSessionSeatsDataCacheService.GetActualMovieSessionSeatsData(movieSessionId);
-            
+
             if (movieSessionSeatsData is null)
             {
                 logger.Error("Movie session seats not found:{@MovieSessionId}", movieSessionId);
                 return;
             }
-            
+
             await movieSessionSeatsDataCacheService.AddOrUpdateMovieSessionSeatsCache(movieSessionSeatsData);
         }
 

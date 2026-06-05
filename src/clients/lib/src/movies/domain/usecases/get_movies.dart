@@ -6,13 +6,10 @@ import 'package:get_it/get_it.dart';
 
 GetIt getIt = GetIt.instance;
 
-class GetActiveMovies
-    extends FutureUsecaseWithoutParams<List<ActiveMovie>> {
-
+class GetActiveMovies extends FutureUsecaseWithoutParams<List<ActiveMovie>> {
   GetActiveMovies(this._repo);
   final MovieSessionRepo _repo;
 
   @override
-  ResultFuture<List<ActiveMovie>> call() =>
-      _repo.getActiveMovies();
+  ResultFuture<List<ActiveMovie>> call() => _repo.getActiveMovies();
 }

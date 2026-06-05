@@ -13,7 +13,7 @@ GetIt getIt = GetIt.instance;
 
 class MovieSessionBloc extends Bloc<MovieSessionEvent, MovieSessionState> {
   MovieSessionBloc(this._getMovieSessionsUseCase)
-      : super(MovieSessionState(status: MovieSessionStateStatus.initial)) {
+    : super(MovieSessionState(status: MovieSessionStateStatus.initial)) {
     on<MovieSessionEvent>(_getMovieSessions);
   }
 
@@ -28,11 +28,18 @@ class MovieSessionBloc extends Bloc<MovieSessionEvent, MovieSessionState> {
     final result = await _getMovieSessionsUseCase(event.movieId);
 
     result.fold(
-      (failure) => emit(state.copyWith(
+      (failure) => emit(
+        state.copyWith(
           status: MovieSessionStateStatus.error,
-          errorMessage: failure.errorMessage)),
-      (movieSessions) => emit(state.copyWith(
-          movieSession: movieSessions, status: MovieSessionStateStatus.loaded)),
+          errorMessage: failure.errorMessage,
+        ),
+      ),
+      (movieSessions) => emit(
+        state.copyWith(
+          movieSession: movieSessions,
+          status: MovieSessionStateStatus.loaded,
+        ),
+      ),
     );
   }
 }

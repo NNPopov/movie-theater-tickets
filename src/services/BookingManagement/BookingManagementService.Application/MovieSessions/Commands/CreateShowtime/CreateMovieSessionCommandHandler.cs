@@ -1,6 +1,9 @@
 ﻿using CinemaTicketBooking.Application.Abstractions;
+using CinemaTicketBooking.Domain.CinemaHalls;
+using CinemaTicketBooking.Domain.Error;
 using CinemaTicketBooking.Domain.MovieSessions;
 using CinemaTicketBooking.Domain.MovieSessions.Abstractions;
+using CinemaTicketBooking.Domain.Movies;
 using CinemaTicketBooking.Domain.Seats;
 using CinemaTicketBooking.Domain.Seats.Abstractions;
 
@@ -9,9 +12,9 @@ namespace CinemaTicketBooking.Application.MovieSessions.Commands.CreateShowtime;
 public record CreateMovieSessionCommand(
     Guid MovieId,
     Guid AuditoriumId,
-    DateTime SessionDate) : IRequest<Guid>;
+    DateTime SessionDate) : IRequest<Result<Guid>>;
 
-internal sealed class CreateMovieSessionCommandHandler : IRequestHandler<CreateMovieSessionCommand, Guid>
+internal sealed class CreateMovieSessionCommandHandler : IRequestHandler<CreateMovieSessionCommand, Result<Guid>>
 {
     // private readonly IMapper _mapper;
     private IMovieSessionsRepository _movieSessionsRepository;
@@ -35,7 +38,7 @@ internal sealed class CreateMovieSessionCommandHandler : IRequestHandler<CreateM
         _movieSessionSeatRepository = movieSessionSeatRepository;
     }
 
-    public async Task<Guid> Handle(CreateMovieSessionCommand request,
+    public async Task<Result<Guid>> Handle(CreateMovieSessionCommand request,
         CancellationToken cancellationToken)
     {
         var auditorium = await _cinemaHallRepository
@@ -44,14 +47,14 @@ internal sealed class CreateMovieSessionCommandHandler : IRequestHandler<CreateM
 
         if (auditorium == null)
         {
-            throw new Exception();
+            return DomainErrors<CinemaHall>.NotFound($"Cinema hall {request.AuditoriumId} was not found.");
         }
 
         var movie = await _moviesRepository.GetByIdAsync(request.MovieId, cancellationToken);
 
         if (movie == null)
         {
-            throw new Exception();
+            return DomainErrors<Movie>.NotFound($"Movie {request.MovieId} was not found.");
         }
 
         var showtime = MovieSession.Create(movie.Id,

@@ -1,5 +1,6 @@
 ﻿using CinemaTicketBooking.Application.Abstractions;
 using CinemaTicketBooking.Application.Abstractions.Repositories;
+using CinemaTicketBooking.Application.Common.Behaviours;
 using CinemaTicketBooking.Application.Exceptions;
 using CinemaTicketBooking.Domain.Error;
 using CinemaTicketBooking.Domain.Seats.Abstractions;
@@ -9,9 +10,9 @@ using CinemaTicketBooking.Domain.ShoppingCarts.Abstractions;
 
 namespace CinemaTicketBooking.Application.ShoppingCarts.Command.PurchaseSeats;
 
-public record PurchaseTicketsCommand(Guid ShoppingCartId) : IRequest<Result>;
+public record PurchaseTicketsCommand(Guid ShoppingCartId) : IRequest<Result>, ICartScopedRequest;
 
-internal sealed  class PurchaseTicketsCommandHandler : IRequestHandler<PurchaseTicketsCommand, Result>
+internal sealed class PurchaseTicketsCommandHandler : IRequestHandler<PurchaseTicketsCommand, Result>
 {
     private IShoppingCartSeatLifecycleManager _shoppingCartSeatLifecycleManager;
 
@@ -56,13 +57,18 @@ internal sealed  class PurchaseTicketsCommandHandler : IRequestHandler<PurchaseT
         }
 
 
-        cart.PurchaseComplete();
+        var purchaseResult = cart.PurchaseComplete();
+        if (purchaseResult.IsFailure)
+        {
+            return purchaseResult;                  // BEFORE SaveAsync / lifecycle deletes (atomicity)
+        }
+
         await _activeShoppingCartRepository.SaveAsync(cart);
         await _shoppingCartLifecycleManager.DeleteAsync(cart.Id);
 
         foreach (var seat in cart.Seats)
         {
-            await _shoppingCartSeatLifecycleManager.DeleteAsync(cart.MovieSessionId,seat.SeatRow,seat.SeatNumber);
+            await _shoppingCartSeatLifecycleManager.DeleteAsync(cart.MovieSessionId, seat.SeatRow, seat.SeatNumber);
         }
 
         return Result.Success();

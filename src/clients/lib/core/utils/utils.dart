@@ -1,4 +1,3 @@
-
 // import 'package:education_app_tutorial/core/common/features/video/data/models/video_model.dart';
 // import 'package:education_app_tutorial/core/common/features/video/domain/entities/video.dart';
 // import 'package:education_app_tutorial/core/extensions/string_extensions.dart';
@@ -7,7 +6,6 @@ import 'package:flutter/material.dart';
 
 import '../res/colours.dart';
 //import 'package:youtube_metadata/youtube.dart';
-
 
 class Utils {
   // static Future<Video?> getVideoFromYT(BuildContext context, String url) async {
@@ -54,14 +52,16 @@ class Utils {
       context: context,
       barrierDismissible: false,
       builder: (context) {
-        return const Center(
-          child: CircularProgressIndicator(),
-        );
+        return const Center(child: CircularProgressIndicator());
       },
     );
   }
 
-  static void showSnackBar(BuildContext context, String message,{ Color? backgroundColor}) {
+  static void showSnackBar(
+    BuildContext context,
+    String message, {
+    Color? backgroundColor,
+  }) {
     ScaffoldMessenger.of(context)
       ..removeCurrentSnackBar()
       ..showSnackBar(
@@ -74,14 +74,11 @@ class Utils {
             ),
           ),
           behavior: SnackBarBehavior.floating,
-          backgroundColor: backgroundColor??Colours.primaryColour,
+          backgroundColor: backgroundColor ?? Colours.primaryColour,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
           ),
-          margin: const EdgeInsets.symmetric(
-            horizontal: 10,
-            vertical: 10,
-          ),
+          margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
         ),
       );
   }

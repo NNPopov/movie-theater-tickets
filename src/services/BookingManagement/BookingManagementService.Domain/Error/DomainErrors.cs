@@ -3,18 +3,18 @@
 public static class DomainErrors<T>
 {
     public static Domain.Error.Error ConflictException(string? description = null) => new ConflictError(
-        $"{nameof(T)}.ConflictException",
+        $"{typeof(T).Name}.ConflictException",
         description);
 
-    public static Domain.Error.Error NotFound(string? description = null) => new NotFountError(
-        $"{nameof(T)}.NotFound",
+    public static Domain.Error.Error NotFound(string? description = null) => new NotFoundError(
+        $"{typeof(T).Name}.NotFound",
         description);
-    
+
     public static Domain.Error.Error DomainValidation(string description) => new(
-        $"{nameof(T)}.DomainValidation",
+        $"{typeof(T).Name}.DomainValidation",
         description);
 
     public static Domain.Error.Error InvalidOperation(string? description = null) => new(
-        $"{nameof(T)}.InvalidOperation",
+        $"{typeof(T).Name}.InvalidOperation",
         description);
 }

@@ -1,4 +1,5 @@
 ﻿using CinemaTicketBooking.Application.Exceptions;
+using CinemaTicketBooking.Domain.Error;
 using CinemaTicketBooking.Domain.Exceptions;
 using CinemaTicketBooking.Domain.ShoppingCarts;
 using CinemaTicketBooking.Domain.ShoppingCarts.Abstractions;
@@ -167,10 +168,174 @@ public class ShoppingCartSpecification
         var clientId = Guid.NewGuid();
 
         // Act
-        shoppingCart.AssignClientId(clientId);
+        var result = shoppingCart.AssignClientId(clientId);
 
         // Assert
+        result.IsSuccess.Should().BeTrue();
         shoppingCart.ClientId.Should().Be(clientId);
         shoppingCart.GetDomainEvents().Should().Contain(x => x is ShoppingCartAssignedToClientDomainEvent);
+    }
+
+    // Slice 0003_assign_client_cart_result_http: AssignClientId now expresses the already-assigned
+    // case as a returned ConflictError (no longer a thrown ConflictException) and appends the
+    // domain event only on the success branch.
+    [Fact]
+    public void AssignClientId_ShouldReturnConflictError_When_CartAlreadyHasAnOwner()
+    {
+        // Arrange
+        var shoppingCart = ShoppingCart.Create(5, dataHasher);
+        shoppingCart.AssignClientId(Guid.NewGuid());
+
+        // Act
+        var result = shoppingCart.AssignClientId(Guid.NewGuid());
+
+        // Assert
+        result.IsFailure.Should().BeTrue();
+        result.Error.Should().BeOfType<ConflictError>();
+        result.Error.Code.Should().Be("ShoppingCart.ConflictException");
+    }
+
+    [Fact]
+    public void AssignClientId_ShouldNotRaiseASecondEvent_When_CartAlreadyHasAnOwner()
+    {
+        // Arrange
+        var shoppingCart = ShoppingCart.Create(5, dataHasher);
+        shoppingCart.AssignClientId(Guid.NewGuid());
+
+        // Act — the conflicting second assignment must not append another assigned-to-client event.
+        shoppingCart.AssignClientId(Guid.NewGuid());
+
+        // Assert
+        shoppingCart.GetDomainEvents()
+            .Count(x => x is ShoppingCartAssignedToClientDomainEvent)
+            .Should().Be(1);
+    }
+
+    // Slice 0005_reserve_tickets_result_http: SeatsReserve() is retyped void -> Result. On a genuine
+    // InWork -> SeatsReserved transition it succeeds and raises exactly one ShoppingCartReservedDomainEvent;
+    // re-reserving an already-SeatsReserved cart is an idempotent success with no second event; reserving a
+    // PurchaseCompleted cart returns a ConflictError (was a thrown ConflictException) and raises no event.
+    [Fact]
+    public void SeatsReserve_ShouldTransitionToSeatsReservedAndRaiseEvent_When_CartIsInWork()
+    {
+        // Arrange
+        var shoppingCart = ShoppingCart.Create(5, dataHasher);
+        shoppingCart.SetShowTime(Guid.NewGuid());
+
+        // Act
+        var result = shoppingCart.SeatsReserve();
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        shoppingCart.Status.Should().Be(ShoppingCartStatus.SeatsReserved);
+        shoppingCart.GetDomainEvents()
+            .Count(x => x is ShoppingCartReservedDomainEvent)
+            .Should().Be(1);
+    }
+
+    [Fact]
+    public void SeatsReserve_ShouldSucceedWithoutASecondEvent_When_CartIsAlreadySeatsReserved()
+    {
+        // Arrange
+        var shoppingCart = ShoppingCart.Create(5, dataHasher);
+        shoppingCart.SetShowTime(Guid.NewGuid());
+        shoppingCart.SeatsReserve();
+
+        // Act — re-reserving an already-reserved cart is an idempotent success, no duplicate event.
+        var result = shoppingCart.SeatsReserve();
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        shoppingCart.Status.Should().Be(ShoppingCartStatus.SeatsReserved);
+        shoppingCart.GetDomainEvents()
+            .Count(x => x is ShoppingCartReservedDomainEvent)
+            .Should().Be(1);
+    }
+
+    [Fact]
+    public void SeatsReserve_ShouldReturnConflictErrorAndRaiseNoEvent_When_CartIsPurchaseCompleted()
+    {
+        // Arrange
+        var shoppingCart = ShoppingCart.Create(5, dataHasher);
+        shoppingCart.AssignClientId(Guid.NewGuid());
+        shoppingCart.SeatsReserve();
+        shoppingCart.PurchaseComplete();
+
+        // Act
+        var result = shoppingCart.SeatsReserve();
+
+        // Assert
+        result.IsFailure.Should().BeTrue();
+        result.Error.Should().BeOfType<ConflictError>();
+        result.Error.Code.Should().Be("ShoppingCart.ConflictException");
+        shoppingCart.GetDomainEvents()
+            .Count(x => x is ShoppingCartReservedDomainEvent)
+            .Should().Be(1);
+    }
+
+    // Slice 0006_purchase_tickets_result_http: PurchaseComplete() is retyped void -> Result. On a
+    // genuine SeatsReserved -> PurchaseCompleted transition it succeeds and raises exactly one
+    // ShoppingCartPurchaseDomainEvent; re-completing an already-PurchaseCompleted cart is an idempotent
+    // success with no second event; completing from any other status (e.g. InWork) returns a
+    // ConflictError (was a thrown ConflictException) and raises no event. The ClientId-empty invariant
+    // stays a throw (see SetShowTime_ShouldThrowArgumentException_WhenClientIdNotAssign).
+    [Fact]
+    public void PurchaseComplete_ShouldTransitionToPurchaseCompletedAndRaiseEvent_When_CartIsSeatsReserved()
+    {
+        // Arrange
+        var shoppingCart = ShoppingCart.Create(5, dataHasher);
+        shoppingCart.AssignClientId(Guid.NewGuid());
+        shoppingCart.SeatsReserve();
+
+        // Act
+        var result = shoppingCart.PurchaseComplete();
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        shoppingCart.Status.Should().Be(ShoppingCartStatus.PurchaseCompleted);
+        shoppingCart.GetDomainEvents()
+            .Count(x => x is ShoppingCartPurchaseDomainEvent)
+            .Should().Be(1);
+    }
+
+    [Fact]
+    public void PurchaseComplete_ShouldSucceedWithoutASecondEvent_When_CartIsAlreadyPurchaseCompleted()
+    {
+        // Arrange
+        var shoppingCart = ShoppingCart.Create(5, dataHasher);
+        shoppingCart.AssignClientId(Guid.NewGuid());
+        shoppingCart.SeatsReserve();
+        shoppingCart.PurchaseComplete();
+
+        // Act — re-completing an already-completed cart is an idempotent success, no duplicate event.
+        var result = shoppingCart.PurchaseComplete();
+
+        // Assert
+        result.IsSuccess.Should().BeTrue();
+        shoppingCart.Status.Should().Be(ShoppingCartStatus.PurchaseCompleted);
+        shoppingCart.GetDomainEvents()
+            .Count(x => x is ShoppingCartPurchaseDomainEvent)
+            .Should().Be(1);
+    }
+
+    [Fact]
+    public void PurchaseComplete_ShouldReturnConflictErrorAndRaiseNoEvent_When_CartIsInWork()
+    {
+        // Arrange — a client is assigned (so the ClientId invariant passes) but the seats were never
+        // reserved, so the cart is still InWork: purchasing without a prior reservation is illegal.
+        var shoppingCart = ShoppingCart.Create(5, dataHasher);
+        shoppingCart.AssignClientId(Guid.NewGuid());
+
+        // Act
+        var result = shoppingCart.PurchaseComplete();
+
+        // Assert
+        result.IsFailure.Should().BeTrue();
+        result.Error.Should().BeOfType<ConflictError>();
+        result.Error.Code.Should().Be("ShoppingCart.ConflictException");
+        shoppingCart.Status.Should().Be(ShoppingCartStatus.InWork);
+        shoppingCart.GetDomainEvents()
+            .Count(x => x is ShoppingCartPurchaseDomainEvent)
+            .Should().Be(0);
     }
 }

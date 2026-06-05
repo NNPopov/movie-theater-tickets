@@ -8,9 +8,9 @@ using Microsoft.AspNetCore.SignalR;
 namespace CinemaTicketBooking.Api.Sockets;
 
 public class ShoppingCartNotifier(IHubContext<BookingManagementServiceHub, IBookingManagementStateUpdater> context,
-    IConnectionManager connectionManager, 
+    IConnectionManager connectionManager,
     IMapper mapper,
-    Serilog.ILogger logger):IShoppingCartNotifier
+    Serilog.ILogger logger) : IShoppingCartNotifier
 {
     public async Task SentShoppingCartState(ShoppingCart shoppingCart)
     {
@@ -25,10 +25,10 @@ public class ShoppingCartNotifier(IHubContext<BookingManagementServiceHub, IBook
                 foreach (var connection in connections)
                 {
                     await context.Clients.Client(connection).SentShoppingCartState(shoppingCartDto);
-                } 
-                
+                }
+
                 logger.Debug("Updates have been sent to subscribers of ClientId:{@ClientId}",
-                    shoppingCart.ClientId );
+                    shoppingCart.ClientId);
             }
             else
             {
@@ -38,13 +38,13 @@ public class ShoppingCartNotifier(IHubContext<BookingManagementServiceHub, IBook
                 foreach (var connection in connections)
                 {
                     await context.Clients.Client(connection).SentShoppingCartState(shoppingCartDto);
-                } 
-                
+                }
+
                 logger.Debug("Updates have been sent to subscribers of ShoppingCartId:{@ShoppingCartId}",
-                    shoppingCart.Id );
+                    shoppingCart.Id);
             }
-           
-            
+
+
 
         }
         catch (Exception e)
@@ -56,9 +56,9 @@ public class ShoppingCartNotifier(IHubContext<BookingManagementServiceHub, IBook
     public void ReassignCartToClientId(ShoppingCart shoppingCart)
     {
         var connections = connectionManager.GetConnectionId(shoppingCart.Id);
-        
+
         connectionManager.RemoveShoppingCartId(shoppingCart.Id);
-        
+
         connectionManager.AddConnections(shoppingCart.ClientId, connections);
     }
 }

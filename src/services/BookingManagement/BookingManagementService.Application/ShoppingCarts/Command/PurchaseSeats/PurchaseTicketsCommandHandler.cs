@@ -1,5 +1,6 @@
 ﻿using CinemaTicketBooking.Application.Abstractions;
 using CinemaTicketBooking.Application.Abstractions.Repositories;
+using CinemaTicketBooking.Application.Common.Behaviours;
 using CinemaTicketBooking.Application.Exceptions;
 using CinemaTicketBooking.Domain.Error;
 using CinemaTicketBooking.Domain.Seats.Abstractions;
@@ -9,7 +10,7 @@ using CinemaTicketBooking.Domain.ShoppingCarts.Abstractions;
 
 namespace CinemaTicketBooking.Application.ShoppingCarts.Command.PurchaseSeats;
 
-public record PurchaseTicketsCommand(Guid ShoppingCartId) : IRequest<Result>;
+public record PurchaseTicketsCommand(Guid ShoppingCartId) : IRequest<Result>, ICartScopedRequest;
 
 internal sealed class PurchaseTicketsCommandHandler : IRequestHandler<PurchaseTicketsCommand, Result>
 {

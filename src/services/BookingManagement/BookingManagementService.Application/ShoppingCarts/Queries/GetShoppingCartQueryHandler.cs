@@ -1,11 +1,12 @@
 ﻿using CinemaTicketBooking.Application.Abstractions;
+using CinemaTicketBooking.Application.Common.Behaviours;
 using CinemaTicketBooking.Application.Exceptions;
 using CinemaTicketBooking.Domain.ShoppingCarts;
 using CinemaTicketBooking.Domain.ShoppingCarts.Abstractions;
 
 namespace CinemaTicketBooking.Application.ShoppingCarts.Queries;
 
-public record GetShoppingCartQuery(Guid ShoppingCartId) : IRequest<ShoppingCart>;
+public record GetShoppingCartQuery(Guid ShoppingCartId) : IRequest<ShoppingCart>, ICartScopedRequest;
 
 internal sealed class GetShoppingCartQueryHandler : IRequestHandler<GetShoppingCartQuery, ShoppingCart>
 {

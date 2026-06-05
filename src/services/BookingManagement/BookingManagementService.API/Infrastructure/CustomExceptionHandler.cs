@@ -47,7 +47,7 @@ public class CustomExceptionHandler : IExceptionHandler
         {
             {
                 exception.Message,
-                new[] { exception.Message }
+                [exception.Message]
             }
         };
 

@@ -43,6 +43,7 @@ public static class ConfigureServices
             //cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(UnhandledExceptionBehaviour<,>));
             // cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(AuthorizationBehaviour<,>));
             cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>));
+            cfg.AddOpenBehavior(typeof(CartOwnershipBehaviour<,>));        // ADR-003 §option-1: object-level authorization
             cfg.AddOpenBehavior(typeof(IdempotentCommandPipelineBehaviour<,>));
 
 

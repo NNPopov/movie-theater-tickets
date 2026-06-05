@@ -2,9 +2,9 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:movie_theater_tickets/core/res/app_theme.dart';
 import 'package:movie_theater_tickets/core/routing/app_router.gr.dart';
-import 'package:movie_theater_tickets/src/cinema_halls/presentation/cubit/movie_cubit.dart';
 import 'package:movie_theater_tickets/src/seats/presentation/cubit/seat_cubit.dart';
-import 'package:movie_theater_tickets/src/seats/presentation/widgets/seats_movie_session_widget.dart';
+import 'package:movie_theater_tickets/src/seats/presentation/cubit/seat_layout_cubit.dart';
+import 'package:movie_theater_tickets/src/seats/presentation/widgets/seat_map_view.dart';
 import 'package:movie_theater_tickets/src/shopping_carts/presentation/widgens/shopping_cart_widget.dart';
 import '../../../../core/res/app_styles.dart';
 import '../../../movie_sessions/presentation/widgets/auditorium_detail.dart';
@@ -20,8 +20,10 @@ GetIt getIt = GetIt.instance;
 
 /// Route page for the Seats screen.
 ///
-/// Reproduces the per-route [SeatBloc] + [CinemaHallInfoBloc] providers from
-/// the legacy `generateRoute`; carries the required typed [movieSession].
+/// Reproduces the per-route [SeatBloc] provider from the legacy `generateRoute`
+/// and adds the [SeatLayoutCubit] geometry loader; carries the required typed
+/// [movieSession]. The geometry now arrives through the `SeatLayoutSource` port,
+/// so the legacy `CinemaHallInfoBloc` provider is no longer mounted here.
 @RoutePage(name: 'SeatsRoute')
 class SeatsPage extends StatelessWidget {
   const SeatsPage({required this.movieSession, super.key});
@@ -35,8 +37,9 @@ class SeatsPage extends StatelessWidget {
         BlocProvider<SeatBloc>(
           create: (_) => SeatBloc(getIt.get(), getIt.get()),
         ),
-        BlocProvider<CinemaHallInfoBloc>(
-          create: (_) => CinemaHallInfoBloc(getIt.get()),
+        BlocProvider<SeatLayoutCubit>(
+          create: (_) =>
+              SeatLayoutCubit(getIt.get())..load(movieSession.cinemaHallId),
         ),
       ],
       child: SeatsView(movieSession),
@@ -79,10 +82,7 @@ class _SeatsView extends State<SeatsView> {
               children: [
                 if (width > 1200) buildMovieSessionInfo(context),
                 if (width > 1200) const SizedBox(width: 15),
-                SeatsMovieSessionWidget(
-                  movieSession: widget.movieSession,
-                  // getCinemaHallInfo: getIt.get()
-                ),
+                buildSeatMap(context, width),
 
                 if (width > 800) const SizedBox(width: 15),
                 if (width > 800) const ShoppingCartWidget(),
@@ -91,6 +91,29 @@ class _SeatsView extends State<SeatsView> {
           ),
         ],
       ),
+    );
+  }
+
+  /// The coordinate-driven hall body. The renderer fills a bounded box so the
+  /// inner `InteractiveViewer` has finite constraints to pan/zoom within.
+  Widget buildSeatMap(BuildContext context, double width) {
+    final hallWidth = width > 800
+        ? (width * 0.5).clamp(320.0, 700.0)
+        : (width - 30).clamp(280.0, double.infinity);
+
+    return Container(
+      width: hallWidth.toDouble(),
+      height: 520,
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: Theme.of(context).widgetColor,
+        borderRadius: BorderRadius.circular(AppStyles.defaultRadius),
+        border: Border.all(
+          color: Theme.of(context).defaultBorderColor,
+          width: AppStyles.defaultBorderWidth,
+        ),
+      ),
+      child: SeatMapView(movieSession: widget.movieSession),
     );
   }
 

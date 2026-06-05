@@ -186,6 +186,7 @@ public class ShoppingCartEndpointApplicationBuilderExtensions : IEndpoints
             .WithName("PurchaseSeats")
             .WithTags(Tag)
             .Produces(200)
+            .Produces(403)
             .Produces(404)
             .Produces(409);
 
@@ -202,6 +203,7 @@ public class ShoppingCartEndpointApplicationBuilderExtensions : IEndpoints
             .WithName("GetShoppingCartById")
             .WithTags(Tag)
             .Produces<ShoppingCartDto>(200, "application/json")
+            .Produces(403)
             .Produces(404);
     }
 
